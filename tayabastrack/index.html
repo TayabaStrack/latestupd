@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TayabaStrack - Public Dashboard</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+    }
+
+    header {
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 25px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      color: #2164f3;
+      font-size: 1.3rem;
+    }
+
+    .login-btn {
+      background: #2164f3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 15px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s;
+    }
+
+    .login-btn:hover {
+      background: #1a52cc;
+    }
+
+    .container {
+      margin: 20px auto;
+      padding: 20px;
+      max-width: 1200px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 1.4rem;
+    }
+
+    .search-bar {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border 0.3s;
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: #2164f3;
+      box-shadow: 0 0 0 3px rgba(33, 100, 243, 0.1);
+    }
+
+    .carousel-wrapper {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    .carousel-container {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding-bottom: 15px;
+    }
+
+    .carousel-container::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .carousel-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .carousel-container::-webkit-scrollbar-thumb {
+      background: #2164f3;
+      border-radius: 4px;
+    }
+
+    .carousel-container::-webkit-scrollbar-thumb:hover {
+      background: #1a52cc;
+    }
+
+    .card {
+      flex: 0 0 280px;
+      background: #fafafa;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+
+    .card:hover {
+      transform: scale(1.08);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .card-image-wrapper {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      background: #e9ecef;
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .card:hover img {
+      transform: scale(1.1);
+    }
+
+    .new-label {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #28a745;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .card-content {
+      padding: 15px;
+    }
+
+    .card h3 {
+      color: #2164f3;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .card-info {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .card-info strong {
+      color: #333;
+      display: block;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+
+    .status-ongoing {
+      background: #ffc107;
+      color: #333;
+    }
+
+    .status-resolved {
+      background: #28a745;
+      color: white;
+    }
+
+    .status-reported {
+      background: #17a2b8;
+      color: white;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-size: 1rem;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s;
+    }
+
+    .modal.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      animation: slideUp 0.3s;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .close-btn {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .close-btn:hover {
+      color: #333;
+    }
+
+    .modal-title {
+      color: #2164f3;
+      font-size: 1.5rem;
+      margin: 20px 0;
+      clear: both;
+    }
+
+    .modal-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .image-label {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 20px;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .modal-section {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .modal-section:last-child {
+      border-bottom: none;
+    }
+
+    .modal-label {
+      font-weight: bold;
+      color: #333;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .modal-text {
+      color: #666;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .coordinates {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      word-break: break-all;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>TayabaStrack</h1>
+    <a href="login.html" class="login-btn">Login</a>
+  </header>
+
+  <div class="container">
+    <h2>NEWS / UPDATES</h2>
+    
+    <div class="search-bar">
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Search by barangay, issue, status, or date..." 
+      />
+    </div>
+
+    <div id="errorMessage" class="error" style="display:none;"></div>
+
+    <div class="carousel-wrapper">
+      <div id="loadingMessage" class="loading">Loading bulletins...</div>
+      <div id="noDataMessage" class="no-data" style="display:none;">No bulletins available at the moment.</div>
+      <div id="noSearchMessage" class="no-data" style="display:none;">No bulletins match your search.</div>
+      <div class="carousel-container" id="newsContainer">
+        <!-- Posts appear here dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="bulletinModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2 class="modal-title">Barangay <span id="modalBarangay"></span></h2>
+
+      <div class="modal-section">
+        <div class="modal-label">Before Image</div>
+        <img id="modalBeforeImage" class="modal-image" src="" alt="Before">
+        <div class="image-label">Situation before the issue</div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">After Image</div>
+        <img id="modalAfterImage" class="modal-image" src="" alt="After">
+        <div class="image-label">Situation after the issue</div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Description</div>
+        <p class="modal-text" id="modalDescription"></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Who Were Affected</div>
+        <p class="modal-text" id="modalAffected"></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Age Range</div>
+        <p class="modal-text" id="modalAgeRange"></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Status</div>
+        <p class="modal-text" id="modalStatus"></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Date Reported</div>
+        <p class="modal-text" id="modalDate"></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Repair Duration</div>
+        <div class="modal-text">
+          <div>Start Date: <span id="modalStartDate">TBD</span></div>
+          <div>End Date: <span id="modalEndDate">TBD</span></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Coordinates</div>
+        <div class="coordinates">
+          <div>Latitude: <span id="modalLatitude"></span></div>
+          <div>Longitude: <span id="modalLongitude"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.appspot.com",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const newsContainer = document.getElementById("newsContainer");
+    const loadingMessage = document.getElementById("loadingMessage");
+    const errorMessage = document.getElementById("errorMessage");
+    const noDataMessage = document.getElementById("noDataMessage");
+    const noSearchMessage = document.getElementById("noSearchMessage");
+    const searchInput = document.getElementById("searchInput");
+    const modal = document.getElementById("bulletinModal");
+    const closeBtn = document.querySelector(".close-btn");
+
+    let allBulletins = [];
+
+    function formatDate(date) {
+      if (!date) return 'N/A';
+      if (typeof date === 'object' && date.toDate) {
+        return date.toDate().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+      return date;
+    }
+
+    function getStatusClass(status) {
+      if (!status) return 'status-reported';
+      const lower = status.toLowerCase();
+      if (lower.includes('ongoing') || lower.includes('in progress')) return 'status-ongoing';
+      if (lower.includes('resolved') || lower.includes('fixed')) return 'status-resolved';
+      return 'status-reported';
+    }
+
+    function createCard(data, index) {
+      const card = document.createElement("div");
+      card.classList.add("card");
+      
+      const formattedDate = formatDate(data.createdAt || data.date);
+      const isNew = index === 0;
+      
+      card.innerHTML = `
+        ${isNew ? '<div class="new-label">NEW</div>' : ''}
+        <div class="card-image-wrapper">
+          <img src="${data.imageURL || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+               alt="bulletin image"
+               onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Available'">
+        </div>
+        <div class="card-content">
+          <h3>Barangay ${data.barangay || 'N/A'}</h3>
+          <div class="card-info">
+            <strong class="status-badge ${getStatusClass(data.status)}">
+              ${data.status || 'Reported'}
+            </strong>
+          </div>
+          <div class="card-info">
+            <strong>Date:</strong> ${formatDate(data.createdAt || data.date)}
+          </div>
+        </div>
+      `;
+
+      card.addEventListener("click", () => openModal(data));
+      return card;
+    }
+
+    function openModal(data) {
+      document.getElementById("modalBarangay").textContent = data.barangay || 'N/A';
+      document.getElementById("modalBeforeImage").src = data.beforeImageURL || 'https://via.placeholder.com/300x200?text=No+Before+Image';
+      document.getElementById("modalAfterImage").src = data.afterImageURL || 'https://via.placeholder.com/300x200?text=No+After+Image';
+      document.getElementById("modalDescription").textContent = data.description || 'No description available';
+      document.getElementById("modalAffected").textContent = data.affected || 'Not specified';
+      document.getElementById("modalAgeRange").textContent = data.ageRange || 'Not specified';
+      document.getElementById("modalStatus").textContent = data.status || 'Not specified';
+      document.getElementById("modalDate").textContent = formatDate(data.createdAt || data.date);
+      document.getElementById("modalStartDate").textContent = data.repairStartDate ? formatDate(data.repairStartDate) : 'TBD';
+      document.getElementById("modalEndDate").textContent = data.repairEndDate ? formatDate(data.repairEndDate) : 'TBD';
+      document.getElementById("modalLatitude").textContent = data.latitude || 'N/A';
+      document.getElementById("modalLongitude").textContent = data.longitude || 'N/A';
+      
+      modal.classList.add("active");
+    }
+
+    function closeModal() {
+      modal.classList.remove("active");
+    }
+
+    function filterBulletins(searchTerm) {
+      loadingMessage.style.display = "none";
+      errorMessage.style.display = "none";
+      noDataMessage.style.display = "none";
+      noSearchMessage.style.display = "none";
+      newsContainer.innerHTML = "";
+
+      const term = searchTerm.toLowerCase();
+      const filtered = allBulletins.filter(data => {
+        const barangay = (data.barangay || '').toLowerCase();
+        const issue = (data.issue || '').toLowerCase();
+        const status = (data.status || '').toLowerCase();
+        const date = formatDate(data.date).toLowerCase();
+        const description = (data.description || '').toLowerCase();
+
+        return barangay.includes(term) || 
+               issue.includes(term) || 
+               status.includes(term) || 
+               date.includes(term) ||
+               description.includes(term);
+      });
+
+      if (filtered.length === 0) {
+        if (searchTerm) {
+          noSearchMessage.style.display = "block";
+        } else {
+          noDataMessage.style.display = "block";
+        }
+        return;
+      }
+
+      filtered.forEach((data, index) => {
+        newsContainer.appendChild(createCard(data, index));
+      });
+    }
+
+    function renderBulletins(snapshot) {
+      loadingMessage.style.display = "none";
+
+      if (snapshot.empty) {
+        allBulletins = [];
+        noDataMessage.style.display = "block";
+        return;
+      }
+
+      allBulletins = snapshot.docs.map(doc => doc.data());
+      filterBulletins(searchInput.value);
+    }
+
+    function handleError(error) {
+      console.error("Error loading bulletins:", error);
+      loadingMessage.style.display = "none";
+      errorMessage.textContent = "Error loading bulletins. Please try refreshing the page.";
+      errorMessage.style.display = "block";
+    }
+
+    // Event Listeners
+    closeBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    searchInput.addEventListener("input", (e) => {
+      filterBulletins(e.target.value);
+    });
+
+    // Listen for real-time updates
+    try {
+      const q = query(collection(db, "ad_bulletin"), orderBy("date", "desc"));
+      onSnapshot(q, renderBulletins, handleError);
+    } catch (error) {
+      handleError(error);
+    }
+  </script>
+</body>
+</html>

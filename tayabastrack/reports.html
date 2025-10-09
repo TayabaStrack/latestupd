@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Manage Reports | TayabaStrack Super Admin</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+    /* ---------- RESET & BASE ---------- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      display: flex;
+      min-height: 100vh;
+      background: #f5f7fb;
+      color: #333;
+      overflow: hidden;
+    }
+
+    /* ---------- SIDEBAR ---------- */
+    .sidebar {
+      width: 240px;
+      background: #004aad;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1rem 0;
+      flex-shrink: 0;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 2rem;
+    }
+    .sidebar-header img {
+      width: 40px;
+    }
+    .sidebar-header h2 {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+    .sidebar-menu {
+      list-style: none;
+    }
+    .sidebar-menu li {
+      margin: 0.5rem 0;
+    }
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.8rem 1.5rem;
+      text-decoration: none;
+      color: #fff;
+      transition: background 0.3s;
+    }
+    .sidebar-menu li.active a,
+    .sidebar-menu a:hover {
+      background: #0756cc;
+      border-left: 4px solid #042f68;
+    }
+    .sidebar-footer {
+      text-align: center;
+      font-size: 0.85rem;
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* ---------- MAIN & NAV ---------- */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      margin-left: 240px;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    .navbar h1 {
+      font-size: 1.4rem;
+      color: #004aad;
+      white-space: nowrap;
+    }
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+    .fa-bell {
+      font-size: 1.2rem;
+      position: relative;
+    }
+    .badge {
+      background: red;
+      color: #fff;
+      font-size: .7rem;
+      border-radius: 50%;
+      padding: 3px 6px;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+    }
+    .profile-dropdown {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .username {
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+      min-width: 200px;
+      z-index: 10000;
+    }
+    .dropdown-menu a {
+      display: block;
+      padding: .6rem 1rem;
+      text-decoration: none;
+      color: #333;
+      font-size: .9rem;
+    }
+    .dropdown-menu a:hover {
+      background: #f0f0f0;
+      color: #004aad;
+    }
+
+    /* ---------- CONTENT ---------- */
+    .reports-section {
+      padding: 1.5rem;
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .report-box {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 1rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+    }
+    .report-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .report-box-header h2 {
+      color: #004aad;
+      font-size: 1.05rem;
+    }
+    .report-actions input {
+      padding: .4rem .75rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 18px;
+      font-size: .9rem;
+      width: 260px;
+      max-width: 100%;
+    }
+
+    /* ---------- SCROLL HINT ---------- */
+    .scroll-hint {
+      background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0, 74, 173, 0.2);
+    }
+    .scroll-hint i {
+      animation: slideHint 2s ease-in-out infinite;
+    }
+    @keyframes slideHint {
+      0%, 100% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+    }
+
+    /* ---------- TABLE CONTAINER WITH SCROLL ---------- */
+    .table-wrapper {
+      position: relative;
+    }
+    
+    .table-card {
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      scroll-behavior: smooth;
+      position: relative;
+    }
+
+    /* Enhanced scrollbar */
+    .table-card::-webkit-scrollbar {
+      height: 10px;
+    }
+    .table-card::-webkit-scrollbar-track {
+      background: #e9eef5;
+      border-radius: 5px;
+    }
+    .table-card::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+      border-radius: 5px;
+      border: 2px solid #e9eef5;
+    }
+    .table-card::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #003580 0%, #004aad 100%);
+    }
+
+    /* Firefox scrollbar */
+    .table-card {
+      scrollbar-width: thin;
+      scrollbar-color: #004aad #e9eef5;
+    }
+
+    /* Scroll shadow indicators */
+    .table-card::before,
+    .table-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 12px;
+      width: 30px;
+      pointer-events: none;
+      z-index: 2;
+      transition: opacity 0.3s;
+    }
+
+    .table-card::before {
+      left: 8px;
+      background: linear-gradient(to right, rgba(255,255,255,0.95), transparent);
+      opacity: 0;
+    }
+
+    .table-card::after {
+      right: 8px;
+      background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
+    }
+
+    .table-card.scrolled-left::before {
+      opacity: 1;
+    }
+
+    .table-card.scrolled-right::after {
+      opacity: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px;
+    }
+    thead th {
+      background: #f5f8fb;
+      color: #333;
+      font-weight: 700;
+      padding: .7rem .75rem;
+      text-align: left;
+      white-space: nowrap;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    th, td {
+      padding: .5rem .75rem;
+      font-size: .85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #f0f2f5;
+    }
+    tbody tr:nth-child(even) {
+      background: #fbfdff;
+    }
+    tbody tr:hover {
+      background: #f1f8ff;
+    }
+    .col-id { width: 140px; color: #444; font-weight: 600; }
+    .col-small { width: 110px; }
+    .truncate {
+      max-width: 420px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .status {
+      display: inline-block;
+      padding: .25rem .5rem;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 700;
+      font-size: .75rem;
+      min-width: 80px;
+      text-align: center;
+    }
+    .pending { background: #f6c23e; color: #2b2b2b; }
+    .ongoing { background: #36b9cc; }
+    .completed { background: #1cc88a; }
+    .action a { color: #004aad; text-decoration: none; font-weight: 700; cursor: pointer; margin-right: 8px; }
+    .action a.delete { color: #d9534f; }
+
+    /* ---------- MODAL ---------- */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 5000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, .45);
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+    }
+    .modal-content {
+      background: #fff;
+      width: 100%;
+      max-width: 980px;
+      border-radius: 12px;
+      padding: 18px;
+      max-height: 92vh;
+      overflow: auto;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .modal-header h2 {
+      color: #004aad;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #444;
+    }
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .modal-row {
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-row label {
+      font-weight: 700;
+      font-size: .9rem;
+      margin-bottom: 6px;
+      color: #333;
+    }
+    .modal-row input[type="text"],
+    .modal-row input[type="number"],
+    .modal-row textarea,
+    .modal-row select {
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: .95rem;
+    }
+    .modal-row textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .img-preview {
+      width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid #eee;
+      margin-top: 6px;
+    }
+    .modal-footer {
+      text-align: right;
+      margin-top: 12px;
+    }
+    .btn {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+    .btn-save { background: #004aad; color: #fff; }
+    .btn-cancel { background: #9e9e9e; color: #fff; }
+    .btn-delete { background: #d9534f; color: #fff; }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 900px) {
+      .modal-grid { grid-template-columns: 1fr; }
+      .report-actions input { width: 100%; }
+      .navbar h1 { font-size: 1.1rem; }
+      .username { display: none; }
+    }
+
+    /* ---------- LOADING ---------- */
+    .loading-overlay {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.7);
+      z-index: 10000;
+      display: none;
+    }
+    .spinner {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 6px solid #e9eef5;
+      border-top-color: #004aad;
+      animation: spin .9s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+</style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <img src="logu.png" alt="Logo">
+        <h2>TayabaStrack</h2>
+      </div>
+
+ <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
+        <li><a href="usermanagement.html"><i class="fa fa-tasks"></i> User Management</a></li>
+        <li class="active"><a href="reports.html"><i class="fa fa-map-marker-alt"></i> Manage Reports</a></li>
+        <li><a href="bdatemanagement.html"><i class="fa fa-coins"></i> Budget & Date Management</a></li>
+      </ul>
+    </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <p>Logged in as:</p>
+      <strong id="sidebarName">Loading...</strong><br>
+      <span id="sidebarPosition">Loading...</span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <nav class="navbar">
+      <h1>Manage Reports</h1>
+      <div class="navbar-right">
+        <div style="position:relative">
+          <i class="fa fa-bell"></i>
+          <span class="badge" id="notifBadge">0</span>
+        </div>
+
+        <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
+          <img src="mark.jpg" alt="Profile" class="avatar">
+          <span class="username" id="navUsername">Loading...</span>
+          <i class="fas fa-chevron-down" style="font-size:0.7rem;color:#666;"></i>
+
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a href="profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+            <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i>&nbsp; Logout</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Reports section -->
+    <section class="reports-section">
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Ongoing Reports</h2>
+          <div class="report-actions">
+            <input id="searchOngoing" placeholder="Search ongoing...">
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-card" id="ongoingTableCard">
+            <table>
+              <thead>
+                <tr>
+                  <th class="col-id">Report ID</th>
+                  <th>Barangay</th>
+                  <th style="min-width:300px">Description</th>
+                  <th>Affected Age Groups</th>
+                  <th class="col-small">People</th>
+                  <th class="col-small">Width</th>
+                  <th class="col-small">Height</th>
+                  <th>Image</th>
+                  <th class="col-small">Lat</th>
+                  <th class="col-small">Lng</th>
+                  <th class="col-small">Status</th>
+                  <th class="col-small">Timestamp</th>
+                  <th class="col-id">Created At</th>
+                  <th class="col-id">User ID</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="ongoingBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Completed Reports</h2>
+          <div class="report-actions">
+            <input id="searchCompleted" placeholder="Search completed...">
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-card" id="completedTableCard">
+            <table>
+              <thead>
+                <tr>
+                  <th class="col-id">Report ID</th>
+                  <th>Barangay</th>
+                  <th style="min-width:300px">Description</th>
+                  <th>Affected Age Groups</th>
+                  <th class="col-small">People</th>
+                  <th class="col-small">Width</th>
+                  <th class="col-small">Height</th>
+                  <th>Image</th>
+                  <th class="col-small">Lat</th>
+                  <th class="col-small">Lng</th>
+                  <th class="col-small">Status</th>
+                  <th class="col-small">Timestamp</th>
+                  <th class="col-id">Created At</th>
+                  <th class="col-id">User ID</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="completedBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Edit Modal -->
+  <div class="modal" id="editModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h2 id="modalTitle">Edit Report</h2>
+        <button class="close-btn" id="closeModal" title="Close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-grid" id="modalGrid"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-cancel" id="cancelBtn">Cancel</button>
+        <button class="btn btn-save" id="saveChangesBtn">Save Changes</button>
+        <button class="btn btn-delete" id="deleteBtn">Delete Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
+    <div class="spinner" role="status" aria-label="Loading"></div>
+  </div>
+
+  <!-- Firebase + logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.firebasestorage.app",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const ongoingBody = document.getElementById("ongoingBody");
+    const completedBody = document.getElementById("completedBody");
+    const ongoingTableCard = document.getElementById("ongoingTableCard");
+    const completedTableCard = document.getElementById("completedTableCard");
+    const searchOngoing = document.getElementById("searchOngoing");
+    const searchCompleted = document.getElementById("searchCompleted");
+
+    const editModal = document.getElementById("editModal");
+    const modalGrid = document.getElementById("modalGrid");
+    const closeModal = document.getElementById("closeModal");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const saveChangesBtn = document.getElementById("saveChangesBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
+
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const profileToggle = document.getElementById("profileToggle");
+    const navUsername = document.getElementById("navUsername");
+    const sidebarName = document.getElementById("sidebarName");
+    const sidebarPosition = document.getElementById("sidebarPosition");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+
+    let currentDocId = null;
+    let currentDocData = null;
+
+    // Handle scroll shadows
+    function handleScrollShadows(el) {
+      const isScrolledLeft = el.scrollLeft > 10;
+      const isScrolledRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 10);
+      
+      el.classList.toggle('scrolled-left', isScrolledLeft);
+      el.classList.toggle('scrolled-right', isScrolledRight);
+    }
+
+    // Attach scroll listeners
+    ongoingTableCard.addEventListener('scroll', () => handleScrollShadows(ongoingTableCard));
+    completedTableCard.addEventListener('scroll', () => handleScrollShadows(completedTableCard));
+
+    function showLoading(show = true) {
+      loadingOverlay.style.display = show ? "flex" : "none";
+      loadingOverlay.setAttribute("aria-hidden", show ? "false" : "true");
+    }
+
+    function createFieldRow(key, value, opts = {}) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "modal-row";
+      const label = document.createElement("label");
+      label.textContent = key;
+      wrapper.appendChild(label);
+
+      if (key === "imageUrl") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = `field-${key}`;
+        input.value = value || "";
+        if (opts.readonly) input.readOnly = true;
+        wrapper.appendChild(input);
+
+        if (value) {
+          const img = document.createElement("img");
+          img.src = value;
+          img.alt = "image preview";
+          img.className = "img-preview";
+          wrapper.appendChild(img);
+        } else {
+          const ph = document.createElement("div");
+          ph.style.marginTop = "6px";
+          ph.style.color = "#666";
+          ph.style.fontSize = ".9rem";
+          ph.textContent = "No image available";
+          wrapper.appendChild(ph);
+        }
+        return wrapper;
+      }
+
+      if (key === "createdAt" && value && typeof value === "object" && value.toDate) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = `field-${key}`;
+        input.value = value.toDate ? value.toDate().toLocaleString() : String(value);
+        input.readOnly = true;
+        wrapper.appendChild(input);
+        return wrapper;
+      }
+
+      if (opts.readonly) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = `field-${key}`;
+        input.value = value === undefined ? "" : String(value);
+        input.readOnly = true;
+        wrapper.appendChild(input);
+        return wrapper;
+      }
+
+      if (typeof value === "number") {
+        const input = document.createElement("input");
+        input.type = "number";
+        input.id = `field-${key}`;
+        input.value = value;
+        wrapper.appendChild(input);
+        return wrapper;
+      }
+
+      if (typeof value === "string") {
+        if (value.length > 120 || key.toLowerCase().includes("description") || key.toLowerCase().includes("remarks")) {
+          const ta = document.createElement("textarea");
+          ta.id = `field-${key}`;
+          ta.value = value;
+          wrapper.appendChild(ta);
+          return wrapper;
+        } else {
+          const input = document.createElement("input");
+          input.type = "text";
+          input.id = `field-${key}`;
+          input.value = value;
+          wrapper.appendChild(input);
+          return wrapper;
+        }
+      }
+
+      const ta = document.createElement("textarea");
+      ta.id = `field-${key}`;
+      try { ta.value = JSON.stringify(value); } catch(e) { ta.value = String(value); }
+      wrapper.appendChild(ta);
+      return wrapper;
+    }
+
+    function buildTableRow(docSnap) {
+      const r = docSnap.data();
+      const tr = document.createElement("tr");
+
+      function addCell(text, classes = "", title = null) {
+        const td = document.createElement("td");
+        if (classes.includes("truncate")) {
+          const span = document.createElement("span");
+          span.className = "truncate";
+          span.textContent = (text === undefined || text === null) ? "" : String(text);
+          if (title) span.title = title;
+          td.appendChild(span);
+        } else {
+          td.textContent = (text === undefined || text === null) ? "" : String(text);
+          if (title) td.title = title;
+        }
+        if (classes) td.className = classes;
+        tr.appendChild(td);
+      }
+
+      addCell(r.reportId || "", "col-id");
+      addCell(r.barangay || "");
+      addCell(r.description || "", "","" );
+      const descCell = tr.children[2];
+      if (r.description) {
+        descCell.innerHTML = `<span class="truncate" title="${escapeHtml(r.description)}">${r.description}</span>`;
+      }
+
+      addCell(r.affectedAgeGroups || "");
+      addCell(r.peopleInvolved ?? "", "col-small");
+      addCell(r.width ?? "", "col-small");
+      addCell(r.height ?? "", "col-small");
+
+      const imgTd = document.createElement("td");
+      imgTd.className = "";
+      if (r.imageUrl || r.image) {
+        const link = document.createElement("a");
+        link.href = r.imageUrl || r.image;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = "View";
+        link.title = "Open image in new tab";
+        imgTd.appendChild(link);
+      } else {
+        imgTd.textContent = "No";
+      }
+      tr.appendChild(imgTd);
+
+      addCell(r.latitude ?? "", "col-small");
+      addCell(r.longitude ?? "", "col-small");
+
+      const statusTd = document.createElement("td");
+      const span = document.createElement("span");
+      const st = (r.status || "pending").toString().toLowerCase();
+      span.className = `status ${st==='pending'?'pending':st==='ongoing'?'ongoing':'completed'}`;
+      span.textContent = r.status || "Pending";
+      statusTd.appendChild(span);
+      tr.appendChild(statusTd);
+
+      addCell(r.timestamp || "", "col-small");
+      addCell((r.createdAt && r.createdAt.toDate) ? r.createdAt.toDate().toLocaleString() : (r.createdAt || ""), "col-id");
+      addCell(r.userId || "", "col-id");
+
+      const actionTd = document.createElement("td");
+      actionTd.className = "action";
+      const edit = document.createElement("a");
+      edit.href = "#";
+      edit.textContent = "Edit";
+      edit.dataset.id = docSnap.id;
+      edit.className = "edit-link";
+      actionTd.appendChild(edit);
+
+      const del = document.createElement("a");
+      del.href = "#";
+      del.textContent = "Delete";
+      del.dataset.id = docSnap.id;
+      del.className = "delete-link delete";
+      actionTd.appendChild(del);
+
+      tr.appendChild(actionTd);
+      return tr;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    async function loadAllReports() {
+      showLoading(true);
+      ongoingBody.innerHTML = "";
+      completedBody.innerHTML = "";
+      try {
+        const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        snap.forEach(docSnap => {
+          const r = docSnap.data();
+          const row = buildTableRow(docSnap);
+          const status = (r.status || "").toLowerCase();
+
+          if (status === "ongoing") {
+            ongoingBody.appendChild(row);
+          } else if (status === "completed" || status === "posted") {
+            completedBody.appendChild(row);
+          }
+        });
+
+        document.querySelectorAll(".edit-link").forEach(a => a.addEventListener("click", openEditFromRow));
+        document.querySelectorAll(".delete-link").forEach(a => a.addEventListener("click", deleteFromRow));
+
+        // Initialize scroll shadows
+        setTimeout(() => {
+          handleScrollShadows(ongoingTableCard);
+          handleScrollShadows(completedTableCard);
+        }, 100);
+
+      } catch (err) {
+        console.error("Failed to load reports:", err);
+        alert("Failed to load reports. Check console for details.");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function attachSearch(inputElem, tableBody) {
+      if (!inputElem) return;
+      inputElem.addEventListener("keyup", () => {
+        const filter = inputElem.value.toLowerCase();
+        const rows = tableBody.getElementsByTagName("tr");
+        for (let i=0;i<rows.length;i++){
+          const cells = rows[i].getElementsByTagName("td");
+          let show = false;
+          for (let j=0;j<cells.length;j++){
+            if (cells[j].innerText.toLowerCase().includes(filter)) { show = true; break; }
+          }
+          rows[i].style.display = show ? "" : "none";
+        }
+      });
+    }
+    attachSearch(searchOngoing, ongoingBody);
+    attachSearch(searchCompleted, completedBody);
+
+    async function openEditFromRow(e) {
+      e.preventDefault();
+      const id = e.currentTarget.dataset.id;
+      await openModalForDoc(id);
+    }
+
+    async function deleteFromRow(e) {
+      e.preventDefault();
+      const id = e.currentTarget.dataset.id;
+      if (!confirm("Delete this report? This action cannot be undone.")) return;
+      try {
+        await deleteDoc(doc(db,"reports",id));
+        alert("Report deleted.");
+        await loadAllReports();
+      } catch (err) {
+        console.error(err);
+        alert("Delete failed. See console.");
+      }
+    }
+
+    async function openModalForDoc(id) {
+      currentDocId = id;
+      try {
+        const snap = await getDoc(doc(db,"reports",id));
+        if (!snap.exists()) { alert("Report not found"); return; }
+        currentDocData = snap.data();
+        modalGrid.innerHTML = "";
+
+        const ordered = ["reportId","barangay","description","affectedAgeGroups","peopleInvolved","width","height","imageUrl","latitude","longitude","status","timestamp","createdAt","userId"];
+        const extras = Object.keys(currentDocData).filter(k => !ordered.includes(k));
+        const keys = ordered.concat(extras);
+
+        keys.forEach(k => {
+          if (!(k in currentDocData)) return;
+          const readonly = k === "createdAt";
+          const row = createFieldRow(k, currentDocData[k], { readonly });
+          modalGrid.appendChild(row);
+        });
+
+        editModal.style.display = "flex";
+        editModal.setAttribute("aria-hidden","false");
+        editModal.querySelector(".modal-content").scrollTop = 0;
+      } catch (err) {
+        console.error(err);
+        alert("Failed to open report. See console.");
+      }
+    }
+
+    function closeEditModal() {
+      currentDocId = null;
+      currentDocData = null;
+      editModal.style.display = "none";
+      editModal.setAttribute("aria-hidden","true");
+    }
+
+    saveChangesBtn.addEventListener("click", async () => {
+      if (!currentDocId) return;
+      const inputs = modalGrid.querySelectorAll("[id^='field-']");
+      const updates = {};
+      inputs.forEach(inp => {
+        const key = inp.id.replace("field-","");
+        if (inp.type === "number") {
+          updates[key] = inp.value === "" ? null : Number(inp.value);
+        } else {
+          const orig = currentDocData[key];
+          if (orig !== undefined && typeof orig === "object" && !(orig && orig.toDate)) {
+            try { updates[key] = JSON.parse(inp.value); } catch(e) { updates[key] = inp.value; }
+          } else {
+            updates[key] = inp.value;
+          }
+        }
+      });
+
+      try {
+        await updateDoc(doc(db,"reports",currentDocId), updates);
+        alert("Changes saved.");
+        closeEditModal();
+        await loadAllReports();
+      } catch (err) {
+        console.error(err);
+        alert("Save failed. See console.");
+      }
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+      if (!currentDocId) return;
+      if (!confirm("Delete this report? This action cannot be undone.")) return;
+      try {
+        await deleteDoc(doc(db,"reports",currentDocId));
+        alert("Report deleted.");
+        closeEditModal();
+        await loadAllReports();
+      } catch (err) {
+        console.error(err);
+        alert("Delete failed. See console.");
+      }
+    });
+
+    closeModal.addEventListener("click", closeEditModal);
+    cancelBtn.addEventListener("click", closeEditModal);
+    
+    window.addEventListener("click", (ev) => {
+      if (ev.target === editModal) closeEditModal();
+      if (!ev.target.closest(".profile-dropdown")) {
+        dropdownMenu.style.display = "none";
+      }
+    });
+
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "login.html"; return; }
+      try {
+        const uDoc = await getDoc(doc(db,"users",user.uid));
+        if (!uDoc.exists()) { window.location.href = "login.html"; return; }
+        const d = uDoc.data();
+        if (d.position !== "Super Admin") { 
+          alert("Unauthorized access!"); 
+          window.location.href = "login.html"; 
+          return; 
+        }
+
+        navUsername.textContent = d.name || "Super Admin";
+        sidebarName.textContent = d.name || "Super Admin";
+        sidebarPosition.textContent = d.position || "Super Admin";
+
+        await loadAllReports();
+      } catch (err) {
+        console.error(err);
+        window.location.href = "login.html";
+      }
+    });
+
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      try {
+        await signOut(auth);
+        window.location.href = "logout.html";
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 1500);
+      } catch (error) {
+        console.error("Logout failed:", error);
+        window.location.href = "login.html";
+      }
+    });
+
+  </script>
+</body>
+</html>
