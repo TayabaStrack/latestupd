@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Profile | TayabaStrack</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family: "Segoe UI", Tahoma, sans-serif; background:#f5f7fb; color:#222; display:flex; min-height:100vh}
+
+    /* Sidebar */
+    .sidebar { width:240px; background:#004aad; color:white; display:flex; flex-direction:column; justify-content:space-between; padding:1rem 0; }
+    .sidebar-header{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:1rem}
+    .sidebar-header img{width:40px}
+    .sidebar-header h2{font-size:1.1rem}
+    .sidebar-menu{list-style:none;padding:0 0.5rem}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:10px;border-radius:6px;color:#fff;text-decoration:none}
+    .sidebar-menu a:hover{background:#0756cc}
+    .sidebar-footer{padding:12px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);font-size:0.9rem}
+
+    /* Main */
+    .main { flex:1; display:flex; flex-direction:column; }
+    .navbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,0.04);position:sticky;top:0;z-index:5}
+    .navbar h1{color:#004aad;font-size:20px}
+    .profile{display:flex;align-items:center;gap:12px;position:relative}
+    .avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;cursor:pointer}
+    .badge{background:red;color:white;border-radius:50%;padding:3px 6px;font-size:12px;position:absolute;top:-6px;right:-6px}
+
+    /* Page grid */
+    .page { padding:28px; display:flex; justify-content:center; width:100% }
+    .profile-section{max-width:1100px; width:100%; display:grid; grid-template-columns: 1fr 420px; gap:20px; align-items:start}
+
+    /* Cards */
+    .card{background:white;border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(13,34,85,0.06)}
+    .profile-card .top{display:flex;gap:18px;align-items:center}
+    .profile-card img{width:120px;height:120px;border-radius:10px;object-fit:cover;border-radius:50%}
+    .profile-info{margin-top:12px}
+    .profile-info label{display:block;font-weight:700;font-size:13px;margin-top:10px}
+    .profile-info input{width:100%;padding:8px;border-radius:8px;border:1px solid #d7dce6;margin-top:6px;font-size:14px;background:#fbfdff}
+
+    .btn{background:#004aad;color:white;padding:8px 12px;border-radius:8px;border:0;cursor:pointer;margin-top:12px}
+    .btn:hover{opacity:0.95}
+
+    /* Account card */
+    .account-card h2{color:#0b3e89;margin-bottom:8px}
+    .account-meta p{margin:6px 0;font-size:14px}
+
+    /* Calendar */
+    .calendar{margin-top:12px}
+    .calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .calendar-header button{background:#e9f0ff;border:0;padding:6px 10px;border-radius:8px;cursor:pointer}
+    .weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;font-size:12px;color:#5b6b85}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .calendar-day{padding:12px;border-radius:8px;background:#f7f9fc;min-height:48px;cursor:pointer;position:relative}
+    .calendar-day.today{background:#0b63d6;color:white;font-weight:700}
+    .calendar-day.has-event::after{content:"";width:8px;height:8px;border-radius:50%;background:#ef4444;position:absolute;right:8px;bottom:8px}
+
+    .events-list h4{color:#0b63d6;margin-top:14px}
+    .events-list ul{list-style:none;margin-top:8px;padding:0}
+    .events-list li{background:#eef6ff;padding:8px;border-radius:8px;margin-bottom:8px;font-size:14px}
+
+    /* Modal */
+    .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:50}
+    .modal .content{background:white;padding:16px;border-radius:10px;width:360px;max-width:95%;box-shadow:0 14px 40px rgba(2,6,23,0.15)}
+    .modal .content h2{color:#004aad;margin-bottom:10px;text-align:center}
+    .modal input[type="text"], .modal input[type="email"]{width:100%;padding:8px;margin-top:8px;border-radius:8px;border:1px solid #d7dce6}
+    .modal .preview{display:block;margin:8px auto;border-radius:50%;width:90px;height:90px;object-fit:cover}
+
+    /* small screens */
+    @media (max-width:980px){
+      .profile-section{grid-template-columns:1fr; padding-bottom:40px}
+      .sidebar{display:none}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <img src="logu.png" alt="Logo">
+        <h2>TayabaStrack</h2>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="ad_dashboard.html"><i class="fa fa-home"></i>&nbsp;Dashboard</a></li>
+        <li><a href="ad_reports.html"><i class="fa fa-tasks"></i>&nbsp;Manage Reports</a></li>
+        <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i>&nbsp;Map</a></li>
+        <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i>&nbsp;User Management</a></li>
+        <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i>&nbsp;Report Bulletin</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <div>Logged in as:</div>
+      <strong id="sidebarName">Loading...</strong>
+      <div id="sidebarPosition">Loading...</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <nav class="navbar">
+      <h1>User Profile</h1>
+      <div class="profile">
+        <div style="position:relative">
+          <i class="fa fa-bell"></i>
+          <span class="badge">1</span>
+        </div>
+        <img src="admin-profile.jpg" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
+        <div style="display:none;position:absolute;right:10px;top:64px;background:#fff;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.12)" id="dropdownMenu">
+          <a href="ad_profile.html" style="display:block;padding:10px;text-decoration:none;color:#222">Profile</a>
+          <a href="logout.html" style="display:block;padding:10px;text-decoration:none;color:#222">Logout</a>
+        </div>
+        <div id="navUsername" style="font-weight:600"></div>
+      </div>
+    </nav>
+
+    <div class="page">
+      <div class="profile-section">
+
+        <!-- Left: Profile Card -->
+        <section class="card profile-card">
+          <div class="top">
+            <img src="admin-profile.jpg" id="profilePic" alt="profile">
+            <div>
+              <div style="font-size:18px;font-weight:700;color:#0b3e89" id="displayName">Loading...</div>
+              <div style="margin-top:6px;color:#6b7380" id="displayRole">Administrator</div>
+            </div>
+          </div>
+
+          <div class="profile-info">
+            <label>Full Name</label>
+            <input id="cardName" readonly>
+
+            <label>ID</label>
+            <input id="cardID" readonly>
+
+            <label>Email</label>
+            <input id="cardEmail" readonly>
+
+            <label>Phone</label>
+            <input id="cardPhone" readonly>
+
+            <label>Address</label>
+            <input id="cardAddress" readonly>
+
+            <label>Gender</label>
+            <input id="cardGender" readonly>
+          </div>
+
+          <button class="btn" onclick="openEditModal()">Edit Profile</button>
+        </section>
+
+        <!-- Right: Account Info + Calendar -->
+        <aside class="card account-card">
+          <h2>Account Info</h2>
+          <div class="account-meta">
+            <p><strong>Type:</strong> <span id="accountType">Loading...</span></p>
+            <p><strong>Registered:</strong> <span id="registeredAt">—</span></p>
+            <p><strong>Last Login:</strong> <span id="lastLogin">—</span></p>
+          </div>
+
+          <div class="calendar">
+            <div class="calendar-header">
+              <button onclick="prevMonth()">‹</button>
+              <div id="monthYear" style="font-weight:700;color:#0b3e89"></div>
+              <button onclick="nextMonth()">›</button>
+            </div>
+
+            <div class="weekday-row">
+              <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+
+            <div class="calendar-grid" id="calendarDays"></div>
+          </div>
+
+          <div class="events-list">
+            <h4>📅 Upcoming Events</h4>
+            <ul id="eventsSummary">
+              <li><em>No events yet. Add one by clicking a date.</em></li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Modal -->
+  <div class="modal" id="editModal">
+    <div class="content">
+      <h2>Edit Profile</h2>
+
+      <input type="file" id="editPhoto" accept="image/*">
+      <img id="previewImg" class="preview" style="display:none">
+
+      <input type="text" id="editName" placeholder="Full name">
+      <input type="text" id="editID" placeholder="ID">
+      <input type="email" id="editEmail" placeholder="Email">
+      <input type="text" id="editPhone" placeholder="Phone">
+      <input type="text" id="editAddress" placeholder="Address">
+      <input type="text" id="editGender" placeholder="Gender">
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn" onclick="closeEditModal()" style="background:#f0f2f7;color:#222">Cancel</button>
+        <button class="btn" onclick="saveEdit()" id="saveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase compat libs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+  <script>
+    // ---------- Firebase config ----------
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.appspot.com",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    let currentUser = null;
+
+    // Dropdown
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    function toggleDropdown(){
+      dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block'
+    }
+    window.addEventListener('click', (e)=>{
+      if(!e.target.closest('.avatar') && !e.target.closest('#dropdownMenu')) dropdownMenu.style.display = 'none'
+    });
+
+    // ---------- Auth state & load profile ----------
+    auth.onAuthStateChanged(async (user)=>{
+      if(!user) return console.warn("No user logged in.");
+      currentUser = user;
+
+      const ref = db.collection('users').doc(user.uid);
+      ref.onSnapshot(doc=>{
+        if(!doc.exists) return;
+        const data = doc.data();
+
+        document.getElementById("sidebarName").textContent = data.name || "No name";
+        document.getElementById("sidebarPosition").textContent = data.role || "—";
+        document.getElementById("navUsername").textContent = data.name || "User";
+
+        document.getElementById("profilePic").src = data.photoURL || "admin-profile.jpg";
+        document.getElementById("navAvatar").src = data.photoURL || "admin-profile.jpg";
+        document.getElementById("displayName").textContent = data.name || "—";
+
+        document.getElementById("cardName").value = data.name || "";
+        document.getElementById("cardID").value = data.id || "";
+        document.getElementById("cardEmail").value = data.email || user.email;
+        document.getElementById("cardPhone").value = data.phone || "";
+        document.getElementById("cardAddress").value = data.address || "";
+        document.getElementById("cardGender").value = data.gender || "";
+
+        document.getElementById("editName").value = data.name || "";
+        document.getElementById("editID").value = data.id || "";
+        document.getElementById("editEmail").value = data.email || user.email;
+        document.getElementById("editPhone").value = data.phone || "";
+        document.getElementById("editAddress").value = data.address || "";
+        document.getElementById("editGender").value = data.gender || "";
+      });
+    });
+
+    // ---------- Modal ----------
+    const editModal = document.getElementById("editModal");
+    const editPhoto = document.getElementById("editPhoto");
+    const previewImg = document.getElementById("previewImg");
+
+    function openEditModal(){ editModal.style.display="flex"; previewImg.style.display="none"; editPhoto.value="" }
+    function closeEditModal(){ editModal.style.display="none" }
+
+    editPhoto.addEventListener("change", e=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev=>{
+        previewImg.src = ev.target.result;
+        previewImg.style.display="block";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // ---------- Save profile ----------
+    async function saveEdit(){
+      if(!currentUser) return alert("No user logged in");
+      const uid = currentUser.uid;
+      const ref = db.collection("users").doc(uid);
+
+      const updated = {
+        name: document.getElementById("editName").value.trim(),
+        id: document.getElementById("editID").value.trim(),
+        email: document.getElementById("editEmail").value.trim(),
+        phone: document.getElementById("editPhone").value.trim(),
+        address: document.getElementById("editAddress").value.trim(),
+        gender: document.getElementById("editGender").value.trim()
+      };
+
+      const file = editPhoto.files[0];
+      try {
+        if(file){
+          const storageRef = storage.ref().child(`profilePics/${uid}/avatar.jpg`);
+          await storageRef.put(file);
+          const url = await storageRef.getDownloadURL();
+          updated.photoURL = url;
+        }
+        await ref.set(updated, { merge:true });
+        alert("Profile updated!");
+        closeEditModal();
+      } catch(err){
+        console.error(err);
+        alert("Error: "+err.message);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | TayabaStrack</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; }
+
+        .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; }
+        .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; }
+        .sidebar-header img { width: 40px; }
+        .sidebar-header h2 { font-size: 1.2rem; }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li { margin: 0.5rem 0; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; }
+        .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
+        .sidebar-footer { text-align: center; font-size: 0.85rem; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
+
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 10; }
+        .navbar h1 { font-size: 1.4rem; color: #004aad; }
+        .profile { display: flex; align-items: center; gap: 1rem; cursor: pointer; }
+        .profile .fa-bell { font-size: 1.2rem; position: relative; }
+        .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; }
+
+        .profile-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; }
+        .avatar { width: 35px; height: 35px; border-radius: 50%; }
+        .username { font-weight: 500; }
+        .dropdown-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); min-width: 160px; z-index: 1000; }
+        .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.85rem; }
+        .dropdown-menu a:hover { background: #f0f0f0; color: #004aad; }
+
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1.5rem; }
+        .card { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #fff; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .card i { font-size: 1.8rem; color: #004aad; }
+        .card p { font-size: 0.9rem; color: #666; }
+        .card h2 { font-size: 1.5rem; font-weight: bold; }
+
+        .bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; padding: 1.5rem; }
+        .reports, .map { background: #fff; border-radius: 12px; padding: 1rem 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .reports h3, .map h3 { margin-bottom: 1rem; color: #004aad; }
+        canvas { width: 100% !important; height: 250px !important; }
+        #miniMap { height: 250px !important; border-radius: 10px; width: 100%; }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="logu.png" alt="Logo" class="logo" />
+                <h2>TayabaStrack</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="ad_dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
+                <li><a href="ad_reports.html"><i class="fa fa-tasks"></i> Manage Reports</a></li>
+                <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
+                <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
+                <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <p>Logged in as:</p>
+            <strong id="sidebarName">Loading...</strong><br />
+            <span id="sidebarPosition">---</span>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+        <nav class="navbar">
+            <h1>Dashboard</h1>
+            <div class="profile" onclick="toggleDropdown()">
+                <div style="position: relative;">
+                    <i class="fa fa-bell"></i>
+                    <span class="badge">2</span>
+                </div>
+                <div class="profile-dropdown" id="profileToggle">
+                    <img src="admin-profile.jpg" alt="Profile" class="avatar" />
+                    <span class="username" id="navbarName">---</span>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
+                        <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Stats Cards -->
+        <section class="stats">
+            <div class="card"><i class="fa fa-chart-bar"></i><div><p>Total Reports</p><h2 id="totalReports">0</h2></div></div>
+            <div class="card"><i class="fa fa-clock"></i><div><p>Pending</p><h2 id="pendingReports">0</h2></div></div>
+            <div class="card"><i class="fa fa-sync"></i><div><p>Ongoing</p><h2 id="ongoingReports">0</h2></div></div>
+            <div class="card"><i class="fa fa-check-circle"></i><div><p>Completed</p><h2 id="completedReports">0</h2></div></div>
+        </section>
+
+        <!-- Reports & Map -->
+        <section class="bottom">
+            <div class="reports">
+                <h3>Total Reports</h3>
+                <canvas id="dashboardChart"></canvas>
+            </div>
+
+            <div class="map">
+                <h3>Map</h3>
+                <div id="miniMap"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Google Maps -->
+    <script>
+        let miniMap;
+        window.reportLocations = [];
+
+        function initMiniMap() {
+            // Tayabas City Rizal Park coordinates
+            const tayabasRizalPark = { lat: 14.0167747, lng: 121.5857253 };
+
+            miniMap = new google.maps.Map(document.getElementById("miniMap"), {
+                zoom: 13,
+                center: tayabasRizalPark,
+                mapTypeId: 'roadmap'
+            });
+
+            // Add blue marker for Tayabas City Rizal Park
+            new google.maps.Marker({
+                position: tayabasRizalPark,
+                map: miniMap,
+                title: "Tayabas City - Rizal Park",
+                icon: {
+                    url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                }
+            });
+
+            // Add report markers if data is ready
+            addReportMarkers();
+        }
+
+        function addReportMarkers() {
+            if (!miniMap || !window.reportLocations) return;
+
+            console.log(`Adding ${window.reportLocations.length} markers to mini map`);
+
+            window.reportLocations.forEach((report) => {
+                let markerColor = "red";
+                if (report.status === "resolved" || report.status === "completed") markerColor = "green";
+                else if (report.status === "ongoing" || report.status === "in-progress") markerColor = "yellow";
+
+                new google.maps.Marker({
+                    position: { lat: report.lat, lng: report.lng },
+                    map: miniMap,
+                    title: report.type,
+                    icon: {
+                        url: `http://maps.google.com/mapfiles/ms/icons/${markerColor}-dot.png`
+                    }
+                });
+            });
+        }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJkfi59FibsnD-dxAdyYUohj36N_bOtfE&callback=initMiniMap"></script>
+
+    <!-- Firebase + Chart -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+            authDomain: "tayabastrack-23b95.firebaseapp.com",
+            projectId: "tayabastrack-23b95",
+            storageBucket: "tayabastrack-23b95.firebasestorage.app",
+            messagingSenderId: "674055915366",
+            appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const sidebarName = document.getElementById("sidebarName");
+        const sidebarPosition = document.getElementById("sidebarPosition");
+        const navbarName = document.getElementById("navbarName");
+        const logoutBtn = document.getElementById("logoutBtn");
+
+        const totalReportsEl = document.getElementById("totalReports");
+        const pendingEl = document.getElementById("pendingReports");
+        const ongoingEl = document.getElementById("ongoingReports");
+        const completedEl = document.getElementById("completedReports");
+
+        // Auth check
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return (window.location.href = "login.html");
+
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (!userDoc.exists() || userDoc.data().position !== "Admin") {
+                alert("Unauthorized access! Redirecting...");
+                return (window.location.href = "login.html");
+            }
+
+            const data = userDoc.data();
+            sidebarName.textContent = data.name || user.email;
+            sidebarPosition.textContent = data.position || "Admin";
+            navbarName.textContent = data.name || "Admin";
+
+            // Load Firestore counts and map data
+            await loadDashboardData();
+        });
+
+        // Logout
+        logoutBtn.addEventListener("click", async () => {
+            await signOut(auth);
+            window.location.href = "login.html";
+        });
+
+        // Dashboard data
+        async function loadDashboardData() {
+            const snapshot = await getDocs(collection(db, "reports"));
+            let total = 0, pending = 0, ongoing = 0, completed = 0;
+
+            // Reset report locations
+            window.reportLocations = [];
+
+            snapshot.forEach(docSnap => {
+                const report = docSnap.data();
+                total++;
+                const status = report.status?.toLowerCase();
+                if (status === "pending") pending++;
+                else if (status === "ongoing" || status === "in-progress") ongoing++;
+                else if (status === "resolved" || status === "completed") completed++;
+
+                // Collect location data for map
+                const lat = report.latitude || report.lat || report.location?.latitude;
+                const lng = report.longitude || report.lng || report.location?.longitude;
+
+                if (lat && lng) {
+                    window.reportLocations.push({
+                        lat: parseFloat(lat),
+                        lng: parseFloat(lng),
+                        type: report.reportType || report.type || "Unknown",
+                        status: status || "pending"
+                    });
+                }
+            });
+
+            totalReportsEl.textContent = total;
+            pendingEl.textContent = pending;
+            ongoingEl.textContent = ongoing;
+            completedEl.textContent = completed;
+
+            updateChart(completed, ongoing, pending);
+
+            // Add markers to map if it's loaded
+            if (window.miniMap) {
+                addReportMarkers();
+            }
+        }
+
+        // Chart.js
+        let chart;
+        function updateChart(completed, ongoing, pending) {
+            const ctx = document.getElementById("dashboardChart").getContext("2d");
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: ["Completed", "Ongoing", "Pending"],
+                    datasets: [{
+                        label: "Reports",
+                        data: [completed, ongoing, pending],
+                        backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e"]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Dropdown toggle
+        function toggleDropdown() {
+            const menu = document.getElementById("dropdownMenu");
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+        window.toggleDropdown = toggleDropdown;
+
+        window.addEventListener("click", (e) => {
+            if (!e.target.closest(".profile-dropdown")) {
+                document.getElementById("dropdownMenu").style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
