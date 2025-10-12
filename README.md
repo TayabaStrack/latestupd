@@ -2,7 +2,7 @@
 problems for another day  
 
 admi 
-- notification bell function, profile changes  (LAHAT)
+- notification bell function, profile changes  (LAHAT except dashboard na reference point)
 - img no display (REPORTS, MAP, BULLETIN, PUBLIC DASH)
 - img edit/upload (PROFILE)
 
