@@ -2,10 +2,9 @@
 problems for another day  
 
 admi 
-- notification bell function, profile changes  (LAHAT except usermanagement & dashboard)
+- profile picture changes  (LAHAT kahit sa other day na)
 - img no display (REPORTS, MAP, BULLETIN, PUBLIC DASH)
-- img edit/upload (PROFILE)
-- scrollable tables (LAHAT NG KELANGAN)
+- img edit/upload (PROFILE done pero not tested yet)
 
 
 s-admin
