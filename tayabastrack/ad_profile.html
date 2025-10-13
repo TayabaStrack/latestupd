@@ -9,18 +9,47 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <style>
+    /* ---------- RESET & BASE ---------- */
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family: "Segoe UI", Tahoma, sans-serif; background:#f5f7fb; color:#222; display:flex; min-height:100vh}
+    body{
+      font-family:'Segoe UI', Tahoma, sans-serif;
+      display:flex;
+      min-height:100vh;
+      background:#f5f7fb;
+      color:#333;
+      overflow:hidden;
+    }
 
-    /* Sidebar */
-    .sidebar { width:240px; background:#004aad; color:white; display:flex; flex-direction:column; justify-content:space-between; padding:1rem 0; }
-    .sidebar-header{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:1rem}
+    /* ---------- SIDEBAR (fixed) ---------- */
+    .sidebar{
+      width:250px;
+      min-width:250px;
+      background:#004aad;
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      padding:1rem 0;
+      position:fixed;
+      top:0;
+      left:0;
+      bottom:0;
+      z-index:50;
+      height:100vh;
+      overflow-y:auto;
+    }
+    .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
     .sidebar-header img{width:40px}
-    .sidebar-header h2{font-size:1.1rem}
-    .sidebar-menu{list-style:none;padding:0 0.5rem}
-    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:10px;border-radius:6px;color:#fff;text-decoration:none}
-    .sidebar-menu a:hover{background:#0756cc}
-    .sidebar-footer{padding:12px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);font-size:0.9rem}
+    .sidebar-header h2{font-size:1.2rem;margin:0}
+    .sidebar-menu{list-style:none;padding-left:0}
+    .sidebar-menu li{margin:0.5rem 0}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
+    .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
+    .sidebar-footer{
+      text-align:center;
+      padding:1rem;
+      border-top:1px solid rgba(255,255,255,0.2);
+    }
     .logout-btn {
       background-color: #d9534f;
       color: #fff;
@@ -35,14 +64,156 @@
     .logout-btn:hover {
       background-color: #c9302c;
     }
-    
-    /* Main */
-    .main { flex:1; display:flex; flex-direction:column; }
-    .navbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,0.04);position:sticky;top:0;z-index:5}
-    .navbar h1{color:#004aad;font-size:20px}
-    .profile{display:flex;align-items:center;gap:12px;position:relative}
-    .avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;cursor:pointer}
-    .badge{background:red;color:white;border-radius:50%;padding:3px 6px;font-size:12px;position:absolute;top:-6px;right:-6px}
+
+    /* ---------- NAVBAR (fixed) ---------- */
+    .navbar{
+      position:fixed;
+      top:0;
+      left:250px;
+      right:0;
+      height:64px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:0 24px;
+      background:#fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.05);
+      z-index:40;
+    }
+    .navbar h1{font-size:1.4rem;color:#004aad}
+    .profile{display:flex;align-items:center;gap:1rem}
+    .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
+    .badge{
+      background:red;
+      color:#fff;
+      font-size:.7rem;
+      border-radius:50%;
+      padding:3px 6px;
+      position:absolute;
+      top:-8px;
+      right:-8px;
+      display:none;
+    }
+    .badge.show{display:flex;align-items:center;justify-content:center}
+    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
+    .avatar{width:35px;height:35px;border-radius:50%}
+    .username{font-weight:500}
+    .dropdown-menu{
+      display:none;
+      position:absolute;
+      top:120%;
+      right:0;
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:6px;
+      box-shadow:0 4px 8px rgba(0,0,0,.15);
+      min-width:200px;
+      z-index:1000;
+    }
+    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
+    .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
+
+    /* Notification Menu */
+    .notification-menu {
+      display: none;
+      position: absolute;
+      top: 120%;
+      right: 0;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-shadow: 0 4px 8px rgba(0,0,0,.15);
+      width: 320px;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    .notification-menu.show {
+      display: block;
+    }
+    .notification-header {
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .notification-header h3 {
+      font-size: 1rem;
+      color: #333;
+      margin: 0;
+    }
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #004aad;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .notification-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .notification-item {
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      gap: 0.8rem;
+      transition: background 0.2s;
+    }
+    .notification-item:hover {
+      background: #f9f9f9;
+    }
+    .notification-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .notification-icon.user {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+    .notification-icon.report {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+    .notification-content {
+      flex: 1;
+    }
+    .notification-content p {
+      margin: 0;
+      font-size: 0.85rem;
+    }
+    .notification-content .time {
+      color: #999;
+      font-size: 0.75rem;
+      margin-top: 0.2rem;
+    }
+    .notification-empty {
+      padding: 2rem;
+      text-align: center;
+      color: #999;
+    }
+
+    .main {
+      margin-left:250px;
+      margin-top:74px;
+      flex:1;
+      display:block;
+      min-width:0;
+      height:calc(100vh - 74px);
+      overflow:hidden;
+    }
+    .content { 
+      flex: 1; 
+      padding: 1.5rem; 
+      overflow-y: auto;
+      height:100%;
+    }
 
     /* Page grid */
     .page { padding:28px; display:flex; justify-content:center; width:100% }
@@ -67,17 +238,24 @@
     .calendar{margin-top:12px}
     .calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
     .calendar-header button{background:#e9f0ff;border:0;padding:6px 10px;border-radius:8px;cursor:pointer}
-    .weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;font-size:12px;color:#5b6b85}
+    .calendar-header button:hover{background:#d0e0ff}
+    .weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;font-size:12px;color:#5b6b85;text-align:center}
     .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-    .calendar-day{padding:12px;border-radius:8px;background:#f7f9fc;min-height:48px;cursor:pointer;position:relative}
+    .calendar-day{padding:12px;border-radius:8px;background:#f7f9fc;min-height:48px;cursor:pointer;position:relative;text-align:center;transition:all 0.2s}
+    .calendar-day:hover{background:#e3f2fd;transform:scale(1.05)}
     .calendar-day.today{background:#0b63d6;color:white;font-weight:700}
     .calendar-day.has-event::after{content:"";width:8px;height:8px;border-radius:50%;background:#ef4444;position:absolute;right:8px;bottom:8px}
+    .calendar-day.selected{background:#1976d2;color:white;font-weight:600}
 
-    .events-list h4{color:#0b63d6;margin-top:14px}
+    .events-list h4{color:#0b63d6;margin-top:14px;margin-bottom:8px}
     .events-list ul{list-style:none;margin-top:8px;padding:0}
-    .events-list li{background:#eef6ff;padding:8px;border-radius:8px;margin-bottom:8px;font-size:14px}
+    .events-list li{background:#eef6ff;padding:8px 12px;border-radius:8px;margin-bottom:8px;font-size:13px;position:relative;display:flex;justify-content:space-between;align-items:center}
+    .events-list li .event-date{font-weight:700;color:#0b63d6;font-size:11px}
+    .events-list li .event-title{margin-top:2px;color:#333}
+    .events-list li .delete-event{background:#ef4444;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px}
+    .events-list li .delete-event:hover{background:#c82333}
 
-    /* Modal */
+/* Modal */
     .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:50}
     .modal .content{background:white;padding:20px;border-radius:10px;width:420px;max-width:95%;box-shadow:0 14px 40px rgba(2,6,23,0.15);max-height:90vh;overflow-y:auto}
     .modal .content h2{color:#004aad;margin-bottom:16px;text-align:center}
@@ -130,16 +308,26 @@
     </div>
   </aside>
 
-  <!-- Main -->
-  <main class="main">
-    <nav class="navbar">
+  <nav class="navbar">
       <h1>User Profile</h1>
       <div class="profile">
         <div style="position:relative">
-          <i class="fa fa-bell"></i>
-          <span class="badge">1</span>
+          <i class="fa fa-bell" id="notificationBell"></i>
+          <span class="badge" id="notificationBadge">0</span>
+          
+          <!-- Notification Menu -->
+          <div class="notification-menu" id="notificationMenu">
+            <div class="notification-header">
+              <h3>Notifications</h3>
+              <button class="clear-btn" id="clearNotificationsBtn">Clear all</button>
+            </div>
+            <div class="notification-list" id="notificationList">
+              <div class="notification-empty">No new notifications</div>
+            </div>
+          </div>
         </div>
-        <img src="admin-profile.jpg" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
+        
+        <img src="image.png" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
         <div class="dropdown-menu" id="dropdownMenu">
           <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
         </div>
@@ -147,13 +335,15 @@
       </div>
     </nav>
 
+  <!-- Main -->
+  <main class="main">
     <div class="page">
       <div class="profile-section">
 
         <!-- Left: Profile Card -->
         <section class="card profile-card">
           <div class="top">
-            <img src="admin-profile.jpg" id="profilePic" alt="profile" class="profile-main">
+            <img src="image.png" id="profilePic" alt="profile" class="profile-main">
             <div>
               <div style="font-size:18px;font-weight:700;color:#0b3e89" id="displayName">Loading...</div>
               <div style="margin-top:6px;color:#6b7380" id="displayRole">Administrator</div>
@@ -208,22 +398,20 @@
 
           <div class="events-list">
             <h4>📅 Upcoming Events</h4>
-            <ul id="eventsSummary">
-              <li><em>No events yet. Add one by clicking a date.</em></li>
-            </ul>
+            <ul id="eventsSummary"></ul>
           </div>
         </aside>
       </div>
     </div>
   </main>
 
-  <!-- Edit Modal -->
+  <!-- Edit Profile Modal -->
   <div class="modal" id="editModal">
     <div class="content">
       <h2>Edit Profile</h2>
 
       <div class="photo-upload-section">
-        <img id="previewImg" class="preview" src="admin-profile.jpg" alt="Profile Preview">
+        <img id="previewImg" class="preview" src="image.png" alt="Profile Preview">
         <div class="upload-btn-wrapper">
           <label class="upload-btn">
             <i class="fa fa-camera"></i> Choose Photo
@@ -260,6 +448,29 @@
     </div>
   </div>
 
+  <!-- Add Event Modal -->
+  <div class="modal" id="eventModal">
+    <div class="content">
+      <h2>Add Event</h2>
+      
+      <label>Event Date</label>
+      <input type="text" id="eventDate" readonly>
+      
+      <label>Event Title</label>
+      <input type="text" id="eventTitle" placeholder="Enter event title" maxlength="100">
+      
+      <label>Description (optional)</label>
+      <textarea id="eventDescription" placeholder="Enter event description"></textarea>
+
+      <div class="btn-group">
+        <button class="btn btn-cancel" onclick="closeEventModal()">Cancel</button>
+        <button class="btn" onclick="saveEvent()" id="saveEventBtn">
+          <i class="fa fa-plus"></i> Add Event
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase compat libs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -284,6 +495,75 @@
     let currentUser = null;
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
+    let selectedDate = null;
+    let userEvents = {};
+    let notificationsList = [];
+    let trackedUsers = new Set();
+    let trackedReports = new Set();
+
+    // Notification functions
+    const notificationBell = document.getElementById("notificationBell");
+    const notificationBadge = document.getElementById("notificationBadge");
+    const notificationMenu = document.getElementById("notificationMenu");
+    const notificationList = document.getElementById("notificationList");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+
+    function addNotification(type, message, detail) {
+      const notification = {
+        id: Date.now(),
+        type,
+        message,
+        detail,
+        timestamp: new Date()
+      };
+      notificationsList.unshift(notification);
+      updateNotificationUI();
+    }
+
+    function updateNotificationUI() {
+      const count = notificationsList.length;
+      if (count > 0) {
+        notificationBadge.textContent = count;
+        notificationBadge.classList.add("show");
+      } else {
+        notificationBadge.textContent = "";
+        notificationBadge.classList.remove("show");
+      }
+
+      if (notificationsList.length === 0) {
+        notificationList.innerHTML = `<div class="notification-empty">No new notifications</div>`;
+        return;
+      }
+
+      notificationList.innerHTML = notificationsList.map(n => `
+        <div class="notification-item">
+          <div class="notification-icon ${n.type}">
+            ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+          </div>
+          <div class="notification-content">
+            <p><strong>${n.message}</strong></p>
+            <p>${n.detail}</p>
+            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notificationMenu.classList.toggle("show");
+    });
+
+    clearNotificationsBtn.addEventListener("click", () => {
+      notificationsList = [];
+      updateNotificationUI();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!notificationMenu.contains(e.target) && e.target !== notificationBell) {
+        notificationMenu.classList.remove("show");
+      }
+    });
 
     // Dropdown
     const dropdownMenu = document.getElementById('dropdownMenu');
@@ -294,11 +574,240 @@
       if(!e.target.closest('.avatar') && !e.target.closest('#dropdownMenu')) dropdownMenu.style.display = 'none'
     });
 
+    function isBarangayPosition(position) {
+      if (!position) return false;
+      const pos = position.toLowerCase().trim();
+      return pos.includes("barangay captain") || 
+             pos.includes("brgy captain") || 
+             pos.includes("brgy. captain") ||
+             pos.includes("barangay official") || 
+             pos.includes("brgy official") || 
+             pos.includes("brgy. official");
+    }
+
+    // ---------- Calendar Functions ----------
+    function getDateKey(year, month, day) {
+      return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    async function loadEvents() {
+      if (!currentUser) return;
+      
+      try {
+        const eventsRef = db.collection('users').doc(currentUser.uid).collection('events');
+        eventsRef.onSnapshot((snapshot) => {
+          userEvents = {};
+          snapshot.forEach(doc => {
+            const event = doc.data();
+            userEvents[event.dateKey] = userEvents[event.dateKey] || [];
+            userEvents[event.dateKey].push({
+              id: doc.id,
+              ...event
+            });
+          });
+          renderCalendar();
+          renderEventsList();
+        });
+      } catch (err) {
+        console.error("Error loading events:", err);
+      }
+    }
+
+    function renderCalendar() {
+      const monthYear = document.getElementById('monthYear');
+      const calendarDays = document.getElementById('calendarDays');
+      
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const lastDay = new Date(currentYear, currentMonth + 1, 0);
+      const today = new Date();
+      
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+      
+      monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+      
+      calendarDays.innerHTML = '';
+      
+      // Empty cells before first day
+      for(let i = 0; i < firstDay.getDay(); i++) {
+        const emptyDiv = document.createElement('div');
+        calendarDays.appendChild(emptyDiv);
+      }
+      
+      // Days of month
+      for(let day = 1; day <= lastDay.getDate(); day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'calendar-day';
+        dayDiv.textContent = day;
+        
+        const dateKey = getDateKey(currentYear, currentMonth, day);
+        
+        // Check if today
+        if(day === today.getDate() && 
+           currentMonth === today.getMonth() && 
+           currentYear === today.getFullYear()) {
+          dayDiv.classList.add('today');
+        }
+        
+        // Check if has events
+        if(userEvents[dateKey] && userEvents[dateKey].length > 0) {
+          dayDiv.classList.add('has-event');
+        }
+        
+        // Add click event
+        dayDiv.addEventListener('click', () => {
+          document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
+          dayDiv.classList.add('selected');
+          openEventModal(currentYear, currentMonth, day);
+        });
+        
+        calendarDays.appendChild(dayDiv);
+      }
+    }
+
+    function renderEventsList() {
+      const eventsSummary = document.getElementById('eventsSummary');
+      const today = new Date();
+      const upcomingEvents = [];
+      
+      // Get all events and sort by date
+      Object.keys(userEvents).forEach(dateKey => {
+        const [year, month, day] = dateKey.split('-').map(Number);
+        const eventDate = new Date(year, month - 1, day);
+        
+        if (eventDate >= today) {
+          userEvents[dateKey].forEach(event => {
+            upcomingEvents.push({
+              ...event,
+              date: eventDate,
+              dateKey: dateKey
+            });
+          });
+        }
+      });
+      
+      upcomingEvents.sort((a, b) => a.date - b.date);
+      
+      if (upcomingEvents.length === 0) {
+        eventsSummary.innerHTML = '<li style="list-style:none;color:#999;text-align:center;padding:10px"><em>No upcoming events</em></li>';
+        return;
+      }
+      
+      eventsSummary.innerHTML = upcomingEvents.slice(0, 5).map(event => {
+        const dateStr = event.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `
+          <li>
+            <div>
+              <div class="event-date">${dateStr}</div>
+              <div class="event-title">${event.title}</div>
+            </div>
+            <button class="delete-event" onclick="deleteEvent('${event.id}', '${event.dateKey}')">
+              <i class="fa fa-trash"></i>
+            </button>
+          </li>
+        `;
+      }).join('');
+    }
+
+    function prevMonth() {
+      currentMonth--;
+      if(currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      currentMonth++;
+      if(currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    }
+
+    // ---------- Event Modal Functions ----------
+    const eventModal = document.getElementById('eventModal');
+    
+    function openEventModal(year, month, day) {
+      selectedDate = { year, month, day };
+      const dateKey = getDateKey(year, month, day);
+      const dateObj = new Date(year, month, day);
+      const dateStr = dateObj.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      
+      document.getElementById('eventDate').value = dateStr;
+      document.getElementById('eventTitle').value = '';
+      document.getElementById('eventDescription').value = '';
+      
+      eventModal.style.display = 'flex';
+    }
+    
+    function closeEventModal() {
+      eventModal.style.display = 'none';
+      selectedDate = null;
+    }
+    
+    async function saveEvent() {
+      if (!currentUser || !selectedDate) return;
+      
+      const title = document.getElementById('eventTitle').value.trim();
+      const description = document.getElementById('eventDescription').value.trim();
+      
+      if (!title) {
+        alert('Please enter an event title');
+        return;
+      }
+      
+      const saveBtn = document.getElementById('saveEventBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+      
+      try {
+        const dateKey = getDateKey(selectedDate.year, selectedDate.month, selectedDate.day);
+        const eventsRef = db.collection('users').doc(currentUser.uid).collection('events');
+        
+        await eventsRef.add({
+          title: title,
+          description: description,
+          dateKey: dateKey,
+          year: selectedDate.year,
+          month: selectedDate.month,
+          day: selectedDate.day,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        closeEventModal();
+      } catch (err) {
+        console.error("Error saving event:", err);
+        alert("Error saving event: " + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fa fa-plus"></i> Add Event';
+      }
+    }
+    
+    async function deleteEvent(eventId, dateKey) {
+      if (!confirm('Delete this event?')) return;
+      
+      try {
+        await db.collection('users').doc(currentUser.uid).collection('events').doc(eventId).delete();
+      } catch (err) {
+        console.error("Error deleting event:", err);
+        alert("Error deleting event: " + err.message);
+      }
+    }
+
     // ---------- Auth state & load profile ----------
     auth.onAuthStateChanged(async (user)=>{
       if(!user) {
         console.warn("No user logged in.");
-        window.location.href = "login.html";
+        window.location.href = "logout.html";
         return;
       }
       currentUser = user;
@@ -312,7 +821,7 @@
         document.getElementById("navUsername").textContent = data.name || "User";
         
         // Update profile pictures from Firestore
-        const photoURL = data.photoURL || "admin-profile.jpg";
+        const photoURL = data.photoURL || "image.png";
         document.getElementById("profilePic").src = photoURL;
         document.getElementById("navAvatar").src = photoURL;
         document.getElementById("previewImg").src = photoURL;
@@ -348,9 +857,36 @@
           document.getElementById("lastLogin").textContent = date.toLocaleString();
         }
       });
+
+      // Load calendar events
+      loadEvents();
+
+      // Live Firestore Notifications - New Users
+      db.collection("users").where("status", "==", "pending").onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
+            trackedUsers.add(change.doc.id);
+            const u = change.doc.data();
+            if (isBarangayPosition(u.position)) {
+              addNotification("user", `New registration: ${u.firstName || ""} ${u.surname || ""}`, u.email);
+            }
+          }
+        });
+      });
+
+      // Watch for new reports
+      db.collection("reports").onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === "added" && !trackedReports.has(change.doc.id)) {
+            trackedReports.add(change.doc.id);
+            const r = change.doc.data();
+            addNotification("report", `New report submitted in ${r.barangay || "a barangay"}`, r.type || "");
+          }
+        });
+      });
     });
 
-    // ---------- Modal ----------
+    // ---------- Edit Profile Modal ----------
     const editModal = document.getElementById("editModal");
     const editPhoto = document.getElementById("editPhoto");
     const previewImg = document.getElementById("previewImg");
@@ -368,14 +904,12 @@
       const file = e.target.files[0];
       if(!file) return;
       
-      // Validate file type
       if(!file.type.startsWith('image/')) {
         alert('Please select an image file');
         editPhoto.value = '';
         return;
       }
       
-      // Validate file size (max 5MB)
       if(file.size > 5 * 1024 * 1024) {
         alert('Image size should be less than 5MB');
         editPhoto.value = '';
@@ -409,7 +943,6 @@
         gender: document.getElementById("editGender").value.trim()
       };
 
-      // Validate required fields
       if(!updated.name) {
         alert("Name is required");
         return;
@@ -421,7 +954,6 @@
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
 
-        // Upload photo if selected
         if(file){
           const storageRef = storage.ref().child(`profilePics/${uid}/avatar.jpg`);
           const uploadTask = await storageRef.put(file);
@@ -429,13 +961,11 @@
           updated.photoURL = url;
         }
         
-        // Update Firestore
         await ref.set(updated, { merge:true });
         
         alert("Profile updated successfully!");
         closeEditModal();
         
-        // Reset file input
         editPhoto.value = '';
         
       } catch(err){
@@ -447,65 +977,25 @@
       }
     }
 
-    // ---------- Calendar Functions ----------
-    function renderCalendar() {
-      const monthYear = document.getElementById('monthYear');
-      const calendarDays = document.getElementById('calendarDays');
-      
-      const firstDay = new Date(currentYear, currentMonth, 1);
-      const lastDay = new Date(currentYear, currentMonth + 1, 0);
-      const today = new Date();
-      
-      const monthNames = ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"];
-      
-      monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-      
-      calendarDays.innerHTML = '';
-      
-      // Add empty cells for days before first day of month
-      for(let i = 0; i < firstDay.getDay(); i++) {
-        const emptyDiv = document.createElement('div');
-        calendarDays.appendChild(emptyDiv);
-      }
-      
-      // Add days of month
-      for(let day = 1; day <= lastDay.getDate(); day++) {
-        const dayDiv = document.createElement('div');
-        dayDiv.className = 'calendar-day';
-        dayDiv.textContent = day;
-        
-        // Highlight today
-        if(day === today.getDate() && 
-           currentMonth === today.getMonth() && 
-           currentYear === today.getFullYear()) {
-          dayDiv.classList.add('today');
-        }
-        
-        calendarDays.appendChild(dayDiv);
-      }
-    }
-
-    function prevMonth() {
-      currentMonth--;
-      if(currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
-      }
-      renderCalendar();
-    }
-
-    function nextMonth() {
-      currentMonth++;
-      if(currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-      }
-      renderCalendar();
-    }
-
-    // Initialize calendar
+    // Initialize calendar on load
     renderCalendar();
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      try {
+        await auth.signOut();
+        console.log("Admin signed out.");
+        window.location.href = "logout.html";
+      } catch (err) {
+        console.error("Logout error:", err);
+      }
+    });
+
+    // Close modals on outside click
+    window.addEventListener("click", (e) => {
+      if (e.target === editModal) closeEditModal();
+      if (e.target === eventModal) closeEventModal();
+    });
 
     // Make functions global
     window.openEditModal = openEditModal;
@@ -514,6 +1004,10 @@
     window.toggleDropdown = toggleDropdown;
     window.prevMonth = prevMonth;
     window.nextMonth = nextMonth;
+    window.openEventModal = openEventModal;
+    window.closeEventModal = closeEventModal;
+    window.saveEvent = saveEvent;
+    window.deleteEvent = deleteEvent;
   </script>
 </body>
 </html>

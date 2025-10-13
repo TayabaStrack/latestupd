@@ -17,8 +17,7 @@
       min-height:100vh;
       background:#f5f7fb;
       color:#333;
-      min-width:1300px;
-      overflow-x:auto;
+      overflow:hidden;
     }
 
     /* ---------- SIDEBAR (fixed) ---------- */
@@ -36,6 +35,8 @@
       left:0;
       bottom:0;
       z-index:50;
+      height:100vh;
+      overflow-y:auto;
     }
     .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
     .sidebar-header img{width:40px}
@@ -81,12 +82,121 @@
     }
     .navbar h1{font-size:1.4rem;color:#004aad}
     .profile{display:flex;align-items:center;gap:1rem}
-    .fa-bell{font-size:1.2rem;position:relative}
-    .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px}
+    .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
+    .badge{
+      background:red;
+      color:#fff;
+      font-size:.7rem;
+      border-radius:50%;
+      padding:3px 6px;
+      position:absolute;
+      top:-8px;
+      right:-8px;
+      display:none;
+    }
+    .badge.show{display:flex;align-items:center;justify-content:center}
+
+    /* Notification Menu */
+    .notification-menu {
+      display: none;
+      position: absolute;
+      top: 120%;
+      right: 0;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-shadow: 0 4px 8px rgba(0,0,0,.15);
+      width: 320px;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    .notification-menu.show {
+      display: block;
+    }
+    .notification-header {
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .notification-header h3 {
+      font-size: 1rem;
+      color: #333;
+      margin: 0;
+    }
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #004aad;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .notification-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .notification-item {
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      gap: 0.8rem;
+      transition: background 0.2s;
+    }
+    .notification-item:hover {
+      background: #f9f9f9;
+    }
+    .notification-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .notification-icon.user {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+    .notification-icon.report {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+    .notification-content {
+      flex: 1;
+    }
+    .notification-content p {
+      margin: 0;
+      font-size: 0.85rem;
+    }
+    .notification-content .time {
+      color: #999;
+      font-size: 0.75rem;
+      margin-top: 0.2rem;
+    }
+    .notification-empty {
+      padding: 2rem;
+      text-align: center;
+      color: #999;
+    }
+
     .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
     .avatar{width:35px;height:35px;border-radius:50%}
     .username{font-weight:500}
-    .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
+    .dropdown-menu{
+      display:none;
+      position:absolute;
+      top:120%;
+      right:0;
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:6px;
+      box-shadow:0 4px 8px rgba(0,0,0,.15);
+      min-width:200px;
+      z-index:1000;
+    }
     .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
     .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
 
@@ -95,53 +205,190 @@
       margin-left:250px;
       margin-top:74px;
       flex:1;
-      display:block;
-      padding:20px 28px;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      height:calc(100vh - 74px);
+      overflow:hidden;
     }
 
-    /* ---------- CONTENT ---------- */
-    .reports-section{padding-bottom:40px}
-    .report-box{background:#fff;border-radius:10px;padding:16px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
-    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .report-box-header h2{color:#004aad;font-size:1.05rem}
-    .report-actions input{padding:.4rem .75rem;border:1px solid #e0e0e0;border-radius:18px;font-size:.9rem;width:260px}
-    .tables-wrap{display:grid;grid-template-columns:1fr;gap:18px}
+    .reports-section{
+      padding:1.5rem;
+      flex:1;
+      overflow-y:auto;
+      overflow-x:hidden;
+    }
 
-    /* ---------- TABLE STYLES (card-like) ---------- */
+    /* ---------- REPORT BOX & SEARCH ---------- */
+    .report-box{
+      background:#fff;
+      border-radius:10px;
+      padding:16px;
+      margin-bottom:1rem;
+      box-shadow:0 6px 18px rgba(0,0,0,0.04);
+    }
+    .report-box-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .report-box-header h2{
+      color:#004aad;
+      font-size:1.05rem;
+    }
+    .report-actions input{
+      padding:.4rem .75rem;
+      border:1px solid #e0e0e0;
+      border-radius:18px;
+      font-size:.9rem;
+      width:260px;
+    }
+
+    /* ---------- SCROLL HINT ---------- */
+    .scroll-hint {
+      background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0, 74, 173, 0.2);
+    }
+    .scroll-hint i {
+      animation: slideHint 2s ease-in-out infinite;
+    }
+    @keyframes slideHint {
+      0%, 100% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+    }
+
+    /* ---------- TABLE CONTAINER WITH SCROLL ---------- */
+    .table-wrapper {
+      position: relative;
+    }
+    
     .table-card {
       overflow-x: auto;
       overflow-y: hidden;
-      border-radius:8px;
-      background:#fff;
-      padding:8px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.03);
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      scroll-behavior: smooth;
+      position: relative;
+    }
+
+    /* Enhanced scrollbar */
+    .table-card::-webkit-scrollbar {
+      height: 10px;
+    }
+    .table-card::-webkit-scrollbar-track {
+      background: #e9eef5;
+      border-radius: 5px;
+    }
+    .table-card::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+      border-radius: 5px;
+      border: 2px solid #e9eef5;
+    }
+    .table-card::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #003580 0%, #004aad 100%);
+    }
+
+    /* Firefox scrollbar */
+    .table-card {
+      scrollbar-width: thin;
+      scrollbar-color: #004aad #e9eef5;
+    }
+
+    /* Scroll shadow indicators */
+    .table-card::before,
+    .table-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 12px;
+      width: 30px;
+      pointer-events: none;
+      z-index: 2;
+      transition: opacity 0.3s;
+    }
+
+    .table-card::before {
+      left: 8px;
+      background: linear-gradient(to right, rgba(255,255,255,0.95), transparent);
+      opacity: 0;
+    }
+
+    .table-card::after {
+      right: 8px;
+      background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
+    }
+
+    .table-card.scrolled-left::before {
+      opacity: 1;
+    }
+
+    .table-card.scrolled-right::after {
+      opacity: 0;
+    }
+
+    table{
       width:100%;
-      margin-top:8px;
-      scrollbar-width:thin;
+      border-collapse:collapse;
+      min-width:1200px;
     }
-
-    .table-card::-webkit-scrollbar { height:10px; }
-    .table-card::-webkit-scrollbar-thumb { background:#cfcfcf; border-radius:8px; }
-    .table-card::-webkit-scrollbar-thumb:hover { background:#a8a8a8; }
-
-    table{width:100%;border-collapse:collapse;min-width:1000px}
     thead th{
-      background:#f5f8fb;color:#333;font-weight:700;padding:.85rem .75rem;text-align:left;
-      position:sticky;top:0;z-index:3;
-      border-bottom:2px solid #e8edf5;
+      background:#f5f8fb;
+      color:#333;
+      font-weight:700;
+      padding:.7rem .75rem;
+      text-align:left;
+      white-space:nowrap;
+      border-bottom:2px solid #e0e0e0;
     }
-    th,td{padding:.6rem .75rem;font-size:.88rem;vertical-align:top;border-bottom:1px solid #f0f2f5;white-space:nowrap}
+    th,td{
+      padding:.5rem .75rem;
+      font-size:.85rem;
+      vertical-align:top;
+      border-bottom:1px solid #f0f2f5;
+    }
     tbody tr:nth-child(even){background:#fbfdff}
     tbody tr:hover{background:#f1f8ff}
+    
     .col-id{width:160px;color:#444;font-weight:600}
     .col-small{width:110px}
-    .truncate { max-width:420px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block; vertical-align:middle; }
-    .status { display:inline-block; padding:.25rem .5rem; border-radius:6px; color:#fff; font-weight:700; font-size:.75rem; min-width:80px; text-align:center; }
-    .pending { background:#f6c23e; color:#2b2b2b; }
-    .ongoing { background:#36b9cc; color:#fff; }
-    .completed { background:#1cc88a; color:#fff; }
-    .action a { color:#004aad; text-decoration:none; font-weight:700; cursor:pointer; margin-right:8px; }
-    .action a.delete { color:#d9534f }
+    .truncate{
+      max-width:420px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      display:inline-block;
+      vertical-align:middle;
+    }
+    .status{
+      display:inline-block;
+      padding:.25rem .5rem;
+      border-radius:6px;
+      color:#fff;
+      font-weight:700;
+      font-size:.75rem;
+      min-width:80px;
+      text-align:center;
+    }
+    .pending{background:#f6c23e;color:#2b2b2b}
+    .ongoing{background:#36b9cc;color:#fff}
+    .completed{background:#1cc88a;color:#fff}
+    .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
+    .action a.delete{color:#d9534f}
 
     /* ---------- MODAL ---------- */
     .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
@@ -152,7 +399,7 @@
     .modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .modal-row{display:flex;flex-direction:column}
     .modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
-    .modal-row input[type="text"],.modal-row input[type="number"],.modal-row textarea,.modal-row select { padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem }
+    .modal-row input[type="text"],.modal-row input[type="number"],.modal-row textarea,.modal-row select{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
     .modal-row textarea{min-height:80px;resize:vertical}
     .img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px}
     .modal-footer{text-align:right;margin-top:12px}
@@ -164,12 +411,11 @@
     @media (max-width:900px) {
       .modal-grid{grid-template-columns:1fr}
       .report-actions input{width:100%}
-      table{min-width:900px}
     }
 
     /* ---------- LOADING ---------- */
     .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
-    .spinner { width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite; }
+    .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
     @keyframes spin { to { transform:rotate(360deg); } }
 
   </style>
@@ -204,12 +450,23 @@
     <h1>Manage Reports</h1>
     <div style="display:flex;align-items:center;gap:14px">
       <div style="position:relative">
-        <i class="fa fa-bell" aria-hidden="true"></i>
-        <span class="badge" id="notifBadge">0</span>
+        <i class="fa fa-bell" id="notificationBell" aria-hidden="true"></i>
+        <span class="badge" id="notificationBadge">0</span>
+        
+        <!-- Notification Menu -->
+        <div class="notification-menu" id="notificationMenu">
+          <div class="notification-header">
+            <h3>Notifications</h3>
+            <button class="clear-btn" id="clearNotificationsBtn">Clear all</button>
+          </div>
+          <div class="notification-list" id="notificationList">
+            <div class="notification-empty">No new notifications</div>
+          </div>
+        </div>
       </div>
 
       <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
-        <img src="image.png" alt="Profile" class="avatar">
+        <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar">
         <span class="username" id="navUsername">Loading...</span>
 
         <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
@@ -235,25 +492,31 @@
             <input id="searchPending" placeholder="Search pending..." aria-label="Search pending reports">
           </div>
         </div>
-        <div class="table-card" aria-live="polite">
-          <table>
-            <thead>
-              <tr>
-                <th class="col-id">Report ID</th>
-                <th>Barangay</th>
-                <th style="min-width:300px">Description</th>
-                <th>Age Groups / People</th>
-                <th class="col-small">Dimensions (W×H)</th>
-                <th>Image</th>
-                <th class="col-small">Coordinates</th>
-                <th class="col-small">Status</th>
-                <th style="min-width:180px">Timestamp</th>
-                <th class="col-id">User ID</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="pendingBody"></tbody>
-          </table>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-card" id="pendingTableCard" aria-live="polite">
+            <table>
+              <thead>
+                <tr>
+                  <th class="col-id">Report ID</th>
+                  <th>Barangay</th>
+                  <th style="min-width:300px">Description</th>
+                  <th>Age Groups / People</th>
+                  <th class="col-small">Dimensions (W×H)</th>
+                  <th>Image</th>
+                  <th class="col-small">Coordinates</th>
+                  <th class="col-small">Status</th>
+                  <th style="min-width:180px">Timestamp</th>
+                  <th class="col-id">User ID</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="pendingBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -264,25 +527,31 @@
             <input id="searchOngoing" placeholder="Search ongoing..." aria-label="Search ongoing reports">
           </div>
         </div>
-        <div class="table-card" aria-live="polite">
-          <table>
-            <thead>
-              <tr>
-                <th class="col-id">Report ID</th>
-                <th>Barangay</th>
-                <th style="min-width:300px">Description</th>
-                <th>Age Groups / People</th>
-                <th class="col-small">Dimensions (W×H)</th>
-                <th>Image</th>
-                <th class="col-small">Coordinates</th>
-                <th class="col-small">Status</th>
-                <th style="min-width:180px">Timestamp</th>
-                <th class="col-id">User ID</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="ongoingBody"></tbody>
-          </table>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-card" id="ongoingTableCard" aria-live="polite">
+            <table>
+              <thead>
+                <tr>
+                  <th class="col-id">Report ID</th>
+                  <th>Barangay</th>
+                  <th style="min-width:300px">Description</th>
+                  <th>Age Groups / People</th>
+                  <th class="col-small">Dimensions (W×H)</th>
+                  <th>Image</th>
+                  <th class="col-small">Coordinates</th>
+                  <th class="col-small">Status</th>
+                  <th style="min-width:180px">Timestamp</th>
+                  <th class="col-id">User ID</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="ongoingBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -293,25 +562,31 @@
             <input id="searchCompleted" placeholder="Search completed..." aria-label="Search completed reports">
           </div>
         </div>
-        <div class="table-card" aria-live="polite">
-          <table>
-            <thead>
-              <tr>
-                <th class="col-id">Report ID</th>
-                <th>Barangay</th>
-                <th style="min-width:300px">Description</th>
-                <th>Age Groups / People</th>
-                <th class="col-small">Dimensions (W×H)</th>
-                <th>Image</th>
-                <th class="col-small">Coordinates</th>
-                <th class="col-small">Status</th>
-                <th style="min-width:180px">Timestamp</th>
-                <th class="col-id">User ID</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="completedBody"></tbody>
-          </table>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-card" id="completedTableCard" aria-live="polite">
+            <table>
+              <thead>
+                <tr>
+                  <th class="col-id">Report ID</th>
+                  <th>Barangay</th>
+                  <th style="min-width:300px">Description</th>
+                  <th>Age Groups / People</th>
+                  <th class="col-small">Dimensions (W×H)</th>
+                  <th>Image</th>
+                  <th class="col-small">Coordinates</th>
+                  <th class="col-small">Status</th>
+                  <th style="min-width:180px">Timestamp</th>
+                  <th class="col-id">User ID</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="completedBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -345,6 +620,7 @@
       getFirestore,
       collection,
       query,
+      where,
       orderBy,
       onSnapshot,
       getDoc,
@@ -370,6 +646,9 @@
     const pendingBody = document.getElementById("pendingBody");
     const ongoingBody = document.getElementById("ongoingBody");
     const completedBody = document.getElementById("completedBody");
+    const pendingTableCard = document.getElementById("pendingTableCard");
+    const ongoingTableCard = document.getElementById("ongoingTableCard");
+    const completedTableCard = document.getElementById("completedTableCard");
     const searchPending = document.getElementById("searchPending");
     const searchOngoing = document.getElementById("searchOngoing");
     const searchCompleted = document.getElementById("searchCompleted");
@@ -384,13 +663,112 @@
     const dropdownMenu = document.getElementById("dropdownMenu");
     const profileToggle = document.getElementById("profileToggle");
     const navUsername = document.getElementById("navUsername");
+    const navbarAvatar = document.getElementById("navbarAvatar");
     const logoutBtn = document.getElementById("logoutBtn");
-    const notifBadge = document.getElementById("notifBadge");
     const loadingOverlay = document.getElementById("loadingOverlay");
+    const notificationBell = document.getElementById("notificationBell");
+    const notificationBadge = document.getElementById("notificationBadge");
+    const notificationMenu = document.getElementById("notificationMenu");
+    const notificationList = document.getElementById("notificationList");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
 
     let currentDocId = null;
     let currentDocData = null;
-    let reportsUnsub = null;
+    let notificationsList = [];
+    let trackedUsers = new Set();
+    let trackedReports = new Set();
+
+    // Notification functions
+    function addNotification(type, message, detail) {
+      const notification = {
+        id: Date.now(),
+        type,
+        message,
+        detail,
+        timestamp: new Date()
+      };
+      notificationsList.unshift(notification);
+      updateNotificationUI();
+    }
+
+    function updateNotificationUI() {
+      const count = notificationsList.length;
+      if (count > 0) {
+        notificationBadge.textContent = count;
+        notificationBadge.classList.add("show");
+      } else {
+        notificationBadge.textContent = "";
+        notificationBadge.classList.remove("show");
+      }
+
+      if (notificationsList.length === 0) {
+        notificationList.innerHTML = `<div class="notification-empty">No new notifications</div>`;
+        return;
+      }
+
+      notificationList.innerHTML = notificationsList.map(n => `
+        <div class="notification-item">
+          <div class="notification-icon ${n.type}">
+            ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+          </div>
+          <div class="notification-content">
+            <p><strong>${n.message}</strong></p>
+            <p>${n.detail}</p>
+            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // Toggle notification menu
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notificationMenu.classList.toggle("show");
+    });
+
+    // Clear all notifications
+    clearNotificationsBtn.addEventListener("click", () => {
+      notificationsList = [];
+      updateNotificationUI();
+    });
+
+    // Hide notification menu on outside click
+    document.addEventListener("click", (e) => {
+      if (!notificationMenu.contains(e.target) && e.target !== notificationBell) {
+        notificationMenu.classList.remove("show");
+      }
+    });
+
+    // Helper function to check if position is Barangay
+    function isBarangayPosition(position) {
+      if (!position) return false;
+      const pos = position.toLowerCase().trim();
+      return pos.includes("barangay captain") || 
+             pos.includes("brgy captain") || 
+             pos.includes("brgy. captain") ||
+             pos.includes("barangay official") || 
+             pos.includes("brgy official") || 
+             pos.includes("brgy. official");
+    }
+
+    // Handle scroll shadows
+    function handleScrollShadows(el) {
+      const isScrolledLeft = el.scrollLeft > 10;
+      const isScrolledRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 10);
+      
+      el.classList.toggle('scrolled-left', isScrolledLeft);
+      el.classList.toggle('scrolled-right', isScrolledRight);
+    }
+
+    // Attach scroll listeners
+    pendingTableCard.addEventListener('scroll', () => handleScrollShadows(pendingTableCard));
+    ongoingTableCard.addEventListener('scroll', () => handleScrollShadows(ongoingTableCard));
+    completedTableCard.addEventListener('scroll', () => handleScrollShadows(completedTableCard));
+
+    function showLoading(show = true) {
+      loadingOverlay.style.display = show ? "flex" : "none";
+      loadingOverlay.setAttribute("aria-hidden", show ? "false" : "true");
+    }
 
     // Format timestamp
     function formatTimestamp(timestamp) {
@@ -414,11 +792,6 @@
       return `${month}/${day}/${year} | ${hours}:${minutes} ${ampm}`;
     }
 
-    function showLoading(show = true) {
-      loadingOverlay.style.display = show ? "flex" : "none";
-      loadingOverlay.setAttribute("aria-hidden", show ? "false" : "true");
-    }
-
     function createFieldRow(key, value, opts = {}) {
       const wrapper = document.createElement("div");
       wrapper.className = "modal-row";
@@ -432,34 +805,13 @@
         input.id = `field-${key}`;
         input.value = value || "";
         if (opts.readonly) input.readOnly = true;
-        input.style.fontSize = "0.75rem";
         wrapper.appendChild(input);
 
         if (value) {
           const img = document.createElement("img");
-          if (typeof value === "object" && value.bytes) {
-            // Firestore Blob -> Base64
-            const bytes = new Uint8Array(value.bytes);
-            const binary = Array.from(bytes).map(b => String.fromCharCode(b)).join("");
-            img.src = `data:image/jpeg;base64,${btoa(binary)}`;
-          } else if (typeof value === "string" && value.startsWith("data:")) {
-            img.src = value;
-          } else if (typeof value === "string" && value.startsWith("http")) {
-            img.src = value;
-          } else {
-            img.src = `data:image/jpeg;base64,${value}`;
-          }
+          img.src = value;
           img.alt = "image preview";
           img.className = "img-preview";
-          img.onerror = function() {
-            this.style.display = "none";
-            const errorMsg = document.createElement("div");
-            errorMsg.style.color = "#d9534f";
-            errorMsg.style.marginTop = "6px";
-            errorMsg.style.fontSize = "0.85rem";
-            errorMsg.textContent = "Error loading image";
-            wrapper.appendChild(errorMsg);
-          };
           wrapper.appendChild(img);
         } else {
           const ph = document.createElement("div");
@@ -529,25 +881,24 @@
       const r = docSnap.data();
       const tr = document.createElement("tr");
 
-      function addCell(content, classes = "") {
+      function addCell(text, classes = "") {
         const td = document.createElement("td");
         if (classes) td.className = classes;
-        if (typeof content === "string") {
-          td.textContent = content;
+        if (classes.includes("truncate")) {
+          const span = document.createElement("span");
+          span.className = "truncate";
+          span.textContent = (text === undefined || text === null) ? "" : String(text);
+          span.title = (text === undefined || text === null) ? "" : String(text);
+          td.appendChild(span);
         } else {
-          td.appendChild(content);
+          td.textContent = (text === undefined || text === null) ? "" : String(text);
         }
         tr.appendChild(td);
       }
 
       addCell(r.reportId || "", "col-id");
       addCell(r.barangay || "");
-
-      const descSpan = document.createElement("span");
-      descSpan.className = "truncate";
-      descSpan.textContent = r.description || "";
-      descSpan.title = r.description || "";
-      addCell(descSpan);
+      addCell(r.description || "", "truncate");
 
       const ageGroup = r.affectedAgeGroups || "";
       const people = r.peopleInvolved || "";
@@ -558,8 +909,7 @@
       const dimensions = width && height ? `${width}×${height}` : (width || height || "");
       addCell(dimensions, "col-small");
 
-      // 🔥 Fix for incidentImage blob/base64/url
-      const imgContent = document.createElement("span");
+      const imgTd = document.createElement("td");
       const imageData = r.incidentImage || r.imageUrl || r.image;
       
       if (imageData) {
@@ -573,17 +923,7 @@
           imgModal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
           
           const img = document.createElement("img");
-          if (typeof imageData === "object" && imageData.bytes) {
-            const bytes = new Uint8Array(imageData.bytes);
-            const binary = Array.from(bytes).map(b => String.fromCharCode(b)).join("");
-            img.src = `data:image/jpeg;base64,${btoa(binary)}`;
-          } else if (typeof imageData === "string" && imageData.startsWith("data:")) {
-            img.src = imageData;
-          } else if (typeof imageData === "string" && imageData.startsWith("http")) {
-            img.src = imageData;
-          } else {
-            img.src = `data:image/jpeg;base64,${imageData}`;
-          }
+          img.src = imageData;
           img.style.cssText = "max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
           
           const closeBtn = document.createElement("button");
@@ -597,11 +937,11 @@
           imgModal.addEventListener("click", () => imgModal.remove());
           closeBtn.addEventListener("click", () => imgModal.remove());
         });
-        imgContent.appendChild(link);
+        imgTd.appendChild(link);
       } else {
-        imgContent.textContent = "No";
+        imgTd.textContent = "No";
       }
-      addCell(imgContent);
+      tr.appendChild(imgTd);
 
       const lat = r.latitude || "";
       const lng = r.longitude || "";
@@ -612,7 +952,10 @@
       const st = (r.status || "pending").toString().toLowerCase();
       statusSpan.className = `status ${st==='pending'?'pending':st==='ongoing'?'ongoing':'completed'}`;
       statusSpan.textContent = r.status || "Pending";
-      addCell(statusSpan, "col-small");
+      const statusTd = document.createElement("td");
+      statusTd.className = "col-small";
+      statusTd.appendChild(statusSpan);
+      tr.appendChild(statusTd);
 
       addCell(formatTimestamp(r.timestamp || r.createdAt));
       addCell(r.userId || "", "col-id");
@@ -632,7 +975,11 @@
       del.className = "delete-link delete";
       actionContent.appendChild(del);
 
-      addCell(actionContent, "action");
+      const actionTd = document.createElement("td");
+      actionTd.className = "action";
+      actionTd.appendChild(actionContent);
+      tr.appendChild(actionTd);
+
       return tr;
     }
 
@@ -753,28 +1100,37 @@
 
     closeModal.addEventListener("click", closeEditModal);
     cancelBtn.addEventListener("click", closeEditModal);
+    
     window.addEventListener("click", (ev) => {
       if (ev.target === editModal) closeEditModal();
-      if (!ev.target.closest(".profile-dropdown")) dropdownMenu.style.display = "none";
+      if (!ev.target.closest(".profile")) {
+        dropdownMenu.style.display = "none";
+      }
+    });
+
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
     });
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = "login.html"; return; }
+      if (!user) { window.location.href = "logout.html"; return; }
       try {
         const uDoc = await getDoc(doc(db,"users",user.uid));
-        if (!uDoc.exists()) { window.location.href = "login.html"; return; }
+        if (!uDoc.exists()) { window.location.href = "logout.html"; return; }
         const d = uDoc.data();
-        if (d.position !== "Admin") { alert("Unauthorized access!"); window.location.href = "login.html"; return; }
+        if (d.position !== "Admin") { alert("Unauthorized access!"); window.location.href = "logout.html"; return; }
 
-        navUsername.textContent = d.name || "Admin";
+        navUsername.textContent = d.name || d.firstName || "Admin";
+        if (d.photoURL || d.profilePic) {
+          navbarAvatar.src = d.photoURL || d.profilePic;
+        }
 
         const reportsQuery = query(collection(db,"reports"), orderBy("createdAt","desc"));
-        if (reportsUnsub) reportsUnsub();
-        reportsUnsub = onSnapshot(reportsQuery, snapshot => {
+        onSnapshot(reportsQuery, snapshot => {
           pendingBody.innerHTML = "";
           ongoingBody.innerHTML = "";
           completedBody.innerHTML = "";
-          let notif = 0;
 
           snapshot.forEach(docSnap => {
             const r = docSnap.data();
@@ -786,35 +1142,52 @@
               completedBody.appendChild(row);
             } else {
               pendingBody.appendChild(row);
-              notif++;
             }
           });
-
-          notifBadge.textContent = notif;
 
           document.querySelectorAll(".edit-link").forEach(a => a.removeEventListener("click", openEditFromRow));
           document.querySelectorAll(".delete-link").forEach(a => a.removeEventListener("click", deleteFromRow));
           document.querySelectorAll(".edit-link").forEach(a => a.addEventListener("click", openEditFromRow));
           document.querySelectorAll(".delete-link").forEach(a => a.addEventListener("click", deleteFromRow));
+
+          setTimeout(() => {
+            handleScrollShadows(pendingTableCard);
+            handleScrollShadows(ongoingTableCard);
+            handleScrollShadows(completedTableCard);
+          }, 100);
         }, err => {
           console.error("Realtime listener failed:", err);
         });
 
+        // Live Firestore Notifications - New Users
+        const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
+        onSnapshot(qNewUsers, (snapshot) => {
+          snapshot.docChanges().forEach(change => {
+            if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
+              trackedUsers.add(change.doc.id);
+              const u = change.doc.data();
+              if (isBarangayPosition(u.position)) {
+                addNotification("user", `New registration: ${u.firstName || ""} ${u.surname || ""}`, u.email);
+              }
+            }
+          });
+        });
+
+        // Watch for new reports
+        const qReports = query(collection(db, "reports"));
+        onSnapshot(qReports, (snapshot) => {
+          snapshot.docChanges().forEach(change => {
+            if (change.type === "added" && !trackedReports.has(change.doc.id)) {
+              trackedReports.add(change.doc.id);
+              const r = change.doc.data();
+              addNotification("report", `New report submitted in ${r.barangay || "a barangay"}`, r.type || "");
+            }
+          });
+        });
+
       } catch (err) {
         console.error(err);
-        window.location.href = "login.html";
-      }
-    });
-
-    profileToggle.addEventListener("click", () => {
-      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
-      dropdownMenu.setAttribute("aria-hidden", dropdownMenu.style.display === "none" ? "true" : "false");
-    });
-
-    window.addEventListener("click", function(e) {
-      if (!profileToggle.contains(e.target)) {
-        dropdownMenu.style.display = "none";
-        dropdownMenu.setAttribute("aria-hidden","true");
+        window.location.href = "logout.html";
       }
     });
 
@@ -822,7 +1195,6 @@
       await signOut(auth);
       window.location.href = "logout.html";
     });
-
   </script>
 </body>
 </html>

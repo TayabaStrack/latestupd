@@ -7,9 +7,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: hidden; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: auto; }
     
-    /* Sidebar */
     .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; flex-shrink: 0; height: 100vh; position: fixed; left: 0; top: 0; }
     .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; }
     .sidebar-header img { width: 40px; }
@@ -18,12 +17,31 @@
     .sidebar-menu li { margin: 0.5rem 0; }
     .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; }
     .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
-    .sidebar-footer { text-align: center; font-size: 0.85rem; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
+    .sidebar-footer {
+                text-align: center;
+                padding: 1rem;
+                border-top: 1px solid rgba(255,255,255,0.2);
+            }
+            .logout-btn {
+                background-color: #d9534f;
+                color: #fff;
+                border: none;
+                padding: 0.6rem 1.2rem;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 500;
+                transition: background 0.3s;
+                width: 100%;
+            }
+            .logout-btn:hover {
+                background-color: #c9302c;
+            }
+
     
-    /* Main */
     .dashboard-main { flex: 1; display: flex; flex-direction: column; min-width: 0; margin-left: 240px; height: 100vh; overflow: hidden; }
     .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); flex-shrink: 0; z-index: 100; }
     .navbar h1 { font-size: 1.4rem; color: #004aad; white-space: nowrap; }
+
     .profile { display: flex; align-items: center; gap: 1rem; position: relative; cursor: pointer; flex-shrink: 0; }
     .profile .fa-bell { font-size: 1.2rem; cursor: pointer; position: relative; }
     .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; }
@@ -34,7 +52,6 @@
     .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.9rem; }
     .dropdown-menu a:hover { background: #f0f0f0; color: #004aad; }
     
-    /* User section */
     .user-section { padding: 1.5rem; flex: 1; overflow-y: auto; overflow-x: hidden; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px; }
     .header h2 { color: #004aad; }
@@ -43,42 +60,11 @@
     .actions button:hover { background: #005ce6; }
     .actions input { padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; }
 
-    /* Scroll hint */
     .scroll-hint { background: linear-gradient(135deg, #004aad 0%, #0066cc 100%); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; text-align: center; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(0,74,173,0.2); }
     .scroll-hint i { animation: slideHint 2s ease-in-out infinite; }
     @keyframes slideHint { 0%, 100% { transform: translateX(-4px); } 50% { transform: translateX(4px); } }
 
-    /* Table wrapper */
-    .table-wrapper { position: relative; }
-    .table-card { overflow-x: auto; overflow-y: hidden; border-radius: 10px; background: #fff; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); scroll-behavior: smooth; position: relative; }
-
-    /* Enhanced scrollbar */
-    .table-card::-webkit-scrollbar { height: 10px; }
-    .table-card::-webkit-scrollbar-track { background: #e9eef5; border-radius: 5px; }
-    .table-card::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #004aad 0%, #0066cc 100%); border-radius: 5px; border: 2px solid #e9eef5; }
-    .table-card::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #003580 0%, #004aad 100%); }
-    .table-card { scrollbar-width: thin; scrollbar-color: #004aad #e9eef5; }
-
-    /* Scroll shadows */
-    .table-card::before, .table-card::after { content: ''; position: absolute; top: 0; bottom: 12px; width: 30px; pointer-events: none; z-index: 2; transition: opacity 0.3s; }
-    .table-card::before { left: 8px; background: linear-gradient(to right, rgba(255,255,255,0.95), transparent); opacity: 0; }
-    .table-card::after { right: 8px; background: linear-gradient(to left, rgba(255,255,255,0.95), transparent); }
-    .table-card.scrolled-left::before { opacity: 1; }
-    .table-card.scrolled-right::after { opacity: 0; }
-
-    /* Table */
-    table { width: 100%; border-collapse: collapse; min-width: 900px; }
-    thead { background: #f5f8fb; color: #333; }
-    thead th { font-weight: 700; padding: 0.7rem 0.75rem; text-align: left; white-space: nowrap; border-bottom: 2px solid #e0e0e0; }
-    th, td { text-align: left; padding: 0.6rem 0.8rem; font-size: 0.85rem; word-break: break-word; border-bottom: 1px solid #f0f2f5; }
-    tbody tr:nth-child(even) { background: #fbfdff; }
-    tbody tr:hover { background: #f1f8ff; }
-    td button { padding: 0.3rem 0.6rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 4px; }
-    td button:first-child { background: #004aad; color: #fff; }
-    td button:first-child:disabled { background: #ccc; cursor: not-allowed; }
-    td button:last-child { background: #d9534f; color: #fff; }
-
-    /* Modal */
+      /* Modal */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 5000; padding: 1rem; }
     .modal-content { background: #fff; padding: 1.2rem; border-radius: 12px; border: 3px solid #004aad; width: 380px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
     .modal-content h2 { margin-bottom: 0.8rem; color: #004aad; text-align: center; font-size: 1.2rem; }
@@ -91,13 +77,151 @@
     .cancel-btn { background: #ccc; color: #333; }
     .save-btn { background: #004aad; color: #fff; }
 
-    /* Responsive */
-    @media (max-width: 900px) {
-      .actions { width: 100%; }
-      .actions input { flex: 1; }
-      .navbar h1 { font-size: 1.1rem; }
-      .username { display: none; }
-    }
+.table-wrapper { 
+  margin-top: 1rem; 
+}
+
+.table-card { 
+  overflow-x: auto; 
+  overflow-y: hidden; 
+  border-radius: 10px; 
+  background: #fff; 
+  padding: 8px; 
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
+  scroll-behavior: smooth; 
+  position: relative; 
+  margin-bottom: 1.5rem; 
+}
+
+.table-card::-webkit-scrollbar { 
+  height: 10px; 
+}
+
+.table-card::-webkit-scrollbar-thumb { 
+  background: linear-gradient(135deg, #004aad 0%, #0066cc 100%); 
+  border-radius: 5px; 
+}
+
+table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  table-layout: auto; /* ✅ now respects min-width settings */
+  min-width: 1200px; /* ⬆ gives more space for long content */
+}
+
+thead { 
+  background: #f5f8fb; 
+  color: #333; 
+}
+
+thead th { 
+  font-weight: 700; 
+  padding: 0.7rem 0.75rem; 
+  text-align: left; 
+  border-bottom: 2px solid #e0e0e0; 
+}
+
+th, td { 
+  text-align: left; 
+  padding: 0.6rem 0.8rem; 
+  font-size: 0.85rem; 
+  border-bottom: 1px solid #f0f2f5; 
+  overflow: visible; /* ✅ allow full text */
+  white-space: nowrap; /* keeps long emails in one line */
+}
+
+tbody tr:nth-child(even) { 
+  background: #fbfdff; 
+}
+
+tbody tr:hover { 
+  background: #f1f8ff; 
+}
+
+/* 📏 Column width distribution */
+th:nth-child(1), td:nth-child(1) { 
+  min-width: 300px; /* ⬆ Name wider */
+}
+
+th:nth-child(2), td:nth-child(2) { 
+  min-width: 320px; /* ⬆ Email wider */
+}
+
+th:nth-child(3), td:nth-child(3) { 
+  min-width: 180px; /* Address */
+}
+
+th:nth-child(4), td:nth-child(4) { 
+  min-width: 140px; /* Position */
+}
+
+th:nth-child(5), td:nth-child(5) { 
+  min-width: 100px; /* Status */
+}
+
+th:nth-child(6), td:nth-child(6) { 
+  min-width: 220px; /* ⬆ Actions wider for buttons */
+}
+
+td button { 
+  padding: 0.3rem 0.6rem; 
+  border: none; 
+  border-radius: 4px; 
+  cursor: pointer; 
+  font-size: 0.8rem; 
+  margin-right: 4px; 
+}
+
+td button:first-child { 
+  background: #004aad; 
+  color: #fff; 
+}
+
+td button:last-child { 
+  background: #d9534f; 
+  color: #fff; 
+}
+
+/* Header and actions */
+.user-section .header, .user-section h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-section h3 {
+  margin: 1rem 0 0.5rem 0;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.actions input {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.actions button {
+  background: #004aad;
+  color: #fff;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.scroll-hint {
+  font-size: 0.85rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 0.5rem;
+}
+
   </style>
 </head>
 <body>
@@ -114,14 +238,13 @@
         <li><a href="reports.html"><i class="fa fa-map-marker-alt"></i> Manage Reports</a></li>
         <li><a href="bdatemanagement.html"><i class="fa fa-coins"></i> Budget & Date Management</a></li>
       </ul>
-    </div>
-    </div>
-    <div class="sidebar-footer">
-      <p>Logged in as:</p>
-      <strong id="footerName">Loading...</strong><br>
-      <span id="footerPosition">---</span>
-    </div>
-  </aside>
+    </div>  
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fa fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </aside>
 
   <!-- Main -->
   <div class="dashboard-main">
@@ -146,7 +269,7 @@
 
     <div class="user-section">
       <div class="header">
-        <h2>All Users</h2>
+        <h2>Admins</h2>
         <div class="actions">
           <button onclick="openAddModal()">Add User</button>
           <input type="text" id="searchInput" placeholder="Search user" oninput="searchUser()"/>
@@ -158,27 +281,33 @@
         <span>Scroll horizontally to view all columns</span>
       </div>
 
+      <!-- PENDING ADMINS -->
+      <h3>Pending Admins</h3>
       <div class="table-wrapper">
-        <div class="table-card" id="tableCard">
-          <table id="userTable">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Address</th>
-                <th>Position</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="userTableBody"></tbody>
-          </table>
-        </div>
+        <div class="table-card"><table><thead><tr>
+          <th>Name</th><th>Email</th><th>Address</th><th>Position</th><th>Status</th><th>Actions</th>
+        </tr></thead><tbody id="pendingAdmins"></tbody></table></div>
+      </div>
+
+      <!-- ACTIVE ADMINS -->
+      <h3>Active Admins</h3>
+      <div class="table-wrapper">
+        <div class="table-card"><table><thead><tr>
+          <th>Name</th><th>Email</th><th>Address</th><th>Position</th><th>Status</th><th>Actions</th>
+        </tr></thead><tbody id="activeAdmins"></tbody></table></div>
+      </div>
+
+      <!-- INACTIVE ADMINS -->
+      <h3>Inactive Admins</h3>
+      <div class="table-wrapper">
+        <div class="table-card"><table><thead><tr>
+          <th>Name</th><th>Email</th><th>Address</th><th>Position</th><th>Status</th><th>Actions</th>
+        </tr></thead><tbody id="inactiveAdmins"></tbody></table></div>
       </div>
     </div>
   </div>
 
-  <!-- Modal -->
+   <!-- Modal -->
   <div class="modal" id="userModal">
     <div class="modal-content">
       <h2>Add User</h2>
@@ -271,13 +400,8 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  import { 
-    getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut
-  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-  import { 
-    getFirestore, collection, doc, setDoc, updateDoc, serverTimestamp, 
-    query, orderBy, onSnapshot, deleteDoc, getDoc 
-  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+  import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+  import { getFirestore, collection, doc, setDoc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
@@ -292,22 +416,7 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  const tableCard = document.getElementById("tableCard");
-  const profileToggle = document.getElementById("profileToggle");
-  const dropdownMenu = document.getElementById("dropdownMenu");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  // Handle scroll shadows
-  function handleScrollShadows(el) {
-    const isScrolledLeft = el.scrollLeft > 10;
-    const isScrolledRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 10);
-    el.classList.toggle('scrolled-left', isScrolledLeft);
-    el.classList.toggle('scrolled-right', isScrolledRight);
-  }
-
-  tableCard.addEventListener('scroll', () => handleScrollShadows(tableCard));
-
-  // Modal controls
+  // Modal control
   window.openAddModal = () => document.getElementById("userModal").style.display = "flex";
   window.closeModal = () => document.getElementById("userModal").style.display = "none";
   window.togglePassword = () => {
@@ -315,7 +424,7 @@
     p.type = p.type === "password" ? "text" : "password";
   };
 
-  // Add user
+  // Add User
   document.getElementById("addUserForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("name").value.trim();
@@ -323,16 +432,12 @@
     const address = document.getElementById("address").value.trim();
     const position = document.getElementById("position").value;
     const password = document.getElementById("password").value;
-
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await setDoc(doc(db, "users", cred.user.uid), {
-        name,
-        email,
-        address,
-        position,
+        name, email, address, position,
         status: "Pending",
-        role: position === "Admin" ? "Admin" : "Barangay",
+        role: "Admin",
         createdAt: serverTimestamp()
       });
       closeModal();
@@ -342,11 +447,17 @@
     }
   });
 
-  // Fetch only Admins
+  const pendingTable = document.getElementById("pendingAdmins");
+  const activeTable = document.getElementById("activeAdmins");
+  const inactiveTable = document.getElementById("inactiveAdmins");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+
   const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
   onSnapshot(q, (snap) => {
-    const tbody = document.getElementById("userTableBody");
-    tbody.innerHTML = "";
+    pendingTable.innerHTML = "";
+    activeTable.innerHTML = "";
+    inactiveTable.innerHTML = "";
     snap.forEach(docSnap => {
       const u = docSnap.data();
       if (u.position !== "Admin") return;
@@ -359,89 +470,95 @@
         <td>${u.status || ""}</td>
         <td>
           ${
-            u.status === "Pending" 
-              ? `<button onclick="approveUser('${docSnap.id}')">Approve</button>`
-              : `<button disabled>Approved</button>`
+            u.status === "Pending" ? `<button onclick="approveUser('${docSnap.id}')">Approve</button>` :
+            u.status === "Active" ? `<button onclick="deactivateUser('${docSnap.id}')">Deactivate</button>` :
+            u.status === "Inactive" ? `<button onclick="activateUser('${docSnap.id}')">Activate</button>` : ''
           }
           <button onclick="deleteUser('${docSnap.id}')">Delete</button>
         </td>
       `;
-      tbody.appendChild(tr);
+      if (u.status === "Pending") pendingTable.appendChild(tr);
+      else if (u.status === "Active") activeTable.appendChild(tr);
+      else if (u.status === "Inactive") inactiveTable.appendChild(tr);
     });
-    setTimeout(() => handleScrollShadows(tableCard), 100);
   });
+    logoutBtn.addEventListener("click", async () => {
+              await signOut(auth);
+              window.location.href = "logout.html";
+          });
 
-  // Approve user
   window.approveUser = async (id) => {
-    if (confirm("Approve this Admin?")) {
-      await updateDoc(doc(db, "users", id), {
-        status: "Approved",
-        role: "Admin"
-      });
-      alert("Admin approved!");
+    if (confirm("Approve this admin?")) {
+      await updateDoc(doc(db, "users", id), { status: "Active" });
+    }
+  };
+  window.deactivateUser = async (id) => {
+    if (confirm("Deactivate this admin?")) {
+      await updateDoc(doc(db, "users", id), { status: "Inactive" });
     }
   };
 
-  // Delete user
+  window.activateUser = async (id) => {
+    if (confirm("Activate this admin?")) {
+      await updateDoc(doc(db, "users", id), { status: "Active" });
+    }
+  };
+
   window.deleteUser = async (id) => {
-    if (confirm("Delete this user?")) {
+    if (confirm("Are you sure you want to delete this user?")) {
       await deleteDoc(doc(db, "users", id));
     }
   };
 
-  // Search filter
+  // 🔍 Search Function
   window.searchUser = () => {
     const input = document.getElementById("searchInput").value.toLowerCase();
-    const rows = document.querySelectorAll("#userTableBody tr");
-    rows.forEach(r => {
-      r.style.display = r.textContent.toLowerCase().includes(input) ? "" : "none";
+    [pendingTable, activeTable, inactiveTable].forEach(table => {
+      [...table.querySelectorAll("tr")].forEach(row => {
+        const name = row.cells[0].textContent.toLowerCase();
+        const email = row.cells[1].textContent.toLowerCase();
+        row.style.display = name.includes(input) || email.includes(input) ? "" : "none";
+      });
     });
   };
 
-  // Auth guard
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
-      if (snap.exists()) {
-        const u = snap.data();
-        document.getElementById("footerName").textContent = u.name || "Unknown";
-        document.getElementById("footerPosition").textContent = u.position || "Unknown";
-        document.getElementById("navUsername").textContent = u.name || "Unknown";
-
-        if (u.position !== "Super Admin") {
-          alert("Access denied. Redirecting...");
-          window.location.href = "login.html";
-        }
-      }
-    } else {
-      window.location.href = "login.html";
-    }
-  });
-
-  // Dropdown and logout
-  window.addEventListener("click", (e) => {
-    if (e.target === document.getElementById("userModal")) closeModal();
-    if (!e.target.closest(".profile-dropdown")) dropdownMenu.style.display = "none";
-  });
+  // 👤 Profile Dropdown Toggle
+  const profileToggle = document.getElementById("profileToggle");
+  const dropdownMenu = document.getElementById("dropdownMenu");
 
   profileToggle.addEventListener("click", (e) => {
     e.stopPropagation();
     dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
   });
 
-  logoutBtn.addEventListener("click", async (e) => {
+  window.addEventListener("click", () => dropdownMenu.style.display = "none");
+
+  // 🚪 Logout
+  document.getElementById("logoutBtn").addEventListener("click", async (e) => {
     e.preventDefault();
-    try {
-      await signOut(auth);
-      window.location.href = "logout.html";
-      setTimeout(() => { window.location.href = "login.html"; }, 1500);
-    } catch (error) {
-      console.error("Logout failed:", error);
-      window.location.href = "login.html";
+    await signOut(auth);
+    window.location.href = "index.html";
+  });
+
+  // 🧑 Auth State
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        document.getElementById("navUsername").textContent = data.name || "Unknown";
+        document.getElementById("footerName").textContent = data.name || "Unknown";
+        document.getElementById("footerPosition").textContent = data.position || "---";
+
+        if (data.position !== "Super Admin") {
+          alert("Access denied. Only Super Admins can manage users.");
+          window.location.href = "dashboard.html";
+        }
+      }
+    } else {
+      window.location.href = "index.html";
     }
   });
 </script>
-
 </body>
 </html>

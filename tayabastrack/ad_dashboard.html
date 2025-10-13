@@ -415,12 +415,12 @@
         }
 
         onAuthStateChanged(auth, async (user) => {
-            if (!user) return (window.location.href = "login.html");
+            if (!user) return (window.location.href = "logout.html");
 
             const userDoc = await getDoc(doc(db, "users", user.uid));
             if (!userDoc.exists() || userDoc.data().position !== "Admin") {
                 alert("Unauthorized access! Redirecting...");
-                return (window.location.href = "login.html");
+                return (window.location.href = "logout.html");
             }
 
             const data = userDoc.data();

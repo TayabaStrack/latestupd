@@ -84,9 +84,24 @@
 
   .sidebar-footer {
     text-align: center;
-    font-size: 0.85rem;
     padding: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  .logout-btn {
+    background-color: #d9534f;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+    width: 100%;
+  }
+  
+  .logout-btn:hover {
+    background-color: #c9302c;
   }
 
   /* ============================
@@ -217,9 +232,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
   }
 
   .report-box-header h2 {
@@ -241,7 +256,7 @@
   ============================ */
   .table-section {
     margin-top: 25px;
-    padding-left: 20px;   /* 👈 added */
+    padding-left: 20px;
     padding-right: 20px;  
   }
 
@@ -268,12 +283,10 @@
   }
 
   .table-wrapper {
-    padding: 10px;
+    padding: 16px;
     border-radius: 10px;
     background: #fff;
     overflow-x: auto;
-    background: #fff;
-    border-radius: 10px;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
   }
 
@@ -285,7 +298,6 @@
   .table-wrapper th,
   .table-wrapper td {
     padding: 12px 15px;
-    text-align: left;
   }
 
   .table-wrapper thead {
@@ -484,6 +496,31 @@
     color: #fff;
   }
 
+  /* ---------- SCROLL HINT ---------- */
+  .scroll-hint {
+    background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 74, 173, 0.2);
+  }
+  
+  .scroll-hint i {
+    animation: slideHint 2s ease-in-out infinite;
+  }
+  
+  @keyframes slideHint {
+    0%, 100% { transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+  }
+
   /* ============================
      RESPONSIVE
   ============================ */
@@ -501,7 +538,6 @@
     }
   }
 </style>
-
 </head>
 
 <body>
@@ -520,9 +556,9 @@
       </ul>
     </div>
     <div class="sidebar-footer">
-      <p>Logged in as:</p>
-      <strong id="sidebarName">Loading...</strong><br />
-      <span id="sidebarPosition">Loading...</span>
+      <button class="logout-btn" id="sidebarLogoutBtn">
+        <i class="fa fa-sign-out-alt"></i> Logout
+      </button>
     </div>
   </aside>
 
@@ -541,59 +577,67 @@
           <i class="fas fa-chevron-down" style="font-size:0.7rem;color:#666;"></i>
           <div class="dropdown-menu" id="dropdownMenu">
             <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
-            <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+            <a href="#" id="navLogoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
           </div>
         </div>
       </div>
     </nav>
 
     <!-- Reports Section -->
-  <!-- Allocated Reports Section -->
-<div class="table-section">
-  <div class="table-header">
-    <h2>Allocated Reports</h2>
-    <input type="text" id="searchAllocated" placeholder="Search allocated reports..." />
-  </div>
-  <div id="tableCardAllocated" class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Report ID</th>
-          <th>Barangay</th>
-          <th>Allocated Budget</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="allocatedTable"></tbody>
-    </table>
-  </div>
-</div>
+    <section class="reports-section">
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Ongoing Reports</h2>
+          <input id="searchOngoing" placeholder="Search ongoing...">
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Barangay</th>
+                <th>Allocated Budget</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ongoingTable"></tbody>
+          </table>
+        </div>
+      </div>
 
-<!-- Pending Reports Section -->
-<div class="table-section">
-  <div class="table-header">
-    <h2>Pending Reports</h2>
-    <input type="text" id="searchPending" placeholder="Search pending reports..." />
-  </div>
-  <div id="tableCardPending" class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Report ID</th>
-          <th>Barangay</th>
-          <th>Allocated Budget</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="pendingTable"></tbody>
-    </table>
-  </div>
-</div>
-
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Completed Reports</h2>
+          <input id="searchCompleted" placeholder="Search completed...">
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Barangay</th>
+                <th>Allocated Budget</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="completedTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <!-- Modal -->
   <div class="modal" id="editModal">
@@ -617,207 +661,222 @@
     </div>
   </div>
 
- <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { 
-    getFirestore, doc, getDoc, collection, getDocs, setDoc, updateDoc 
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+      getFirestore, doc, getDoc, collection, getDocs, setDoc, updateDoc 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
-    authDomain: "tayabastrack-23b95.firebaseapp.com",
-    projectId: "tayabastrack-23b95",
-    storageBucket: "tayabastrack-23b95.firebasestorage.app",
-    messagingSenderId: "674055915366",
-    appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  let currentReportId = null;
-
-  const profileToggle = document.getElementById("profileToggle");
-  const dropdownMenu = document.getElementById("dropdownMenu");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  const tableCardAllocated = document.getElementById("tableCardAllocated");
-  const tableCardPending = document.getElementById("tableCardPending");
-
-  function handleScrollShadows(el) {
-    const isScrolledLeft = el.scrollLeft > 10;
-    const isScrolledRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 10);
-    el.classList.toggle('scrolled-left', isScrolledLeft);
-    el.classList.toggle('scrolled-right', isScrolledRight);
-  }
-
-  tableCardAllocated.addEventListener('scroll', () => handleScrollShadows(tableCardAllocated));
-  tableCardPending.addEventListener('scroll', () => handleScrollShadows(tableCardPending));
-
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return (window.location.href = "login.html");
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (!userDoc.exists()) return;
-
-    const data = userDoc.data();
-    document.getElementById("sidebarName").textContent = data.name || "No Name";
-    document.getElementById("sidebarPosition").textContent = data.position || "No Position";
-    document.getElementById("navUsername").textContent = data.name || "User";
-
-    if (data.position !== "Super Admin") {
-      alert("Access denied. Redirecting...");
-      await signOut(auth);
-      window.location.href = "login.html";
-      return;
-    }
-
-    loadReports();
-  });
-
-  async function loadReports() {
-    const reportsSnapshot = await getDocs(collection(db, "reports"));
-    const allocatedBody = document.getElementById("allocatedTable");
-    const pendingBody = document.getElementById("pendingTable");
-
-    allocatedBody.innerHTML = "";
-    pendingBody.innerHTML = "";
-
-    for (const report of reportsSnapshot.docs) {
-      const data = report.data();
-
-      const allocRef = doc(db, "reports", report.id, "budgetAllocations", report.id);
-      const allocSnap = await getDoc(allocRef);
-      const alloc = allocSnap.exists() ? allocSnap.data() : {};
-
-      const hasAllocation = alloc.allocatedBudget && alloc.startDate && alloc.endDate;
-      const displayStatus = data.status || "Pending";
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="col-id">${report.id}</td>
-        <td>${data.barangay || "—"}</td>
-        <td>${alloc.allocatedBudget ? "₱" + alloc.allocatedBudget.toLocaleString() : "—"}</td>
-        <td>${alloc.startDate ? formatDisplay(alloc.startDate) : "—"}</td>
-        <td>${alloc.endDate ? formatDisplay(alloc.endDate) : "—"}</td>
-        <td class="action">
-          <span class="status-badge ${displayStatus === 'Completed' ? 'completed' : 'pending'}">
-            ${displayStatus}
-          </span>
-          <a class="edit ${hasAllocation ? '' : 'allocate'}">
-            <i class="fas ${hasAllocation ? 'fa-pen' : 'fa-coins'}"></i>
-            ${hasAllocation ? 'Edit' : 'Allocate'}
-          </a>
-        </td>
-      </tr>
-      `;
-
-      tr.querySelector(".edit").addEventListener("click", () => openModal(report.id, alloc));
-
-      if (hasAllocation) {
-        allocatedBody.appendChild(tr);
-      } else {
-        pendingBody.appendChild(tr);
-      }
-    }
-  }
-
-  function formatDisplay(val) {
-    const d = val.toDate ? val.toDate() : new Date(val);
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  }
-
-  function openModal(reportId, alloc) {
-    currentReportId = reportId;
-    document.getElementById("editBudget").value = alloc.allocatedBudget || "";
-    document.getElementById("editStart").value = alloc.startDate
-      ? new Date(alloc.startDate.toDate ? alloc.startDate.toDate() : alloc.startDate).toISOString().split("T")[0]
-      : "";
-    document.getElementById("editEnd").value = alloc.endDate
-      ? new Date(alloc.endDate.toDate ? alloc.endDate.toDate() : alloc.endDate).toISOString().split("T")[0]
-      : "";
-    document.getElementById("editModal").style.display = "flex";
-  }
-
-  document.getElementById("saveEdit").addEventListener("click", async () => {
-    const budget = document.getElementById("editBudget").value;
-    const start = document.getElementById("editStart").value;
-    const end = document.getElementById("editEnd").value;
-    if (!budget || !start || !end) return alert("Please fill all fields.");
-
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-
-    const reportDoc = await getDoc(doc(db, "reports", currentReportId));
-    const data = reportDoc.exists() ? reportDoc.data() : {};
-
-    const payload = {
-      allocatedBudget: Number(budget),
-      startDate,
-      endDate,
-      reportId: currentReportId,
-      barangay: data.barangay || "Unknown"
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.firebasestorage.app",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
     };
 
-    // ✅ Save to subcollection
-    await setDoc(doc(db, "reports", currentReportId, "budgetAllocations", currentReportId), payload);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let currentReportId = null;
 
-    // ✅ Save to root budgetAllocations for easier querying
-    await setDoc(doc(db, "budgetAllocations", currentReportId), payload);
+    const profileToggle = document.getElementById("profileToggle");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
+    const navLogoutBtn = document.getElementById("navLogoutBtn");
 
-    // ✅ Update status of report to Completed if not already
-    await updateDoc(doc(db, "reports", currentReportId), {
-      status: "Completed",
-      completedAt: new Date(),
-      completedBy: auth.currentUser.uid
+    // ------------------ AUTH & USER INFO ------------------
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        const data = userDoc.data();
+        document.getElementById("navUsername").textContent = data.name || "User";
+
+        if (data.position !== "Super Admin") {
+          alert("Access denied. Only Super Admins can access this page.");
+          await signOut(auth);
+          window.location.href = "dashboard.html";
+          return;
+        }
+
+        loadReports();
+      } catch(err) {
+        console.error("Error loading user data:", err);
+        alert("Error loading user data. Please try again.");
+        window.location.href = "index.html";
+      }
     });
 
-    alert("Budget and dates allocated successfully! Report marked as Completed.");
-    document.getElementById("editModal").style.display = "none";
-    loadReports();
-  });
+    // ------------------ LOAD REPORTS ------------------
+    async function loadReports() {
+      const ongoingTable = document.getElementById("ongoingTable");
+      const completedTable = document.getElementById("completedTable");
 
-  document.getElementById("closeModal").onclick = () => (document.getElementById("editModal").style.display = "none");
-  document.getElementById("cancelEdit").onclick = () => (document.getElementById("editModal").style.display = "none");
+      ongoingTable.innerHTML = "";
+      completedTable.innerHTML = "";
 
-  window.addEventListener("click", (e) => {
-    if (e.target === document.getElementById("editModal")) document.getElementById("editModal").style.display = "none";
-    if (!e.target.closest(".profile-dropdown")) dropdownMenu.style.display = "none";
-  });
+      try {
+        const reportsSnapshot = await getDocs(collection(db, "reports"));
+        
+        for (const docSnap of reportsSnapshot.docs) {
+          const report = docSnap.data();
+          const reportId = docSnap.id;
 
-  profileToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
-  });
+          try {
+            const budgetDoc = await getDoc(doc(db, "reports", reportId, "budgetAllocations", reportId));
 
-  logoutBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    try {
-      await signOut(auth);
-      window.location.href = "logout.html";
-      setTimeout(() => { window.location.href = "login.html"; }, 1500);
-    } catch (error) {
-      console.error("Logout failed:", error);
-      window.location.href = "login.html";
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td class="col-id">${reportId}</td>
+              <td>${report.barangay || "N/A"}</td>
+              <td>₱${budgetDoc.exists() ? budgetDoc.data().allocatedBudget.toLocaleString() : "-"}</td>
+              <td>${budgetDoc.exists() ? new Date(budgetDoc.data().startDate.seconds * 1000).toLocaleDateString() : "-"}</td>
+              <td>${budgetDoc.exists() ? new Date(budgetDoc.data().endDate.seconds * 1000).toLocaleDateString() : "-"}</td>
+              <td class="action">
+                ${!budgetDoc.exists() ? `<a class="edit allocate" onclick="window.openEditModal('${reportId}')">Allocate</a>` : `<span class="status-badge completed">Completed</span>`}
+              </td>
+            `;
+
+            if (!budgetDoc.exists()) {
+              ongoingTable.appendChild(row);
+            } else {
+              completedTable.appendChild(row);
+            }
+          } catch(err) {
+            console.error(`Error loading budget for report ${reportId}:`, err);
+          }
+        }
+      } catch(err) {
+        console.error("Error loading reports:", err);
+        alert("Error loading reports. Please refresh the page.");
+      }
     }
-  });
 
-  // ✅ Search for Allocated Table
-  document.getElementById("searchAllocated").addEventListener("keyup", (e) => {
-    const filter = e.target.value.toLowerCase();
-    document.querySelectorAll("#allocatedTable tr").forEach(row => {
-      row.style.display = row.textContent.toLowerCase().includes(filter) ? "" : "none";
+    // ------------------ MODAL & EDIT ------------------
+    window.openEditModal = function(reportId) {
+      currentReportId = reportId;
+      document.getElementById("editModal").style.display = "flex";
+    };
+
+    document.getElementById("saveEdit").addEventListener("click", async () => {
+      const budget = document.getElementById("editBudget").value;
+      const start = document.getElementById("editStart").value;
+      const end = document.getElementById("editEnd").value;
+      
+      if (!budget || !start || !end) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+
+      if (endDate <= startDate) {
+        alert("End date must be after start date.");
+        return;
+      }
+
+      try {
+        const reportDoc = await getDoc(doc(db, "reports", currentReportId));
+        const data = reportDoc.exists() ? reportDoc.data() : {};
+
+        const payload = {
+          allocatedBudget: Number(budget),
+          startDate,
+          endDate,
+          reportId: currentReportId,
+          barangay: data.barangay || "Unknown"
+        };
+
+        await setDoc(doc(db, "reports", currentReportId, "budgetAllocations", currentReportId), payload);
+        await setDoc(doc(db, "budgetAllocations", currentReportId), payload);
+
+        await updateDoc(doc(db, "reports", currentReportId), {
+          status: "Completed",
+          updatedAt: new Date(),
+          updatedBy: auth.currentUser.uid
+        });
+
+        alert("Budget and dates allocated successfully! Report moved to Completed Reports.");
+        document.getElementById("editModal").style.display = "none";
+        
+        document.getElementById("editBudget").value = "";
+        document.getElementById("editStart").value = "";
+        document.getElementById("editEnd").value = "";
+        
+        loadReports();
+      } catch(err) {
+        console.error("Error saving budget allocation:", err);
+        alert("Error saving data. Please try again.");
+      }
     });
-  });
 
-  // ✅ Search for Pending Table
-  document.getElementById("searchPending").addEventListener("keyup", (e) => {
-    const filter = e.target.value.toLowerCase();
-    document.querySelectorAll("#pendingTable tr").forEach(row => {
-      row.style.display = row.textContent.toLowerCase().includes(filter) ? "" : "none";
+    document.getElementById("closeModal").onclick = () => {
+      document.getElementById("editModal").style.display = "none";
+    };
+    
+    document.getElementById("cancelEdit").onclick = () => {
+      document.getElementById("editModal").style.display = "none";
+    };
+
+    // ------------------ DROPDOWN & LOGOUT ------------------
+    window.addEventListener("click", (e) => {
+      if (e.target === document.getElementById("editModal")) {
+        document.getElementById("editModal").style.display = "none";
+      }
+      if (!e.target.closest(".profile-dropdown")) {
+        dropdownMenu.style.display = "none";
+      }
     });
-  });
-</script>
 
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+    });
+
+    async function handleLogout() {
+      try {
+        await signOut(auth);
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error("Logout failed:", error);
+        alert("Error logging out. Please try again.");
+      }
+    }
+
+    sidebarLogoutBtn.addEventListener("click", handleLogout);
+    
+    navLogoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      handleLogout();
+    });
+
+    // ------------------ SEARCH FUNCTIONALITY ------------------
+    document.getElementById("searchOngoing").addEventListener("keyup", (e) => {
+      const filter = e.target.value.toLowerCase();
+      document.querySelectorAll("#ongoingTable tr").forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? "" : "none";
+      });
+    });
+
+    document.getElementById("searchCompleted").addEventListener("keyup", (e) => {
+      const filter = e.target.value.toLowerCase();
+      document.querySelectorAll("#completedTable tr").forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? "" : "none";
+      });
+    });
+  </script>
 </body>
 </html>

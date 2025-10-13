@@ -14,8 +14,7 @@
       min-height:100vh;
       background:#f5f7fb;
       color:#333;
-      min-width:1300px;
-      overflow-x:auto;
+      overflow:hidden;
     }
 
     /* ---------- SIDEBAR (fixed) ---------- */
@@ -33,6 +32,8 @@
       left:0;
       bottom:0;
       z-index:50;
+      height:100vh;
+      overflow-y:auto;
     }
     .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
     .sidebar-header img{width:40px}
@@ -90,7 +91,7 @@
       right:-8px;
       display:none;
     }
-    .badge.show{display:block}
+    .badge.show{display:flex;align-items:center;justify-content:center}
     .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
     .avatar{width:35px;height:35px;border-radius:50%}
     .username{font-weight:500}
@@ -201,13 +202,15 @@
       margin-top:74px;
       flex:1;
       display:block;
-      padding:20px 28px;
+      min-width:0;
+      height:calc(100vh - 74px);
+      overflow:hidden;
     }
     .content { 
       flex: 1; 
       padding: 1.5rem; 
       overflow-y: auto;
-      height: calc(100vh - 80px);
+      height:100%;
     }
 
     /* Table Sections */
@@ -217,10 +220,11 @@
 
     .table-section h2 {
       color: #004aad;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      font-size: 1.1rem;
     }
 
     .table-section h2 span {
@@ -252,18 +256,123 @@
       color: #999;
     }
 
+    /* ---------- SCROLL HINT ---------- */
+    .scroll-hint {
+      background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0, 74, 173, 0.2);
+    }
+    .scroll-hint i {
+      animation: slideHint 2s ease-in-out infinite;
+    }
+    @keyframes slideHint {
+      0%, 100% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+    }
+
+    /* ---------- TABLE CONTAINER WITH SCROLL ---------- */
+    .table-wrapper {
+      position: relative;
+    }
+    
+    .table-card {
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      scroll-behavior: smooth;
+      position: relative;
+    }
+
+    /* Enhanced scrollbar */
+    .table-card::-webkit-scrollbar {
+      height: 10px;
+    }
+    .table-card::-webkit-scrollbar-track {
+      background: #e9eef5;
+      border-radius: 5px;
+    }
+    .table-card::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+      border-radius: 5px;
+      border: 2px solid #e9eef5;
+    }
+    .table-card::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #003580 0%, #004aad 100%);
+    }
+
+    /* Firefox scrollbar */
+    .table-card {
+      scrollbar-width: thin;
+      scrollbar-color: #004aad #e9eef5;
+    }
+
+    /* Scroll shadow indicators */
+    .table-card::before,
+    .table-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 12px;
+      width: 30px;
+      pointer-events: none;
+      z-index: 2;
+      transition: opacity 0.3s;
+    }
+
+    .table-card::before {
+      left: 8px;
+      background: linear-gradient(to right, rgba(255,255,255,0.95), transparent);
+      opacity: 0;
+    }
+
+    .table-card::after {
+      right: 8px;
+      background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
+    }
+
+    .table-card.scrolled-left::before {
+      opacity: 1;
+    }
+
+    .table-card.scrolled-right::after {
+      opacity: 0;
+    }
+
     /* Table */
     table { 
       width: 100%; 
       border-collapse: collapse; 
       background: #fff; 
-      border-radius: 12px; 
-      overflow: hidden; 
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
+      min-width: 900px;
     }
-    th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #eee; }
-    th { background: #004aad; color: #fff; }
-    tr:hover { background: #f9f9f9; }
+    th, td { 
+      padding: 0.75rem 1rem; 
+      text-align: left; 
+      border-bottom: 1px solid #eee; 
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    th { 
+      background: #f5f8fb; 
+      color: #333;
+      font-weight: 700;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    tr:hover { 
+      background: #f1f8ff; 
+    }
     
     button {
       border: none; 
@@ -273,13 +382,24 @@
       font-size: 0.8rem; 
       color: #fff;
       margin-right: 0.3rem;
+      transition: background 0.2s;
+      font-weight: 600;
     }
     
     button.approve { background: #28a745; }
+    button.approve:hover { background: #218838; }
     button.decline { background: #dc3545; }
+    button.decline:hover { background: #c82333; }
     button.edit { background: #007bff; }
+    button.edit:hover { background: #0056b3; }
     button.inactive { background: #ffc107; color: #333; }
+    button.inactive:hover { background: #e0a800; }
     button.activate { background: #28a745; }
+    button.activate:hover { background: #218838; }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
 
     /* Modal */
     .modal {
@@ -357,7 +477,9 @@
     }
 
     button.save { background: #28a745; }
+    button.save:hover { background: #218838; }
     button.cancel { background: #6c757d; }
+    button.cancel:hover { background: #5a6268; }
   </style>
 </head>
 <body>
@@ -384,7 +506,7 @@
     </div>
   </aside>
 
-  <!--Navbar-->
+  <!-- Navbar -->
   <nav class="navbar" role="navigation" aria-label="Main navigation">
     <h1>User Management</h1>
     <div style="display:flex;align-items:center;gap:14px">
@@ -420,77 +542,101 @@
     <div class="content">
       <!-- Pending Registration Table -->
       <div class="table-section">
-        <h2>Pending Registration <span id="pendingCount"></span></h2>
+        <h2>Pending Registration <span id="pendingCount">(0)</span></h2>
         <div class="search-box">
           <input type="text" id="searchPending" placeholder="Search pending users...">
           <i class="fa fa-search"></i>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Email</th>
-              <th>Barangay</th>
-              <th>Position</th>
-              <th>Contact</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="pendingTable">
-            <tr><td colspan="7" style="text-align:center; color:#777; padding:1rem;">Loading...</td></tr>
-          </tbody>
-        </table>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-card" id="pendingTableCard">
+            <table>
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Barangay</th>
+                  <th>Position</th>
+                  <th>Contact</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="pendingTable">
+                <tr><td colspan="7" style="text-align:center; color:#777; padding:1rem;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- Active Users Table -->
       <div class="table-section">
-        <h2>Active Users <span id="activeCount"></span></h2>
+        <h2>Active Users <span id="activeCount">(0)</span></h2>
         <div class="search-box">
           <input type="text" id="searchActive" placeholder="Search active users...">
           <i class="fa fa-search"></i>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Email</th>
-              <th>Barangay</th>
-              <th>Position</th>
-              <th>Contact</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="activeTable">
-            <tr><td colspan="7" style="text-align:center; color:#777; padding:1rem;">Loading...</td></tr>
-          </tbody>
-        </table>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-card" id="activeTableCard">
+            <table>
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Barangay</th>
+                  <th>Position</th>
+                  <th>Contact</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="activeTable">
+                <tr><td colspan="7" style="text-align:center; color:#777; padding:1rem;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- Inactive Users Table -->
       <div class="table-section">
-        <h2>Inactive Users <span id="inactiveCount"></span></h2>
+        <h2>Inactive Users <span id="inactiveCount">(0)</span></h2>
         <div class="search-box">
           <input type="text" id="searchInactive" placeholder="Search inactive users...">
           <i class="fa fa-search"></i>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Email</th>
-              <th>Barangay</th>
-              <th>Position</th>
-              <th>Contact</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="inactiveTable">
-            <tr><td colspan="7" style="text-align:center; color:#777; padding:1rem;">Loading...</td></tr>
-          </tbody>
-        </table>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-card" id="inactiveTableCard">
+            <table>
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Barangay</th>
+                  <th>Position</th>
+                  <th>Contact</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="inactiveTable">
+                <tr><td colspan="7" style="text-align:center; color:#777; padding:1rem;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -555,32 +701,28 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // DOM elements
     const navbarName = document.getElementById("navbarName");
-
-    // Tables
     const pendingTable = document.getElementById("pendingTable");
     const activeTable = document.getElementById("activeTable");
     const inactiveTable = document.getElementById("inactiveTable");
-
-    // Search inputs
+    const pendingTableCard = document.getElementById("pendingTableCard");
+    const activeTableCard = document.getElementById("activeTableCard");
+    const inactiveTableCard = document.getElementById("inactiveTableCard");
     const searchPending = document.getElementById("searchPending");
     const searchActive = document.getElementById("searchActive");
     const searchInactive = document.getElementById("searchInactive");
-
-    // Modal
     const editModal = document.getElementById("editModal");
     const closeModal = document.getElementById("closeModal");
     const cancelEdit = document.getElementById("cancelEdit");
     const editForm = document.getElementById("editForm");
-
-    // Notifications
     const notificationBell = document.getElementById("notificationBell");
     const notificationBadge = document.getElementById("notificationBadge");
     const notificationMenu = document.getElementById("notificationMenu");
     const notificationList = document.getElementById("notificationList");
     const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
 
-    // Store all users
+    // Data storage
     let allPendingUsers = [];
     let allActiveUsers = [];
     let allInactiveUsers = [];
@@ -588,7 +730,20 @@
     let trackedUsers = new Set();
     let trackedReports = new Set();
 
-    // Helper function to check if position is Barangay Captain or Official
+    // Handle scroll shadows
+    function handleScrollShadows(el) {
+      const isScrolledLeft = el.scrollLeft > 10;
+      const isScrolledRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 10);
+      
+      el.classList.toggle('scrolled-left', isScrolledLeft);
+      el.classList.toggle('scrolled-right', isScrolledRight);
+    }
+
+    pendingTableCard.addEventListener('scroll', () => handleScrollShadows(pendingTableCard));
+    activeTableCard.addEventListener('scroll', () => handleScrollShadows(activeTableCard));
+    inactiveTableCard.addEventListener('scroll', () => handleScrollShadows(inactiveTableCard));
+
+    // Helper function to check if position is Barangay
     function isBarangayPosition(position) {
       if (!position) return false;
       const pos = position.toLowerCase().trim();
@@ -618,19 +773,27 @@
           <td>${u.position || ""}</td>
           <td>${u.phoneNumber || u.contact || "—"}</td>
           <td>
-            ${actionType === 'pending' ? `
-              <button class="approve" onclick="approveUser('${id}')">Approve</button>
-              <button class="decline" onclick="declineUser('${id}')">Decline</button>
-            ` : actionType === 'active' ? `
-              <button class="edit" onclick="openEditModal('${id}')">Edit</button>
-              <button class="inactive" onclick="makeInactive('${id}')">Inactive</button>
-            ` : `
-              <button class="activate" onclick="activateUser('${id}')">Activate</button>
-            `}
+            ${
+              actionType === 'pending' ? `
+                <button class="approve" onclick="approveUser('${id}')">Approve</button>
+                <button class="decline" onclick="declineUser('${id}')">Decline</button>
+              ` : actionType === 'active' ? `
+                <button class="edit" onclick="openEditModal('${id}')">Edit</button>
+                <button class="inactive" onclick="makeInactive('${id}')">Inactive</button>
+              ` : `
+                <button class="activate" onclick="activateUser('${id}')">Activate</button>
+              `
+            }
           </td>
         `;
         tbody.appendChild(tr);
       });
+
+      setTimeout(() => {
+        if (tbody === pendingTable) handleScrollShadows(pendingTableCard);
+        if (tbody === activeTable) handleScrollShadows(activeTableCard);
+        if (tbody === inactiveTable) handleScrollShadows(inactiveTableCard);
+      }, 100);
     }
 
     // Search filter
@@ -734,7 +897,7 @@
       }
     });
 
-    // --- Notifications Functions ---
+    // Notification functions
     function addNotification(type, message, detail) {
       const notification = {
         id: Date.now(),
@@ -769,7 +932,8 @@
           </div>
           <div class="notification-content">
             <p><strong>${n.message}</strong></p>
-            <p class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+            <p>${n.detail}</p>
+            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
         </div>
       `).join("");
@@ -807,7 +971,7 @@
       if (!profileToggle.contains(e.target)) dropdownMenu.style.display = "none";
     });
 
-    // Auth check
+    // Auth check and data loading
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         console.warn("No user detected. Redirecting to login...");
@@ -897,8 +1061,7 @@
           renderTable(inactiveTable, filtered, 'inactive');
         });
 
-        // --- Live Firestore Notifications ---
-        // Watch for new pending users
+        // Live Firestore Notifications
         const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
         onSnapshot(qNewUsers, (snapshot) => {
           snapshot.docChanges().forEach(change => {
@@ -912,7 +1075,7 @@
           });
         });
 
-        // Watch for new reports (optional, adjust collection name)
+        // Watch for new reports
         const qReports = query(collection(db, "reports"));
         onSnapshot(qReports, (snapshot) => {
           snapshot.docChanges().forEach(change => {
