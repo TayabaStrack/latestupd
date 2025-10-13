@@ -17,7 +17,7 @@
       min-height:100vh;
       background:#f5f7fb;
       color:#333;
-      overflow:hidden;
+      overflow:auto;
     }
 
     /* ---------- SIDEBAR (fixed) ---------- */
@@ -35,8 +35,6 @@
       left:0;
       bottom:0;
       z-index:50;
-      height:100vh;
-      overflow-y:auto;
     }
     .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
     .sidebar-header img{width:40px}
@@ -205,35 +203,31 @@
       margin-left:250px;
       margin-top:74px;
       flex:1;
-      display:flex;
-      flex-direction:column;
-      min-width:0;
-      height:calc(100vh - 74px);
-      overflow:hidden;
+      display:block;
+      padding:20px 28px;
+      height: calc(100vh - 74px);
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
+    /* ---------- CONTENT ---------- */
     .reports-section{
-      padding:1.5rem;
-      flex:1;
-      overflow-y:auto;
-      overflow-x:hidden;
+      padding-bottom:40px;
+      max-width: 100%;
     }
-
-    /* ---------- REPORT BOX & SEARCH ---------- */
     .report-box{
       background:#fff;
       border-radius:10px;
       padding:16px;
       margin-bottom:1rem;
       box-shadow:0 6px 18px rgba(0,0,0,0.04);
+      overflow: visible;
     }
     .report-box-header{
       display:flex;
       justify-content:space-between;
       align-items:center;
       margin-bottom:8px;
-      flex-wrap:wrap;
-      gap:10px;
     }
     .report-box-header h2{
       color:#004aad;
@@ -255,13 +249,15 @@
       border-radius: 6px;
       font-size: 0.85rem;
       text-align: center;
-      margin-bottom: 10px;
+      margin: 10px 0 12px 0;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       box-shadow: 0 2px 8px rgba(0, 74, 173, 0.2);
+      flex-shrink: 0;
     }
+
     .scroll-hint i {
       animation: slideHint 2s ease-in-out infinite;
     }
@@ -270,125 +266,133 @@
       50% { transform: translateX(4px); }
     }
 
-    /* ---------- TABLE CONTAINER WITH SCROLL ---------- */
-    .table-wrapper {
-      position: relative;
-    }
-    
+    /* ---------- TABLE CARD WITH ENHANCED SCROLLING ---------- */
     .table-card {
       overflow-x: auto;
       overflow-y: hidden;
-      border-radius: 8px;
+      border-radius: 10px;
       background: #fff;
       padding: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
       scroll-behavior: smooth;
       position: relative;
+      margin-bottom: 0;
+      width: 100%;
     }
 
-    /* Enhanced scrollbar */
     .table-card::-webkit-scrollbar {
       height: 10px;
     }
-    .table-card::-webkit-scrollbar-track {
-      background: #e9eef5;
-      border-radius: 5px;
-    }
+
     .table-card::-webkit-scrollbar-thumb {
       background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
       border-radius: 5px;
-      border: 2px solid #e9eef5;
-    }
-    .table-card::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(135deg, #003580 0%, #004aad 100%);
     }
 
-    /* Firefox scrollbar */
-    .table-card {
-      scrollbar-width: thin;
-      scrollbar-color: #004aad #e9eef5;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: auto;
+      min-width: 1800px;
     }
 
-    /* Scroll shadow indicators */
-    .table-card::before,
-    .table-card::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      bottom: 12px;
-      width: 30px;
-      pointer-events: none;
-      z-index: 2;
-      transition: opacity 0.3s;
+    thead {
+      background: #f5f8fb;
+      color: #333;
     }
 
-    .table-card::before {
-      left: 8px;
-      background: linear-gradient(to right, rgba(255,255,255,0.95), transparent);
-      opacity: 0;
+    thead th {
+      font-weight: 700;
+      padding: 0.7rem 0.75rem;
+      text-align: left;
+      border-bottom: 2px solid #e0e0e0;
+      white-space: nowrap;
     }
 
-    .table-card::after {
-      right: 8px;
-      background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
+    th, td {
+      text-align: left;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.85rem;
+      border-bottom: 1px solid #f0f2f5;
+      overflow: visible;
+      white-space: nowrap;
     }
 
-    .table-card.scrolled-left::before {
-      opacity: 1;
+    tbody tr:nth-child(even) {
+      background: #fbfdff;
     }
 
-    .table-card.scrolled-right::after {
-      opacity: 0;
+    tbody tr:hover {
+      background: #f1f8ff;
     }
 
-    table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:1200px;
+    /* Column width distribution */
+    th:nth-child(1), td:nth-child(1) { min-width: 180px; } /* Report ID */
+    th:nth-child(2), td:nth-child(2) { min-width: 150px; } /* Barangay */
+    th:nth-child(3), td:nth-child(3) { min-width: 320px; } /* Description */
+    th:nth-child(4), td:nth-child(4) { min-width: 180px; } /* Age Groups */
+    th:nth-child(5), td:nth-child(5) { min-width: 140px; } /* Dimensions */
+    th:nth-child(6), td:nth-child(6) { min-width: 100px; } /* Image */
+    th:nth-child(7), td:nth-child(7) { min-width: 180px; } /* Coordinates */
+    th:nth-child(8), td:nth-child(8) { min-width: 120px; } /* Status */
+    th:nth-child(9), td:nth-child(9) { min-width: 200px; } /* Timestamp */
+    th:nth-child(10), td:nth-child(10) { min-width: 180px; } /* User ID */
+    th:nth-child(11), td:nth-child(11) { min-width: 160px; } /* Inspection Date */
+    th:nth-child(12), td:nth-child(12) { min-width: 160px; } /* Budget */
+    th:nth-child(13), td:nth-child(13) { min-width: 200px; } /* Actions */
+
+    .truncate {
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: inline-block;
+      vertical-align: middle;
     }
-    thead th{
-      background:#f5f8fb;
-      color:#333;
-      font-weight:700;
-      padding:.7rem .75rem;
-      text-align:left;
-      white-space:nowrap;
-      border-bottom:2px solid #e0e0e0;
+
+    .status {
+      display: inline-block;
+      padding: .25rem .5rem;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 700;
+      font-size: .75rem;
+      min-width: 80px;
+      text-align: center;
     }
-    th,td{
-      padding:.5rem .75rem;
-      font-size:.85rem;
-      vertical-align:top;
-      border-bottom:1px solid #f0f2f5;
+
+    .pending { background: #f6c23e; color: #2b2b2b; }
+    .ongoing { background: #36b9cc; color: #fff; }
+    .completed { background: #1cc88a; color: #fff; }
+    .declined { background: #d9534f; color: #fff; }
+
+    .action a {
+      color: #004aad;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      margin-right: 8px;
     }
-    tbody tr:nth-child(even){background:#fbfdff}
-    tbody tr:hover{background:#f1f8ff}
-    
-    .col-id{width:160px;color:#444;font-weight:600}
-    .col-small{width:110px}
-    .truncate{
-      max-width:420px;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      display:inline-block;
-      vertical-align:middle;
+    .action a.decline { color: #d9534f; }
+
+    td button {
+      padding: 0.3rem 0.6rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-right: 4px;
     }
-    .status{
-      display:inline-block;
-      padding:.25rem .5rem;
-      border-radius:6px;
-      color:#fff;
-      font-weight:700;
-      font-size:.75rem;
-      min-width:80px;
-      text-align:center;
+
+    td button.btn-edit {
+      background: #004aad;
+      color: #fff;
     }
-    .pending{background:#f6c23e;color:#2b2b2b}
-    .ongoing{background:#36b9cc;color:#fff}
-    .completed{background:#1cc88a;color:#fff}
-    .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
-    .action a.delete{color:#d9534f}
+
+    td button.btn-decline {
+      background: #d9534f;
+      color: #fff;
+    }
 
     /* ---------- MODAL ---------- */
     .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
@@ -399,7 +403,7 @@
     .modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .modal-row{display:flex;flex-direction:column}
     .modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
-    .modal-row input[type="text"],.modal-row input[type="number"],.modal-row textarea,.modal-row select{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
+    .modal-row input[type="text"],.modal-row input[type="number"],.modal-row textarea,.modal-row select { padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem }
     .modal-row textarea{min-height:80px;resize:vertical}
     .img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px}
     .modal-footer{text-align:right;margin-top:12px}
@@ -408,16 +412,107 @@
     .btn-cancel{background:#9e9e9e;color:#fff}
     .btn-delete{background:#d9534f;color:#fff}
 
-    @media (max-width:900px) {
-      .modal-grid{grid-template-columns:1fr}
-      .report-actions input{width:100%}
+    /* Decline Modal */
+    .decline-modal {
+      display: none;
+      position: fixed;
+      z-index: 3000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,.5);
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+    }
+    .decline-modal-content {
+      background: #fff;
+      width: 100%;
+      max-width: 600px;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .decline-modal-header {
+      margin-bottom: 20px;
+    }
+    .decline-modal-header h3 {
+      color: #d9534f;
+      font-size: 1.3rem;
+      margin: 0;
+    }
+    .decline-form-group {
+      margin-bottom: 18px;
+    }
+    .decline-form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 0.95rem;
+    }
+    .decline-form-group label .required {
+      color: #d9534f;
+      margin-left: 3px;
+    }
+    .decline-form-group textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .decline-form-group input[type="date"],
+    .decline-form-group input[type="text"],
+    .decline-form-group input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .decline-form-group input:focus,
+    .decline-form-group textarea:focus {
+      outline: none;
+      border-color: #004aad;
+      box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.1);
+    }
+    .budget-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .budget-input-wrapper span {
+      font-weight: 600;
+      color: #666;
+    }
+    .budget-input-wrapper input {
+      flex: 1;
+    }
+    .decline-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
     }
 
     /* ---------- LOADING ---------- */
     .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
-    .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
+    .spinner { width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
+    @media (max-width:900px) {
+      .modal-grid{grid-template-columns:1fr}
+      .report-actions input{width:100%}
+    }
   </style>
 </head>
 <body>
@@ -439,7 +534,7 @@
     </div>
 
     <div class="sidebar-footer">
-      <button class="logout-btn" id="logoutBtn">
+      <button class="logout-btn" id="sidebarLogoutBtn">
         <i class="fa fa-sign-out-alt"></i> Logout
       </button>
     </div>
@@ -471,6 +566,7 @@
 
         <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
           <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+          <a href="#" id="navLogoutBtn"><i class="fa fa-sign-out-alt"></i>&nbsp; Logout</a>
         </div>
       </div>
     </div>
@@ -485,6 +581,7 @@
         <div class="spinner" role="status" aria-label="Loading"></div>
       </div>
 
+      <!-- Pending Reports -->
       <div class="report-box">
         <div class="report-box-header">
           <h2>Pending Reports</h2>
@@ -492,34 +589,35 @@
             <input id="searchPending" placeholder="Search pending..." aria-label="Search pending reports">
           </div>
         </div>
+
         <div class="scroll-hint">
           <i class="fas fa-arrows-alt-h"></i>
           <span>Scroll horizontally to view all columns</span>
         </div>
-        <div class="table-wrapper">
-          <div class="table-card" id="pendingTableCard" aria-live="polite">
-            <table>
-              <thead>
-                <tr>
-                  <th class="col-id">Report ID</th>
-                  <th>Barangay</th>
-                  <th style="min-width:300px">Description</th>
-                  <th>Age Groups / People</th>
-                  <th class="col-small">Dimensions (W×H)</th>
-                  <th>Image</th>
-                  <th class="col-small">Coordinates</th>
-                  <th class="col-small">Status</th>
-                  <th style="min-width:180px">Timestamp</th>
-                  <th class="col-id">User ID</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="pendingBody"></tbody>
-            </table>
-          </div>
+
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Barangay</th>
+                <th>Description</th>
+                <th>Age Groups / People</th>
+                <th>Dimensions (W×H)</th>
+                <th>Image</th>
+                <th>Coordinates</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+                <th>User ID</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="pendingBody"></tbody>
+          </table>
         </div>
       </div>
 
+      <!-- Ongoing Reports -->
       <div class="report-box">
         <div class="report-box-header">
           <h2>Ongoing Reports</h2>
@@ -527,34 +625,37 @@
             <input id="searchOngoing" placeholder="Search ongoing..." aria-label="Search ongoing reports">
           </div>
         </div>
+
         <div class="scroll-hint">
           <i class="fas fa-arrows-alt-h"></i>
           <span>Scroll horizontally to view all columns</span>
         </div>
-        <div class="table-wrapper">
-          <div class="table-card" id="ongoingTableCard" aria-live="polite">
-            <table>
-              <thead>
-                <tr>
-                  <th class="col-id">Report ID</th>
-                  <th>Barangay</th>
-                  <th style="min-width:300px">Description</th>
-                  <th>Age Groups / People</th>
-                  <th class="col-small">Dimensions (W×H)</th>
-                  <th>Image</th>
-                  <th class="col-small">Coordinates</th>
-                  <th class="col-small">Status</th>
-                  <th style="min-width:180px">Timestamp</th>
-                  <th class="col-id">User ID</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="ongoingBody"></tbody>
-            </table>
-          </div>
+
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Barangay</th>
+                <th>Description</th>
+                <th>Age Groups / People</th>
+                <th>Dimensions (W×H)</th>
+                <th>Image</th>
+                <th>Coordinates</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+                <th>User ID</th>
+                <th>Inspection Date</th>
+                <th>Budget Allocation</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ongoingBody"></tbody>
+          </table>
         </div>
       </div>
 
+      <!-- Completed Reports -->
       <div class="report-box">
         <div class="report-box-header">
           <h2>Completed Reports</h2>
@@ -562,31 +663,72 @@
             <input id="searchCompleted" placeholder="Search completed..." aria-label="Search completed reports">
           </div>
         </div>
+
         <div class="scroll-hint">
           <i class="fas fa-arrows-alt-h"></i>
           <span>Scroll horizontally to view all columns</span>
         </div>
-        <div class="table-wrapper">
-          <div class="table-card" id="completedTableCard" aria-live="polite">
-            <table>
-              <thead>
-                <tr>
-                  <th class="col-id">Report ID</th>
-                  <th>Barangay</th>
-                  <th style="min-width:300px">Description</th>
-                  <th>Age Groups / People</th>
-                  <th class="col-small">Dimensions (W×H)</th>
-                  <th>Image</th>
-                  <th class="col-small">Coordinates</th>
-                  <th class="col-small">Status</th>
-                  <th style="min-width:180px">Timestamp</th>
-                  <th class="col-id">User ID</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="completedBody"></tbody>
-            </table>
+
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Barangay</th>
+                <th>Description</th>
+                <th>Age Groups / People</th>
+                <th>Dimensions (W×H)</th>
+                <th>Image</th>
+                <th>Coordinates</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+                <th>User ID</th>
+                <th>Inspection Date</th>
+                <th>Budget Allocation</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="completedBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Declined Reports -->
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Declined Reports</h2>
+          <div class="report-actions">
+            <input id="searchDeclined" placeholder="Search declined..." aria-label="Search declined reports">
           </div>
+        </div>
+
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Barangay</th>
+                <th>Description</th>
+                <th>Age Groups / People</th>
+                <th>Dimensions (W×H)</th>
+                <th>Image</th>
+                <th>Coordinates</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+                <th>User ID</th>
+                <th>Inspection Date</th>
+                <th>Budget Allocation</th>
+                <th>Decline Reason</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="declinedBody"></tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -612,8 +754,47 @@
     </div>
   </div>
 
+  <!-- Decline Modal -->
+  <div class="decline-modal" id="declineModal">
+    <div class="decline-modal-content">
+      <div class="decline-modal-header">
+        <h3>Decline Report</h3>
+      </div>
+      
+      <div class="decline-form-group">
+        <label for="declineReason">
+          Reason for Declining <span class="required">*</span>
+        </label>
+        <textarea id="declineReason" placeholder="Enter detailed reason for declining this report..." required></textarea>
+      </div>
+
+      <div class="decline-form-group">
+        <label for="declineInspectionDate">
+          Inspection Date <span class="required">*</span>
+        </label>
+        <input type="date" id="declineInspectionDate" required>
+      </div>
+
+      <div class="decline-form-group">
+        <label for="declineBudgetMin">
+          Budget Allocation Range (₱) <span class="required">*</span>
+        </label>
+        <div class="budget-input-wrapper">
+          <input type="number" id="declineBudgetMin" placeholder="Min (e.g., 100000)" min="0" step="1000" required>
+          <span>to</span>
+          <input type="number" id="declineBudgetMax" placeholder="Max (e.g., 150000)" min="0" step="1000" required>
+        </div>
+      </div>
+
+      <div class="decline-modal-footer">
+        <button class="btn btn-cancel" id="cancelDeclineBtn">Cancel</button>
+        <button class="btn btn-delete" id="confirmDeclineBtn">Confirm Decline</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase + logic -->
-<script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import {
@@ -626,7 +807,8 @@
       getDoc,
       doc,
       updateDoc,
-      deleteDoc
+      deleteDoc,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -646,12 +828,11 @@
     const pendingBody = document.getElementById("pendingBody");
     const ongoingBody = document.getElementById("ongoingBody");
     const completedBody = document.getElementById("completedBody");
-    const pendingTableCard = document.getElementById("pendingTableCard");
-    const ongoingTableCard = document.getElementById("ongoingTableCard");
-    const completedTableCard = document.getElementById("completedTableCard");
+    const declinedBody = document.getElementById("declinedBody");
     const searchPending = document.getElementById("searchPending");
     const searchOngoing = document.getElementById("searchOngoing");
     const searchCompleted = document.getElementById("searchCompleted");
+    const searchDeclined = document.getElementById("searchDeclined");
 
     const editModal = document.getElementById("editModal");
     const modalGrid = document.getElementById("modalGrid");
@@ -660,20 +841,31 @@
     const saveChangesBtn = document.getElementById("saveChangesBtn");
     const deleteBtn = document.getElementById("deleteBtn");
 
+    const declineModal = document.getElementById("declineModal");
+    const declineReason = document.getElementById("declineReason");
+    const declineInspectionDate = document.getElementById("declineInspectionDate");
+    const declineBudgetMin = document.getElementById("declineBudgetMin");
+    const declineBudgetMax = document.getElementById("declineBudgetMax");
+    const cancelDeclineBtn = document.getElementById("cancelDeclineBtn");
+    const confirmDeclineBtn = document.getElementById("confirmDeclineBtn");
+
     const dropdownMenu = document.getElementById("dropdownMenu");
     const profileToggle = document.getElementById("profileToggle");
     const navUsername = document.getElementById("navUsername");
     const navbarAvatar = document.getElementById("navbarAvatar");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const loadingOverlay = document.getElementById("loadingOverlay");
+    const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
+    const navLogoutBtn = document.getElementById("navLogoutBtn");
     const notificationBell = document.getElementById("notificationBell");
     const notificationBadge = document.getElementById("notificationBadge");
     const notificationMenu = document.getElementById("notificationMenu");
     const notificationList = document.getElementById("notificationList");
     const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+    const loadingOverlay = document.getElementById("loadingOverlay");
 
     let currentDocId = null;
     let currentDocData = null;
+    let reportsUnsub = null;
+    let reportToDecline = null;
     let notificationsList = [];
     let trackedUsers = new Set();
     let trackedReports = new Set();
@@ -732,13 +924,6 @@
       updateNotificationUI();
     });
 
-    // Hide notification menu on outside click
-    document.addEventListener("click", (e) => {
-      if (!notificationMenu.contains(e.target) && e.target !== notificationBell) {
-        notificationMenu.classList.remove("show");
-      }
-    });
-
     // Helper function to check if position is Barangay
     function isBarangayPosition(position) {
       if (!position) return false;
@@ -751,311 +936,257 @@
              pos.includes("brgy. official");
     }
 
-    // Handle scroll shadows
-    function handleScrollShadows(el) {
-      const isScrolledLeft = el.scrollLeft > 10;
-      const isScrolledRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 10);
-      
-      el.classList.toggle('scrolled-left', isScrolledLeft);
-      el.classList.toggle('scrolled-right', isScrolledRight);
-    }
-
-    // Attach scroll listeners
-    pendingTableCard.addEventListener('scroll', () => handleScrollShadows(pendingTableCard));
-    ongoingTableCard.addEventListener('scroll', () => handleScrollShadows(ongoingTableCard));
-    completedTableCard.addEventListener('scroll', () => handleScrollShadows(completedTableCard));
-
-    function showLoading(show = true) {
-      loadingOverlay.style.display = show ? "flex" : "none";
-      loadingOverlay.setAttribute("aria-hidden", show ? "false" : "true");
-    }
-
-    // Format timestamp
     function formatTimestamp(timestamp) {
       if (!timestamp) return "";
       let date;
-      if (timestamp.toDate) {
-        date = timestamp.toDate();
-      } else if (typeof timestamp === 'string') {
-        date = new Date(timestamp);
-      } else {
-        return timestamp;
-      }
+      if (timestamp.toDate) date = timestamp.toDate();
+      else if (typeof timestamp === 'string') date = new Date(timestamp);
+      else return timestamp;
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const month = months[date.getMonth()];
-      const day = String(date.getDate()).padStart(2, '0');
-      const year = date.getFullYear();
-      let hours = date.getHours();
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12 || 12;
-      return `${month}/${day}/${year} | ${hours}:${minutes} ${ampm}`;
+      const m = months[date.getMonth()];
+      const d = String(date.getDate()).padStart(2,'0');
+      const y = date.getFullYear();
+      let h = date.getHours();
+      const min = String(date.getMinutes()).padStart(2,'0');
+      const ampm = h>=12?'PM':'AM';
+      h = h%12||12;
+      return `${m}/${d}/${y} | ${h}:${min} ${ampm}`;
     }
 
-    function createFieldRow(key, value, opts = {}) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "modal-row";
-      const label = document.createElement("label");
-      label.textContent = key;
-      wrapper.appendChild(label);
-
-      if (key === "incidentImage" || key === "imageUrl") {
-        const input = document.createElement("input");
-        input.type = "text";
-        input.id = `field-${key}`;
-        input.value = value || "";
-        if (opts.readonly) input.readOnly = true;
-        wrapper.appendChild(input);
-
-        if (value) {
-          const img = document.createElement("img");
-          img.src = value;
-          img.alt = "image preview";
-          img.className = "img-preview";
-          wrapper.appendChild(img);
-        } else {
-          const ph = document.createElement("div");
-          ph.style.marginTop = "6px";
-          ph.style.color = "#666";
-          ph.style.fontSize = ".9rem";
-          ph.textContent = "No image available";
-          wrapper.appendChild(ph);
-        }
-        return wrapper;
-      }
-
-      if (key === "createdAt" && value && typeof value === "object" && value.toDate) {
-        const input = document.createElement("input");
-        input.type = "text";
-        input.id = `field-${key}`;
-        input.value = value.toDate ? value.toDate().toLocaleString() : String(value);
-        input.readOnly = true;
-        wrapper.appendChild(input);
-        return wrapper;
-      }
-
-      if (opts.readonly) {
-        const input = document.createElement("input");
-        input.type = "text";
-        input.id = `field-${key}`;
-        input.value = value === undefined ? "" : String(value);
-        input.readOnly = true;
-        wrapper.appendChild(input);
-        return wrapper;
-      }
-
-      if (typeof value === "number") {
-        const input = document.createElement("input");
-        input.type = "number";
-        input.id = `field-${key}`;
-        input.value = value;
-        wrapper.appendChild(input);
-        return wrapper;
-      }
-
-      if (typeof value === "string") {
-        if (value.length > 120 || key.toLowerCase().includes("description") || key.toLowerCase().includes("remarks")) {
-          const ta = document.createElement("textarea");
-          ta.id = `field-${key}`;
-          ta.value = value;
-          wrapper.appendChild(ta);
-          return wrapper;
-        } else {
-          const input = document.createElement("input");
-          input.type = "text";
-          input.id = `field-${key}`;
-          input.value = value;
-          wrapper.appendChild(input);
-          return wrapper;
-        }
-      }
-
-      const ta = document.createElement("textarea");
-      ta.id = `field-${key}`;
-      try { ta.value = JSON.stringify(value); } catch(e) { ta.value = String(value); }
-      wrapper.appendChild(ta);
-      return wrapper;
+    function formatDate(timestamp) {
+      if (!timestamp) return "Not Set";
+      let date;
+      if (timestamp.toDate) date = timestamp.toDate();
+      else if (typeof timestamp === 'string') date = new Date(timestamp);
+      else return "Not Set";
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const m = months[date.getMonth()];
+      const d = String(date.getDate()).padStart(2,'0');
+      const y = date.getFullYear();
+      return `${m} ${d}, ${y}`;
     }
 
-    function buildTableRow(docSnap) {
+    function showLoading(show = true) {
+      loadingOverlay.style.display = show ? "flex" : "none";
+    }
+
+    function buildTableRow(docSnap, isDeclined = false) {
       const r = docSnap.data();
       const tr = document.createElement("tr");
-
-      function addCell(text, classes = "") {
-        const td = document.createElement("td");
-        if (classes) td.className = classes;
-        if (classes.includes("truncate")) {
-          const span = document.createElement("span");
-          span.className = "truncate";
-          span.textContent = (text === undefined || text === null) ? "" : String(text);
-          span.title = (text === undefined || text === null) ? "" : String(text);
-          td.appendChild(span);
-        } else {
-          td.textContent = (text === undefined || text === null) ? "" : String(text);
-        }
+      const addCell = (c, cls="")=>{
+        const td=document.createElement("td");
+        if(cls)td.className=cls;
+        if(typeof c==="string")td.textContent=c;else td.appendChild(c);
         tr.appendChild(td);
-      }
-
-      addCell(r.reportId || "", "col-id");
-      addCell(r.barangay || "");
-      addCell(r.description || "", "truncate");
-
-      const ageGroup = r.affectedAgeGroups || "";
-      const people = r.peopleInvolved || "";
-      addCell(ageGroup + (ageGroup && people ? " / " : "") + people);
-
-      const width = r.width || "";
-      const height = r.height || "";
-      const dimensions = width && height ? `${width}×${height}` : (width || height || "");
-      addCell(dimensions, "col-small");
-
-      const imgTd = document.createElement("td");
-      const imageData = r.incidentImage || r.imageUrl || r.image;
+      };
       
-      if (imageData) {
-        const link = document.createElement("a");
-        link.href = "#";
-        link.textContent = "View";
-        link.style.cursor = "pointer";
-        link.addEventListener("click", (e) => {
+      addCell(r.reportId||"");
+      addCell(r.barangay||"");
+      const desc=document.createElement("span");
+      desc.className="truncate";
+      desc.textContent=r.description||"";
+      desc.title=r.description||"";
+      addCell(desc);
+      addCell(`${r.affectedAgeGroups||""}${r.affectedAgeGroups&&r.peopleInvolved?" / ":""}${r.peopleInvolved||""}`);
+      const dims=(r.width&&r.height)?`${r.width}×${r.height}`:(r.width||r.height||"");
+      addCell(dims);
+      
+      const imgSpan=document.createElement("span");
+      const imgData=r.incidentImage||r.imageUrl||r.image;
+      if(imgData){
+        const link=document.createElement("a");
+        link.href="#";link.textContent="View";
+        link.onclick=(e)=>{
           e.preventDefault();
-          const imgModal = document.createElement("div");
-          imgModal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
-          
-          const img = document.createElement("img");
-          img.src = imageData;
-          img.style.cssText = "max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
-          
-          const closeBtn = document.createElement("button");
-          closeBtn.textContent = "×";
-          closeBtn.style.cssText = "position:absolute;top:20px;right:20px;background:white;border:none;font-size:30px;cursor:pointer;width:40px;height:40px;border-radius:50%;";
-          
-          imgModal.appendChild(img);
-          imgModal.appendChild(closeBtn);
-          document.body.appendChild(imgModal);
-          
-          imgModal.addEventListener("click", () => imgModal.remove());
-          closeBtn.addEventListener("click", () => imgModal.remove());
-        });
-        imgTd.appendChild(link);
-      } else {
-        imgTd.textContent = "No";
+          const overlay=document.createElement("div");
+          overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
+          const img=document.createElement("img");
+          img.src=imgData.startsWith("http")?imgData:`data:image/jpeg;base64,${imgData}`;
+          img.style.cssText="max-width:90%;max-height:90%;border-radius:8px;";
+          overlay.appendChild(img);
+          overlay.onclick=()=>overlay.remove();
+          document.body.appendChild(overlay);
+        };
+        imgSpan.appendChild(link);
+      } else imgSpan.textContent="No";
+      addCell(imgSpan);
+      
+      addCell(`${r.latitude||""}${r.latitude&&r.longitude?", ":""}${r.longitude||""}`);
+      
+      const status=document.createElement("span");
+      const s=(r.status||"Pending").toLowerCase();
+      status.className=`status ${s}`;
+      status.textContent=r.status||"Pending";
+      addCell(status);
+      
+      addCell(formatTimestamp(r.timestamp||r.createdAt));
+      addCell(r.userId||"");
+      
+      // Add inspection date and budget for ongoing/completed/declined
+      if (s !== "pending") {
+        addCell(formatDate(r.inspectionDate));
+        
+        let budgetDisplay = "Not Set";
+        if(r.budgetAllocation) {
+          budgetDisplay = r.budgetAllocation;
+        } else if(r.budgetMin && r.budgetMax) {
+          budgetDisplay = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
+        }
+        addCell(budgetDisplay);
       }
-      tr.appendChild(imgTd);
-
-      const lat = r.latitude || "";
-      const lng = r.longitude || "";
-      const coords = lat && lng ? `${lat}, ${lng}` : (lat || lng || "");
-      addCell(coords, "col-small");
-
-      const statusSpan = document.createElement("span");
-      const st = (r.status || "pending").toString().toLowerCase();
-      statusSpan.className = `status ${st==='pending'?'pending':st==='ongoing'?'ongoing':'completed'}`;
-      statusSpan.textContent = r.status || "Pending";
-      const statusTd = document.createElement("td");
-      statusTd.className = "col-small";
-      statusTd.appendChild(statusSpan);
-      tr.appendChild(statusTd);
-
-      addCell(formatTimestamp(r.timestamp || r.createdAt));
-      addCell(r.userId || "", "col-id");
-
-      const actionContent = document.createElement("span");
-      const edit = document.createElement("a");
-      edit.href = "#";
-      edit.textContent = "Edit";
-      edit.dataset.id = docSnap.id;
-      edit.className = "edit-link";
-      actionContent.appendChild(edit);
-
-      const del = document.createElement("a");
-      del.href = "#";
-      del.textContent = "Delete";
-      del.dataset.id = docSnap.id;
-      del.className = "delete-link delete";
-      actionContent.appendChild(del);
-
-      const actionTd = document.createElement("td");
-      actionTd.className = "action";
-      actionTd.appendChild(actionContent);
-      tr.appendChild(actionTd);
-
+      
+      if(isDeclined) {
+        const reasonSpan = document.createElement("span");
+        reasonSpan.className = "truncate";
+        reasonSpan.textContent = r.declineReason || "No reason provided";
+        reasonSpan.title = r.declineReason || "No reason provided";
+        addCell(reasonSpan);
+      }
+      
+      const action=document.createElement("span");
+      const eLink=document.createElement("button");
+      eLink.className="btn-edit";
+      eLink.textContent="Edit";
+      eLink.dataset.id=docSnap.id;
+      eLink.onclick=openEditFromRow;
+      
+      action.appendChild(eLink);
+      
+      if(!isDeclined && s === "pending") {
+        const dLink=document.createElement("button");
+        dLink.className="btn-decline";
+        dLink.textContent="Decline";
+        dLink.dataset.id=docSnap.id;
+        dLink.onclick=openDeclineModal;
+        action.appendChild(dLink);
+      }
+      
+      addCell(action,"action");
       return tr;
     }
 
     function attachSearch(inputElem, tableBody) {
-      if (!inputElem) return;
-      inputElem.addEventListener("keyup", () => {
-        const filter = inputElem.value.toLowerCase();
-        const rows = tableBody.getElementsByTagName("tr");
-        for (let i=0;i<rows.length;i++){
-          const cells = rows[i].getElementsByTagName("td");
-          let show = false;
-          for (let j=0;j<cells.length;j++){
-            if (cells[j].innerText.toLowerCase().includes(filter)) { show = true; break; }
-          }
-          rows[i].style.display = show ? "" : "none";
-        }
+      inputElem.addEventListener("keyup", ()=>{
+        const val=inputElem.value.toLowerCase();
+        [...tableBody.rows].forEach(r=>{
+          const text=r.innerText.toLowerCase();
+          r.style.display=text.includes(val)?"":"none";
+        });
       });
     }
-
     attachSearch(searchPending, pendingBody);
     attachSearch(searchOngoing, ongoingBody);
     attachSearch(searchCompleted, completedBody);
+    attachSearch(searchDeclined, declinedBody);
 
-    async function openEditFromRow(e) {
+    async function openEditFromRow(e){
       e.preventDefault();
-      const id = e.currentTarget.dataset.id;
-      await openModalForDoc(id);
+      const id=e.currentTarget.dataset.id;
+      const snap=await getDoc(doc(db,"reports",id));
+      if(!snap.exists())return alert("Not found");
+      currentDocId=id;
+      currentDocData=snap.data();
+      modalGrid.innerHTML="";
+      Object.entries(currentDocData).forEach(([k,v])=>{
+        const row=document.createElement("div");
+        row.className="modal-row";
+        const lab=document.createElement("label");
+        lab.textContent=k;
+        row.appendChild(lab);
+        const inp=document.createElement("textarea");
+        inp.value=typeof v==="object"?JSON.stringify(v):v;
+        inp.id=`field-${k}`;
+        row.appendChild(inp);
+        modalGrid.appendChild(row);
+      });
+      editModal.style.display="flex";
     }
 
-    async function deleteFromRow(e) {
+    function openDeclineModal(e){
       e.preventDefault();
-      const id = e.currentTarget.dataset.id;
-      if (!confirm("Delete this report? This action cannot be undone.")) return;
-      try {
-        await deleteDoc(doc(db,"reports",id));
-        alert("Report deleted.");
-      } catch (err) {
-        console.error(err);
-        alert("Delete failed. See console.");
+      const id=e.currentTarget.dataset.id;
+      reportToDecline = id;
+      
+      declineReason.value = "";
+      declineInspectionDate.value = "";
+      declineBudgetMin.value = "";
+      declineBudgetMax.value = "";
+      
+      const today = new Date().toISOString().split('T')[0];
+      declineInspectionDate.min = today;
+      
+      declineModal.style.display="flex";
+    }
+
+    async function confirmDecline(){
+      const reason = declineReason.value.trim();
+      const inspectionDate = declineInspectionDate.value;
+      const budgetMin = declineBudgetMin.value.trim();
+      const budgetMax = declineBudgetMax.value.trim();
+      
+      if(!reason) {
+        alert("Please provide a reason for declining this report.");
+        declineReason.focus();
+        return;
       }
-    }
-
-    async function openModalForDoc(id) {
-      currentDocId = id;
+      
+      if(!inspectionDate) {
+        alert("Please select an inspection date.");
+        declineInspectionDate.focus();
+        return;
+      }
+      
+      if(!budgetMin || !budgetMax) {
+        alert("Please provide both minimum and maximum budget allocation.");
+        if(!budgetMin) declineBudgetMin.focus();
+        else declineBudgetMax.focus();
+        return;
+      }
+      
+      const minBudget = parseFloat(budgetMin);
+      const maxBudget = parseFloat(budgetMax);
+      
+      if(minBudget <= 0 || maxBudget <= 0) {
+        alert("Budget amounts must be greater than zero.");
+        return;
+      }
+      
+      if(minBudget >= maxBudget) {
+        alert("Maximum budget must be greater than minimum budget.");
+        declineBudgetMax.focus();
+        return;
+      }
+      
+      if(!reportToDecline) return;
+      
       try {
-        const snap = await getDoc(doc(db,"reports",id));
-        if (!snap.exists()) { alert("Report not found"); return; }
-        currentDocData = snap.data();
-        modalGrid.innerHTML = "";
-
-        const ordered = ["reportId","barangay","description","affectedAgeGroups","peopleInvolved","width","height","incidentImage","imageUrl","latitude","longitude","status","timestamp","createdAt","userId"];
-        const extras = Object.keys(currentDocData).filter(k => !ordered.includes(k));
-        const keys = ordered.concat(extras);
-
-        keys.forEach(k => {
-          if (!(k in currentDocData)) return;
-          const readonly = k === "createdAt";
-          const row = createFieldRow(k, currentDocData[k], { readonly });
-          modalGrid.appendChild(row);
+        const budgetRange = `₱${minBudget.toLocaleString()} - ₱${maxBudget.toLocaleString()}`;
+        
+        await updateDoc(doc(db, "reports", reportToDecline), {
+          status: "Declined",
+          declineReason: reason,
+          inspectionDate: new Date(inspectionDate),
+          budgetAllocation: budgetRange,
+          budgetMin: minBudget,
+          budgetMax: maxBudget,
+          declinedAt: serverTimestamp()
         });
-
-        editModal.style.display = "flex";
-        editModal.setAttribute("aria-hidden","false");
-        editModal.querySelector(".modal-content").scrollTop = 0;
-      } catch (err) {
-        console.error(err);
-        alert("Failed to open report. See console.");
+        
+        declineModal.style.display = "none";
+        reportToDecline = null;
+        alert("Report has been declined successfully.");
+      } catch(err) {
+        alert("Error declining report: " + err.message);
       }
     }
 
-    function closeEditModal() {
-      currentDocId = null;
-      currentDocData = null;
-      editModal.style.display = "none";
-      editModal.setAttribute("aria-hidden","true");
-    }
+    closeModal.onclick=()=>editModal.style.display="none";
+    cancelBtn.onclick=()=>editModal.style.display="none";
+    cancelDeclineBtn.onclick=()=>{
+      declineModal.style.display="none";
+      reportToDecline = null;
+    };
+    confirmDeclineBtn.onclick=confirmDecline;
 
     saveChangesBtn.addEventListener("click", async () => {
       if (!currentDocId) return;
@@ -1078,7 +1209,7 @@
       try {
         await updateDoc(doc(db,"reports",currentDocId), updates);
         alert("Changes saved.");
-        closeEditModal();
+        editModal.style.display="none";
       } catch (err) {
         console.error(err);
         alert("Save failed. See console.");
@@ -1091,20 +1222,10 @@
       try {
         await deleteDoc(doc(db,"reports",currentDocId));
         alert("Report deleted.");
-        closeEditModal();
+        editModal.style.display="none";
       } catch (err) {
         console.error(err);
         alert("Delete failed. See console.");
-      }
-    });
-
-    closeModal.addEventListener("click", closeEditModal);
-    cancelBtn.addEventListener("click", closeEditModal);
-    
-    window.addEventListener("click", (ev) => {
-      if (ev.target === editModal) closeEditModal();
-      if (!ev.target.closest(".profile")) {
-        dropdownMenu.style.display = "none";
       }
     });
 
@@ -1113,50 +1234,85 @@
       dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
     });
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = "logout.html"; return; }
-      try {
-        const uDoc = await getDoc(doc(db,"users",user.uid));
-        if (!uDoc.exists()) { window.location.href = "logout.html"; return; }
-        const d = uDoc.data();
-        if (d.position !== "Admin") { alert("Unauthorized access!"); window.location.href = "logout.html"; return; }
+    window.addEventListener("click", (e) => {
+      if (!e.target.closest(".profile-dropdown")) {
+        dropdownMenu.style.display = "none";
+      }
+      if (!notificationMenu.contains(e.target) && e.target !== notificationBell) {
+        notificationMenu.classList.remove("show");
+      }
+    });
 
-        navUsername.textContent = d.name || d.firstName || "Admin";
+    async function handleLogout() {
+      try {
+        await signOut(auth);
+        window.location.href = "logout.html";
+      } catch(err) {
+        alert("Error logging out: " + err.message);
+      }
+    }
+
+    sidebarLogoutBtn.addEventListener("click", handleLogout);
+    navLogoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      handleLogout();
+    });
+
+    onAuthStateChanged(auth, async(user)=>{
+      if(!user) {
+        window.location.href="logout.html";
+        return;
+      }
+      
+      try {
+        const uDoc=await getDoc(doc(db,"users",user.uid));
+        if(!uDoc.exists()) {
+          window.location.href="logout.html";
+          return;
+        }
+        
+        const d=uDoc.data();
+        if(d.position!=="Admin") {
+          alert("Unauthorized. Only Admins can access this page.");
+          window.location.href="logout.html";
+          return;
+        }
+        
+        navUsername.textContent=d.name||d.firstName||"Admin";
         if (d.photoURL || d.profilePic) {
           navbarAvatar.src = d.photoURL || d.profilePic;
         }
 
-        const reportsQuery = query(collection(db,"reports"), orderBy("createdAt","desc"));
-        onSnapshot(reportsQuery, snapshot => {
-          pendingBody.innerHTML = "";
-          ongoingBody.innerHTML = "";
-          completedBody.innerHTML = "";
-
-          snapshot.forEach(docSnap => {
-            const r = docSnap.data();
-            const st = (r.status || "pending").toString().toLowerCase();
-            const row = buildTableRow(docSnap);
-            if (st === "ongoing") {
-              ongoingBody.appendChild(row);
-            } else if (st === "completed" || st === "posted") {
-              completedBody.appendChild(row);
-            } else {
+        const q=query(collection(db,"reports"),orderBy("createdAt","desc"));
+        if(reportsUnsub) reportsUnsub();
+        
+        reportsUnsub=onSnapshot(q,(snap)=>{
+          pendingBody.innerHTML="";
+          ongoingBody.innerHTML="";
+          completedBody.innerHTML="";
+          declinedBody.innerHTML="";
+          
+          snap.forEach(docSnap=>{
+            const data=docSnap.data();
+            const status=(data.status||"pending").toLowerCase();
+            
+            if(status==="pending") {
+              const row=buildTableRow(docSnap, false);
               pendingBody.appendChild(row);
             }
+            else if(status==="ongoing") {
+              const row=buildTableRow(docSnap, false);
+              ongoingBody.appendChild(row);
+            }
+            else if(status==="completed" || status==="posted") {
+              const row=buildTableRow(docSnap, false);
+              completedBody.appendChild(row);
+            }
+            else if(status==="declined") {
+              const row=buildTableRow(docSnap, true);
+              declinedBody.appendChild(row);
+            }
           });
-
-          document.querySelectorAll(".edit-link").forEach(a => a.removeEventListener("click", openEditFromRow));
-          document.querySelectorAll(".delete-link").forEach(a => a.removeEventListener("click", deleteFromRow));
-          document.querySelectorAll(".edit-link").forEach(a => a.addEventListener("click", openEditFromRow));
-          document.querySelectorAll(".delete-link").forEach(a => a.addEventListener("click", deleteFromRow));
-
-          setTimeout(() => {
-            handleScrollShadows(pendingTableCard);
-            handleScrollShadows(ongoingTableCard);
-            handleScrollShadows(completedTableCard);
-          }, 100);
-        }, err => {
-          console.error("Realtime listener failed:", err);
         });
 
         // Live Firestore Notifications - New Users
@@ -1185,15 +1341,11 @@
           });
         });
 
-      } catch (err) {
-        console.error(err);
-        window.location.href = "logout.html";
+      } catch(err) {
+        console.error("Error loading user data:", err);
+        alert("Error loading user data. Please try again.");
+        window.location.href="logout.html";
       }
-    });
-
-    logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "logout.html";
     });
   </script>
 </body>
