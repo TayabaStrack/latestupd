@@ -5,6 +5,7 @@ admi
 - notification bell function, profile changes  (LAHAT except usermanagement & dashboard)
 - img no display (REPORTS, MAP, BULLETIN, PUBLIC DASH)
 - img edit/upload (PROFILE)
+- scrollable tables (LAHAT NG KELANGAN)
 
 
 s-admin
