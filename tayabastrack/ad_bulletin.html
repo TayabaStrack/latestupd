@@ -22,16 +22,98 @@
   .sidebar-menu li{margin:0.5rem 0}
   .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;text-decoration:none;color:#fff;transition:background .2s}
   .sidebar-menu li.active a,.sidebar-menu a:hover{background:#0756cc;border-left:4px solid #042f68}
-  .sidebar-footer{text-align:center;font-size:.85rem;padding:1rem;border-top:1px solid rgba(255,255,255,.2)}
+  .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,.2)}
+  .logout-btn {
+    background-color: #d9534f;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+    width: 100%;
+  }
+  .logout-btn:hover {
+    background-color: #c9302c;
+  }
 
   /* Main + Navbar */
   .main{flex:1;display:flex;flex-direction:column}
   .navbar{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);position:sticky;top:0;z-index:10}
   .navbar h1{font-size:1.4rem;color:#004aad}
-  .profile{display:flex;align-items:center;gap:1rem;cursor:pointer}
-  .fa-bell{font-size:1.2rem;position:relative}
-  .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px}
-  .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem}
+  .profile{display:flex;align-items:center;gap:1rem}
+  .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
+  .badge{
+    background:red;
+    color:#fff;
+    font-size:.7rem;
+    border-radius:50%;
+    padding:3px 6px;
+    position:absolute;
+    top:-8px;
+    right:-8px;
+    display:none;
+  }
+  .badge.show{display:flex;align-items:center;justify-content:center}
+
+  /* Notification Menu */
+  .notification-menu{
+    display:none;
+    position:absolute;
+    top:120%;
+    right:0;
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:6px;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+    width:320px;
+    max-height:400px;
+    overflow-y:auto;
+    z-index:1000;
+  }
+  .notification-menu.show{display:block}
+  .notification-header{
+    padding:1rem;
+    border-bottom:1px solid #eee;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .notification-header h3{font-size:1rem;color:#333;margin:0}
+  .clear-btn{
+    background:none;
+    border:none;
+    color:#004aad;
+    cursor:pointer;
+    font-size:0.85rem;
+  }
+  .notification-list{max-height:300px;overflow-y:auto}
+  .notification-item{
+    padding:0.8rem 1rem;
+    border-bottom:1px solid #f0f0f0;
+    display:flex;
+    gap:0.8rem;
+    transition:background 0.2s;
+  }
+  .notification-item:hover{background:#f9f9f9}
+  .notification-icon{
+    width:35px;
+    height:35px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .notification-icon.user{background:#e3f2fd;color:#1976d2}
+  .notification-icon.report{background:#fff3e0;color:#f57c00}
+  .notification-content{flex:1}
+  .notification-content p{margin:0;font-size:0.85rem}
+  .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.2rem}
+  .notification-empty{padding:2rem;text-align:center;color:#999}
+
+  .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
   .avatar{width:35px;height:35px;border-radius:50%}
   .username{font-weight:500}
   .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
@@ -98,9 +180,9 @@
     </ul>
   </div>
   <div class="sidebar-footer">
-    <p>Logged in as:</p>
-    <strong id="sidebarName">Loading...</strong><br>
-    <span id="sidebarPosition">Loading...</span>
+    <button class="logout-btn" id="logoutBtn">
+      <i class="fa fa-sign-out-alt"></i> Logout
+    </button>
   </div>
 </aside>
 
@@ -110,17 +192,27 @@
     <h1>Report Bulletin</h1>
     <div style="display:flex;align-items:center;gap:14px">
       <div style="position:relative">
-        <i class="fa fa-bell"></i>
-        <span class="badge" id="notifBadge">0</span>
+        <i class="fa fa-bell" id="notificationBell"></i>
+        <span class="badge" id="notificationBadge">0</span>
+        
+        <!-- Notification Menu -->
+        <div class="notification-menu" id="notificationMenu">
+          <div class="notification-header">
+            <h3>Notifications</h3>
+            <button class="clear-btn" id="clearNotificationsBtn">Clear all</button>
+          </div>
+          <div class="notification-list" id="notificationList">
+            <div class="notification-empty">No new notifications</div>
+          </div>
+        </div>
       </div>
 
       <div class="profile-dropdown" id="profileToggle">
-        <img src="admin-profile.jpg" alt="Profile" class="avatar">
+        <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar">
         <span class="username" id="navUsername">Loading...</span>
 
         <div class="dropdown-menu" id="dropdownMenu">
           <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
-          <a href="logout.html" id="logoutBtn"><i class="fa fa-sign-out-alt"></i>&nbsp; Logout</a>
         </div>
       </div>
     </div>
@@ -185,11 +277,10 @@
 </div>
 
 <!-- Firebase Script -->
-<!-- Firebase Script -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, query, where, orderBy, updateDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
@@ -216,13 +307,131 @@ const postToBulletinBtn = document.getElementById("postToBulletinBtn");
 const dropdownMenu = document.getElementById("dropdownMenu");
 const profileToggle = document.getElementById("profileToggle");
 const navUsername = document.getElementById("navUsername");
-const sidebarName = document.getElementById("sidebarName");
-const sidebarPosition = document.getElementById("sidebarPosition");
+const navbarAvatar = document.getElementById("navbarAvatar");
 const logoutBtn = document.getElementById("logoutBtn");
-const notifBadge = document.getElementById("notifBadge");
+
+// Notification elements
+const notificationBell = document.getElementById("notificationBell");
+const notificationBadge = document.getElementById("notificationBadge");
+const notificationMenu = document.getElementById("notificationMenu");
+const notificationList = document.getElementById("notificationList");
+const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
 
 let currentDocId = null;
 let currentDocData = null;
+let notificationsList = [];
+let trackedUsers = new Set();
+let trackedReports = new Set();
+
+// Helper function to check if position is Barangay Captain or Official
+function isBarangayPosition(position) {
+  if (!position) return false;
+  const pos = position.toLowerCase().trim();
+  return pos.includes("barangay captain") || 
+         pos.includes("brgy captain") || 
+         pos.includes("brgy. captain") ||
+         pos.includes("barangay official") || 
+         pos.includes("brgy official") || 
+         pos.includes("brgy. official");
+}
+
+// Notification functions
+function addNotification(type, message, detail) {
+  const notification = {
+    id: Date.now(),
+    type,
+    message,
+    detail,
+    timestamp: new Date()
+  };
+  notificationsList.unshift(notification);
+  updateNotificationUI();
+}
+
+function updateNotificationUI() {
+  const count = notificationsList.length;
+  if (count > 0) {
+    notificationBadge.textContent = count;
+    notificationBadge.classList.add("show");
+  } else {
+    notificationBadge.textContent = "";
+    notificationBadge.classList.remove("show");
+  }
+
+  if (notificationsList.length === 0) {
+    notificationList.innerHTML = '<div class="notification-empty">No new notifications</div>';
+  } else {
+    notificationList.innerHTML = notificationsList.map(n => `
+      <div class="notification-item">
+        <div class="notification-icon ${n.type}">
+          ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+        </div>
+        <div class="notification-content">
+          <p><strong>${n.message}</strong></p>
+          <p>${n.detail}</p>
+          <span class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+// Toggle notification menu
+notificationBell.addEventListener("click", (e) => {
+  e.stopPropagation();
+  notificationMenu.classList.toggle("show");
+  dropdownMenu.style.display = "none";
+});
+
+// Clear all notifications
+clearNotificationsBtn.addEventListener("click", () => {
+  notificationsList = [];
+  updateNotificationUI();
+});
+
+// Hide menus on outside click
+window.addEventListener("click", (e) => {
+  if (!e.target.closest(".profile")) {
+    notificationMenu.classList.remove("show");
+    dropdownMenu.style.display = "none";
+  }
+});
+
+// Profile dropdown toggle
+profileToggle.addEventListener("click", (e) => {
+  e.stopPropagation();
+  dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+  notificationMenu.classList.remove("show");
+});
+
+// Setup realtime notifications
+function setupRealtimeNotifications() {
+  // Listen for new pending users
+  const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
+  onSnapshot(qNewUsers, (snapshot) => {
+    snapshot.docChanges().forEach(change => {
+      if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
+        trackedUsers.add(change.doc.id);
+        const u = change.doc.data();
+        if (isBarangayPosition(u.position)) {
+          addNotification("user", `New registration: ${u.firstName || ""} ${u.surname || ""}`, u.email || "");
+        }
+      }
+    });
+  });
+
+  // Listen for new reports
+  const qReports = query(collection(db, "reports"));
+  onSnapshot(qReports, (snapshot) => {
+    snapshot.docChanges().forEach(change => {
+      if (change.type === "added" && !trackedReports.has(change.doc.id)) {
+        trackedReports.add(change.doc.id);
+        const r = change.doc.data();
+        addNotification("report", `New report submitted in ${r.barangay || "a barangay"}`, r.reportType || r.type || "");
+      }
+    });
+  });
+}
 
 // Load reports
 async function loadReports() {
@@ -230,7 +439,6 @@ async function loadReports() {
   const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
 
-  let notifCount = 0;
   snapshot.forEach(snap => {
     const r = snap.data();
 
@@ -272,15 +480,8 @@ async function loadReports() {
       tr.appendChild(actionTd);
 
       reportTable.appendChild(tr);
-    } else {
-      // Count pending reports for notifications
-      if (r.status && r.status.toString().trim().toLowerCase() === "pending") {
-        notifCount++;
-      }
     }
   });
-
-  notifBadge.textContent = notifCount;
 }
 
 // Search reports
@@ -322,11 +523,6 @@ function closeModalFunc() { editModal.style.display = "none"; currentDocId = nul
 closeModal.addEventListener("click", closeModalFunc);
 cancelBtn.addEventListener("click", closeModalFunc);
 
-// Dropdown toggle
-profileToggle.addEventListener("click", () => {
-  dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
-});
-
 // Logout
 logoutBtn.addEventListener("click", () => signOut(auth).then(() => location.href = "logout.html"));
 
@@ -337,9 +533,18 @@ onAuthStateChanged(auth, async user => {
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (!userDoc.exists()) return location.href = "login.html";
     const data = userDoc.data();
-    navUsername.textContent = data.name || user.email;
-    sidebarName.textContent = data.name || user.email;
-    sidebarPosition.textContent = data.position || "Admin";
+    if (data.position !== "Admin") {
+      alert("Unauthorized access!");
+      return location.href = "login.html";
+    }
+    navUsername.textContent = data.name || data.firstName || "Admin";
+    if (data.photoURL || data.profilePic) {
+      navbarAvatar.src = data.photoURL || data.profilePic;
+    }
+    
+    // Load reports and setup notifications
+    loadReports();
+    setupRealtimeNotifications();
   } catch (err) {
     console.error(err);
     location.href = "login.html";
@@ -365,11 +570,10 @@ saveChangesBtn.addEventListener("click", async () => {
   }
 });
 
-/// Post to Bulletin button (Fixed)
+// Post to Bulletin button
 postToBulletinBtn.addEventListener("click", async () => {
   if (!currentDocId) return;
   try {
-    // Convert date to proper Timestamp for Firestore ordering
     let dateValue = new Date();
     
     if (currentDocData.createdAt && currentDocData.createdAt.toDate) {
@@ -381,7 +585,7 @@ postToBulletinBtn.addEventListener("click", async () => {
     const bulletinData = {
       barangay: currentDocData.barangay || "",
       issue: currentDocData.description || "",
-      date: dateValue, // Save as proper Date object
+      date: dateValue,
       imageURL: currentDocData.imageUrl || ""
     };
 
@@ -392,11 +596,6 @@ postToBulletinBtn.addEventListener("click", async () => {
     alert("Error posting to bulletin.");
   }
 });
-
-// Load reports on page load
-loadReports();
 </script>
-
-
 </body>
 </html>

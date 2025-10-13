@@ -44,7 +44,25 @@
     .sidebar-menu li{margin:0.5rem 0}
     .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
     .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
-    .sidebar-footer{text-align:center;font-size:.85rem;padding:1rem;border-top:1px solid rgba(255,255,255,.2)}
+    .sidebar-footer{
+      text-align:center;
+      padding:1rem;
+      border-top:1px solid rgba(255,255,255,0.2);
+    }
+    .logout-btn {
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    .logout-btn:hover {
+      background-color: #c9302c;
+    }
 
     /* ---------- NAVBAR (fixed) ---------- */
     .navbar{
@@ -175,9 +193,9 @@
     </div>
 
     <div class="sidebar-footer">
-      <p>Logged in as:</p>
-      <strong id="sidebarName">Loading...</strong><br>
-      <span id="sidebarPosition">Loading...</span>
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa fa-sign-out-alt"></i> Logout
+      </button>
     </div>
   </aside>
 
@@ -191,12 +209,11 @@
       </div>
 
       <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
-        <img src="admin-profile.jpg" alt="Profile" class="avatar">
+        <img src="image.png" alt="Profile" class="avatar">
         <span class="username" id="navUsername">Loading...</span>
 
         <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
           <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
-          <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i>&nbsp; Logout</a>
         </div>
       </div>
     </div>
@@ -321,7 +338,7 @@
   </div>
 
   <!-- Firebase + logic -->
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import {
@@ -367,8 +384,6 @@
     const dropdownMenu = document.getElementById("dropdownMenu");
     const profileToggle = document.getElementById("profileToggle");
     const navUsername = document.getElementById("navUsername");
-    const sidebarName = document.getElementById("sidebarName");
-    const sidebarPosition = document.getElementById("sidebarPosition");
     const logoutBtn = document.getElementById("logoutBtn");
     const notifBadge = document.getElementById("notifBadge");
     const loadingOverlay = document.getElementById("loadingOverlay");
@@ -377,7 +392,7 @@
     let currentDocData = null;
     let reportsUnsub = null;
 
-    // Format timestamp to MMM/DD/YYYY | HH:MM AM/PM
+    // Format timestamp
     function formatTimestamp(timestamp) {
       if (!timestamp) return "";
       let date;
@@ -388,17 +403,14 @@
       } else {
         return timestamp;
       }
-      
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const month = months[date.getMonth()];
       const day = String(date.getDate()).padStart(2, '0');
       const year = date.getFullYear();
-      
       let hours = date.getHours();
       const minutes = String(date.getMinutes()).padStart(2, '0');
       const ampm = hours >= 12 ? 'PM' : 'AM';
       hours = hours % 12 || 12;
-      
       return `${month}/${day}/${year} | ${hours}:${minutes} ${ampm}`;
     }
 
@@ -425,13 +437,16 @@
 
         if (value) {
           const img = document.createElement("img");
-          // Handle base64 data
-          if (typeof value === 'string' && value.startsWith('data:')) {
+          if (typeof value === "object" && value.bytes) {
+            // Firestore Blob -> Base64
+            const bytes = new Uint8Array(value.bytes);
+            const binary = Array.from(bytes).map(b => String.fromCharCode(b)).join("");
+            img.src = `data:image/jpeg;base64,${btoa(binary)}`;
+          } else if (typeof value === "string" && value.startsWith("data:")) {
             img.src = value;
-          } else if (typeof value === 'string' && value.startsWith('http')) {
+          } else if (typeof value === "string" && value.startsWith("http")) {
             img.src = value;
           } else {
-            // Assume it's base64 without prefix
             img.src = `data:image/jpeg;base64,${value}`;
           }
           img.alt = "image preview";
@@ -525,31 +540,25 @@
         tr.appendChild(td);
       }
 
-      // Report ID
       addCell(r.reportId || "", "col-id");
-
-      // Barangay
       addCell(r.barangay || "");
 
-      // Description (truncated)
       const descSpan = document.createElement("span");
       descSpan.className = "truncate";
       descSpan.textContent = r.description || "";
       descSpan.title = r.description || "";
       addCell(descSpan);
 
-      // Age Groups / People (combined)
       const ageGroup = r.affectedAgeGroups || "";
       const people = r.peopleInvolved || "";
       addCell(ageGroup + (ageGroup && people ? " / " : "") + people);
 
-      // Dimensions (W×H)
       const width = r.width || "";
       const height = r.height || "";
       const dimensions = width && height ? `${width}×${height}` : (width || height || "");
       addCell(dimensions, "col-small");
 
-      // Image - handle both URL and blob/base64 data
+      // 🔥 Fix for incidentImage blob/base64/url
       const imgContent = document.createElement("span");
       const imageData = r.incidentImage || r.imageUrl || r.image;
       
@@ -560,18 +569,19 @@
         link.style.cursor = "pointer";
         link.addEventListener("click", (e) => {
           e.preventDefault();
-          // Create modal to show image
           const imgModal = document.createElement("div");
           imgModal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
           
           const img = document.createElement("img");
-          // Check if it's base64 or URL
-          if (typeof imageData === 'string' && imageData.startsWith('data:')) {
+          if (typeof imageData === "object" && imageData.bytes) {
+            const bytes = new Uint8Array(imageData.bytes);
+            const binary = Array.from(bytes).map(b => String.fromCharCode(b)).join("");
+            img.src = `data:image/jpeg;base64,${btoa(binary)}`;
+          } else if (typeof imageData === "string" && imageData.startsWith("data:")) {
             img.src = imageData;
-          } else if (typeof imageData === 'string' && imageData.startsWith('http')) {
+          } else if (typeof imageData === "string" && imageData.startsWith("http")) {
             img.src = imageData;
           } else {
-            // Assume it's base64 without prefix
             img.src = `data:image/jpeg;base64,${imageData}`;
           }
           img.style.cssText = "max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
@@ -593,26 +603,20 @@
       }
       addCell(imgContent);
 
-      // Coordinates (combined)
       const lat = r.latitude || "";
       const lng = r.longitude || "";
       const coords = lat && lng ? `${lat}, ${lng}` : (lat || lng || "");
       addCell(coords, "col-small");
 
-      // Status
       const statusSpan = document.createElement("span");
       const st = (r.status || "pending").toString().toLowerCase();
       statusSpan.className = `status ${st==='pending'?'pending':st==='ongoing'?'ongoing':'completed'}`;
       statusSpan.textContent = r.status || "Pending";
       addCell(statusSpan, "col-small");
 
-      // Timestamp (formatted)
       addCell(formatTimestamp(r.timestamp || r.createdAt));
-
-      // User ID
       addCell(r.userId || "", "col-id");
 
-      // Actions
       const actionContent = document.createElement("span");
       const edit = document.createElement("a");
       edit.href = "#";
@@ -629,7 +633,6 @@
       actionContent.appendChild(del);
 
       addCell(actionContent, "action");
-
       return tr;
     }
 
@@ -764,8 +767,6 @@
         if (d.position !== "Admin") { alert("Unauthorized access!"); window.location.href = "login.html"; return; }
 
         navUsername.textContent = d.name || "Admin";
-        sidebarName.textContent = d.name || "Admin";
-        sidebarPosition.textContent = d.position || "Admin";
 
         const reportsQuery = query(collection(db,"reports"), orderBy("createdAt","desc"));
         if (reportsUnsub) reportsUnsub();
@@ -817,16 +818,9 @@
       }
     });
 
-    logoutBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      try {
-        await signOut(auth);
-        window.location.href = "logout.html";
-        setTimeout(() => { window.location.href = "login.html"; }, 1200);
-      } catch (error) {
-        console.error("Logout failed:", error);
-        window.location.href = "login.html";
-      }
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "logout.html";
     });
 
   </script>

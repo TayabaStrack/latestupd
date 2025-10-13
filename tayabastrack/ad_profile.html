@@ -21,7 +21,21 @@
     .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:10px;border-radius:6px;color:#fff;text-decoration:none}
     .sidebar-menu a:hover{background:#0756cc}
     .sidebar-footer{padding:12px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);font-size:0.9rem}
-
+    .logout-btn {
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    .logout-btn:hover {
+      background-color: #c9302c;
+    }
+    
     /* Main */
     .main { flex:1; display:flex; flex-direction:column; }
     .navbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,0.04);position:sticky;top:0;z-index:5}
@@ -37,7 +51,7 @@
     /* Cards */
     .card{background:white;border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(13,34,85,0.06)}
     .profile-card .top{display:flex;gap:18px;align-items:center}
-    .profile-card img{width:120px;height:120px;border-radius:10px;object-fit:cover;border-radius:50%}
+    .profile-card img.profile-main{width:120px;height:120px;border-radius:50%;object-fit:cover}
     .profile-info{margin-top:12px}
     .profile-info label{display:block;font-weight:700;font-size:13px;margin-top:10px}
     .profile-info input{width:100%;padding:8px;border-radius:8px;border:1px solid #d7dce6;margin-top:6px;font-size:14px;background:#fbfdff}
@@ -65,10 +79,25 @@
 
     /* Modal */
     .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:50}
-    .modal .content{background:white;padding:16px;border-radius:10px;width:360px;max-width:95%;box-shadow:0 14px 40px rgba(2,6,23,0.15)}
-    .modal .content h2{color:#004aad;margin-bottom:10px;text-align:center}
-    .modal input[type="text"], .modal input[type="email"]{width:100%;padding:8px;margin-top:8px;border-radius:8px;border:1px solid #d7dce6}
-    .modal .preview{display:block;margin:8px auto;border-radius:50%;width:90px;height:90px;object-fit:cover}
+    .modal .content{background:white;padding:20px;border-radius:10px;width:420px;max-width:95%;box-shadow:0 14px 40px rgba(2,6,23,0.15);max-height:90vh;overflow-y:auto}
+    .modal .content h2{color:#004aad;margin-bottom:16px;text-align:center}
+    .modal input[type="text"], .modal input[type="email"], .modal input[type="tel"]{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #d7dce6;font-size:14px}
+    .modal label{display:block;font-weight:600;margin-top:12px;font-size:13px;color:#333}
+    
+    .photo-upload-section{text-align:center;margin-bottom:16px;padding:16px;background:#f9fafb;border-radius:8px}
+    .photo-upload-section .preview{display:block;margin:12px auto;border-radius:50%;width:120px;height:120px;object-fit:cover;border:3px solid #004aad}
+    .upload-btn-wrapper{position:relative;display:inline-block;margin-top:10px}
+    .upload-btn-wrapper input[type=file]{display:none}
+    .upload-btn{background:#004aad;color:white;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;display:inline-block}
+    .upload-btn:hover{opacity:0.9}
+
+    .btn-group{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+    .btn-cancel{background:#6c757d}
+    .btn-cancel:hover{background:#5a6268}
+
+    .dropdown-menu{display:none;position:absolute;right:0;top:50px;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.12);min-width:150px;z-index:100}
+    .dropdown-menu a{display:block;padding:10px 16px;text-decoration:none;color:#222;font-size:14px}
+    .dropdown-menu a:hover{background:#f0f2f7}
 
     /* small screens */
     @media (max-width:980px){
@@ -95,9 +124,9 @@
       </ul>
     </div>
     <div class="sidebar-footer">
-      <div>Logged in as:</div>
-      <strong id="sidebarName">Loading...</strong>
-      <div id="sidebarPosition">Loading...</div>
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa fa-sign-out-alt"></i> Logout
+      </button>
     </div>
   </aside>
 
@@ -111,9 +140,8 @@
           <span class="badge">1</span>
         </div>
         <img src="admin-profile.jpg" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
-        <div style="display:none;position:absolute;right:10px;top:64px;background:#fff;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.12)" id="dropdownMenu">
-          <a href="ad_profile.html" style="display:block;padding:10px;text-decoration:none;color:#222">Profile</a>
-          <a href="logout.html" style="display:block;padding:10px;text-decoration:none;color:#222">Logout</a>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
         </div>
         <div id="navUsername" style="font-weight:600"></div>
       </div>
@@ -125,7 +153,7 @@
         <!-- Left: Profile Card -->
         <section class="card profile-card">
           <div class="top">
-            <img src="admin-profile.jpg" id="profilePic" alt="profile">
+            <img src="admin-profile.jpg" id="profilePic" alt="profile" class="profile-main">
             <div>
               <div style="font-size:18px;font-weight:700;color:#0b3e89" id="displayName">Loading...</div>
               <div style="margin-top:6px;color:#6b7380" id="displayRole">Administrator</div>
@@ -194,19 +222,40 @@
     <div class="content">
       <h2>Edit Profile</h2>
 
-      <input type="file" id="editPhoto" accept="image/*">
-      <img id="previewImg" class="preview" style="display:none">
+      <div class="photo-upload-section">
+        <img id="previewImg" class="preview" src="admin-profile.jpg" alt="Profile Preview">
+        <div class="upload-btn-wrapper">
+          <label class="upload-btn">
+            <i class="fa fa-camera"></i> Choose Photo
+            <input type="file" id="editPhoto" accept="image/*">
+          </label>
+        </div>
+        <div style="font-size:12px;color:#666;margin-top:8px">Upload a profile picture (JPG, PNG)</div>
+      </div>
 
+      <label>Full Name</label>
       <input type="text" id="editName" placeholder="Full name">
+      
+      <label>ID</label>
       <input type="text" id="editID" placeholder="ID">
+      
+      <label>Email</label>
       <input type="email" id="editEmail" placeholder="Email">
-      <input type="text" id="editPhone" placeholder="Phone">
+      
+      <label>Phone</label>
+      <input type="tel" id="editPhone" placeholder="Phone">
+      
+      <label>Address</label>
       <input type="text" id="editAddress" placeholder="Address">
+      
+      <label>Gender</label>
       <input type="text" id="editGender" placeholder="Gender">
 
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-        <button class="btn" onclick="closeEditModal()" style="background:#f0f2f7;color:#222">Cancel</button>
-        <button class="btn" onclick="saveEdit()" id="saveBtn">Save</button>
+      <div class="btn-group">
+        <button class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+        <button class="btn" onclick="saveEdit()" id="saveBtn">
+          <i class="fa fa-save"></i> Save Changes
+        </button>
       </div>
     </div>
   </div>
@@ -233,6 +282,8 @@
     const storage = firebase.storage();
 
     let currentUser = null;
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
 
     // Dropdown
     const dropdownMenu = document.getElementById('dropdownMenu');
@@ -245,22 +296,32 @@
 
     // ---------- Auth state & load profile ----------
     auth.onAuthStateChanged(async (user)=>{
-      if(!user) return console.warn("No user logged in.");
+      if(!user) {
+        console.warn("No user logged in.");
+        window.location.href = "login.html";
+        return;
+      }
       currentUser = user;
 
       const ref = db.collection('users').doc(user.uid);
       ref.onSnapshot(doc=>{
         if(!doc.exists) return;
         const data = doc.data();
-
-        document.getElementById("sidebarName").textContent = data.name || "No name";
-        document.getElementById("sidebarPosition").textContent = data.role || "—";
+        
+        // Update navbar
         document.getElementById("navUsername").textContent = data.name || "User";
+        
+        // Update profile pictures from Firestore
+        const photoURL = data.photoURL || "admin-profile.jpg";
+        document.getElementById("profilePic").src = photoURL;
+        document.getElementById("navAvatar").src = photoURL;
+        document.getElementById("previewImg").src = photoURL;
 
-        document.getElementById("profilePic").src = data.photoURL || "admin-profile.jpg";
-        document.getElementById("navAvatar").src = data.photoURL || "admin-profile.jpg";
+        // Update display info
         document.getElementById("displayName").textContent = data.name || "—";
+        document.getElementById("displayRole").textContent = data.position || data.role || "Administrator";
 
+        // Update form fields
         document.getElementById("cardName").value = data.name || "";
         document.getElementById("cardID").value = data.id || "";
         document.getElementById("cardEmail").value = data.email || user.email;
@@ -268,12 +329,24 @@
         document.getElementById("cardAddress").value = data.address || "";
         document.getElementById("cardGender").value = data.gender || "";
 
+        // Update edit modal fields
         document.getElementById("editName").value = data.name || "";
         document.getElementById("editID").value = data.id || "";
         document.getElementById("editEmail").value = data.email || user.email;
         document.getElementById("editPhone").value = data.phone || "";
         document.getElementById("editAddress").value = data.address || "";
         document.getElementById("editGender").value = data.gender || "";
+
+        // Update account info
+        document.getElementById("accountType").textContent = data.position || data.role || "Administrator";
+        if(data.createdAt) {
+          const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+          document.getElementById("registeredAt").textContent = date.toLocaleDateString();
+        }
+        if(data.lastLogin) {
+          const date = data.lastLogin.toDate ? data.lastLogin.toDate() : new Date(data.lastLogin);
+          document.getElementById("lastLogin").textContent = date.toLocaleString();
+        }
       });
     });
 
@@ -282,25 +355,50 @@
     const editPhoto = document.getElementById("editPhoto");
     const previewImg = document.getElementById("previewImg");
 
-    function openEditModal(){ editModal.style.display="flex"; previewImg.style.display="none"; editPhoto.value="" }
-    function closeEditModal(){ editModal.style.display="none" }
+    function openEditModal(){ 
+      editModal.style.display="flex";
+    }
+    
+    function closeEditModal(){ 
+      editModal.style.display="none";
+    }
 
+    // Preview image when file is selected
     editPhoto.addEventListener("change", e=>{
       const file = e.target.files[0];
       if(!file) return;
+      
+      // Validate file type
+      if(!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        editPhoto.value = '';
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if(file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        editPhoto.value = '';
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onload = ev=>{
         previewImg.src = ev.target.result;
-        previewImg.style.display="block";
       };
       reader.readAsDataURL(file);
     });
 
     // ---------- Save profile ----------
     async function saveEdit(){
-      if(!currentUser) return alert("No user logged in");
+      if(!currentUser) {
+        alert("No user logged in");
+        return;
+      }
+      
       const uid = currentUser.uid;
       const ref = db.collection("users").doc(uid);
+      const saveBtn = document.getElementById("saveBtn");
 
       const updated = {
         name: document.getElementById("editName").value.trim(),
@@ -311,22 +409,111 @@
         gender: document.getElementById("editGender").value.trim()
       };
 
+      // Validate required fields
+      if(!updated.name) {
+        alert("Name is required");
+        return;
+      }
+
       const file = editPhoto.files[0];
+      
       try {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+
+        // Upload photo if selected
         if(file){
           const storageRef = storage.ref().child(`profilePics/${uid}/avatar.jpg`);
-          await storageRef.put(file);
+          const uploadTask = await storageRef.put(file);
           const url = await storageRef.getDownloadURL();
           updated.photoURL = url;
         }
+        
+        // Update Firestore
         await ref.set(updated, { merge:true });
-        alert("Profile updated!");
+        
+        alert("Profile updated successfully!");
         closeEditModal();
+        
+        // Reset file input
+        editPhoto.value = '';
+        
       } catch(err){
         console.error(err);
-        alert("Error: "+err.message);
+        alert("Error updating profile: " + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
       }
     }
+
+    // ---------- Calendar Functions ----------
+    function renderCalendar() {
+      const monthYear = document.getElementById('monthYear');
+      const calendarDays = document.getElementById('calendarDays');
+      
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const lastDay = new Date(currentYear, currentMonth + 1, 0);
+      const today = new Date();
+      
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+      
+      monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+      
+      calendarDays.innerHTML = '';
+      
+      // Add empty cells for days before first day of month
+      for(let i = 0; i < firstDay.getDay(); i++) {
+        const emptyDiv = document.createElement('div');
+        calendarDays.appendChild(emptyDiv);
+      }
+      
+      // Add days of month
+      for(let day = 1; day <= lastDay.getDate(); day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'calendar-day';
+        dayDiv.textContent = day;
+        
+        // Highlight today
+        if(day === today.getDate() && 
+           currentMonth === today.getMonth() && 
+           currentYear === today.getFullYear()) {
+          dayDiv.classList.add('today');
+        }
+        
+        calendarDays.appendChild(dayDiv);
+      }
+    }
+
+    function prevMonth() {
+      currentMonth--;
+      if(currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      currentMonth++;
+      if(currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    }
+
+    // Initialize calendar
+    renderCalendar();
+
+    // Make functions global
+    window.openEditModal = openEditModal;
+    window.closeEditModal = closeEditModal;
+    window.saveEdit = saveEdit;
+    window.toggleDropdown = toggleDropdown;
+    window.prevMonth = prevMonth;
+    window.nextMonth = nextMonth;
   </script>
 </body>
 </html>

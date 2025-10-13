@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TayabaStrack | Map</title>
+  <title>Map | TayabaStrack</title>
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -58,6 +58,21 @@
       font-size: 0.85rem;
       padding: 1rem;
       border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .logout-btn {
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    .logout-btn:hover {
+      background-color: #c9302c;
     }
 
     /* Main / Navbar */
@@ -196,9 +211,9 @@
       </ul>
     </div>
     <div class="sidebar-footer">
-      <p>Logged in as:</p>
-      <strong id="sidebarName">Loading...</strong><br />
-      <span id="sidebarPosition">---</span>
+      <button class="logout-btn" id="logoutBtn">
+      <i class="fa fa-sign-out-alt"></i> Logout
+      </button>
     </div>
   </aside>
 
@@ -220,7 +235,6 @@
           <span class="username" id="navUsername">Admin</span>
           <div class="dropdown-menu" id="dropdownMenu">
             <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
-            <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
           </div>
         </div>
       </div>
@@ -273,8 +287,6 @@
         }
 
         const data = userDocSnap.data();
-        document.getElementById("sidebarName").textContent = data.name || "Admin";
-        document.getElementById("sidebarPosition").textContent = data.position || "Admin";
         document.getElementById("navUsername").textContent = data.name || "Admin";
 
         // Fetch reports from Firestore
