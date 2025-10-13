@@ -208,6 +208,11 @@
       color: white;
     }
 
+    .status-completed {
+      background: #1cc88a;
+      color: white;
+    }
+
     .loading {
       text-align: center;
       padding: 40px;
@@ -242,12 +247,15 @@
       height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
       animation: fadeIn 0.3s;
+      overflow-y: auto;
+      padding: 20px;
     }
 
     .modal.active {
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
+      padding-top: 40px;
     }
 
     @keyframes fadeIn {
@@ -259,11 +267,13 @@
       background: white;
       padding: 30px;
       border-radius: 12px;
-      max-width: 600px;
+      max-width: 900px;
+      width: 100%;
       max-height: 90vh;
       overflow-y: auto;
       box-shadow: 0 10px 40px rgba(0,0,0,0.3);
       animation: slideUp 0.3s;
+      margin: 0 auto;
     }
 
     @keyframes slideUp {
@@ -284,6 +294,7 @@
       color: #999;
       cursor: pointer;
       transition: color 0.2s;
+      line-height: 1;
     }
 
     .close-btn:hover {
@@ -297,20 +308,39 @@
       clear: both;
     }
 
+    /* Side-by-side images container */
+    .images-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .image-container {
+      display: flex;
+      flex-direction: column;
+    }
+
     .modal-image {
       width: 100%;
-      height: 300px;
+      height: 250px;
       object-fit: cover;
       border-radius: 8px;
-      margin-bottom: 15px;
+      margin-bottom: 8px;
+      border: 2px solid #e9ecef;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .modal-image:hover {
+      transform: scale(1.02);
     }
 
     .image-label {
       font-size: 0.85rem;
       color: #666;
-      margin-bottom: 20px;
       text-align: center;
-      font-style: italic;
+      font-weight: 600;
     }
 
     .modal-section {
@@ -344,6 +374,67 @@
       font-size: 0.9rem;
       word-break: break-all;
     }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .images-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        padding: 20px;
+        margin: 20px;
+      }
+
+      .card {
+        flex: 0 0 250px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+    }
+
+    /* Image preview modal */
+    .image-preview-modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .image-preview-modal.active {
+      display: flex;
+    }
+
+    .image-preview-content {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .image-preview-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .image-preview-close:hover {
+      color: #ccc;
+    }
   </style>
 </head>
 
@@ -376,22 +467,22 @@
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Main Modal -->
   <div id="bulletinModal" class="modal">
     <div class="modal-content">
       <span class="close-btn">&times;</span>
       <h2 class="modal-title">Barangay <span id="modalBarangay"></span></h2>
 
-      <div class="modal-section">
-        <div class="modal-label">Before Image</div>
-        <img id="modalBeforeImage" class="modal-image" src="" alt="Before">
-        <div class="image-label">Situation before the issue</div>
-      </div>
-
-      <div class="modal-section">
-        <div class="modal-label">After Image</div>
-        <img id="modalAfterImage" class="modal-image" src="" alt="After">
-        <div class="image-label">Situation after the issue</div>
+      <!-- Side-by-side images -->
+      <div class="images-grid">
+        <div class="image-container">
+          <img id="modalBeforeImage" class="modal-image" src="" alt="Before" onclick="previewImage(this.src)">
+          <div class="image-label">Before Image</div>
+        </div>
+        <div class="image-container">
+          <img id="modalAfterImage" class="modal-image" src="" alt="After" onclick="previewImage(this.src)">
+          <div class="image-label">After Image</div>
+        </div>
       </div>
 
       <div class="modal-section">
@@ -437,6 +528,12 @@
     </div>
   </div>
 
+  <!-- Image Preview Modal -->
+  <div id="imagePreviewModal" class="image-preview-modal">
+    <span class="image-preview-close">&times;</span>
+    <img id="imagePreviewContent" class="image-preview-content" src="" alt="Preview">
+  </div>
+
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -462,8 +559,19 @@
     const searchInput = document.getElementById("searchInput");
     const modal = document.getElementById("bulletinModal");
     const closeBtn = document.querySelector(".close-btn");
+    const imagePreviewModal = document.getElementById("imagePreviewModal");
+    const imagePreviewContent = document.getElementById("imagePreviewContent");
+    const imagePreviewClose = document.querySelector(".image-preview-close");
 
     let allBulletins = [];
+
+    // Image preview function (global scope)
+    window.previewImage = function(src) {
+      if (src && !src.includes('placeholder')) {
+        imagePreviewContent.src = src;
+        imagePreviewModal.classList.add("active");
+      }
+    };
 
     function formatDate(date) {
       if (!date) return 'N/A';
@@ -474,7 +582,27 @@
           day: 'numeric'
         });
       }
-      return date;
+      if (date instanceof Date) {
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+      // Try to parse string date
+      try {
+        const parsedDate = new Date(date);
+        if (!isNaN(parsedDate.getTime())) {
+          return parsedDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+        }
+      } catch (e) {
+        console.error('Date parsing error:', e);
+      }
+      return date.toString();
     }
 
     function getStatusClass(status) {
@@ -482,6 +610,7 @@
       const lower = status.toLowerCase();
       if (lower.includes('ongoing') || lower.includes('in progress')) return 'status-ongoing';
       if (lower.includes('resolved') || lower.includes('fixed')) return 'status-resolved';
+      if (lower.includes('completed')) return 'status-completed';
       return 'status-reported';
     }
 
@@ -489,13 +618,13 @@
       const card = document.createElement("div");
       card.classList.add("card");
       
-      const formattedDate = formatDate(data.createdAt || data.date);
       const isNew = index === 0;
+      const imageUrl = data.imageURL || data.beforeImageURL || 'https://via.placeholder.com/300x200?text=No+Image';
       
       card.innerHTML = `
         ${isNew ? '<div class="new-label">NEW</div>' : ''}
         <div class="card-image-wrapper">
-          <img src="${data.imageURL || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+          <img src="${imageUrl}" 
                alt="bulletin image"
                onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Available'">
         </div>
@@ -507,8 +636,9 @@
             </strong>
           </div>
           <div class="card-info">
-            <strong>Date:</strong> ${formatDate(data.createdAt || data.date)}
+            <strong>Date:</strong> ${formatDate(data.date || data.createdAt)}
           </div>
+          ${data.issue ? `<div class="card-info"><strong>Issue:</strong> ${data.issue.substring(0, 50)}${data.issue.length > 50 ? '...' : ''}</div>` : ''}
         </div>
       `;
 
@@ -518,23 +648,42 @@
 
     function openModal(data) {
       document.getElementById("modalBarangay").textContent = data.barangay || 'N/A';
-      document.getElementById("modalBeforeImage").src = data.beforeImageURL || 'https://via.placeholder.com/300x200?text=No+Before+Image';
-      document.getElementById("modalAfterImage").src = data.afterImageURL || 'https://via.placeholder.com/300x200?text=No+After+Image';
-      document.getElementById("modalDescription").textContent = data.description || 'No description available';
-      document.getElementById("modalAffected").textContent = data.affected || 'Not specified';
-      document.getElementById("modalAgeRange").textContent = data.ageRange || 'Not specified';
+      
+      // Handle before image
+      const beforeImg = data.beforeImageURL || data.imageURL || 'https://via.placeholder.com/400x300?text=No+Before+Image';
+      document.getElementById("modalBeforeImage").src = beforeImg;
+      document.getElementById("modalBeforeImage").onerror = function() {
+        this.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
+      };
+      
+      // Handle after image
+      const afterImg = data.afterImageURL || 'https://via.placeholder.com/400x300?text=No+After+Image';
+      document.getElementById("modalAfterImage").src = afterImg;
+      document.getElementById("modalAfterImage").onerror = function() {
+        this.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
+      };
+      
+      document.getElementById("modalDescription").textContent = data.description || data.issue || 'No description available';
+      document.getElementById("modalAffected").textContent = data.affected || data.peopleInvolved || 'Not specified';
+      document.getElementById("modalAgeRange").textContent = data.ageRange || data.affectedAgeGroups || 'Not specified';
       document.getElementById("modalStatus").textContent = data.status || 'Not specified';
-      document.getElementById("modalDate").textContent = formatDate(data.createdAt || data.date);
+      document.getElementById("modalDate").textContent = formatDate(data.date || data.createdAt);
       document.getElementById("modalStartDate").textContent = data.repairStartDate ? formatDate(data.repairStartDate) : 'TBD';
       document.getElementById("modalEndDate").textContent = data.repairEndDate ? formatDate(data.repairEndDate) : 'TBD';
       document.getElementById("modalLatitude").textContent = data.latitude || 'N/A';
       document.getElementById("modalLongitude").textContent = data.longitude || 'N/A';
       
       modal.classList.add("active");
+      document.body.style.overflow = 'hidden';
     }
 
     function closeModal() {
       modal.classList.remove("active");
+      document.body.style.overflow = 'auto';
+    }
+
+    function closeImagePreview() {
+      imagePreviewModal.classList.remove("active");
     }
 
     function filterBulletins(searchTerm) {
@@ -549,7 +698,7 @@
         const barangay = (data.barangay || '').toLowerCase();
         const issue = (data.issue || '').toLowerCase();
         const status = (data.status || '').toLowerCase();
-        const date = formatDate(data.date).toLowerCase();
+        const date = formatDate(data.date || data.createdAt).toLowerCase();
         const description = (data.description || '').toLowerCase();
 
         return barangay.includes(term) || 
@@ -582,7 +731,10 @@
         return;
       }
 
-      allBulletins = snapshot.docs.map(doc => doc.data());
+      allBulletins = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       filterBulletins(searchInput.value);
     }
 
@@ -599,8 +751,24 @@
       if (e.target === modal) closeModal();
     });
 
+    imagePreviewClose.addEventListener("click", closeImagePreview);
+    imagePreviewModal.addEventListener("click", (e) => {
+      if (e.target === imagePreviewModal) closeImagePreview();
+    });
+
     searchInput.addEventListener("input", (e) => {
       filterBulletins(e.target.value);
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (imagePreviewModal.classList.contains("active")) {
+          closeImagePreview();
+        } else if (modal.classList.contains("active")) {
+          closeModal();
+        }
+      }
     });
 
     // Listen for real-time updates
