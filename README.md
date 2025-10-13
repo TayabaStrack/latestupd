@@ -6,6 +6,7 @@ admi
 - img no display (MAP, PUBLIC DASH, AD DASH)
 - img edit/upload (PROFILE done pero not tested yet)
 - fix notifications
+- edit post bulletin to include after image repairs before posting to buletin
 
 s-admin
 - uniform layout(LAHAT) 
