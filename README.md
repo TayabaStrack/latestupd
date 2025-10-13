@@ -5,7 +5,6 @@ admi
 - profile picture changes  (LAHAT kahit sa other day na)
 - img no display (REPORTS, MAP, BULLETIN, PUBLIC DASH, AD DASH)
 - img edit/upload (PROFILE done pero not tested yet)
-- update yung table ng ongoing at completed reports na may mga startdate/end date etc.
 
 
 s-admin
