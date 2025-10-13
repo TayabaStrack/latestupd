@@ -1,0 +1,49 @@
+[debug] [2025-10-07T12:24:58.543Z] ----------------------------------------------------------------------
+[debug] [2025-10-07T12:24:58.547Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Muchie\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js serve
+[debug] [2025-10-07T12:24:58.548Z] CLI Version:   14.18.0
+[debug] [2025-10-07T12:24:58.548Z] Platform:      win32
+[debug] [2025-10-07T12:24:58.548Z] Node Version:  v22.20.0
+[debug] [2025-10-07T12:24:58.548Z] Time:          Tue Oct 07 2025 20:24:58 GMT+0800 (Singapore Standard Time)
+[debug] [2025-10-07T12:24:58.548Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-07T12:24:58.874Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-10-07T12:24:58.874Z] > authorizing via signed-in user (tayabastrack@gmail.com)
+[debug] [2025-10-07T12:24:58.875Z] [iam] checking project tayabastrack-23b95 for permissions ["firebase.projects.get"]
+[debug] [2025-10-07T12:24:58.875Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:24:58.876Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:24:58.877Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/tayabastrack-23b95:testIamPermissions [none]
+[debug] [2025-10-07T12:24:58.877Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/tayabastrack-23b95:testIamPermissions x-goog-quota-user=projects/tayabastrack-23b95
+[debug] [2025-10-07T12:24:58.877Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/tayabastrack-23b95:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-10-07T12:25:00.395Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/tayabastrack-23b95:testIamPermissions 200
+[debug] [2025-10-07T12:25:00.395Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/tayabastrack-23b95:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-10-07T12:25:00.397Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:25:00.397Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:25:00.397Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/tayabastrack-23b95/services/cloudresourcemanager.googleapis.com [none]
+[debug] [2025-10-07T12:25:00.397Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/tayabastrack-23b95/services/cloudresourcemanager.googleapis.com x-goog-quota-user=projects/tayabastrack-23b95
+[debug] [2025-10-07T12:25:02.224Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/tayabastrack-23b95/services/cloudresourcemanager.googleapis.com 200
+[debug] [2025-10-07T12:25:02.224Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/tayabastrack-23b95/services/cloudresourcemanager.googleapis.com [omitted]
+[debug] [2025-10-07T12:25:02.229Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:25:02.229Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:25:02.229Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/tayabastrack-23b95 [none]
+[debug] [2025-10-07T12:25:02.529Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/tayabastrack-23b95 200
+[debug] [2025-10-07T12:25:02.529Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/tayabastrack-23b95 {"projectNumber":"674055915366","projectId":"tayabastrack-23b95","lifecycleState":"ACTIVE","name":"TayabaStrack","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-09-20T16:38:26.579475Z"}
+[info] 
+[info] === Serving from 'C:\Users\Muchie\Documents\AAWEB DEV\tayabastrack'...
+[info] 
+[debug] [2025-10-07T12:25:02.536Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:25:02.536Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:25:02.536Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/tayabastrack-23b95/sites 
+[debug] [2025-10-07T12:25:03.448Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/tayabastrack-23b95/sites 200
+[debug] [2025-10-07T12:25:03.448Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/tayabastrack-23b95/sites {"sites":[{"name":"projects/tayabastrack-23b95/sites/tayabastrack-23b95","defaultUrl":"https://tayabastrack-23b95.web.app","appId":"1:674055915366:web:aa560336c1f8b504eeaaa7","type":"DEFAULT_SITE"}]}
+[debug] [2025-10-07T12:25:03.449Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:25:03.449Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:25:03.449Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/tayabastrack-23b95/webApps/1:674055915366:web:aa560336c1f8b504eeaaa7/config [none]
+[debug] [2025-10-07T12:25:04.321Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/tayabastrack-23b95/webApps/1:674055915366:web:aa560336c1f8b504eeaaa7/config 200
+[debug] [2025-10-07T12:25:04.321Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/tayabastrack-23b95/webApps/1:674055915366:web:aa560336c1f8b504eeaaa7/config {"projectId":"tayabastrack-23b95","appId":"1:674055915366:web:aa560336c1f8b504eeaaa7","storageBucket":"tayabastrack-23b95.firebasestorage.app","apiKey":"AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o","authDomain":"tayabastrack-23b95.firebaseapp.com","messagingSenderId":"674055915366","projectNumber":"674055915366","version":"2"}
+[debug] [2025-10-07T12:25:04.328Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:25:04.328Z] Checked if tokens are valid: true, expires at: 1759843160456
+[debug] [2025-10-07T12:25:04.329Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/tayabastrack-23b95 [none]
+[debug] [2025-10-07T12:25:04.600Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/tayabastrack-23b95 200
+[debug] [2025-10-07T12:25:04.600Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/tayabastrack-23b95 {"projectId":"tayabastrack-23b95","projectNumber":"674055915366","displayName":"TayabaStrack","name":"projects/tayabastrack-23b95","resources":{"hostingSite":"tayabastrack-23b95"},"state":"ACTIVE","etag":"1_b9e29349-2bf3-4a54-91bc-ebe867e31edb"}
+[info] +  hosting[tayabastrack-23b95]: Local server: http://localhost:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://localhost:5000\u001b[22m\u001b[24m"}}
+[info] i  hosting: ::1 - - [07/Oct/2025:12:25:13 +0000] "GET / HTTP/1.1" 200 - "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"::1 - - [07/Oct/2025:12:25:13 +0000] \"GET / HTTP/1.1\" 200 - \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\""}}

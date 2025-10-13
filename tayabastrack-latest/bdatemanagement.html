@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budget and Date Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+  /* ============================
+     GLOBAL RESET & BASE
+  ============================ */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    display: flex;
+    min-height: 100vh;
+    background: #f5f7fb;
+    color: #333;
+  }
+
+  /* ============================
+     SIDEBAR
+  ============================ */
+  .sidebar {
+    width: 240px;
+    background: #004aad;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem 0;
+    flex-shrink: 0;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+
+  .sidebar-header img {
+    width: 40px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+
+  .sidebar-menu {
+    list-style: none;
+  }
+
+  .sidebar-menu li {
+    margin: 0.5rem 0;
+  }
+
+  .sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.8rem 1.5rem;
+    text-decoration: none;
+    color: #fff;
+    transition: background 0.3s;
+  }
+
+  .sidebar-menu li.active a,
+  .sidebar-menu a:hover {
+    background: #0756cc;
+    border-left: 4px solid #042f68;
+  }
+
+  .sidebar-footer {
+    text-align: center;
+    padding: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  .logout-btn {
+    background-color: #d9534f;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+    width: 100%;
+  }
+  
+  .logout-btn:hover {
+    background-color: #c9302c;
+  }
+
+  /* ============================
+     NAVBAR
+  ============================ */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    margin-left: 240px;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    z-index: 100;
+  }
+
+  .navbar h1 {
+    font-size: 1.4rem;
+    color: #004aad;
+    white-space: nowrap;
+  }
+
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  .fa-bell {
+    font-size: 1.2rem;
+    position: relative;
+  }
+
+  .badge {
+    background: red;
+    color: #fff;
+    font-size: 0.7rem;
+    border-radius: 50%;
+    padding: 3px 6px;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+  }
+
+  .profile-dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .username {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    z-index: 10000;
+  }
+
+  .dropdown-menu a {
+    display: block;
+    padding: 0.6rem 1rem;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.9rem;
+  }
+
+  .dropdown-menu a:hover {
+    background: #f0f0f0;
+    color: #004aad;
+  }
+
+  /* ============================
+     REPORTS SECTION
+  ============================ */
+  .reports-section {
+    padding: 1.5rem;
+    padding-top: 80px;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .report-box {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 1rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  }
+
+  .report-box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .report-box-header h2 {
+    color: #004aad;
+    font-size: 1.05rem;
+  }
+
+  .report-actions input {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    width: 260px;
+    max-width: 100%;
+  }
+
+  /* ============================
+     TABLE SECTION
+  ============================ */
+  .table-section {
+    margin-top: 25px;
+    padding-left: 20px;
+    padding-right: 20px;  
+  }
+
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .table-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #003366;
+  }
+
+  .table-header input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    width: 250px;
+    max-width: 100%;
+  }
+
+  .table-wrapper {
+    padding: 16px;
+    border-radius: 10px;
+    background: #fff;
+    overflow-x: auto;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-wrapper th,
+  .table-wrapper td {
+    padding: 12px 15px;
+  }
+
+  .table-wrapper thead {
+    background-color: #f5f7fb;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+  }
+
+  thead th {
+    background: #f5f8fb;
+    color: #333;
+    font-weight: 700;
+    padding: 0.7rem 0.75rem;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 2px solid #e0e0e0;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    vertical-align: top;
+    border-bottom: 1px solid #f0f2f5;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #fbfdff;
+  }
+
+  tbody tr:hover {
+    background: #f1f8ff;
+  }
+
+  .col-id {
+    width: 140px;
+    color: #444;
+    font-weight: 600;
+  }
+
+  .col-small {
+    width: 110px;
+  }
+
+  /* ============================
+     ACTION BUTTONS
+  ============================ */
+  .action a {
+    color: #004aad;
+    text-decoration: none;
+    font-weight: 700;
+    cursor: pointer;
+    margin-right: 8px;
+  }
+
+  .action .edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #004aad;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.3s, transform 0.2s;
+  }
+
+  .action .edit:hover {
+    background: #003580;
+    transform: scale(1.05);
+  }
+
+  .action .edit.allocate {
+    background: #28a745;
+  }
+
+  .action .edit.allocate:hover {
+    background: #1e7e34;
+  }
+
+  /* ============================
+     STATUS BADGES
+  ============================ */
+  .status-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.88rem;
+  }
+
+  .status-badge.completed {
+    background-color: #20c997;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(32, 201, 151, 0.25);
+  }
+
+  .status-badge.pending {
+    background-color: #f1c40f;
+    color: #333;
+  }
+
+  /* ============================
+     MODAL
+  ============================ */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 5000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    justify-content: center;
+    align-items: center;
+    padding: 18px;
+  }
+
+  .modal-content {
+    background: #fff;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 12px;
+    padding: 18px;
+    max-height: 92vh;
+    overflow: auto;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .modal-header h2 {
+    color: #004aad;
+    font-size: 1.1rem;
+    margin: 0;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #444;
+  }
+
+  .modal-body label {
+    display: block;
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    color: #333;
+  }
+
+  .modal-body input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+
+  .modal-footer {
+    margin-top: 1rem;
+    text-align: right;
+  }
+
+  .modal-footer button {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 0.9rem;
+  }
+
+  .save-btn {
+    background: #004aad;
+    color: #fff;
+  }
+
+  .cancel-btn {
+    background: #9e9e9e;
+    color: #fff;
+  }
+
+  /* ---------- SCROLL HINT ---------- */
+  .scroll-hint {
+    background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 74, 173, 0.2);
+  }
+  
+  .scroll-hint i {
+    animation: slideHint 2s ease-in-out infinite;
+  }
+  
+  @keyframes slideHint {
+    0%, 100% { transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+  }
+
+  /* ============================
+     RESPONSIVE
+  ============================ */
+  @media (max-width: 900px) {
+    .report-actions input {
+      width: 100%;
+    }
+
+    .navbar h1 {
+      font-size: 1.1rem;
+    }
+
+    .username {
+      display: none;
+    }
+  }
+</style>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <img src="logu.png" alt="Logo" class="logo" />
+        <h2>TayabaStrack</h2>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
+        <li><a href="usermanagement.html"><i class="fa fa-tasks"></i> User Management</a></li>
+        <li><a href="reports.html"><i class="fa fa-map-marker-alt"></i> Manage Reports</a></li>
+        <li class="active"><a href="bdatemanagement.html"><i class="fa fa-coins"></i> Budget & Date Management</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="sidebarLogoutBtn">
+        <i class="fa fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <nav class="navbar">
+      <h1>Budget and Date Management</h1>
+      <div class="navbar-right">
+        <div style="position: relative;">
+          <i class="fa fa-bell"></i>
+          <span class="badge" id="notifBadge">0</span>
+        </div>
+        <div class="profile-dropdown" id="profileToggle">
+          <img src="mark.jpg" alt="Profile" class="avatar" />
+          <span class="username" id="navUsername">Loading...</span>
+          <i class="fas fa-chevron-down" style="font-size:0.7rem;color:#666;"></i>
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+            <a href="#" id="navLogoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Reports Section -->
+    <section class="reports-section">
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Ongoing Reports</h2>
+          <input id="searchOngoing" placeholder="Search ongoing...">
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Barangay</th>
+                <th>Allocated Budget</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ongoingTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Completed Reports</h2>
+          <input id="searchCompleted" placeholder="Search completed...">
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Barangay</th>
+                <th>Allocated Budget</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="completedTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Budget and Date</h2>
+        <button class="close-btn" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label>Budget</label>
+        <input type="number" id="editBudget" placeholder="₱" />
+        <label>Start Date</label>
+        <input type="date" id="editStart" />
+        <label>End Date</label>
+        <input type="date" id="editEnd" />
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" id="cancelEdit">Cancel</button>
+        <button class="save-btn" id="saveEdit">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+      getFirestore, doc, getDoc, collection, getDocs, setDoc, updateDoc 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.firebasestorage.app",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let currentReportId = null;
+
+    const profileToggle = document.getElementById("profileToggle");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
+    const navLogoutBtn = document.getElementById("navLogoutBtn");
+
+    // ------------------ AUTH & USER INFO ------------------
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        const data = userDoc.data();
+        document.getElementById("navUsername").textContent = data.name || "User";
+
+        if (data.position !== "Super Admin") {
+          alert("Access denied. Only Super Admins can access this page.");
+          await signOut(auth);
+          window.location.href = "dashboard.html";
+          return;
+        }
+
+        loadReports();
+      } catch(err) {
+        console.error("Error loading user data:", err);
+        alert("Error loading user data. Please try again.");
+        window.location.href = "index.html";
+      }
+    });
+
+    // ------------------ LOAD REPORTS ------------------
+    async function loadReports() {
+      const ongoingTable = document.getElementById("ongoingTable");
+      const completedTable = document.getElementById("completedTable");
+
+      ongoingTable.innerHTML = "";
+      completedTable.innerHTML = "";
+
+      try {
+        const reportsSnapshot = await getDocs(collection(db, "reports"));
+        
+        for (const docSnap of reportsSnapshot.docs) {
+          const report = docSnap.data();
+          const reportId = docSnap.id;
+
+          try {
+            const budgetDoc = await getDoc(doc(db, "reports", reportId, "budgetAllocations", reportId));
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td class="col-id">${reportId}</td>
+              <td>${report.barangay || "N/A"}</td>
+              <td>₱${budgetDoc.exists() ? budgetDoc.data().allocatedBudget.toLocaleString() : "-"}</td>
+              <td>${budgetDoc.exists() ? new Date(budgetDoc.data().startDate.seconds * 1000).toLocaleDateString() : "-"}</td>
+              <td>${budgetDoc.exists() ? new Date(budgetDoc.data().endDate.seconds * 1000).toLocaleDateString() : "-"}</td>
+              <td class="action">
+                ${!budgetDoc.exists() ? `<a class="edit allocate" onclick="window.openEditModal('${reportId}')">Allocate</a>` : `<span class="status-badge completed">Completed</span>`}
+              </td>
+            `;
+
+            if (!budgetDoc.exists()) {
+              ongoingTable.appendChild(row);
+            } else {
+              completedTable.appendChild(row);
+            }
+          } catch(err) {
+            console.error(`Error loading budget for report ${reportId}:`, err);
+          }
+        }
+      } catch(err) {
+        console.error("Error loading reports:", err);
+        alert("Error loading reports. Please refresh the page.");
+      }
+    }
+
+    // ------------------ MODAL & EDIT ------------------
+    window.openEditModal = function(reportId) {
+      currentReportId = reportId;
+      document.getElementById("editModal").style.display = "flex";
+    };
+
+    document.getElementById("saveEdit").addEventListener("click", async () => {
+      const budget = document.getElementById("editBudget").value;
+      const start = document.getElementById("editStart").value;
+      const end = document.getElementById("editEnd").value;
+      
+      if (!budget || !start || !end) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+
+      if (endDate <= startDate) {
+        alert("End date must be after start date.");
+        return;
+      }
+
+      try {
+        const reportDoc = await getDoc(doc(db, "reports", currentReportId));
+        const data = reportDoc.exists() ? reportDoc.data() : {};
+
+        const payload = {
+          allocatedBudget: Number(budget),
+          startDate,
+          endDate,
+          reportId: currentReportId,
+          barangay: data.barangay || "Unknown"
+        };
+
+        await setDoc(doc(db, "reports", currentReportId, "budgetAllocations", currentReportId), payload);
+        await setDoc(doc(db, "budgetAllocations", currentReportId), payload);
+
+        await updateDoc(doc(db, "reports", currentReportId), {
+          status: "Completed",
+          updatedAt: new Date(),
+          updatedBy: auth.currentUser.uid
+        });
+
+        alert("Budget and dates allocated successfully! Report moved to Completed Reports.");
+        document.getElementById("editModal").style.display = "none";
+        
+        document.getElementById("editBudget").value = "";
+        document.getElementById("editStart").value = "";
+        document.getElementById("editEnd").value = "";
+        
+        loadReports();
+      } catch(err) {
+        console.error("Error saving budget allocation:", err);
+        alert("Error saving data. Please try again.");
+      }
+    });
+
+    document.getElementById("closeModal").onclick = () => {
+      document.getElementById("editModal").style.display = "none";
+    };
+    
+    document.getElementById("cancelEdit").onclick = () => {
+      document.getElementById("editModal").style.display = "none";
+    };
+
+    // ------------------ DROPDOWN & LOGOUT ------------------
+    window.addEventListener("click", (e) => {
+      if (e.target === document.getElementById("editModal")) {
+        document.getElementById("editModal").style.display = "none";
+      }
+      if (!e.target.closest(".profile-dropdown")) {
+        dropdownMenu.style.display = "none";
+      }
+    });
+
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+    });
+
+    async function handleLogout() {
+      try {
+        await signOut(auth);
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error("Logout failed:", error);
+        alert("Error logging out. Please try again.");
+      }
+    }
+
+    sidebarLogoutBtn.addEventListener("click", handleLogout);
+    
+    navLogoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      handleLogout();
+    });
+
+    // ------------------ SEARCH FUNCTIONALITY ------------------
+    document.getElementById("searchOngoing").addEventListener("keyup", (e) => {
+      const filter = e.target.value.toLowerCase();
+      document.querySelectorAll("#ongoingTable tr").forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? "" : "none";
+      });
+    });
+
+    document.getElementById("searchCompleted").addEventListener("keyup", (e) => {
+      const filter = e.target.value.toLowerCase();
+      document.querySelectorAll("#completedTable tr").forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? "" : "none";
+      });
+    });
+  </script>
+</body>
+</html>
