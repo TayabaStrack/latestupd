@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Manage Reports | TayabaStrack Admin</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    /* ---------- RESET & BASE ---------- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI', Tahoma, sans-serif;
+      display:flex;
+      min-height:100vh;
+      background:#f5f7fb;
+      color:#333;
+      min-width:1300px;
+      overflow-x:auto;
+    }
+
+    /* ---------- SIDEBAR (fixed) ---------- */
+    .sidebar{
+      width:250px;
+      min-width:250px;
+      background:#004aad;
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      padding:1rem 0;
+      position:fixed;
+      top:0;
+      left:0;
+      bottom:0;
+      z-index:50;
+    }
+    .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
+    .sidebar-header img{width:40px}
+    .sidebar-header h2{font-size:1.2rem;margin:0}
+    .sidebar-menu{list-style:none;padding-left:0}
+    .sidebar-menu li{margin:0.5rem 0}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
+    .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
+    .sidebar-footer{
+      text-align:center;
+      padding:1rem;
+      border-top:1px solid rgba(255,255,255,0.2);
+    }
+    .logout-btn {
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    .logout-btn:hover {
+      background-color: #c9302c;
+    }
+
+    /* ---------- NAVBAR (fixed) ---------- */
+    .navbar{
+      position:fixed;
+      top:0;
+      left:250px;
+      right:0;
+      height:64px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:0 24px;
+      background:#fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.05);
+      z-index:40;
+    }
+    .navbar h1{font-size:1.4rem;color:#004aad}
+    .profile{display:flex;align-items:center;gap:1rem}
+    .fa-bell{font-size:1.2rem;position:relative}
+    .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px}
+    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
+    .avatar{width:35px;height:35px;border-radius:50%}
+    .username{font-weight:500}
+    .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
+    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
+    .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
+
+    /* ---------- MAIN CONTENT (space for fixed sidebar & navbar) ---------- */
+    .main {
+      margin-left:250px;
+      margin-top:74px;
+      flex:1;
+      display:block;
+      padding:20px 28px;
+    }
+
+    /* ---------- CONTENT ---------- */
+    .reports-section{padding-bottom:40px}
+    .report-box{background:#fff;border-radius:10px;padding:16px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .report-box-header h2{color:#004aad;font-size:1.05rem}
+    .report-actions input{padding:.4rem .75rem;border:1px solid #e0e0e0;border-radius:18px;font-size:.9rem;width:260px}
+    .tables-wrap{display:grid;grid-template-columns:1fr;gap:18px}
+
+    /* ---------- TABLE STYLES (card-like) ---------- */
+    .table-card {
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-radius:8px;
+      background:#fff;
+      padding:8px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.03);
+      width:100%;
+      margin-top:8px;
+      scrollbar-width:thin;
+    }
+
+    .table-card::-webkit-scrollbar { height:10px; }
+    .table-card::-webkit-scrollbar-thumb { background:#cfcfcf; border-radius:8px; }
+    .table-card::-webkit-scrollbar-thumb:hover { background:#a8a8a8; }
+
+    table{width:100%;border-collapse:collapse;min-width:1000px}
+    thead th{
+      background:#f5f8fb;color:#333;font-weight:700;padding:.85rem .75rem;text-align:left;
+      position:sticky;top:0;z-index:3;
+      border-bottom:2px solid #e8edf5;
+    }
+    th,td{padding:.6rem .75rem;font-size:.88rem;vertical-align:top;border-bottom:1px solid #f0f2f5;white-space:nowrap}
+    tbody tr:nth-child(even){background:#fbfdff}
+    tbody tr:hover{background:#f1f8ff}
+    .col-id{width:160px;color:#444;font-weight:600}
+    .col-small{width:110px}
+    .truncate { max-width:420px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block; vertical-align:middle; }
+    .status { display:inline-block; padding:.25rem .5rem; border-radius:6px; color:#fff; font-weight:700; font-size:.75rem; min-width:80px; text-align:center; }
+    .pending { background:#f6c23e; color:#2b2b2b; }
+    .ongoing { background:#36b9cc; color:#fff; }
+    .completed { background:#1cc88a; color:#fff; }
+    .action a { color:#004aad; text-decoration:none; font-weight:700; cursor:pointer; margin-right:8px; }
+    .action a.delete { color:#d9534f }
+
+    /* ---------- MODAL ---------- */
+    .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
+    .modal-content{background:#fff;width:100%;max-width:980px;border-radius:12px;padding:18px;max-height:92vh;overflow:auto}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .modal-header h2{color:#004aad;font-size:1.1rem;margin:0}
+    .close-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#444}
+    .modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .modal-row{display:flex;flex-direction:column}
+    .modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
+    .modal-row input[type="text"],.modal-row input[type="number"],.modal-row textarea,.modal-row select { padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem }
+    .modal-row textarea{min-height:80px;resize:vertical}
+    .img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px}
+    .modal-footer{text-align:right;margin-top:12px}
+    .btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;margin-left:8px}
+    .btn-save{background:#004aad;color:#fff}
+    .btn-cancel{background:#9e9e9e;color:#fff}
+    .btn-delete{background:#d9534f;color:#fff}
+
+    @media (max-width:900px) {
+      .modal-grid{grid-template-columns:1fr}
+      .report-actions input{width:100%}
+      table{min-width:900px}
+    }
+
+    /* ---------- LOADING ---------- */
+    .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
+    .spinner { width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <img src="logu.png" alt="Logo">
+        <h2>TayabaStrack</h2>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li><a href="ad_dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
+        <li class="active"><a href="ad_reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
+        <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i>&nbsp; Map</a></li>
+        <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
+        <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i>&nbsp; Report Bulletin</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Navbar -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <h1>Manage Reports</h1>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="position:relative">
+        <i class="fa fa-bell" aria-hidden="true"></i>
+        <span class="badge" id="notifBadge">0</span>
+      </div>
+
+      <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
+        <img src="image.png" alt="Profile" class="avatar">
+        <span class="username" id="navUsername">Loading...</span>
+
+        <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
+          <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main" role="main">
+    <!-- Reports section -->
+    <section class="reports-section">
+      <!-- Loading overlay -->
+      <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
+        <div class="spinner" role="status" aria-label="Loading"></div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Pending Reports</h2>
+          <div class="report-actions">
+            <input id="searchPending" placeholder="Search pending..." aria-label="Search pending reports">
+          </div>
+        </div>
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-id">Report ID</th>
+                <th>Barangay</th>
+                <th style="min-width:300px">Description</th>
+                <th>Age Groups / People</th>
+                <th class="col-small">Dimensions (W×H)</th>
+                <th>Image</th>
+                <th class="col-small">Coordinates</th>
+                <th class="col-small">Status</th>
+                <th style="min-width:180px">Timestamp</th>
+                <th class="col-id">User ID</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="pendingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Ongoing Reports</h2>
+          <div class="report-actions">
+            <input id="searchOngoing" placeholder="Search ongoing..." aria-label="Search ongoing reports">
+          </div>
+        </div>
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-id">Report ID</th>
+                <th>Barangay</th>
+                <th style="min-width:300px">Description</th>
+                <th>Age Groups / People</th>
+                <th class="col-small">Dimensions (W×H)</th>
+                <th>Image</th>
+                <th class="col-small">Coordinates</th>
+                <th class="col-small">Status</th>
+                <th style="min-width:180px">Timestamp</th>
+                <th class="col-id">User ID</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ongoingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Completed Reports</h2>
+          <div class="report-actions">
+            <input id="searchCompleted" placeholder="Search completed..." aria-label="Search completed reports">
+          </div>
+        </div>
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-id">Report ID</th>
+                <th>Barangay</th>
+                <th style="min-width:300px">Description</th>
+                <th>Age Groups / People</th>
+                <th class="col-small">Dimensions (W×H)</th>
+                <th>Image</th>
+                <th class="col-small">Coordinates</th>
+                <th class="col-small">Status</th>
+                <th style="min-width:180px">Timestamp</th>
+                <th class="col-id">User ID</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="completedBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Edit Modal -->
+  <div class="modal" id="editModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h2 id="modalTitle">Edit Report</h2>
+        <button class="close-btn" id="closeModal" title="Close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-grid" id="modalGrid"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-cancel" id="cancelBtn">Cancel</button>
+        <button class="btn btn-save" id="saveChangesBtn">Save Changes</button>
+        <button class="btn btn-delete" id="deleteBtn">Delete Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase + logic -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      orderBy,
+      onSnapshot,
+      getDoc,
+      doc,
+      updateDoc,
+      deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.firebasestorage.app",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // DOM references
+    const pendingBody = document.getElementById("pendingBody");
+    const ongoingBody = document.getElementById("ongoingBody");
+    const completedBody = document.getElementById("completedBody");
+    const searchPending = document.getElementById("searchPending");
+    const searchOngoing = document.getElementById("searchOngoing");
+    const searchCompleted = document.getElementById("searchCompleted");
+
+    const editModal = document.getElementById("editModal");
+    const modalGrid = document.getElementById("modalGrid");
+    const closeModal = document.getElementById("closeModal");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const saveChangesBtn = document.getElementById("saveChangesBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
+
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const profileToggle = document.getElementById("profileToggle");
+    const navUsername = document.getElementById("navUsername");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const notifBadge = document.getElementById("notifBadge");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+
+    let currentDocId = null;
+    let currentDocData = null;
+    let reportsUnsub = null;
+
+    // Format timestamp
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return "";
+      let date;
+      if (timestamp.toDate) {
+        date = timestamp.toDate();
+      } else if (typeof timestamp === 'string') {
+        date = new Date(timestamp);
+      } else {
+        return timestamp;
+      }
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const month = months[date.getMonth()];
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      let hours = date.getHours();
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      return `${month}/${day}/${year} | ${hours}:${minutes} ${ampm}`;
+    }
+
+    function showLoading(show = true) {
+      loadingOverlay.style.display = show ? "flex" : "none";
+      loadingOverlay.setAttribute("aria-hidden", show ? "false" : "true");
+    }
+
+    function createFieldRow(key, value, opts = {}) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "modal-row";
+      const label = document.createElement("label");
+      label.textContent = key;
+      wrapper.appendChild(label);
+
+      if (key === "incidentImage" || key === "imageUrl") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = `field-${key}`;
+        input.value = value || "";
+        if (opts.readonly) input.readOnly = true;
+        input.style.fontSize = "0.75rem";
+        wrapper.appendChild(input);
+
+        if (value) {
+          const img = document.createElement("img");
+          if (typeof value === "object" && value.bytes) {
+            // Firestore Blob -> Base64
+            const bytes = new Uint8Array(value.bytes);
+            const binary = Array.from(bytes).map(b => String.fromCharCode(b)).join("");
+            img.src = `data:image/jpeg;base64,${btoa(binary)}`;
+          } else if (typeof value === "string" && value.startsWith("data:")) {
+            img.src = value;
+          } else if (typeof value === "string" && value.startsWith("http")) {
+            img.src = value;
+          } else {
+            img.src = `data:image/jpeg;base64,${value}`;
+          }
+          img.alt = "image preview";
+          img.className = "img-preview";
+          img.onerror = function() {
+            this.style.display = "none";
+            const errorMsg = document.createElement("div");
+            errorMsg.style.color = "#d9534f";
+            errorMsg.style.marginTop = "6px";
+            errorMsg.style.fontSize = "0.85rem";
+            errorMsg.textContent = "Error loading image";
+            wrapper.appendChild(errorMsg);
+          };
+          wrapper.appendChild(img);
+        } else {
+          const ph = document.createElement("div");
+          ph.style.marginTop = "6px";
+          ph.style.color = "#666";
+          ph.style.fontSize = ".9rem";
+          ph.textContent = "No image available";
+          wrapper.appendChild(ph);
+        }
+        return wrapper;
+      }
+
+      if (key === "createdAt" && value && typeof value === "object" && value.toDate) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = `field-${key}`;
+        input.value = value.toDate ? value.toDate().toLocaleString() : String(value);
+        input.readOnly = true;
+        wrapper.appendChild(input);
+        return wrapper;
+      }
+
+      if (opts.readonly) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = `field-${key}`;
+        input.value = value === undefined ? "" : String(value);
+        input.readOnly = true;
+        wrapper.appendChild(input);
+        return wrapper;
+      }
+
+      if (typeof value === "number") {
+        const input = document.createElement("input");
+        input.type = "number";
+        input.id = `field-${key}`;
+        input.value = value;
+        wrapper.appendChild(input);
+        return wrapper;
+      }
+
+      if (typeof value === "string") {
+        if (value.length > 120 || key.toLowerCase().includes("description") || key.toLowerCase().includes("remarks")) {
+          const ta = document.createElement("textarea");
+          ta.id = `field-${key}`;
+          ta.value = value;
+          wrapper.appendChild(ta);
+          return wrapper;
+        } else {
+          const input = document.createElement("input");
+          input.type = "text";
+          input.id = `field-${key}`;
+          input.value = value;
+          wrapper.appendChild(input);
+          return wrapper;
+        }
+      }
+
+      const ta = document.createElement("textarea");
+      ta.id = `field-${key}`;
+      try { ta.value = JSON.stringify(value); } catch(e) { ta.value = String(value); }
+      wrapper.appendChild(ta);
+      return wrapper;
+    }
+
+    function buildTableRow(docSnap) {
+      const r = docSnap.data();
+      const tr = document.createElement("tr");
+
+      function addCell(content, classes = "") {
+        const td = document.createElement("td");
+        if (classes) td.className = classes;
+        if (typeof content === "string") {
+          td.textContent = content;
+        } else {
+          td.appendChild(content);
+        }
+        tr.appendChild(td);
+      }
+
+      addCell(r.reportId || "", "col-id");
+      addCell(r.barangay || "");
+
+      const descSpan = document.createElement("span");
+      descSpan.className = "truncate";
+      descSpan.textContent = r.description || "";
+      descSpan.title = r.description || "";
+      addCell(descSpan);
+
+      const ageGroup = r.affectedAgeGroups || "";
+      const people = r.peopleInvolved || "";
+      addCell(ageGroup + (ageGroup && people ? " / " : "") + people);
+
+      const width = r.width || "";
+      const height = r.height || "";
+      const dimensions = width && height ? `${width}×${height}` : (width || height || "");
+      addCell(dimensions, "col-small");
+
+      // 🔥 Fix for incidentImage blob/base64/url
+      const imgContent = document.createElement("span");
+      const imageData = r.incidentImage || r.imageUrl || r.image;
+      
+      if (imageData) {
+        const link = document.createElement("a");
+        link.href = "#";
+        link.textContent = "View";
+        link.style.cursor = "pointer";
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          const imgModal = document.createElement("div");
+          imgModal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
+          
+          const img = document.createElement("img");
+          if (typeof imageData === "object" && imageData.bytes) {
+            const bytes = new Uint8Array(imageData.bytes);
+            const binary = Array.from(bytes).map(b => String.fromCharCode(b)).join("");
+            img.src = `data:image/jpeg;base64,${btoa(binary)}`;
+          } else if (typeof imageData === "string" && imageData.startsWith("data:")) {
+            img.src = imageData;
+          } else if (typeof imageData === "string" && imageData.startsWith("http")) {
+            img.src = imageData;
+          } else {
+            img.src = `data:image/jpeg;base64,${imageData}`;
+          }
+          img.style.cssText = "max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
+          
+          const closeBtn = document.createElement("button");
+          closeBtn.textContent = "×";
+          closeBtn.style.cssText = "position:absolute;top:20px;right:20px;background:white;border:none;font-size:30px;cursor:pointer;width:40px;height:40px;border-radius:50%;";
+          
+          imgModal.appendChild(img);
+          imgModal.appendChild(closeBtn);
+          document.body.appendChild(imgModal);
+          
+          imgModal.addEventListener("click", () => imgModal.remove());
+          closeBtn.addEventListener("click", () => imgModal.remove());
+        });
+        imgContent.appendChild(link);
+      } else {
+        imgContent.textContent = "No";
+      }
+      addCell(imgContent);
+
+      const lat = r.latitude || "";
+      const lng = r.longitude || "";
+      const coords = lat && lng ? `${lat}, ${lng}` : (lat || lng || "");
+      addCell(coords, "col-small");
+
+      const statusSpan = document.createElement("span");
+      const st = (r.status || "pending").toString().toLowerCase();
+      statusSpan.className = `status ${st==='pending'?'pending':st==='ongoing'?'ongoing':'completed'}`;
+      statusSpan.textContent = r.status || "Pending";
+      addCell(statusSpan, "col-small");
+
+      addCell(formatTimestamp(r.timestamp || r.createdAt));
+      addCell(r.userId || "", "col-id");
+
+      const actionContent = document.createElement("span");
+      const edit = document.createElement("a");
+      edit.href = "#";
+      edit.textContent = "Edit";
+      edit.dataset.id = docSnap.id;
+      edit.className = "edit-link";
+      actionContent.appendChild(edit);
+
+      const del = document.createElement("a");
+      del.href = "#";
+      del.textContent = "Delete";
+      del.dataset.id = docSnap.id;
+      del.className = "delete-link delete";
+      actionContent.appendChild(del);
+
+      addCell(actionContent, "action");
+      return tr;
+    }
+
+    function attachSearch(inputElem, tableBody) {
+      if (!inputElem) return;
+      inputElem.addEventListener("keyup", () => {
+        const filter = inputElem.value.toLowerCase();
+        const rows = tableBody.getElementsByTagName("tr");
+        for (let i=0;i<rows.length;i++){
+          const cells = rows[i].getElementsByTagName("td");
+          let show = false;
+          for (let j=0;j<cells.length;j++){
+            if (cells[j].innerText.toLowerCase().includes(filter)) { show = true; break; }
+          }
+          rows[i].style.display = show ? "" : "none";
+        }
+      });
+    }
+
+    attachSearch(searchPending, pendingBody);
+    attachSearch(searchOngoing, ongoingBody);
+    attachSearch(searchCompleted, completedBody);
+
+    async function openEditFromRow(e) {
+      e.preventDefault();
+      const id = e.currentTarget.dataset.id;
+      await openModalForDoc(id);
+    }
+
+    async function deleteFromRow(e) {
+      e.preventDefault();
+      const id = e.currentTarget.dataset.id;
+      if (!confirm("Delete this report? This action cannot be undone.")) return;
+      try {
+        await deleteDoc(doc(db,"reports",id));
+        alert("Report deleted.");
+      } catch (err) {
+        console.error(err);
+        alert("Delete failed. See console.");
+      }
+    }
+
+    async function openModalForDoc(id) {
+      currentDocId = id;
+      try {
+        const snap = await getDoc(doc(db,"reports",id));
+        if (!snap.exists()) { alert("Report not found"); return; }
+        currentDocData = snap.data();
+        modalGrid.innerHTML = "";
+
+        const ordered = ["reportId","barangay","description","affectedAgeGroups","peopleInvolved","width","height","incidentImage","imageUrl","latitude","longitude","status","timestamp","createdAt","userId"];
+        const extras = Object.keys(currentDocData).filter(k => !ordered.includes(k));
+        const keys = ordered.concat(extras);
+
+        keys.forEach(k => {
+          if (!(k in currentDocData)) return;
+          const readonly = k === "createdAt";
+          const row = createFieldRow(k, currentDocData[k], { readonly });
+          modalGrid.appendChild(row);
+        });
+
+        editModal.style.display = "flex";
+        editModal.setAttribute("aria-hidden","false");
+        editModal.querySelector(".modal-content").scrollTop = 0;
+      } catch (err) {
+        console.error(err);
+        alert("Failed to open report. See console.");
+      }
+    }
+
+    function closeEditModal() {
+      currentDocId = null;
+      currentDocData = null;
+      editModal.style.display = "none";
+      editModal.setAttribute("aria-hidden","true");
+    }
+
+    saveChangesBtn.addEventListener("click", async () => {
+      if (!currentDocId) return;
+      const inputs = modalGrid.querySelectorAll("[id^='field-']");
+      const updates = {};
+      inputs.forEach(inp => {
+        const key = inp.id.replace("field-","");
+        if (inp.type === "number") {
+          updates[key] = inp.value === "" ? null : Number(inp.value);
+        } else {
+          const orig = currentDocData ? currentDocData[key] : undefined;
+          if (orig !== undefined && typeof orig === "object" && !(orig && orig.toDate)) {
+            try { updates[key] = JSON.parse(inp.value); } catch(e) { updates[key] = inp.value; }
+          } else {
+            updates[key] = inp.value;
+          }
+        }
+      });
+
+      try {
+        await updateDoc(doc(db,"reports",currentDocId), updates);
+        alert("Changes saved.");
+        closeEditModal();
+      } catch (err) {
+        console.error(err);
+        alert("Save failed. See console.");
+      }
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+      if (!currentDocId) return;
+      if (!confirm("Delete this report? This action cannot be undone.")) return;
+      try {
+        await deleteDoc(doc(db,"reports",currentDocId));
+        alert("Report deleted.");
+        closeEditModal();
+      } catch (err) {
+        console.error(err);
+        alert("Delete failed. See console.");
+      }
+    });
+
+    closeModal.addEventListener("click", closeEditModal);
+    cancelBtn.addEventListener("click", closeEditModal);
+    window.addEventListener("click", (ev) => {
+      if (ev.target === editModal) closeEditModal();
+      if (!ev.target.closest(".profile-dropdown")) dropdownMenu.style.display = "none";
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "login.html"; return; }
+      try {
+        const uDoc = await getDoc(doc(db,"users",user.uid));
+        if (!uDoc.exists()) { window.location.href = "login.html"; return; }
+        const d = uDoc.data();
+        if (d.position !== "Admin") { alert("Unauthorized access!"); window.location.href = "login.html"; return; }
+
+        navUsername.textContent = d.name || "Admin";
+
+        const reportsQuery = query(collection(db,"reports"), orderBy("createdAt","desc"));
+        if (reportsUnsub) reportsUnsub();
+        reportsUnsub = onSnapshot(reportsQuery, snapshot => {
+          pendingBody.innerHTML = "";
+          ongoingBody.innerHTML = "";
+          completedBody.innerHTML = "";
+          let notif = 0;
+
+          snapshot.forEach(docSnap => {
+            const r = docSnap.data();
+            const st = (r.status || "pending").toString().toLowerCase();
+            const row = buildTableRow(docSnap);
+            if (st === "ongoing") {
+              ongoingBody.appendChild(row);
+            } else if (st === "completed" || st === "posted") {
+              completedBody.appendChild(row);
+            } else {
+              pendingBody.appendChild(row);
+              notif++;
+            }
+          });
+
+          notifBadge.textContent = notif;
+
+          document.querySelectorAll(".edit-link").forEach(a => a.removeEventListener("click", openEditFromRow));
+          document.querySelectorAll(".delete-link").forEach(a => a.removeEventListener("click", deleteFromRow));
+          document.querySelectorAll(".edit-link").forEach(a => a.addEventListener("click", openEditFromRow));
+          document.querySelectorAll(".delete-link").forEach(a => a.addEventListener("click", deleteFromRow));
+        }, err => {
+          console.error("Realtime listener failed:", err);
+        });
+
+      } catch (err) {
+        console.error(err);
+        window.location.href = "login.html";
+      }
+    });
+
+    profileToggle.addEventListener("click", () => {
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+      dropdownMenu.setAttribute("aria-hidden", dropdownMenu.style.display === "none" ? "true" : "false");
+    });
+
+    window.addEventListener("click", function(e) {
+      if (!profileToggle.contains(e.target)) {
+        dropdownMenu.style.display = "none";
+        dropdownMenu.setAttribute("aria-hidden","true");
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "logout.html";
+    });
+
+  </script>
+</body>
+</html>

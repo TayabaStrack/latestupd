@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TayabasTrack</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      height: 100vh;
+      display: flex;
+    }
+
+
+    /* Left Panel */
+    .left-panel {
+      width: 50%;
+      background: #004aad;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .logo-circle {
+      background: #fff;
+      border-radius: 50%;
+      width: 160px;
+      height: 160px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .logo-circle img {
+      width: 120px;
+    }
+
+    .left-panel h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .left-panel p {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+
+    /* Right Panel */
+    .right-panel {
+      width: 50%;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 0.8rem;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      background: #f0f0f0;
+      transition: 0.3s;
+    }
+
+    .tab.active {
+      background: #004aad;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    h2 {
+      margin-bottom: 1.5rem;
+      color: #004aad;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.9rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      background: #004aad;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    /* Reset password email field smaller */
+    #reset-email{
+      width: 80%;
+      margin: 0 auto 1rem;
+      display: block;
+    }
+
+    button:hover {
+      background: #00327a;
+    }
+
+    a {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #004aad;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Roles */
+    .role { display: none; }
+    .active-role { display: block; }
+
+
+    /* Forgot Password Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #fff;
+      color: #333;
+      padding: 1.5rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 340px;
+      position: relative;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content h3 {
+      margin-bottom: 1rem;
+      color: #004aad;
+    }
+
+    .step { display: none; }
+    .step.active { display: block; }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #555;
+    }
+
+    .close:hover { color: #000; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.firebasestorage.app",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+
+    // ✅ Login Function with strict role check
+    window.loginUser = async function(type) {
+
+      const email = document.getElementById(type + "-email").value;
+      const password = document.getElementById(type + "-password").value;
+
+      if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+      }
+
+      try {
+
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Fetch Firestore user document
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+          alert("No user profile found in Firestore.");
+          await signOut(auth);
+          return;
+        }
+
+        const userData = userDoc.data();
+        const position = userData.position; // "Super Admin" or "Admin"
+
+        // 🔒 Strict role check
+        if ((type === "super" && position !== "Super Admin") ||
+            (type === "admin" && position !== "Admin")) {
+          alert("You are not authorized to login here.");
+          await signOut(auth);
+          return;
+        }
+
+        // Redirect based on actual position
+        if (position === "Super Admin") {
+          window.location.href = "dashboard.html";
+        } else if (position === "Admin") {
+          window.location.href = "ad_dashboard.html";
+        }
+
+      } catch (error) {
+        alert("Login failed: " + error.message);
+      }
+    }
+  </script>
+
+</head>
+
+<body>
+
+  <!-- Left Panel -->
+  <div class="left-panel">
+
+    <div class="logo-circle">
+      <img src="logu.png" alt="TayabasTrack Logo"/>
+    </div>
+
+    <h1>Welcome to TayabasTrack</h1>
+    <p id="access-panel">Super Admin Access Panel</p>
+
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+
+    <div class="login-box">
+
+      <div class="tabs">
+        <button class="tab active" id="tab-super" onclick="switchRole('super')">Super Admin</button>
+        <button class="tab" id="tab-admin" onclick="switchRole('admin')">Admin</button>
+      </div>
+
+      <div id="role-super" class="role active-role">
+        <h2>Super Admin Login</h2>
+        <input type="email" id="super-email" placeholder="Email Address"/>
+        <input type="password" id="super-password" placeholder="Password"/>
+        <button onclick="loginUser('super')">Login</button>
+        <a href="#" onclick="openModal()">Forgot Password?</a>
+      </div>
+
+      <div id="role-admin" class="role">
+        <h2>Admin Login</h2>
+        <input type="email" id="admin-email" placeholder="Email Address"/>
+        <input type="password" id="admin-password" placeholder="Password"/>
+        <button onclick="loginUser('admin')">Login</button>
+        <a href="#" onclick="openModal()">Forgot Password?</a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="modal" class="modal" onclick="outsideClick(event)">
+
+    <div class="modal-content">
+
+      <span class="close" onclick="closeModal()">&times;</span>
+
+      <!-- Step 1: Email -->
+      <div id="step-email" class="step active">
+        <h3>Reset Password</h3>
+        <input type="email" id="reset-email" placeholder="Enter Email"/>
+        <div class="actions">
+          <button onclick="closeModal()">Cancel</button>
+          <button onclick="sendOTP()">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 2: OTP -->
+      <div id="step-otp" class="step">
+        <h3>Verify OTP</h3>
+        <input type="text" id="reset-otp" placeholder="Enter OTP"/>
+        <div class="actions">
+          <button onclick="backToEmail()">Back</button>
+          <button onclick="verifyOTP()">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 3: New Password -->
+      <div id="step-newpass" class="step">
+        <h3>Set New Password</h3>
+        <input type="password" id="new-password" placeholder="New Password"/>
+        <input type="password" id="confirm-password" placeholder="Confirm Password"/>
+        <div class="actions">
+          <button onclick="backToOTP()">Back</button>
+          <button onclick="setNewPassword()">Submit</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    function switchRole(role) {
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+      document.querySelectorAll(".role").forEach(roleDiv => roleDiv.classList.remove("active-role"));
+
+      if (role === 'super') {
+        document.getElementById("tab-super").classList.add("active");
+        document.getElementById("role-super").classList.add("active-role");
+        document.getElementById("access-panel").textContent = "Super Admin Access Panel";
+      } else {
+        document.getElementById("tab-admin").classList.add("active");
+        document.getElementById("role-admin").classList.add("active-role");
+        document.getElementById("access-panel").textContent = "Admin Access Panel";
+      }
+    }
+
+
+    function openModal() {
+      document.getElementById("modal").style.display = "flex";
+      showStep("step-email");
+    }
+
+    function closeModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    function outsideClick(e) {
+      if (e.target.id === "modal") {
+        closeModal();
+      }
+    }
+
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") closeModal();
+    });
+
+    function showStep(stepId) {
+      document.querySelectorAll(".step").forEach(step => step.classList.remove("active"));
+      document.getElementById(stepId).classList.add("active");
+    }
+
+    function sendOTP() {
+      const email = document.getElementById("reset-email").value;
+      if (!email) { alert("Enter your email."); return; }
+      alert("OTP sent to " + email);
+      showStep("step-otp");
+    }
+
+    function backToEmail() { showStep("step-email"); }
+
+    function verifyOTP() {
+      const otp = document.getElementById("reset-otp").value;
+      if (!otp) { alert("Enter OTP."); return; }
+      alert("OTP verified!");
+      showStep("step-newpass");
+    }
+
+    function backToOTP() { showStep("step-otp"); }
+
+    function setNewPassword() {
+      const pass = document.getElementById("new-password").value;
+      const confirm = document.getElementById("confirm-password").value;
+      if (!pass || !confirm) { alert("Fill all fields."); return; }
+      if (pass !== confirm) { alert("Passwords do not match."); return; }
+      alert("Password successfully reset!");
+      closeModal();
+    }
+
+  </script>
+
+</body>
+</html>
