@@ -3,7 +3,7 @@ problems for another day
 
 admi 
 - profile picture changes  (LAHAT kahit sa other day na)
-- img no display (REPORTS, MAP, BULLETIN, PUBLIC DASH)
+- img no display (REPORTS, MAP, BULLETIN, PUBLIC DASH, AD DASH)
 - img edit/upload (PROFILE done pero not tested yet)
 
 
