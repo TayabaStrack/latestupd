@@ -8,7 +8,14 @@ admi
 
 
 s-admin
-- yung logout button sa corner (LAHAT) 
 - uniform layout(LAHAT) 
 - pag sync sa newly allocated reports, sa table (MANAGE REPORTS)
-- maps wala pa markers -notif button
+- notif button (dashboard done)
+
+to do 
+- pending table admin fix
+- admin cannot edit ongoing only super ad
+- admin can edit completed reports for completion date
+-log out
+
+
