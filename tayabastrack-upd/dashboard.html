@@ -206,6 +206,7 @@
             <div class="card"><i class="fa fa-clock"></i><div><p>Pending</p><h2 id="pendingReports">0</h2></div></div>
             <div class="card"><i class="fa fa-sync"></i><div><p>Ongoing</p><h2 id="ongoingReports">0</h2></div></div>
             <div class="card"><i class="fa fa-check-circle"></i><div><p>Completed</p><h2 id="completedReports">0</h2></div></div>
+            <div class="card"><i class="fa fa-times-circle"></i><div><p>Declined</p><h2 id="declinedReports">0</h2></div></div>
         </section>
 
         <!-- Reports & Map -->
@@ -254,8 +255,9 @@
             if (!miniMap || !window.reportLocations) return;
             window.reportLocations.forEach((report) => {
                 let markerColor = "red";
-                if (report.status === "resolved" || report.status === "completed") markerColor = "green";
+                if (report.status === "repaired" || report.status === "completed") markerColor = "green";
                 else if (report.status === "ongoing" || report.status === "in-progress") markerColor = "yellow";
+                else if (report.status === "declined") markerColor = "red";
 
                 new google.maps.Marker({
                     position: { lat: report.lat, lng: report.lng },
@@ -295,6 +297,7 @@
         const pendingEl = document.getElementById("pendingReports");
         const ongoingEl = document.getElementById("ongoingReports");
         const completedEl = document.getElementById("completedReports");
+        const declinedEl = document.getElementById("declinedReports");
 
         // Notification system
         let notificationsList = [];
@@ -400,7 +403,7 @@
                 });
             });
 
-            // Listen for new reports
+            // Listen for new reports and update dashboard in real-time
             const qReports = query(collection(db, "reports"));
             onSnapshot(qReports, (snapshot) => {
                 snapshot.docChanges().forEach(change => {
@@ -410,6 +413,8 @@
                         addNotification("report", `New report submitted in ${r.barangay || "a barangay"}`, r.reportType || r.type || "");
                     }
                 });
+                // Update dashboard data whenever there's a change
+                loadDashboardData();
             });
         }
 
@@ -440,16 +445,23 @@
 
         async function loadDashboardData() {
             const snapshot = await getDocs(collection(db, "reports"));
-            let total = 0, pending = 0, ongoing = 0, completed = 0;
+            let total = 0, pending = 0, ongoing = 0, completed = 0, declined = 0;
             window.reportLocations = [];
 
             snapshot.forEach(docSnap => {
                 const report = docSnap.data();
                 total++;
-                const status = report.status?.toLowerCase();
-                if (status === "pending") pending++;
-                else if (status === "ongoing" || status === "in-progress") ongoing++;
-                else if (status === "resolved" || status === "completed") completed++;
+                const status = report.status?.toLowerCase().trim();
+                
+                if (status === "pending") {
+                    pending++;
+                } else if (status === "ongoing" || status === "in-progress" || status === "in progress") {
+                    ongoing++;
+                } else if (status === "resolved" || status === "completed") {
+                    completed++;
+                } else if (status === "declined" || status === "rejected") {
+                    declined++;
+                }
 
                 const lat = report.latitude || report.lat || report.location?.latitude;
                 const lng = report.longitude || report.lng || report.location?.longitude;
@@ -468,26 +480,41 @@
             pendingEl.textContent = pending;
             ongoingEl.textContent = ongoing;
             completedEl.textContent = completed;
-            updateChart(completed, ongoing, pending);
+            declinedEl.textContent = declined;
+            updateChart(completed, ongoing, pending, declined);
             if (window.miniMap) addReportMarkers();
             loadReportImages();
         }
 
         let chart;
-        function updateChart(completed, ongoing, pending) {
+        function updateChart(completed, ongoing, pending, declined) {
             const ctx = document.getElementById("dashboardChart").getContext("2d");
             if (chart) chart.destroy();
             chart = new Chart(ctx, {
                 type: "bar",
                 data: {
-                    labels: ["Completed", "Ongoing", "Pending"],
+                    labels: ["Completed", "Ongoing", "Pending", "Declined"],
                     datasets: [{
                         label: "Reports",
-                        data: [completed, ongoing, pending],
-                        backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e"]
+                        data: [completed, ongoing, pending, declined],
+                        backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b"]
                     }]
                 },
-                options: { responsive: true, plugins: { legend: { display: false } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false } 
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
             });
         }
 

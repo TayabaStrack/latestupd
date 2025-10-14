@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Manage Reports | TayabaStrack Super Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Reports | TayabaStrack Super Admin</title>
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -218,19 +218,19 @@
     }
 
     /* Column width distribution */
-    th:nth-child(1), td:nth-child(1) { min-width: 180px; } /* Report ID */
-    th:nth-child(2), td:nth-child(2) { min-width: 150px; } /* Barangay */
-    th:nth-child(3), td:nth-child(3) { min-width: 320px; } /* Description */
-    th:nth-child(4), td:nth-child(4) { min-width: 180px; } /* Age Groups */
-    th:nth-child(5), td:nth-child(5) { min-width: 140px; } /* Dimensions */
-    th:nth-child(6), td:nth-child(6) { min-width: 100px; } /* Image */
-    th:nth-child(7), td:nth-child(7) { min-width: 180px; } /* Coordinates */
-    th:nth-child(8), td:nth-child(8) { min-width: 120px; } /* Status */
-    th:nth-child(9), td:nth-child(9) { min-width: 200px; } /* Timestamp */
-    th:nth-child(10), td:nth-child(10) { min-width: 180px; } /* User ID */
-    th:nth-child(11), td:nth-child(11) { min-width: 160px; } /* Inspection Date */
-    th:nth-child(12), td:nth-child(12) { min-width: 160px; } /* Budget */
-    th:nth-child(13), td:nth-child(13) { min-width: 200px; } /* Actions */
+    th:nth-child(1), td:nth-child(1) { min-width: 180px; }
+    th:nth-child(2), td:nth-child(2) { min-width: 150px; }
+    th:nth-child(3), td:nth-child(3) { min-width: 320px; }
+    th:nth-child(4), td:nth-child(4) { min-width: 180px; }
+    th:nth-child(5), td:nth-child(5) { min-width: 140px; }
+    th:nth-child(6), td:nth-child(6) { min-width: 100px; }
+    th:nth-child(7), td:nth-child(7) { min-width: 180px; }
+    th:nth-child(8), td:nth-child(8) { min-width: 120px; }
+    th:nth-child(9), td:nth-child(9) { min-width: 200px; }
+    th:nth-child(10), td:nth-child(10) { min-width: 180px; }
+    th:nth-child(11), td:nth-child(11) { min-width: 160px; }
+    th:nth-child(12), td:nth-child(12) { min-width: 160px; }
+    th:nth-child(13), td:nth-child(13) { min-width: 200px; }
 
     .truncate {
       max-width: 300px;
@@ -254,7 +254,8 @@
 
     .pending { background: #f6c23e; color: #2b2b2b; }
     .ongoing { background: #36b9cc; color: #fff; }
-    .completed { background: #1cc88a; color: #fff; }
+    .torepair { background: #ff8c42; color: #fff; }
+    .repaired { background: #1cc88a; color: #fff; }
     .declined { background: #d9534f; color: #fff; }
 
     .action a {
@@ -294,7 +295,7 @@
     .modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .modal-row{display:flex;flex-direction:column}
     .modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
-    .modal-row input[type="text"],.modal-row input[type="number"],.modal-row textarea,.modal-row select { padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem }
+    .modal-row input[type="text"],.modal-row input[type="number"],.modal-row input[type="date"],.modal-row textarea,.modal-row select { padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem }
     .modal-row textarea{min-height:80px;resize:vertical}
     .img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px}
     .modal-footer{text-align:right;margin-top:12px}
@@ -359,32 +360,10 @@
       resize: vertical;
       font-family: inherit;
     }
-    .decline-form-group input[type="date"],
-    .decline-form-group input[type="text"],
-    .decline-form-group input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 0.95rem;
-    }
-    .decline-form-group input:focus,
     .decline-form-group textarea:focus {
       outline: none;
       border-color: #004aad;
       box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.1);
-    }
-    .budget-input-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .budget-input-wrapper span {
-      font-weight: 600;
-      color: #666;
-    }
-    .budget-input-wrapper input {
-      flex: 1;
     }
     .decline-modal-footer {
       display: flex;
@@ -499,7 +478,7 @@
 
       <div class="report-box">
         <div class="report-box-header">
-          <h2>Completed Reports</h2>
+          <h2>Completed Reports (Repaired)</h2>
           <div class="report-actions">
             <input id="searchCompleted" placeholder="Search completed..." aria-label="Search completed reports">
           </div>
@@ -561,8 +540,6 @@
                 <th>Status</th>
                 <th>Timestamp</th>
                 <th>User ID</th>
-                <th>Inspection Date</th>
-                <th>Budget Allocation</th>
                 <th>Decline Reason</th>
                 <th>Action</th>
               </tr>
@@ -605,24 +582,6 @@
           Reason for Declining <span class="required">*</span>
         </label>
         <textarea id="declineReason" placeholder="Enter detailed reason for declining this report..." required></textarea>
-      </div>
-
-      <div class="decline-form-group">
-        <label for="declineInspectionDate">
-          Inspection Date <span class="required">*</span>
-        </label>
-        <input type="date" id="declineInspectionDate" required>
-      </div>
-
-      <div class="decline-form-group">
-        <label for="declineBudgetMin">
-          Budget Allocation Range (₱) <span class="required">*</span>
-        </label>
-        <div class="budget-input-wrapper">
-          <input type="number" id="declineBudgetMin" placeholder="Min (e.g., 100000)" min="0" step="1000" required>
-          <span>to</span>
-          <input type="number" id="declineBudgetMax" placeholder="Max (e.g., 150000)" min="0" step="1000" required>
-        </div>
       </div>
 
       <div class="decline-modal-footer">
@@ -678,9 +637,6 @@
 
     const declineModal = document.getElementById("declineModal");
     const declineReason = document.getElementById("declineReason");
-    const declineInspectionDate = document.getElementById("declineInspectionDate");
-    const declineBudgetMin = document.getElementById("declineBudgetMin");
-    const declineBudgetMax = document.getElementById("declineBudgetMax");
     const cancelDeclineBtn = document.getElementById("cancelDeclineBtn");
     const confirmDeclineBtn = document.getElementById("confirmDeclineBtn");
 
@@ -775,24 +731,23 @@
       addCell(`${r.latitude||""}${r.latitude&&r.longitude?", ":""}${r.longitude||""}`);
       
       const status=document.createElement("span");
-      const s=(r.status||"Ongoing").toLowerCase();
+      const s=(r.status||"Ongoing").toLowerCase().replace(/\s+/g, '');
       status.className=`status ${s}`;
       status.textContent=r.status||"Ongoing";
       addCell(status);
       
       addCell(formatTimestamp(r.timestamp||r.createdAt));
       addCell(r.userId||"");
-      addCell(formatDate(r.inspectionDate));
       
-      let budgetDisplay = "Not Set";
-      if(r.budgetAllocation) {
-        budgetDisplay = r.budgetAllocation;
-      } else if(r.budgetMin && r.budgetMax) {
-        budgetDisplay = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
-      }
-      addCell(budgetDisplay);
-      
-      if(isDeclined) {
+      if(!isDeclined) {
+        addCell(formatDate(r.inspectionDate));
+        
+        let budgetDisplay = "Not Set";
+        if(r.budgetAllocation) {
+          budgetDisplay = r.budgetAllocation;
+        }
+        addCell(budgetDisplay);
+      } else {
         const reasonSpan = document.createElement("span");
         reasonSpan.className = "truncate";
         reasonSpan.textContent = r.declineReason || "No reason provided";
@@ -835,6 +790,11 @@
     attachSearch(searchCompleted, completedBody);
     attachSearch(searchDeclined, declinedBody);
 
+    const EDITABLE_FIELDS = [
+      'reportId', 'barangay', 'description', 'affectedAgeGroups', 'peopleInvolved',
+      'width', 'height', 'latitude', 'longitude', 'status', 'inspectionDate', 'budgetAllocation'
+    ];
+
     async function openEditFromRow(e){
       e.preventDefault();
       const id=e.currentTarget.dataset.id;
@@ -843,19 +803,53 @@
       currentDocId=id;
       currentDocData=snap.data();
       modalGrid.innerHTML="";
-      Object.entries(currentDocData).forEach(([k,v])=>{
-        const row=document.createElement("div");
-        row.className="modal-row";
-        const lab=document.createElement("label");
-        lab.textContent=k;
+      
+      EDITABLE_FIELDS.forEach(key => {
+        const value = currentDocData[key];
+        const row = document.createElement("div");
+        row.className = "modal-row";
+        const lab = document.createElement("label");
+        lab.textContent = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
         row.appendChild(lab);
-        const inp=document.createElement("textarea");
-        inp.value=typeof v==="object"?JSON.stringify(v):v;
-        inp.id=`field-${k}`;
+        
+        let inp;
+        if(key === 'status') {
+          inp = document.createElement("select");
+          const options = ['Ongoing', 'To Repair', 'Repaired', 'Declined'];
+          options.forEach(opt => {
+            const option = document.createElement("option");
+            option.value = opt;
+            option.textContent = opt;
+            if(value === opt) option.selected = true;
+            inp.appendChild(option);
+          });
+        } else if(key === 'inspectionDate') {
+          inp = document.createElement("input");
+          inp.type = "date";
+          if(value) {
+            let dateStr;
+            if(value.toDate) {
+              dateStr = value.toDate().toISOString().split('T')[0];
+            } else if(typeof value === 'string') {
+              dateStr = new Date(value).toISOString().split('T')[0];
+            }
+            inp.value = dateStr;
+          }
+        } else if(key === 'description') {
+          inp = document.createElement("textarea");
+          inp.value = value || "";
+        } else {
+          inp = document.createElement("input");
+          inp.type = "text";
+          inp.value = value || "";
+        }
+        
+        inp.id = `field-${key}`;
         row.appendChild(inp);
         modalGrid.appendChild(row);
       });
-      editModal.style.display="flex";
+      
+      editModal.style.display = "flex";
     }
 
     function openDeclineModal(e){
@@ -864,21 +858,12 @@
       reportToDecline = id;
       
       declineReason.value = "";
-      declineInspectionDate.value = "";
-      declineBudgetMin.value = "";
-      declineBudgetMax.value = "";
-      
-      const today = new Date().toISOString().split('T')[0];
-      declineInspectionDate.min = today;
       
       declineModal.style.display="flex";
     }
 
     async function confirmDecline(){
       const reason = declineReason.value.trim();
-      const inspectionDate = declineInspectionDate.value;
-      const budgetMin = declineBudgetMin.value.trim();
-      const budgetMax = declineBudgetMax.value.trim();
       
       if(!reason) {
         alert("Please provide a reason for declining this report.");
@@ -886,45 +871,12 @@
         return;
       }
       
-      if(!inspectionDate) {
-        alert("Please select an inspection date.");
-        declineInspectionDate.focus();
-        return;
-      }
-      
-      if(!budgetMin || !budgetMax) {
-        alert("Please provide both minimum and maximum budget allocation.");
-        if(!budgetMin) declineBudgetMin.focus();
-        else declineBudgetMax.focus();
-        return;
-      }
-      
-      const minBudget = parseFloat(budgetMin);
-      const maxBudget = parseFloat(budgetMax);
-      
-      if(minBudget <= 0 || maxBudget <= 0) {
-        alert("Budget amounts must be greater than zero.");
-        return;
-      }
-      
-      if(minBudget >= maxBudget) {
-        alert("Maximum budget must be greater than minimum budget.");
-        declineBudgetMax.focus();
-        return;
-      }
-      
       if(!reportToDecline) return;
       
       try {
-        const budgetRange = `₱${minBudget.toLocaleString()} - ₱${maxBudget.toLocaleString()}`;
-        
         await updateDoc(doc(db, "reports", reportToDecline), {
           status: "Declined",
           declineReason: reason,
-          inspectionDate: new Date(inspectionDate),
-          budgetAllocation: budgetRange,
-          budgetMin: minBudget,
-          budgetMax: maxBudget,
           declinedAt: serverTimestamp()
         });
         
@@ -936,8 +888,38 @@
       }
     }
 
+    async function saveChanges() {
+      if(!currentDocId) return;
+      
+      const updates = {};
+      EDITABLE_FIELDS.forEach(key => {
+        const field = document.getElementById(`field-${key}`);
+        if(field) {
+          let value = field.value.trim();
+          
+          if(key === 'inspectionDate' && value) {
+            updates[key] = new Date(value);
+          } else if(key === 'width' || key === 'height' || key === 'latitude' || key === 'longitude') {
+            updates[key] = value ? parseFloat(value) : null;
+          } else {
+            updates[key] = value || null;
+          }
+        }
+      });
+      
+      try {
+        await updateDoc(doc(db, "reports", currentDocId), updates);
+        editModal.style.display = "none";
+        alert("Report updated successfully!");
+      } catch(err) {
+        alert("Error updating report: " + err.message);
+      }
+    }
+
     closeModal.onclick=()=>editModal.style.display="none";
     cancelBtn.onclick=()=>editModal.style.display="none";
+    saveChangesBtn.onclick=saveChanges;
+    
     cancelDeclineBtn.onclick=()=>{
       declineModal.style.display="none";
       reportToDecline = null;
@@ -998,19 +980,19 @@
           
           snap.forEach(docSnap=>{
             const data=docSnap.data();
-            const status=(data.status||"ongoing").toLowerCase();
+            const status=(data.status||"Ongoing").toLowerCase().replace(/\s+/g, '');
             
-            if(status==="ongoing") {
-              const row=buildTableRow(docSnap, false);
-              ongoingBody.appendChild(row);
-            }
-            else if(status==="completed") {
+            if(status==="repaired" && data.inspectionDate && data.budgetAllocation) {
               const row=buildTableRow(docSnap, false);
               completedBody.appendChild(row);
             }
             else if(status==="declined") {
               const row=buildTableRow(docSnap, true);
               declinedBody.appendChild(row);
+            }
+            else {
+              const row=buildTableRow(docSnap, false);
+              ongoingBody.appendChild(row);
             }
           });
         });

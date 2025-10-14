@@ -1,337 +1,518 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Profile with Events</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Profile | TayabaStrack</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family: "Segoe UI", Tahoma, sans-serif; background:#f5f7fb; color:#222; display:flex; min-height:100vh}
 
     /* Sidebar */
-    .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; }
-    .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; }
-    .sidebar-header img { width: 40px; }
-    .sidebar-header h2 { font-size: 1.2rem; margin: 0; }
-    .sidebar-menu { list-style: none; }
-    .sidebar-menu li { margin: 0.5rem 0; }
-    .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; }
-    .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
-    .sidebar-footer {
-      text-align: center; font-size: 0.85rem; padding: 1rem;
-      border-top: 1px solid rgba(255,255,255,0.2);
+    .sidebar { width:240px; background:#004aad; color:white; display:flex; flex-direction:column; justify-content:space-between; padding:1rem 0; }
+    .sidebar-header{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:1rem}
+    .sidebar-header img{width:40px}
+    .sidebar-header h2{font-size:1.1rem}
+    .sidebar-menu{list-style:none;padding:0 0.5rem}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:10px;border-radius:6px;color:#fff;text-decoration:none}
+    .sidebar-menu a:hover{background:#0756cc}
+    .sidebar-footer{padding:12px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);font-size:0.9rem}
+    .logout-btn {
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+      width: 100%;
     }
+    .logout-btn:hover {
+      background-color: #c9302c;
+    }
+    
     /* Main */
-    .main { flex: 1; display: flex; flex-direction: column; }
-    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 10; }
-    .navbar h1 { font-size: 1.4rem; color: #004aad; }
+    .main { flex:1; display:flex; flex-direction:column; }
+    .navbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,0.04);position:sticky;top:0;z-index:5}
+    .navbar h1{color:#004aad;font-size:20px}
+    .profile{display:flex;align-items:center;gap:12px;position:relative}
+    .avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;cursor:pointer}
+    .badge{background:red;color:white;border-radius:50%;padding:3px 6px;font-size:12px;position:absolute;top:-6px;right:-6px}
 
-    .profile { display: flex; align-items: center; gap: 1rem; position: relative; }
-    .profile .fa-bell { font-size: 1.2rem; cursor: pointer; position: relative; }
-    .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; }
-    .avatar { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
-    .username { font-weight: 500; }
+    /* Page grid */
+    .page { padding:28px; display:flex; justify-content:center; width:100% }
+    .profile-section{max-width:1100px; width:100%; display:grid; grid-template-columns: 1fr 420px; gap:20px; align-items:start}
 
-    /* Dropdown */
-    .dropdown-menu { display: none; position: absolute; top: 50px; right: 0; background: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); overflow: hidden; min-width: 130px; z-index: 100; }
-    .dropdown-menu a { display: block; padding: 10px; text-decoration: none; color: #333; transition: background 0.3s; }
-    .dropdown-menu a:hover { background: #f0f0f0; }
+    /* Cards */
+    .card{background:white;border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(13,34,85,0.06)}
+    .profile-card .top{display:flex;gap:18px;align-items:center}
+    .profile-card img.profile-main{width:120px;height:120px;border-radius:50%;object-fit:cover}
+    .profile-info{margin-top:12px}
+    .profile-info label{display:block;font-weight:700;font-size:13px;margin-top:10px}
+    .profile-info input{width:100%;padding:8px;border-radius:8px;border:1px solid #d7dce6;margin-top:6px;font-size:14px;background:#fbfdff}
 
-    /* Profile Page */
-    .container { display: flex; flex-direction: column; padding: 1rem; }
-    .profile-section { display: flex; gap: 1rem; align-items: flex-start; max-width: 1000px; width: 100%; margin: 0 auto; }
-    .profile-card, .account-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 1rem; flex: 1; }
-    .profile-card img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; }
-    .profile-info label { font-weight: bold; display: block; margin-top: 6px; font-size: 0.85rem; }
-    .profile-info input { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #ccc; margin-top: 3px; font-size: 0.85rem; }
-    .btn { background: #004aad; color: #fff; padding: 6px 12px; border: none; border-radius: 6px; margin-top: 0.8rem; cursor: pointer; font-size: 0.85rem; }
-    .btn:hover { background: #003580; }
+    .btn{background:#004aad;color:white;padding:8px 12px;border-radius:8px;border:0;cursor:pointer;margin-top:12px}
+    .btn:hover{opacity:0.95}
+
+    /* Account card */
+    .account-card h2{color:#0b3e89;margin-bottom:8px}
+    .account-meta p{margin:6px 0;font-size:14px}
 
     /* Calendar */
-    .calendar { margin-top: 1rem; }
-    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-    .calendar-header button { background: #004aad; color: #fff; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.8rem; }
-    .calendar-header h3 { color: #004aad; }
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; font-size: 0.8rem; }
-    .calendar-grid div { padding: 8px; background: #f5f7fb; border-radius: 6px; cursor: pointer; position: relative; }
-    .calendar-grid .today { background: #004aad; color: #fff; font-weight: bold; }
-    .calendar-grid .has-event::after {
-      content: "•";
-      color: red;
-      font-size: 1.2rem;
-      position: absolute;
-      bottom: 2px;
-      right: 6px;
-    }
+    .calendar{margin-top:12px}
+    .calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .calendar-header button{background:#e9f0ff;border:0;padding:6px 10px;border-radius:8px;cursor:pointer}
+    .weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;font-size:12px;color:#5b6b85}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .calendar-day{padding:12px;border-radius:8px;background:#f7f9fc;min-height:48px;cursor:pointer;position:relative}
+    .calendar-day.today{background:#0b63d6;color:white;font-weight:700}
+    .calendar-day.has-event::after{content:"";width:8px;height:8px;border-radius:50%;background:#ef4444;position:absolute;right:8px;bottom:8px}
 
-    /* Events List */
-    .events-list { margin-top: 1rem; }
-    .events-list h4 { color: #004aad; margin-bottom: 0.5rem; }
-    .events-list ul { list-style: none; padding: 0; }
-    .events-list li { background: #f0f4ff; margin-bottom: 6px; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; }
+    .events-list h4{color:#0b63d6;margin-top:14px}
+    .events-list ul{list-style:none;margin-top:8px;padding:0}
+    .events-list li{background:#eef6ff;padding:8px;border-radius:8px;margin-bottom:8px;font-size:14px}
 
     /* Modal */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-    .modal-content { background: #fff; padding: 1rem; border-radius: 10px; width: 350px; }
-    .modal-content h2 { margin-bottom: 1rem; color: #004aad; font-size: 1.2rem; text-align: center; }
-    .modal-content input { width: 100%; padding: 6px; margin-bottom: 0.8rem; border: 1px solid #ccc; border-radius: 6px; }
-    .modal-events { max-height: 150px; overflow-y: auto; margin-bottom: 1rem; text-align: left; }
-    .modal-events ul { list-style: none; padding: 0; }
-    .modal-events li { background: #f0f4ff; margin-bottom: 6px; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; }
+    .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:50}
+    .modal .content{background:white;padding:20px;border-radius:10px;width:420px;max-width:95%;box-shadow:0 14px 40px rgba(2,6,23,0.15);max-height:90vh;overflow-y:auto}
+    .modal .content h2{color:#004aad;margin-bottom:16px;text-align:center}
+    .modal input[type="text"], .modal input[type="email"], .modal input[type="tel"]{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #d7dce6;font-size:14px}
+    .modal label{display:block;font-weight:600;margin-top:12px;font-size:13px;color:#333}
+    
+    .photo-upload-section{text-align:center;margin-bottom:16px;padding:16px;background:#f9fafb;border-radius:8px}
+    .photo-upload-section .preview{display:block;margin:12px auto;border-radius:50%;width:120px;height:120px;object-fit:cover;border:3px solid #004aad}
+    .upload-btn-wrapper{position:relative;display:inline-block;margin-top:10px}
+    .upload-btn-wrapper input[type=file]{display:none}
+    .upload-btn{background:#004aad;color:white;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;display:inline-block}
+    .upload-btn:hover{opacity:0.9}
+
+    .btn-group{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+    .btn-cancel{background:#6c757d}
+    .btn-cancel:hover{background:#5a6268}
+
+    .dropdown-menu{display:none;position:absolute;right:0;top:50px;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.12);min-width:150px;z-index:100}
+    .dropdown-menu a{display:block;padding:10px 16px;text-decoration:none;color:#222;font-size:14px}
+    .dropdown-menu a:hover{background:#f0f2f7}
+
+    /* small screens */
+    @media (max-width:980px){
+      .profile-section{grid-template-columns:1fr; padding-bottom:40px}
+      .sidebar{display:none}
+    }
   </style>
 </head>
 <body>
+
   <!-- Sidebar -->
   <aside class="sidebar">
     <div>
       <div class="sidebar-header">
-        <img src="logu.png" alt="Logo" class="logo">
+        <img src="logu.png" alt="Logo">
         <h2>TayabaStrack</h2>
       </div>
-      <ul class="sidebar-menu">
-        <li><a href="ad_dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
-        <li class="active"><a href="ad_reports.html"><i class="fa fa-tasks"></i> Manage Reports</a></li>
-        <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
-        <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
-        <li><a href="#"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
-      </ul>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
+                <li><a href="usermanagement.html"><i class="fa fa-tasks"></i> User Management</a></li>
+                <li><a href="reports.html"><i class="fa fa-map-marker-alt"></i> Manage Reports</a></li>
+                <li><a href="bdatemanagement.html"><i class="fa fa-coins"></i> Budget & Date Management</a></li>
+            </ul>
     </div>
     <div class="sidebar-footer">
-      <p>Logged in as:</p>
-      <strong id="sidebarName">Loading...</strong><br>
-      <span id="sidebarPosition">Loading...</span>
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa fa-sign-out-alt"></i> Logout
+      </button>
     </div>
-  </aside>
   </aside>
 
   <!-- Main -->
   <main class="main">
-    <!-- Navbar -->
     <nav class="navbar">
       <h1>User Profile</h1>
       <div class="profile">
-        <div style="position: relative;">
+        <div style="position:relative">
           <i class="fa fa-bell"></i>
           <span class="badge">1</span>
         </div>
-        <img src="mark.jpg" alt="Profile" class="avatar" onclick="toggleDropdown()">
+        <img src="admin-profile.jpg" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
         <div class="dropdown-menu" id="dropdownMenu">
-          <a href="profile.html">Profile</a>
-            <a href="logout.html"> Logout</a>
+          <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
         </div>
-          <span class="username" id="navUsername">Loading...</span>
+        <div id="navUsername" style="font-weight:600"></div>
       </div>
     </nav>
 
-    <!-- Profile Content -->
-    <div class="container">
+    <div class="page">
       <div class="profile-section">
-        <!-- Left -->
-        <div class="profile-card">
-          <img src="mark.jpg" alt="Profile Picture">
+
+        <!-- Left: Profile Card -->
+        <section class="card profile-card">
+          <div class="top">
+            <img src="admin-profile.jpg" id="profilePic" alt="profile" class="profile-main">
+            <div>
+              <div style="font-size:18px;font-weight:700;color:#0b3e89" id="displayName">Loading...</div>
+              <div style="margin-top:6px;color:#6b7380" id="displayRole">Administrator</div>
+            </div>
+          </div>
+
           <div class="profile-info">
             <label>Full Name</label>
-            <input type="text" value="Mark Lee">
+            <input id="cardName" readonly>
+
             <label>ID</label>
-            <input type="text" value="12345">
+            <input id="cardID" readonly>
+
             <label>Email</label>
-            <input type="email" value="marklee@slsu.edu.ph">
+            <input id="cardEmail" readonly>
+
             <label>Phone</label>
-            <input type="text" value="09065429497">
+            <input id="cardPhone" readonly>
+
             <label>Address</label>
-            <input type="text" value="Wakas, Tayabas">
+            <input id="cardAddress" readonly>
+
             <label>Gender</label>
-            <input type="text" value="Male">
+            <input id="cardGender" readonly>
           </div>
-          <button class="btn">Edit Profile</button>
-        </div>
 
-        <!-- Right -->
-        <div class="account-card">
+          <button class="btn" onclick="openEditModal()">Edit Profile</button>
+        </section>
+
+        <!-- Right: Account Info + Calendar -->
+        <aside class="card account-card">
           <h2>Account Info</h2>
-          <p><strong>Type:</strong> Super Admin</p>
-          <p><strong>Registered:</strong> March 10, 2025</p>
-          <p><strong>Last Login:</strong> April 23, 2024</p>
+          <div class="account-meta">
+            <p><strong>Type:</strong> <span id="accountType">Loading...</span></p>
+            <p><strong>Registered:</strong> <span id="registeredAt">—</span></p>
+            <p><strong>Last Login:</strong> <span id="lastLogin">—</span></p>
+          </div>
 
-          <!-- Calendar -->
           <div class="calendar">
             <div class="calendar-header">
               <button onclick="prevMonth()">‹</button>
-              <h3 id="monthYear"></h3>
+              <div id="monthYear" style="font-weight:700;color:#0b3e89"></div>
               <button onclick="nextMonth()">›</button>
             </div>
+
+            <div class="weekday-row">
+              <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+
             <div class="calendar-grid" id="calendarDays"></div>
           </div>
 
-          <!-- Events Summary -->
           <div class="events-list">
             <h4>📅 Upcoming Events</h4>
             <ul id="eventsSummary">
               <li><em>No events yet. Add one by clicking a date.</em></li>
             </ul>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   </main>
 
-  <!-- Event Modal -->
-  <div class="modal" id="eventModal">
-    <div class="modal-content">
-      <h2 id="modalDate"></h2>
-      <div class="modal-events">
-        <ul id="dayEvents"></ul>
+  <!-- Edit Modal -->
+  <div class="modal" id="editModal">
+    <div class="content">
+      <h2>Edit Profile</h2>
+
+      <div class="photo-upload-section">
+        <img id="previewImg" class="preview" src="admin-profile.jpg" alt="Profile Preview">
+        <div class="upload-btn-wrapper">
+          <label class="upload-btn">
+            <i class="fa fa-camera"></i> Choose Photo
+            <input type="file" id="editPhoto" accept="image/*">
+          </label>
+        </div>
+        <div style="font-size:12px;color:#666;margin-top:8px">Upload a profile picture (JPG, PNG)</div>
       </div>
-      <input type="text" id="eventInput" placeholder="Enter event">
-      <button class="btn" onclick="saveEvent()">Save Event</button>
+
+      <label>Full Name</label>
+      <input type="text" id="editName" placeholder="Full name">
+      
+      <label>ID</label>
+      <input type="text" id="editID" placeholder="ID">
+      
+      <label>Email</label>
+      <input type="email" id="editEmail" placeholder="Email">
+      
+      <label>Phone</label>
+      <input type="tel" id="editPhone" placeholder="Phone">
+      
+      <label>Address</label>
+      <input type="text" id="editAddress" placeholder="Address">
+      
+      <label>Gender</label>
+      <input type="text" id="editGender" placeholder="Gender">
+
+      <div class="btn-group">
+        <button class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+        <button class="btn" onclick="saveEdit()" id="saveBtn">
+          <i class="fa fa-save"></i> Save Changes
+        </button>
+      </div>
     </div>
   </div>
 
-
-
-<!-- Firebase -->
+  <!-- Firebase compat libs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
   <script>
-    // Firebase Config
+    // ---------- Firebase config ----------
     const firebaseConfig = {
       apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
       authDomain: "tayabastrack-23b95.firebaseapp.com",
       projectId: "tayabastrack-23b95",
-      storageBucket: "tayabastrack-23b95.firebasestorage.app",
+      storageBucket: "tayabastrack-23b95.appspot.com",
       messagingSenderId: "674055915366",
       appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const storage = firebase.storage();
 
-    // Load user info into sidebar + navbar
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        db.collection("users").doc(user.uid).get().then(doc => {
-          if (doc.exists) {
-            const data = doc.data();
-            document.getElementById("sidebarName").textContent = data.name || "No Name";
-            document.getElementById("sidebarPosition").textContent = data.position || "No Position";
-            document.getElementById("navUsername").textContent = data.name || "User";
-          }
-        });
-      } else {
-        window.location.href = "index.html"; // redirect if not logged in
-      }
+    let currentUser = null;
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+
+    // Dropdown
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    function toggleDropdown(){
+      dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block'
+    }
+    window.addEventListener('click', (e)=>{
+      if(!e.target.closest('.avatar') && !e.target.closest('#dropdownMenu')) dropdownMenu.style.display = 'none'
     });
 
-    function toggleDropdown() {
-      const menu = document.getElementById("dropdownMenu");
-      menu.style.display = (menu.style.display === "block") ? "none" : "block";
-    }
-    window.addEventListener("click", function(e) {
-      if (!e.target.matches(".avatar")) {
-        document.getElementById("dropdownMenu").style.display = "none";
+    // ---------- Auth state & load profile ----------
+    auth.onAuthStateChanged(async (user)=>{
+      if(!user) {
+        console.warn("No user logged in.");
+        window.location.href = "login.html";
+        return;
       }
+      currentUser = user;
+
+      const ref = db.collection('users').doc(user.uid);
+      ref.onSnapshot(doc=>{
+        if(!doc.exists) return;
+        const data = doc.data();
+        
+        // Update navbar
+        document.getElementById("navUsername").textContent = data.name || "User";
+        
+        // Update profile pictures from Firestore
+        const photoURL = data.photoURL || "admin-profile.jpg";
+        document.getElementById("profilePic").src = photoURL;
+        document.getElementById("navAvatar").src = photoURL;
+        document.getElementById("previewImg").src = photoURL;
+
+        // Update display info
+        document.getElementById("displayName").textContent = data.name || "—";
+        document.getElementById("displayRole").textContent = data.position || data.role || "Administrator";
+
+        // Update form fields
+        document.getElementById("cardName").value = data.name || "";
+        document.getElementById("cardID").value = data.id || "";
+        document.getElementById("cardEmail").value = data.email || user.email;
+        document.getElementById("cardPhone").value = data.phone || "";
+        document.getElementById("cardAddress").value = data.address || "";
+        document.getElementById("cardGender").value = data.gender || "";
+
+        // Update edit modal fields
+        document.getElementById("editName").value = data.name || "";
+        document.getElementById("editID").value = data.id || "";
+        document.getElementById("editEmail").value = data.email || user.email;
+        document.getElementById("editPhone").value = data.phone || "";
+        document.getElementById("editAddress").value = data.address || "";
+        document.getElementById("editGender").value = data.gender || "";
+
+        // Update account info
+        document.getElementById("accountType").textContent = data.position || data.role || "Administrator";
+        if(data.createdAt) {
+          const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+          document.getElementById("registeredAt").textContent = date.toLocaleDateString();
+        }
+        if(data.lastLogin) {
+          const date = data.lastLogin.toDate ? data.lastLogin.toDate() : new Date(data.lastLogin);
+          document.getElementById("lastLogin").textContent = date.toLocaleString();
+        }
+      });
     });
 
-    // Calendar & Events
-    const monthYear = document.getElementById("monthYear");
-    const calendarDays = document.getElementById("calendarDays");
-    const eventModal = document.getElementById("eventModal");
-    const eventInput = document.getElementById("eventInput");
-    const modalDate = document.getElementById("modalDate");
-    const dayEvents = document.getElementById("dayEvents");
-    const eventsSummary = document.getElementById("eventsSummary");
-    let currentDate = new Date();
-    let selectedDate = null;
-    let events = JSON.parse(localStorage.getItem("events")) || {};
+    // ---------- Modal ----------
+    const editModal = document.getElementById("editModal");
+    const editPhoto = document.getElementById("editPhoto");
+    const previewImg = document.getElementById("previewImg");
 
-    function renderCalendar(date) {
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      const today = new Date();
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      monthYear.textContent = date.toLocaleString("default", { month: "long", year: "numeric" });
-      calendarDays.innerHTML = "";
-
-      for (let i = 0; i < firstDay; i++) {
-        calendarDays.innerHTML += `<div></div>`;
-      }
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dateKey = `${year}-${month + 1}-${day}`;
-        const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-        const hasEvent = events[dateKey] && events[dateKey].length > 0;
-        calendarDays.innerHTML += `<div class="${isToday ? "today" : ""} ${hasEvent ? "has-event" : ""}" onclick="openModal('${dateKey}')">${day}</div>`;
-      }
+    function openEditModal(){ 
+      editModal.style.display="flex";
+    }
+    
+    function closeEditModal(){ 
+      editModal.style.display="none";
     }
 
-    function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(currentDate); updateEventsSummary(); }
-    function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(currentDate); updateEventsSummary(); }
-
-    function openModal(dateKey) {
-      selectedDate = dateKey;
-      modalDate.textContent = `Events for ${dateKey}`;
-      eventInput.value = "";
-      dayEvents.innerHTML = "";
-
-      if (events[dateKey]) {
-        events[dateKey].forEach(ev => {
-          const li = document.createElement("li");
-          li.textContent = ev;
-          dayEvents.appendChild(li);
-        });
-      } else {
-        dayEvents.innerHTML = "<li><em>No events yet.</em></li>";
+    // Preview image when file is selected
+    editPhoto.addEventListener("change", e=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      
+      // Validate file type
+      if(!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        editPhoto.value = '';
+        return;
       }
-
-      eventModal.style.display = "flex";
-    }
-
-    function saveEvent() {
-      if (!eventInput.value.trim()) return;
-      if (!events[selectedDate]) events[selectedDate] = [];
-      events[selectedDate].push(eventInput.value.trim());
-      localStorage.setItem("events", JSON.stringify(events));
-      eventModal.style.display = "none";
-      renderCalendar(currentDate);
-      updateEventsSummary();
-    }
-
-    function updateEventsSummary() {
-      eventsSummary.innerHTML = "";
-      const allEvents = [];
-
-      for (const date in events) {
-        events[date].forEach(ev => {
-          allEvents.push({ date: new Date(date), text: ev });
-        });
+      
+      // Validate file size (max 5MB)
+      if(file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        editPhoto.value = '';
+        return;
       }
+      
+      const reader = new FileReader();
+      reader.onload = ev=>{
+        previewImg.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
 
-      if (allEvents.length === 0) {
-        eventsSummary.innerHTML = "<li><em>No events yet. Add one by clicking a date.</em></li>";
+    // ---------- Save profile ----------
+    async function saveEdit(){
+      if(!currentUser) {
+        alert("No user logged in");
+        return;
+      }
+      
+      const uid = currentUser.uid;
+      const ref = db.collection("users").doc(uid);
+      const saveBtn = document.getElementById("saveBtn");
+
+      const updated = {
+        name: document.getElementById("editName").value.trim(),
+        id: document.getElementById("editID").value.trim(),
+        email: document.getElementById("editEmail").value.trim(),
+        phone: document.getElementById("editPhone").value.trim(),
+        address: document.getElementById("editAddress").value.trim(),
+        gender: document.getElementById("editGender").value.trim()
+      };
+
+      // Validate required fields
+      if(!updated.name) {
+        alert("Name is required");
         return;
       }
 
-      allEvents.sort((a, b) => a.date - b.date);
-      allEvents.forEach(ev => {
-        const li = document.createElement("li");
-        li.textContent = `${ev.date.toDateString()} — ${ev.text}`;
-        eventsSummary.appendChild(li);
-      });
-    }
+      const file = editPhoto.files[0];
+      
+      try {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
 
-    window.onclick = function(event) {
-      if (event.target == eventModal) {
-        eventModal.style.display = "none";
+        // Upload photo if selected
+        if(file){
+          const storageRef = storage.ref().child(`profilePics/${uid}/avatar.jpg`);
+          const uploadTask = await storageRef.put(file);
+          const url = await storageRef.getDownloadURL();
+          updated.photoURL = url;
+        }
+        
+        // Update Firestore
+        await ref.set(updated, { merge:true });
+        
+        alert("Profile updated successfully!");
+        closeEditModal();
+        
+        // Reset file input
+        editPhoto.value = '';
+        
+      } catch(err){
+        console.error(err);
+        alert("Error updating profile: " + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
       }
     }
 
-    renderCalendar(currentDate);
-    updateEventsSummary();
+    // ---------- Calendar Functions ----------
+    function renderCalendar() {
+      const monthYear = document.getElementById('monthYear');
+      const calendarDays = document.getElementById('calendarDays');
+      
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const lastDay = new Date(currentYear, currentMonth + 1, 0);
+      const today = new Date();
+      
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+      
+      monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+      
+      calendarDays.innerHTML = '';
+      
+      // Add empty cells for days before first day of month
+      for(let i = 0; i < firstDay.getDay(); i++) {
+        const emptyDiv = document.createElement('div');
+        calendarDays.appendChild(emptyDiv);
+      }
+      
+      // Add days of month
+      for(let day = 1; day <= lastDay.getDate(); day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'calendar-day';
+        dayDiv.textContent = day;
+        
+        // Highlight today
+        if(day === today.getDate() && 
+           currentMonth === today.getMonth() && 
+           currentYear === today.getFullYear()) {
+          dayDiv.classList.add('today');
+        }
+        
+        calendarDays.appendChild(dayDiv);
+      }
+    }
+
+    function prevMonth() {
+      currentMonth--;
+      if(currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      currentMonth++;
+      if(currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    }
+
+    // Initialize calendar
+    renderCalendar();
+
+    // Make functions global
+    window.openEditModal = openEditModal;
+    window.closeEditModal = closeEditModal;
+    window.saveEdit = saveEdit;
+    window.toggleDropdown = toggleDropdown;
+    window.prevMonth = prevMonth;
+    window.nextMonth = nextMonth;
   </script>
 </body>
 </html>
