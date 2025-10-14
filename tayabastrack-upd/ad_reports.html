@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Manage Reports | TayabaStrack Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI', Tahoma, sans-serif;display:flex;min-height:100vh;background:#f5f7fb;color:#333;overflow:auto}
+    .sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50}
+    .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
+    .sidebar-header img{width:40px}
+    .sidebar-header h2{font-size:1.2rem;margin:0}
+    .sidebar-menu{list-style:none;padding-left:0}
+    .sidebar-menu li{margin:0.5rem 0}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
+    .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
+    .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2)}
+    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%}
+    .logout-btn:hover{background-color:#c9302c}
+    .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40}
+    .navbar h1{font-size:1.4rem;color:#004aad}
+    .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
+    .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none}
+    .badge.show{display:flex;align-items:center;justify-content:center}
+    .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);width:320px;max-height:400px;overflow-y:auto;z-index:1000}
+    .notification-menu.show{display:block}
+    .notification-header{padding:1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+    .notification-header h3{font-size:1rem;color:#333;margin:0}
+    .clear-btn{background:none;border:none;color:#004aad;cursor:pointer;font-size:0.85rem}
+    .notification-item{padding:0.8rem 1rem;border-bottom:1px solid #f0f0f0;display:flex;gap:0.8rem;transition:background 0.2s}
+    .notification-item:hover{background:#f9f9f9}
+    .notification-icon{width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .notification-icon.user{background:#e3f2fd;color:#1976d2}
+    .notification-icon.report{background:#fff3e0;color:#f57c00}
+    .notification-content{flex:1}
+    .notification-content p{margin:0;font-size:0.85rem}
+    .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.2rem}
+    .notification-empty{padding:2rem;text-align:center;color:#999}
+    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
+    .avatar{width:35px;height:35px;border-radius:50%}
+    .username{font-weight:500}
+    .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
+    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
+    .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
+    .main{margin-left:250px;margin-top:74px;flex:1;display:block;padding:20px 28px;height:calc(100vh - 74px);overflow-y:auto;overflow-x:hidden}
+    .reports-section{padding-bottom:40px;max-width:100%}
+    .report-box{background:#fff;border-radius:10px;padding:16px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.04);overflow:visible}
+    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .report-box-header h2{color:#004aad;font-size:1.05rem}
+    .report-actions input{padding:.4rem .75rem;border:1px solid #e0e0e0;border-radius:18px;font-size:.9rem;width:260px}
+    .scroll-hint{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:8px 12px;border-radius:6px;font-size:0.85rem;text-align:center;margin:10px 0 12px 0;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(0,74,173,0.2);flex-shrink:0}
+    .scroll-hint i{animation:slideHint 2s ease-in-out infinite}
+    @keyframes slideHint{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+    .table-card{overflow-x:auto;overflow-y:hidden;border-radius:10px;background:#fff;padding:8px;box-shadow:0 2px 6px rgba(0,0,0,0.05);scroll-behavior:smooth;position:relative;margin-bottom:0;width:100%}
+    .table-card::-webkit-scrollbar{height:10px}
+    .table-card::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);border-radius:5px}
+    table{width:100%;border-collapse:collapse;table-layout:auto;min-width:1800px}
+    thead{background:#f5f8fb;color:#333}
+    thead th{font-weight:700;padding:0.7rem 0.75rem;text-align:left;border-bottom:2px solid #e0e0e0;white-space:nowrap}
+    th,td{text-align:left;padding:0.6rem 0.8rem;font-size:0.85rem;border-bottom:1px solid #f0f2f5;overflow:visible;white-space:nowrap}
+    tbody tr:nth-child(even){background:#fbfdff}
+    tbody tr:hover{background:#f1f8ff}
+    .truncate{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+    .status{display:inline-block;padding:.25rem .5rem;border-radius:6px;color:#fff;font-weight:700;font-size:.75rem;min-width:80px;text-align:center}
+    .pending{background:#f6c23e;color:#2b2b2b}
+    .ongoing{background:#36b9cc;color:#fff}
+    .repaired{background:#1cc88a;color:#fff}
+    .completed{background:#1cc88a;color:#fff}
+    .declined{background:#d9534f;color:#fff}
+    .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
+    .action a.decline{color:#d9534f}
+    td button{padding:0.3rem 0.6rem;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;margin-right:4px}
+    td button.btn-approve{background:#1cc88a;color:#fff}
+    td button.btn-decline{background:#d9534f;color:#fff}
+    td button.btn-edit{background:#004aad;color:#fff}
+    td button:disabled{background:#ccc;cursor:not-allowed;opacity:0.6}
+    .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
+    .modal-content{background:#fff;width:100%;max-width:980px;border-radius:12px;padding:18px;max-height:92vh;overflow:auto}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .modal-header h2{color:#004aad;font-size:1.1rem;margin:0}
+    .close-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#444}
+    .modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .modal-row{display:flex;flex-direction:column}
+    .modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
+    .modal-row input[type="text"],.modal-row input[type="number"],.modal-row input[type="date"],.modal-row textarea,.modal-row select{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
+    .modal-row textarea{min-height:80px;resize:vertical}
+    .img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px}
+    .modal-footer{text-align:right;margin-top:12px}
+    .btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;margin-left:8px}
+    .btn-save{background:#004aad;color:#fff}
+    .btn-cancel{background:#9e9e9e;color:#fff}
+    .btn-delete{background:#d9534f;color:#fff}
+    .decline-modal{display:none;position:fixed;z-index:3000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.5);justify-content:center;align-items:center;padding:18px}
+    .decline-modal-content{background:#fff;width:100%;max-width:600px;border-radius:12px;padding:24px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto}
+    .decline-modal-header{margin-bottom:20px}
+    .decline-modal-header h3{color:#d9534f;font-size:1.3rem;margin:0}
+    .decline-form-group{margin-bottom:18px}
+    .decline-form-group label{display:block;font-weight:600;margin-bottom:8px;color:#333;font-size:0.95rem}
+    .decline-form-group label .required{color:#d9534f;margin-left:3px}
+    .decline-form-group textarea{width:100%;min-height:100px;padding:10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.95rem;resize:vertical;font-family:inherit}
+    .decline-form-group input:focus,.decline-form-group textarea:focus{outline:none;border-color:#004aad;box-shadow:0 0 0 3px rgba(0,74,173,0.1)}
+    .decline-modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0}
+    .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
+    .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media (max-width:900px){.modal-grid{grid-template-columns:1fr}.report-actions input{width:100%}}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <img src="logu.png" alt="Logo">
+        <h2>TayabaStrack</h2>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="ad_dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
+        <li class="active"><a href="ad_reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
+        <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i>&nbsp; Map</a></li>
+        <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
+        <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i>&nbsp; Report Bulletin</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="sidebarLogoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </aside>
+
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <h1>Manage Reports</h1>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="position:relative">
+        <i class="fa fa-bell" id="notificationBell" aria-hidden="true"></i>
+        <span class="badge" id="notificationBadge">0</span>
+        <div class="notification-menu" id="notificationMenu">
+          <div class="notification-header">
+            <h3>Notifications</h3>
+            <button class="clear-btn" id="clearNotificationsBtn">Clear all</button>
+          </div>
+          <div class="notification-list" id="notificationList">
+            <div class="notification-empty">No new notifications</div>
+          </div>
+        </div>
+      </div>
+      <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
+        <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar">
+        <span class="username" id="navUsername">Loading...</span>
+        <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
+          <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+          <a href="#" id="navLogoutBtn"><i class="fa fa-sign-out-alt"></i>&nbsp; Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main" role="main">
+    <section class="reports-section">
+      <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
+        <div class="spinner" role="status" aria-label="Loading"></div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Pending Reports</h2>
+          <div class="report-actions">
+            <input id="searchPending" placeholder="Search pending..." aria-label="Search pending reports">
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th><th>Barangay</th><th>Description</th><th>Age Groups / People</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Status</th><th>Timestamp</th><th>User ID</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="pendingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Ongoing Reports</h2>
+          <div class="report-actions">
+            <input id="searchOngoing" placeholder="Search ongoing..." aria-label="Search ongoing reports">
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th><th>Barangay</th><th>Description</th><th>Age Groups / People</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Status</th><th>Timestamp</th><th>User ID</th><th>Inspection Date</th><th>Start Date</th><th>End Date</th><th>Budget Allocation</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ongoingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Completed Reports (Repaired)</h2>
+          <div class="report-actions">
+            <input id="searchCompleted" placeholder="Search completed..." aria-label="Search completed reports">
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th><th>Barangay</th><th>Description</th><th>Age Groups / People</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Status</th><th>Timestamp</th><th>User ID</th><th>Inspection Date</th><th>Start Date</th><th>End Date</th><th>Budget Allocation</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="completedBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Declined Reports</h2>
+          <div class="report-actions">
+            <input id="searchDeclined" placeholder="Search declined..." aria-label="Search declined reports">
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-card" aria-live="polite">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th><th>Barangay</th><th>Description</th><th>Age Groups / People</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Status</th><th>Timestamp</th><th>User ID</th><th>Inspection Date</th><th>Budget Allocation</th><th>Decline Reason</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="declinedBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="editModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h2 id="modalTitle">Edit Completion Date</h2>
+        <button class="close-btn" id="closeModal" title="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-row">
+          <label for="completionDateField">Completion Date</label>
+          <input type="date" id="completionDateField">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-cancel" id="cancelBtn">Cancel</button>
+        <button class="btn btn-save" id="saveChangesBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="decline-modal" id="declineModal">
+    <div class="decline-modal-content">
+      <div class="decline-modal-header">
+        <h3>Decline Report</h3>
+      </div>
+      <div class="decline-form-group">
+        <label for="declineReason">Reason for Declining <span class="required">*</span></label>
+        <textarea id="declineReason" placeholder="Enter detailed reason for declining this report..." required></textarea>
+      </div>
+      <div class="decline-modal-footer">
+        <button class="btn btn-cancel" id="cancelDeclineBtn">Cancel</button>
+        <button class="btn btn-delete" id="confirmDeclineBtn">Confirm Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, orderBy, onSnapshot, getDoc, doc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.firebasestorage.app",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const pendingBody = document.getElementById("pendingBody");
+    const ongoingBody = document.getElementById("ongoingBody");
+    const completedBody = document.getElementById("completedBody");
+    const declinedBody = document.getElementById("declinedBody");
+    const searchPending = document.getElementById("searchPending");
+    const searchOngoing = document.getElementById("searchOngoing");
+    const searchCompleted = document.getElementById("searchCompleted");
+    const searchDeclined = document.getElementById("searchDeclined");
+    const editModal = document.getElementById("editModal");
+    const completionDateField = document.getElementById("completionDateField");
+    const closeModal = document.getElementById("closeModal");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const saveChangesBtn = document.getElementById("saveChangesBtn");
+    const declineModal = document.getElementById("declineModal");
+    const declineReason = document.getElementById("declineReason");
+    const cancelDeclineBtn = document.getElementById("cancelDeclineBtn");
+    const confirmDeclineBtn = document.getElementById("confirmDeclineBtn");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const profileToggle = document.getElementById("profileToggle");
+    const navUsername = document.getElementById("navUsername");
+    const navbarAvatar = document.getElementById("navbarAvatar");
+    const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
+    const navLogoutBtn = document.getElementById("navLogoutBtn");
+    const notificationBell = document.getElementById("notificationBell");
+    const notificationBadge = document.getElementById("notificationBadge");
+    const notificationMenu = document.getElementById("notificationMenu");
+    const notificationList = document.getElementById("notificationList");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+
+    let currentDocId = null;
+    let reportToDecline = null;
+    let reportsUnsub = null;
+    let notificationsList = [];
+    let trackedUsers = new Set();
+    let trackedReports = new Set();
+
+    function addNotification(type, message, detail) {
+      const notification = {id: Date.now(), type, message, detail, timestamp: new Date()};
+      notificationsList.unshift(notification);
+      updateNotificationUI();
+    }
+
+    function updateNotificationUI() {
+      const count = notificationsList.length;
+      if (count > 0) {
+        notificationBadge.textContent = count;
+        notificationBadge.classList.add("show");
+      } else {
+        notificationBadge.textContent = "";
+        notificationBadge.classList.remove("show");
+      }
+      if (notificationsList.length === 0) {
+        notificationList.innerHTML = `<div class="notification-empty">No new notifications</div>`;
+        return;
+      }
+      notificationList.innerHTML = notificationsList.map(n => `
+        <div class="notification-item">
+          <div class="notification-icon ${n.type}">
+            ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+          </div>
+          <div class="notification-content">
+            <p><strong>${n.message}</strong></p>
+            <p>${n.detail}</p>
+            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notificationMenu.classList.toggle("show");
+    });
+    clearNotificationsBtn.addEventListener("click", () => {
+      notificationsList = [];
+      updateNotificationUI();
+    });
+
+    function isBarangayPosition(position) {
+      if (!position) return false;
+      const pos = position.toLowerCase().trim();
+      return pos.includes("barangay captain") || pos.includes("brgy captain") || pos.includes("brgy. captain") || pos.includes("barangay official") || pos.includes("brgy official") || pos.includes("brgy. official");
+    }
+
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return "";
+      let date;
+      if (timestamp.toDate) date = timestamp.toDate();
+      else if (typeof timestamp === 'string') date = new Date(timestamp);
+      else return timestamp;
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const m = months[date.getMonth()];
+      const d = String(date.getDate()).padStart(2,'0');
+      const y = date.getFullYear();
+      let h = date.getHours();
+      const min = String(date.getMinutes()).padStart(2,'0');
+      const ampm = h>=12?'PM':'AM';
+      h = h%12||12;
+      return `${m}/${d}/${y} | ${h}:${min} ${ampm}`;
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return "Not Set";
+      let date;
+      if (timestamp.toDate) date = timestamp.toDate();
+      else if (typeof timestamp === 'string') date = new Date(timestamp);
+      else return "Not Set";
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const m = months[date.getMonth()];
+      const d = String(date.getDate()).padStart(2,'0');
+      const y = date.getFullYear();
+      return `${m} ${d}, ${y}`;
+    }
+
+    async function getImageUrl(imagePath) {
+      if (!imagePath) return null;
+      if (imagePath.startsWith('http')) return imagePath;
+      try {
+        const url = await getDownloadURL(ref(storage, imagePath));
+        return url;
+      } catch (err) {
+        console.error("Error getting image URL:", err);
+        return null;
+      }
+    }
+
+    async function buildTableRow(docSnap, tableType) {
+      const r = docSnap.data();
+      const tr = document.createElement("tr");
+      const addCell = (c, cls="")=>{
+        const td=document.createElement("td");
+        if(cls)td.className=cls;
+        if(typeof c==="string")td.textContent=c;else td.appendChild(c);
+        tr.appendChild(td);
+      };
+      
+      addCell(r.reportId||"");
+      addCell(r.barangay||"");
+      const desc=document.createElement("span");
+      desc.className="truncate";
+      desc.textContent=r.description||"";
+      desc.title=r.description||"";
+      addCell(desc);
+      addCell(`${r.affectedAgeGroups||""}${r.affectedAgeGroups&&r.peopleInvolved?" / ":""}${r.peopleInvolved||""}`);
+      const dims=(r.width&&r.height)?`${r.width}×${r.height}`:(r.width||r.height||"");
+      addCell(dims);
+      
+      const imgSpan=document.createElement("span");
+      const imagePath = r.incidentImage || r.imageUrl || r.image;
+      if(imagePath){
+        const link=document.createElement("a");
+        link.href="#";
+        link.textContent="View";
+        link.onclick=async (e)=>{
+          e.preventDefault();
+          const imgUrl = await getImageUrl(imagePath);
+          if(!imgUrl) {
+            alert("Could not load image");
+            return;
+          }
+          const overlay=document.createElement("div");
+          overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
+          const img=document.createElement("img");
+          img.src=imgUrl;
+          img.style.cssText="max-width:90%;max-height:90%;border-radius:8px;";
+          overlay.appendChild(img);
+          overlay.onclick=()=>overlay.remove();
+          document.body.appendChild(overlay);
+        };
+        imgSpan.appendChild(link);
+      } else imgSpan.textContent="No";
+      addCell(imgSpan);
+      
+      addCell(`${r.latitude||""}${r.latitude&&r.longitude?", ":""}${r.longitude||""}`);
+      
+      const status=document.createElement("span");
+      const s=(r.status||"Pending").toLowerCase();
+      status.className=`status ${s}`;
+      status.textContent=r.status||"Pending";
+      addCell(status);
+      
+      addCell(formatTimestamp(r.timestamp||r.createdAt));
+      addCell(r.userId||"");
+      
+      if (tableType === "ongoing" || tableType === "completed") {
+        addCell(formatDate(r.inspectionDate));
+        addCell(formatDate(r.startDate));
+        addCell(formatDate(r.endDate));
+        
+        let budgetDisplay = "Not Set";
+        if(r.budgetAllocation) {
+          budgetDisplay = r.budgetAllocation;
+        } else if(r.budgetMin && r.budgetMax) {
+          budgetDisplay = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
+        }
+        addCell(budgetDisplay);
+      }
+      
+      if(tableType === "declined") {
+        addCell(formatDate(r.inspectionDate));
+        
+        let budgetDisplay = "Not Set";
+        if(r.budgetAllocation) {
+          budgetDisplay = r.budgetAllocation;
+        } else if(r.budgetMin && r.budgetMax) {
+          budgetDisplay = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
+        }
+        addCell(budgetDisplay);
+        
+        const reasonSpan = document.createElement("span");
+        reasonSpan.className = "truncate";
+        reasonSpan.textContent = r.declineReason || "No reason provided";
+        reasonSpan.title = r.declineReason || "No reason provided";
+        addCell(reasonSpan);
+      }
+      
+      const action=document.createElement("span");
+      
+      if (tableType === "pending") {
+        const approveBtn=document.createElement("button");
+        approveBtn.className="btn-approve";
+        approveBtn.textContent="Approve";
+        approveBtn.dataset.id=docSnap.id;
+        approveBtn.onclick=approveReport;
+        
+        const declineBtn=document.createElement("button");
+        declineBtn.className="btn-decline";
+        declineBtn.textContent="Decline";
+        declineBtn.dataset.id=docSnap.id;
+        declineBtn.onclick=openDeclineModal;
+        
+        action.appendChild(approveBtn);
+        action.appendChild(declineBtn);
+      } else if (tableType === "ongoing") {
+        const viewBtn=document.createElement("button");
+        viewBtn.className="btn-edit";
+        viewBtn.textContent="View Only";
+        viewBtn.disabled = true;
+        viewBtn.title = "Only Super Admin can edit ongoing reports";
+        action.appendChild(viewBtn);
+      } else if (tableType === "completed") {
+        const editBtn=document.createElement("button");
+        editBtn.className="btn-edit";
+        editBtn.textContent="Edit Date";
+        editBtn.dataset.id=docSnap.id;
+        editBtn.onclick=openEditModal;
+        action.appendChild(editBtn);
+      } else if (tableType === "declined") {
+        const viewBtn=document.createElement("button");
+        viewBtn.className="btn-edit";
+        viewBtn.textContent="View";
+        viewBtn.disabled = true;
+        action.appendChild(viewBtn);
+      }
+      
+      addCell(action,"action");
+      return tr;
+    }
+
+    function attachSearch(inputElem, tableBody) {
+      inputElem.addEventListener("keyup", ()=>{
+        const val=inputElem.value.toLowerCase();
+        [...tableBody.rows].forEach(r=>{
+          const text=r.innerText.toLowerCase();
+          r.style.display=text.includes(val)?"":"none";
+        });
+      });
+    }
+    attachSearch(searchPending, pendingBody);
+    attachSearch(searchOngoing, ongoingBody);
+    attachSearch(searchCompleted, completedBody);
+    attachSearch(searchDeclined, declinedBody);
+
+    async function approveReport(e){
+      e.preventDefault();
+      const id=e.currentTarget.dataset.id;
+      
+      if(!confirm("Approve this report and change status to Ongoing?")) return;
+      
+      try {
+        await updateDoc(doc(db, "reports", id), {
+          status: "Ongoing",
+          approvedAt: serverTimestamp()
+        });
+        alert("Report approved and moved to Ongoing!");
+      } catch(err) {
+        alert("Error approving report: " + err.message);
+      }
+    }
+
+    function openDeclineModal(e){
+      e.preventDefault();
+      const id=e.currentTarget.dataset.id;
+      reportToDecline = id;
+      
+      declineReason.value = "";
+      declineModal.style.display="flex";
+    }
+
+    async function confirmDecline(){
+      const reason = declineReason.value.trim();
+      
+      if(!reason) {
+        alert("Please provide a reason for declining this report.");
+        declineReason.focus();
+        return;
+      }
+      
+      if(!reportToDecline) return;
+      
+      try {
+        await updateDoc(doc(db, "reports", reportToDecline), {
+          status: "Declined",
+          declineReason: reason,
+          declinedAt: serverTimestamp()
+        });
+        
+        declineModal.style.display = "none";
+        reportToDecline = null;
+        alert("Report has been declined successfully.");
+      } catch(err) {
+        alert("Error declining report: " + err.message);
+      }
+    }
+
+    async function openEditModal(e){
+      e.preventDefault();
+      const id=e.currentTarget.dataset.id;
+      currentDocId = id;
+      
+      try {
+        const snap = await getDoc(doc(db,"reports",id));
+        if(!snap.exists()) {
+          alert("Report not found");
+          return;
+        }
+        
+        const data = snap.data();
+        
+        if(data.completionDate) {
+          let dateStr = "";
+          if(data.completionDate.toDate) {
+            const d = data.completionDate.toDate();
+            dateStr = d.toISOString().split('T')[0];
+          } else if(typeof data.completionDate === 'string') {
+            dateStr = new Date(data.completionDate).toISOString().split('T')[0];
+          }
+          completionDateField.value = dateStr;
+        } else {
+          completionDateField.value = "";
+        }
+        
+        editModal.style.display="flex";
+      } catch(err) {
+        alert("Error opening report: " + err.message);
+      }
+    }
+
+    closeModal.onclick=()=>{
+      editModal.style.display="none";
+      currentDocId = null;
+    };
+    cancelBtn.onclick=()=>{
+      editModal.style.display="none";
+      currentDocId = null;
+    };
+    cancelDeclineBtn.onclick=()=>{
+      declineModal.style.display="none";
+      reportToDecline = null;
+    };
+    confirmDeclineBtn.onclick=confirmDecline;
+
+    saveChangesBtn.addEventListener("click", async () => {
+      if (!currentDocId) return;
+      
+      const completionDate = completionDateField.value;
+      
+      if(!completionDate) {
+        alert("Please select a completion date.");
+        return;
+      }
+      
+      try {
+        const reportRef = doc(db,"reports",currentDocId);
+        await updateDoc(reportRef, {
+          completionDate: new Date(completionDate)
+        });
+        
+        const reportSnap = await getDoc(reportRef);
+        if(reportSnap.exists()) {
+          const reportData = reportSnap.data();
+          
+          const bulletinData = {
+            barangay: reportData.barangay || "",
+            issue: reportData.description || "",
+            date: reportData.createdAt || new Date(),
+            completionDate: new Date(completionDate),
+            imageURL: reportData.imageUrl || reportData.incidentImage || "",
+            description: reportData.description || "",
+            affectedAgeGroups: reportData.affectedAgeGroups || "",
+            peopleInvolved: reportData.peopleInvolved || "",
+            latitude: reportData.latitude || "",
+            longitude: reportData.longitude || "",
+            status: reportData.status || "Repaired"
+          };
+          
+          await setDoc(doc(db, "ad_bulletin", currentDocId), bulletinData);
+        }
+        
+        alert("Completion date saved and synced to bulletin!");
+        editModal.style.display="none";
+        currentDocId = null;
+      } catch (err) {
+        console.error(err);
+        alert("Save failed: " + err.message);
+      }
+    });
+
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (!e.target.closest(".profile-dropdown")) {
+        dropdownMenu.style.display = "none";
+      }
+      if (!notificationMenu.contains(e.target) && e.target !== notificationBell) {
+        notificationMenu.classList.remove("show");
+      }
+    });
+
+    async function handleLogout() {
+      try {
+        await signOut(auth);
+        window.location.href = "logout.html";
+      } catch(err) {
+        alert("Error logging out: " + err.message);
+      }
+    }
+
+    sidebarLogoutBtn.addEventListener("click", handleLogout);
+    navLogoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      handleLogout();
+    });
+
+    onAuthStateChanged(auth, async(user)=>{
+      if(!user) {
+        window.location.href="logout.html";
+        return;
+      }
+      
+      try {
+        const uDoc=await getDoc(doc(db,"users",user.uid));
+        if(!uDoc.exists()) {
+          window.location.href="logout.html";
+          return;
+        }
+        
+        const d=uDoc.data();
+        if(d.position!=="Admin") {
+          alert("Unauthorized. Only Admins can access this page.");
+          window.location.href="logout.html";
+          return;
+        }
+        
+        navUsername.textContent=d.name||d.firstName||"Admin";
+        if (d.photoURL || d.profilePic) {
+          navbarAvatar.src = d.photoURL || d.profilePic;
+        }
+
+        const q=query(collection(db,"reports"),orderBy("createdAt","desc"));
+        if(reportsUnsub) reportsUnsub();
+        
+        reportsUnsub=onSnapshot(q,async (snap)=>{
+          pendingBody.innerHTML="";
+          ongoingBody.innerHTML="";
+          completedBody.innerHTML="";
+          declinedBody.innerHTML="";
+          
+          for (const docSnap of snap.docs) {
+            const data=docSnap.data();
+            const status=(data.status||"pending").toLowerCase().trim();
+            
+            if(status==="pending") {
+              const row=await buildTableRow(docSnap, "pending");
+              pendingBody.appendChild(row);
+            }
+            else if(status==="ongoing") {
+              const row=await buildTableRow(docSnap, "ongoing");
+              ongoingBody.appendChild(row);
+            }
+            else if(status==="repaired" || status==="posted") {
+              const row=await buildTableRow(docSnap, "completed");
+              completedBody.appendChild(row);
+            }
+            else if(status==="declined") {
+              const row=await buildTableRow(docSnap, "declined");
+              declinedBody.appendChild(row);
+            }
+          }
+        });
+
+        const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
+        onSnapshot(qNewUsers, (snapshot) => {
+          snapshot.docChanges().forEach(change => {
+            if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
+              trackedUsers.add(change.doc.id);
+              const u = change.doc.data();
+              if (isBarangayPosition(u.position)) {
+                addNotification("user", `New registration: ${u.firstName || ""} ${u.surname || ""}`, u.email);
+              }
+            }
+          });
+        });
+
+        const qReports = query(collection(db, "reports"));
+        onSnapshot(qReports, (snapshot) => {
+          snapshot.docChanges().forEach(change => {
+            if (change.type === "added" && !trackedReports.has(change.doc.id)) {
+              trackedReports.add(change.doc.id);
+              const r = change.doc.data();
+              addNotification("report", `New report submitted in ${r.barangay || "a barangay"}`, r.type || "");
+            }
+          });
+        });
+
+      } catch(err) {
+        console.error("Error loading user data:", err);
+        alert("Error loading user data. Please try again.");
+        window.location.href="logout.html";
+      }
+    });
+  </script>
+</body>
+</html>
