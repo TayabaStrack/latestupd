@@ -10,6 +10,6 @@ admi
 - should not be able to edit specific parts of the table in manage reports such as the report id, timestamp, reporter name 
 
 s-admin
-- uniform layout(LAHAT) 
-- pag sync sa newly allocated reports, sa table (MANAGE REPORTS)
-- notif button (dashboard done)
+- sync sa google calendar ng mga events (optional)
+- profile edit
+- notifs ilalagay sa lahat ng pages
