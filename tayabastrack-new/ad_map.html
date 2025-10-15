@@ -191,8 +191,8 @@
       color: #999;
     }
     .unread-indicator {
-      width: 4px;
-      height: 4px;
+      width: 8px;
+      height: 8px;
       background: #004aad;
       border-radius: 50%;
     }
@@ -513,97 +513,14 @@
       };
     }
 
-    class NotificationManager {
-      constructor(playSound) {
-        this.notifications = [];
-        this.maxNotifications = 50;
-        this.shownNotifications = new Set();
-        this.playSound = playSound;
-        this.lastNotificationTime = {};
-      }
+    let allNotifications = [];
+    const playChime = initNotificationSound();
 
-      add(type, message, detail, autoRemove = true) {
-        const key = `${type}-${message}`;
-        const now = Date.now();
-        if (this.lastNotificationTime[key] && now - this.lastNotificationTime[key] < 3000) {
-          return;
-        }
-        this.lastNotificationTime[key] = now;
-
-        const id = `${type}-${message}-${Date.now()}`;
-        if (this.shownNotifications.has(id)) return;
-        this.shownNotifications.add(id);
-
-        const notification = {
-          id,
-          type,
-          message,
-          detail,
-          timestamp: new Date(),
-          read: false,
-          seen: false
-        };
-
-        this.notifications.unshift(notification);
-
-        if (this.notifications.length > this.maxNotifications) {
-          this.notifications = this.notifications.slice(0, this.maxNotifications);
-        }
-
-        if (this.playSound) {
-          this.playSound();
-        }
-
-        if (autoRemove && type === "report") {
-          setTimeout(() => this.markAsRead(id), 5000);
-        }
-
-        return notification;
-      }
-
-      markAsRead(id) {
-        const notif = this.notifications.find(n => n.id === id);
-        if (notif) {
-          notif.read = true;
-          notif.seen = true;
-        }
-      }
-
-      markAllAsRead() {
-        this.notifications.forEach(n => {
-          n.read = true;
-          n.seen = true;
-        });
-      }
-
-      getUnreadCount() {
-        return this.notifications.filter(n => !n.read).length;
-      }
-
-      getAll() {
-        return this.notifications;
-      }
-
-      getRecent24Hours() {
-        const now = new Date();
-        const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        return this.notifications.filter(n => n.timestamp > twentyFourHoursAgo);
-      }
-
-      getByType(type) {
-        return this.notifications.filter(n => n.type === type);
-      }
-
-      clear() {
-        this.notifications = [];
-        this.shownNotifications.clear();
-        this.lastNotificationTime = {};
-      }
-    }
-
-    function updateNotificationUI(manager, elements) {
-      const { badge, list } = elements;
-      const unreadCount = manager.getUnreadCount();
+    function updateNotificationUI() {
+      const badge = document.getElementById('notificationBadge');
+      const list = document.getElementById('notificationList');
+      
+      const unreadCount = allNotifications.filter(n => !n.read).length;
       
       if (unreadCount > 0) {
         badge.textContent = unreadCount;
@@ -613,11 +530,11 @@
         badge.classList.remove("show");
       }
 
-      const notifications = manager.getAll().slice(0, 5);
-      if (manager.getAll().length === 0) {
+      const recentNotifications = allNotifications.slice(0, 5);
+      if (allNotifications.length === 0) {
         list.innerHTML = `<div class="notification-empty">No notifications</div>`;
       } else {
-        list.innerHTML = notifications.map(n => `
+        list.innerHTML = recentNotifications.map(n => `
           <div class="notification-item ${n.read ? 'read' : 'unread'}" onclick="window.markNotificationAsRead('${n.id}')">
             <div class="notification-icon ${n.type}">
               ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
@@ -625,25 +542,23 @@
             <div class="notification-content">
               <p><strong>${n.message}</strong></p>
               <p>${n.detail}</p>
-              <span class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              <span class="time">${new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
             ${!n.read ? '<div class="unread-indicator"></div>' : ''}
           </div>
         `).join('');
 
-        if (manager.getAll().length > 5) {
+        if (allNotifications.length > 5) {
           list.innerHTML += `
             <div style="padding: 0.8rem 1rem; border-top: 1px solid #eee; text-align: center;">
               <button onclick="window.openNotificationModal()" style="background: none; border: none; color: #004aad; cursor: pointer; font-weight: 500; font-size: 0.85rem;">
-                View all (${manager.getAll().length}) →
+                View all (${allNotifications.length}) →
               </button>
             </div>
           `;
         }
       }
     }
-
-    window.notificationManager = null;
 
     window.openNotificationModal = function() {
       document.getElementById('notificationModal').style.display = 'flex';
@@ -655,17 +570,16 @@
     };
 
     window.filterNotifications = function(filter) {
-      if (!window.notificationManager) return;
-      
       let notifications = [];
       if (filter === 'all') {
-        notifications = window.notificationManager.getAll();
+        notifications = allNotifications;
       } else if (filter === 'report') {
-        notifications = window.notificationManager.getByType('report');
+        notifications = allNotifications.filter(n => n.type === 'report');
       } else if (filter === 'user') {
-        notifications = window.notificationManager.getByType('user');
+        notifications = allNotifications.filter(n => n.type === 'user');
       } else if (filter === '24h') {
-        notifications = window.notificationManager.getRecent24Hours();
+        const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+        notifications = allNotifications.filter(n => n.timestamp > twentyFourHoursAgo);
       }
 
       const list = document.getElementById('notificationModalList');
@@ -680,7 +594,7 @@
             <div style="flex: 1;">
               <p style="margin: 0 0 0.3rem 0; font-weight: 500; color: #333;"><strong>${n.message}</strong></p>
               <p style="margin: 0 0 0.3rem 0; font-size: 0.9rem; color: #666;">${n.detail}</p>
-              <span style="font-size: 0.75rem; color: #999;">${n.timestamp.toLocaleString()}</span>
+              <span style="font-size: 0.75rem; color: #999;">${new Date(n.timestamp).toLocaleString()}</span>
             </div>
             <div style="display: flex; align-items: center;">
               <span style="font-size: 0.75rem; color: #999; padding: 0.2rem 0.5rem; background: #eee; border-radius: 4px;">${n.read ? 'Read' : 'New'}</span>
@@ -694,95 +608,50 @@
       });
     };
 
-    window.markNotificationAsRead = function(id) {
-      if (!window.notificationManager) return;
-      window.notificationManager.markAsRead(id);
-      updateNotificationUI(window.notificationManager, {
-        badge: document.getElementById('notificationBadge'),
-        list: document.getElementById('notificationList')
-      });
-      window.filterNotifications('all');
+    window.markNotificationAsRead = async function(notifId) {
+      try {
+        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        await updateDoc(doc(window.db, "admin_notifications", notifId), {
+          read: true
+        });
+      } catch (err) {
+        console.error("Error marking notification as read:", err);
+      }
     };
 
-    window.markAllNotificationsAsRead = function() {
-      if (!window.notificationManager) return;
-      window.notificationManager.markAllAsRead();
-      updateNotificationUI(window.notificationManager, {
-        badge: document.getElementById('notificationBadge'),
-        list: document.getElementById('notificationList')
-      });
-      window.filterNotifications('all');
-    };
-
-    window.clearAllNotifications = function() {
-      if (confirm('Are you sure you want to clear all notifications?')) {
-        if (window.notificationManager) {
-          window.notificationManager.clear();
-          updateNotificationUI(window.notificationManager, {
-            badge: document.getElementById('notificationBadge'),
-            list: document.getElementById('notificationList')
+    window.markAllNotificationsAsRead = async function() {
+      try {
+        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const unread = allNotifications.filter(n => !n.read);
+        for (const notif of unread) {
+          await updateDoc(doc(window.db, "admin_notifications", notif.id), {
+            read: true
           });
-          window.closeNotificationModal();
+        }
+      } catch (err) {
+        console.error("Error marking all as read:", err);
+      }
+    };
+
+    window.clearAllNotifications = async function() {
+      if (confirm('Are you sure you want to clear all notifications?')) {
+        try {
+          const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          for (const notif of allNotifications) {
+            await deleteDoc(doc(window.db, "admin_notifications", notif.id));
+          }
+        } catch (err) {
+          console.error("Error clearing notifications:", err);
         }
       }
     };
-
-    function setupRealtimeNotifications(db, manager, updateUI, elements, collection, query, where, onSnapshot) {
-      const trackedUsers = new Set();
-      const trackedReports = new Set();
-
-      function isBarangayPosition(position) {
-        if (!position) return false;
-        const pos = position.toLowerCase().trim();
-        return pos.includes("barangay captain") || pos.includes("brgy captain") || 
-               pos.includes("brgy. captain") || pos.includes("barangay official") || 
-               pos.includes("brgy official") || pos.includes("brgy. official");
-      }
-
-      const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
-      onSnapshot(qNewUsers, (snapshot) => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
-            trackedUsers.add(change.doc.id);
-            const u = change.doc.data();
-            if (isBarangayPosition(u.position)) {
-              manager.add("user", 
-                `New User: ${u.firstName || ""} ${u.surname || ""}`, 
-                u.email || "",
-                false
-              );
-              updateUI();
-            }
-          }
-        });
-      });
-
-      const qReports = collection(db, "reports");
-      onSnapshot(qReports, (snapshot) => {
-        snapshot.docChanges().forEach(change => {
-          const reportId = change.doc.id;
-          const r = change.doc.data();
-
-          if (change.type === "added" && !trackedReports.has(reportId)) {
-            trackedReports.add(reportId);
-            
-            manager.add("report", 
-              `New Report in ${r.barangay || "a barangay"}`, 
-              r.reportType || r.type || "Unknown type",
-              true
-            );
-            updateUI();
-          }
-        });
-      });
-    }
   </script>
 
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, getDocs, query, where, onSnapshot, addDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
@@ -796,8 +665,84 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    window.db = db;
 
     window.reportData = [];
+
+    const trackedUsers = new Set();
+    const trackedReports = new Set();
+
+    function isBarangayPosition(position) {
+      if (!position) return false;
+      const pos = position.toLowerCase().trim();
+      return pos.includes("barangay captain") || pos.includes("brgy captain") || 
+             pos.includes("brgy. captain") || pos.includes("barangay official") || 
+             pos.includes("brgy official") || pos.includes("brgy. official");
+    }
+
+    // Listen to Firestore notifications
+    function setupNotificationListener() {
+      const q = query(collection(db, "admin_notifications"), orderBy("timestamp", "desc"));
+      onSnapshot(q, (snapshot) => {
+        const previousUnreadCount = allNotifications.filter(n => !n.read).length;
+        
+        allNotifications = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          timestamp: doc.data().timestamp?.toMillis() || Date.now()
+        }));
+
+        const newUnreadCount = allNotifications.filter(n => !n.read).length;
+        
+        // Play sound only if unread count increased
+        if (newUnreadCount > previousUnreadCount) {
+          playChime();
+        }
+        
+        updateNotificationUI();
+      });
+    }
+
+    // Setup realtime tracking for new users and reports
+    function setupRealtimeTracking() {
+      // Track new pending users
+      const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
+      onSnapshot(qNewUsers, async (snapshot) => {
+        for (const change of snapshot.docChanges()) {
+          if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
+            trackedUsers.add(change.doc.id);
+            const u = change.doc.data();
+            if (isBarangayPosition(u.position)) {
+              await addDoc(collection(db, "admin_notifications"), {
+                type: "user",
+                message: `New User: ${u.firstName || ""} ${u.surname || ""}`,
+                detail: u.email || "",
+                timestamp: serverTimestamp(),
+                read: false
+              });
+            }
+          }
+        }
+      });
+
+      // Track new reports
+      const qReports = query(collection(db, "reports"));
+      onSnapshot(qReports, async (snapshot) => {
+        for (const change of snapshot.docChanges()) {
+          if (change.type === "added" && !trackedReports.has(change.doc.id)) {
+            trackedReports.add(change.doc.id);
+            const r = change.doc.data();
+            await addDoc(collection(db, "admin_notifications"), {
+              type: "report",
+              message: `New Report in ${r.barangay || "a barangay"}`,
+              detail: r.reportType || r.type || "Unknown type",
+              timestamp: serverTimestamp(),
+              read: false
+            });
+          }
+        }
+      });
+    }
 
     const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.addEventListener("click", async (e) => {
@@ -810,15 +755,6 @@
         window.location.href = "logout.html";
       }
     });
-
-    // Initialize notification manager
-    const playChime = initNotificationSound();
-    window.notificationManager = new NotificationManager(playChime);
-
-    const notificationElements = {
-      badge: document.getElementById("notificationBadge"),
-      list: document.getElementById("notificationList")
-    };
 
     const notificationBell = document.getElementById("notificationBell");
     const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
@@ -907,16 +843,8 @@
           window.addMarkersToMap();
         }
 
-        setupRealtimeNotifications(
-          db, 
-          window.notificationManager, 
-          () => updateNotificationUI(window.notificationManager, notificationElements), 
-          notificationElements,
-          collection,
-          query,
-          where,
-          onSnapshot
-        );
+        setupNotificationListener();
+        setupRealtimeTracking();
 
       } catch (err) {
         console.error("Error loading data:", err);
