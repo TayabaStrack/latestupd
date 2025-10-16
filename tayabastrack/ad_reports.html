@@ -202,7 +202,7 @@
           <table>
             <thead>
               <tr>
-                <th>Report ID</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Allocated Budget</th><th>Start Date & Deadline</th><th>Contractor & Supplier</th><th>Reporter Position</th><th>Status</th><th>Action</th>
+                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Allocated Budget</th><th>Start Date & Deadline</th><th>Contractor & Supplier</th><th>Reporter Position</th><th>Status</th><th>Action</th>
               </tr>
             </thead>
             <tbody id="ongoingBody"></tbody>
@@ -225,7 +225,7 @@
           <table>
             <thead>
               <tr>
-                <th>Report ID</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Allocated Budget</th><th>Start Date & Deadline</th><th>Contractor & Supplier</th><th>Completion Date</th><th>Reporter Position</th><th>Status</th><th>Action</th>
+                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Allocated Budget</th><th>Start Date & Deadline</th><th>Contractor & Supplier</th><th>Completion Date</th><th>Penalties</th><th>Reporter Position</th><th>Status</th><th>Action</th>
               </tr>
             </thead>
             <tbody id="completedBody"></tbody>
@@ -248,7 +248,7 @@
           <table>
             <thead>
               <tr>
-                <th>Report ID</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Start Date & Deadline</th><th>Reporter Position</th><th>Status</th><th>Decline Reason</th>
+                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Start Date & Deadline</th><th>Reporter Position</th><th>Status</th><th>Decline Reason</th>
               </tr>
             </thead>
             <tbody id="declinedBody"></tbody>
@@ -267,8 +267,8 @@
       <div class="modal-body">
         <div class="modal-grid">
           <div class="modal-row">
-            <label>Report ID</label>
-            <input type="text" id="editPendingReportId" disabled>
+            <label for="editPendingProjectName">Project Name</label>
+            <input type="text" id="editPendingProjectName">
           </div>
           <div class="modal-row">
             <label>Timestamp</label>
@@ -336,8 +336,8 @@
       <div class="modal-body">
         <div class="modal-grid">
           <div class="modal-row">
-            <label>Report ID</label>
-            <input type="text" id="editOngoingReportId" disabled>
+            <label>Project Name</label>
+            <input type="text" id="editOngoingProjectName" disabled>
           </div>
           <div class="modal-row">
             <label>Timestamp</label>
@@ -389,12 +389,16 @@
       <div class="modal-body">
         <div class="modal-grid">
           <div class="modal-row">
-            <label>Report ID</label>
-            <input type="text" id="editCompletedReportId" disabled>
+            <label>Project Name</label>
+            <input type="text" id="editCompletedProjectName" disabled>
           </div>
           <div class="modal-row">
             <label for="editCompletionDate">Completion Date</label>
             <input type="date" id="editCompletionDate">
+          </div>
+          <div class="modal-row full-width">
+            <label for="editPenalties">Penalties (if applicable)</label>
+            <textarea id="editPenalties" placeholder="Enter penalties if project exceeded deadline..."></textarea>
           </div>
           <div class="modal-row full-width">
             <label>Progress Report (View Only)</label>
@@ -674,7 +678,7 @@
         const data = snap.data();
         const position = await getReporterPosition(data.userId);
         
-        document.getElementById("editPendingReportId").value = data.reportId || "";
+        document.getElementById("editPendingProjectName").value = data.projectName || data.reportId || "";
         document.getElementById("editPendingTimestamp").value = formatTimestamp(data.timestamp || data.createdAt);
         document.getElementById("editPendingPosition").value = position;
         document.getElementById("editPendingBarangay").value = data.barangay || "";
@@ -722,7 +726,7 @@
         const data = snap.data();
         const position = await getReporterPosition(data.userId);
         
-        document.getElementById("editOngoingReportId").value = data.reportId || "";
+        document.getElementById("editOngoingProjectName").value = data.projectName || data.reportId || "";
         document.getElementById("editOngoingTimestamp").value = formatTimestamp(data.timestamp || data.createdAt);
         document.getElementById("editOngoingPosition").value = position;
         document.getElementById("editOngoingBarangay").value = data.barangay || "";
@@ -752,8 +756,9 @@
         
         const data = snap.data();
         
-        document.getElementById("editCompletedReportId").value = data.reportId || "";
+        document.getElementById("editCompletedProjectName").value = data.projectName || data.reportId || "";
         document.getElementById("editCompletionDate").value = formatDateForInput(data.completionDate);
+        document.getElementById("editPenalties").value = data.penalties || "";
         document.getElementById("viewProgressReport").value = data.progressReport || "No progress report available";
         
         editCompletedModal.style.display="flex";
@@ -772,7 +777,7 @@
         tr.appendChild(td);
       };
       
-      addCell(r.reportId||"");
+      addCell(r.projectName || r.reportId || "Unnamed Project");
       addCell(r.barangay||"");
       
       const desc=document.createElement("span");
@@ -860,6 +865,12 @@
       
       if (tableType === "completed") {
         addCell(formatDate(r.completionDate));
+        
+        const penaltiesSpan = document.createElement("span");
+        penaltiesSpan.className = "truncate";
+        penaltiesSpan.textContent = r.penalties || "None";
+        penaltiesSpan.title = r.penalties || "None";
+        addCell(penaltiesSpan);
       }
       
       const reporterPosition = await getReporterPosition(r.userId);
@@ -1001,6 +1012,7 @@
     savePendingChanges.addEventListener("click", async () => {
       if (!currentDocId) return;
       
+      const projectName = document.getElementById("editPendingProjectName").value.trim();
       const barangay = document.getElementById("editPendingBarangay").value.trim();
       const description = document.getElementById("editPendingDescription").value.trim();
       const width = document.getElementById("editPendingWidth").value;
@@ -1026,6 +1038,7 @@
           proposedBudget
         };
         
+        if(projectName) updateData.projectName = projectName;
         if(width) updateData.width = parseFloat(width);
         if(height) updateData.height = parseFloat(height);
         if(startDate) updateData.startDate = new Date(startDate);
@@ -1072,6 +1085,7 @@
       if (!currentDocId) return;
       
       const completionDate = document.getElementById("editCompletionDate").value;
+      const penalties = document.getElementById("editPenalties").value.trim();
       
       if(!completionDate) {
         alert("Please select a completion date.");
@@ -1081,7 +1095,8 @@
       try {
         const reportRef = doc(db,"reports",currentDocId);
         await updateDoc(reportRef, {
-          completionDate: new Date(completionDate)
+          completionDate: new Date(completionDate),
+          penalties: penalties
         });
         
         const reportSnap = await getDoc(reportRef);
@@ -1099,13 +1114,15 @@
             peopleInvolved: reportData.peopleInvolved || "",
             latitude: reportData.latitude || "",
             longitude: reportData.longitude || "",
-            status: reportData.status || "Repaired"
+            status: reportData.status || "Repaired",
+            projectName: reportData.projectName || reportData.reportId || "",
+            penalties: penalties
           };
           
           await setDoc(doc(db, "ad_bulletin", currentDocId), bulletinData);
         }
         
-        alert("Completion date saved and synced to bulletin!");
+        alert("Completion date and penalties saved and synced to bulletin!");
         editCompletedModal.style.display="none";
         currentDocId = null;
       } catch (err) {

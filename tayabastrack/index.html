@@ -586,16 +586,6 @@
       </div>
 
       <div class="modal-section">
-        <div class="modal-label">Who Were Affected</div>
-        <p class="modal-text" id="modalAffected"></p>
-      </div>
-
-      <div class="modal-section">
-        <div class="modal-label">Age Range</div>
-        <p class="modal-text" id="modalAgeRange"></p>
-      </div>
-
-      <div class="modal-section">
         <div class="modal-label">Status</div>
         <p class="modal-text" id="modalStatus"></p>
       </div>
@@ -783,8 +773,6 @@
       }
       
       document.getElementById("modalDescription").textContent = data.description || data.issue || 'No description available';
-      document.getElementById("modalAffected").textContent = data.affected || data.peopleInvolved || 'Not specified';
-      document.getElementById("modalAgeRange").textContent = data.ageRange || data.affectedAgeGroups || 'Not specified';
       document.getElementById("modalStatus").textContent = data.status || 'Not specified';
       document.getElementById("modalDate").textContent = formatDate(data.date || data.createdAt);
       document.getElementById("modalStartDate").textContent = data.repairStartDate ? formatDate(data.repairStartDate) : 'TBD';

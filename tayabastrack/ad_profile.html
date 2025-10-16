@@ -246,26 +246,63 @@
     .account-card h2{color:#0b3e89;margin-bottom:8px}
     .account-meta p{margin:6px 0;font-size:14px}
 
-    /* Calendar */
-    .calendar{margin-top:12px}
-    .calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-    .calendar-header button{background:#e9f0ff;border:0;padding:6px 10px;border-radius:8px;cursor:pointer}
-    .calendar-header button:hover{background:#d0e0ff}
-    .weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;font-size:12px;color:#5b6b85;text-align:center}
-    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-    .calendar-day{padding:12px;border-radius:8px;background:#f7f9fc;min-height:48px;cursor:pointer;position:relative;text-align:center;transition:all 0.2s}
-    .calendar-day:hover{background:#e3f2fd;transform:scale(1.05)}
-    .calendar-day.today{background:#0b63d6;color:white;font-weight:700}
-    .calendar-day.has-event::after{content:"";width:8px;height:8px;border-radius:50%;background:#ef4444;position:absolute;right:8px;bottom:8px}
-    .calendar-day.selected{background:#1976d2;color:white;font-weight:600}
+    /* Google Calendar Container */
+    .calendar-container {
+      margin-top: 20px;
+      border-radius: 10px;
+      overflow: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
 
-    .events-list h4{color:#0b63d6;margin-top:14px;margin-bottom:8px}
-    .events-list ul{list-style:none;margin-top:8px;padding:0}
-    .events-list li{background:#eef6ff;padding:8px 12px;border-radius:8px;margin-bottom:8px;font-size:13px;position:relative;display:flex;justify-content:space-between;align-items:center}
-    .events-list li .event-date{font-weight:700;color:#0b63d6;font-size:11px}
-    .events-list li .event-title{margin-top:2px;color:#333}
-    .events-list li .delete-event{background:#ef4444;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px}
-    .events-list li .delete-event:hover{background:#c82333}
+    .calendar-container iframe {
+      width: 100%;
+      height: 300px;
+      border: 0;
+      border-radius: 10px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .calendar-header h3 {
+      color: #0b3e89;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .sync-btn {
+      background: #34a853;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.3s;
+    }
+
+    .sync-btn:hover {
+      background: #2d8e47;
+    }
+
+    .sync-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .sync-status {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 8px;
+      text-align: center;
+    }
 
     /* Modal */
     .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:50}
@@ -294,14 +331,39 @@
     /* small screens */
     @media (max-width:980px){
       .profile-section{grid-template-columns:1fr; padding-bottom:40px}
-      .sidebar{display:none}
+      .sidebar{
+        left:-250px;
+        transition:left 0.3s;
+      }
+      .sidebar.mobile-open{
+        left:0;
+      }
+      .navbar{
+        left:0;
+      }
+      .main{
+        margin-left:0;
+      }
+      .mobile-menu-btn{
+        display:block !important;
+      }
+    }
+    
+    .mobile-menu-btn{
+      display:none;
+      background:none;
+      border:none;
+      color:#004aad;
+      font-size:1.5rem;
+      cursor:pointer;
+      padding:0.5rem;
     }
   </style>
 </head>
 <body>
 
   <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div>
       <div class="sidebar-header">
         <img src="logu.png" alt="Logo">
@@ -323,7 +385,12 @@
   </aside>
 
   <nav class="navbar">
-    <h1>User Profile</h1>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa fa-bars"></i>
+      </button>
+      <h1>User Profile</h1>
+    </div>
     <div class="profile">
       <div style="position:relative">
         <i class="fa fa-bell" id="notificationBell"></i>
@@ -387,7 +454,7 @@
           <button class="btn" onclick="openEditModal()">Edit Profile</button>
         </section>
 
-        <!-- Right: Account Info + Calendar -->
+        <!-- Right: Account Info + Google Calendar -->
         <aside class="card account-card">
           <h2>Account Info</h2>
           <div class="account-meta">
@@ -396,23 +463,27 @@
             <p><strong>Last Login:</strong> <span id="lastLogin">—</span></p>
           </div>
 
-          <div class="calendar">
+          <div style="margin-top: 24px;">
             <div class="calendar-header">
-              <button onclick="prevMonth()">‹</button>
-              <div id="monthYear" style="font-weight:700;color:#0b3e89"></div>
-              <button onclick="nextMonth()">›</button>
+              <h3><i class="fa fa-calendar"></i> My Calendar</h3>
+              <button class="sync-btn" id="syncCalendarBtn" onclick="syncCalendarEvents()">
+                <i class="fa fa-sync"></i>
+                Sync with Firebase
+              </button>
             </div>
-
-            <div class="weekday-row">
-              <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            
+            <div class="calendar-container">
+              <iframe 
+                id="googleCalendar"
+                src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=Asia%2FManila&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&mode=MONTH"
+                frameborder="0" 
+                scrolling="no">
+              </iframe>
             </div>
-
-            <div class="calendar-grid" id="calendarDays"></div>
-          </div>
-
-          <div class="events-list">
-            <h4>📅 Upcoming Events</h4>
-            <ul id="eventsSummary"></ul>
+            
+            <div class="sync-status" id="syncStatus">
+              Last synced: Never
+            </div>
           </div>
         </aside>
       </div>
@@ -462,29 +533,6 @@
     </div>
   </div>
 
-  <!-- Add Event Modal -->
-  <div class="modal" id="eventModal">
-    <div class="content">
-      <h2>Add Event</h2>
-      
-      <label>Event Date</label>
-      <input type="text" id="eventDate" readonly>
-      
-      <label>Event Title</label>
-      <input type="text" id="eventTitle" placeholder="Enter event title" maxlength="100">
-      
-      <label>Description (optional)</label>
-      <textarea id="eventDescription" placeholder="Enter event description"></textarea>
-
-      <div class="btn-group">
-        <button class="btn btn-cancel" onclick="closeEventModal()">Cancel</button>
-        <button class="btn" onclick="saveEvent()" id="saveEventBtn">
-          <i class="fa fa-plus"></i> Add Event
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- Notification Modal -->
   <div id="notificationModal">
     <div>
@@ -511,6 +559,19 @@
 
   <!-- Notification System -->
   <script>
+    function toggleMobileMenu() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.querySelector('.mobile-menu-btn');
+      if (window.innerWidth <= 980 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+
     function initNotificationSound() {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       return function playChime() {
@@ -665,12 +726,80 @@
       }
     };
 
-    // Calendar and other page-specific variables
+    // Calendar sync function
     let currentUser = null;
-    let currentMonth = new Date().getMonth();
-    let currentYear = new Date().getFullYear();
-    let selectedDate = null;
-    let userEvents = {};
+    
+    window.syncCalendarEvents = async function() {
+      if (!currentUser) {
+        alert("Please log in first");
+        return;
+      }
+
+      const syncBtn = document.getElementById('syncCalendarBtn');
+      const syncStatus = document.getElementById('syncStatus');
+      
+      syncBtn.disabled = true;
+      syncBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Syncing...';
+      
+      try {
+        const { collection, addDoc, serverTimestamp, getDocs, query, where, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        
+        // Get reports from the current user
+        const reportsRef = collection(window.db, 'reports');
+        const q = query(reportsRef, where('userId', '==', currentUser.uid));
+        const snapshot = await getDocs(q);
+        
+        const events = [];
+        const calendarEventsRef = collection(window.db, 'users', currentUser.uid, 'calendar_events');
+        
+        // Clear existing calendar events first
+        const existingEvents = await getDocs(calendarEventsRef);
+        for (const eventDoc of existingEvents.docs) {
+          await deleteDoc(eventDoc.ref);
+        }
+        
+        // Process each report and create calendar events
+        for (const reportDoc of snapshot.docs) {
+          const report = reportDoc.data();
+          
+          // Check if report has a date field
+          if (report.date) {
+            const eventData = {
+              title: `${report.reportType || report.type || 'Report'} - ${report.barangay || 'Unknown'}`,
+              date: report.date,
+              description: report.description || '',
+              reportId: reportDoc.id,
+              createdAt: serverTimestamp()
+            };
+            
+            // Add to calendar_events subcollection
+            await addDoc(calendarEventsRef, eventData);
+            events.push(eventData);
+          }
+        }
+        
+        // Update sync status
+        const now = new Date().toLocaleString();
+        syncStatus.textContent = `Last synced: ${now} (${events.length} events)`;
+        
+        // Save sync timestamp to Firebase
+        const userEventsMetaRef = collection(window.db, 'users', currentUser.uid, 'calendar_meta');
+        await addDoc(userEventsMetaRef, {
+          lastSync: serverTimestamp(),
+          eventCount: events.length
+        });
+        
+        alert(`Calendar synced successfully! Found ${events.length} events from your reports.`);
+        
+      } catch (err) {
+        console.error("Error syncing calendar:", err);
+        alert("Error syncing calendar: " + err.message);
+        syncStatus.textContent = "Sync failed";
+      } finally {
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = '<i class="fa fa-sync"></i> Sync with Firebase';
+      }
+    };
 
     // Dropdown
     const dropdownMenu = document.getElementById('dropdownMenu');
@@ -684,197 +813,6 @@
         document.getElementById("notificationMenu").classList.remove("show");
       }
     });
-
-    // ---------- Calendar Functions ----------
-    function getDateKey(year, month, day) {
-      return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    }
-
-    function renderCalendar() {
-      const monthYear = document.getElementById('monthYear');
-      const calendarDays = document.getElementById('calendarDays');
-      
-      const firstDay = new Date(currentYear, currentMonth, 1);
-      const lastDay = new Date(currentYear, currentMonth + 1, 0);
-      const today = new Date();
-      
-      const monthNames = ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"];
-      
-      monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-      
-      calendarDays.innerHTML = '';
-      
-      for(let i = 0; i < firstDay.getDay(); i++) {
-        const emptyDiv = document.createElement('div');
-        calendarDays.appendChild(emptyDiv);
-      }
-      
-      for(let day = 1; day <= lastDay.getDate(); day++) {
-        const dayDiv = document.createElement('div');
-        dayDiv.className = 'calendar-day';
-        dayDiv.textContent = day;
-        
-        const dateKey = getDateKey(currentYear, currentMonth, day);
-        
-        if(day === today.getDate() && 
-           currentMonth === today.getMonth() && 
-           currentYear === today.getFullYear()) {
-          dayDiv.classList.add('today');
-        }
-        
-        if(userEvents[dateKey] && userEvents[dateKey].length > 0) {
-          dayDiv.classList.add('has-event');
-        }
-        
-        dayDiv.addEventListener('click', () => {
-          document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
-          dayDiv.classList.add('selected');
-          openEventModal(currentYear, currentMonth, day);
-        });
-        
-        calendarDays.appendChild(dayDiv);
-      }
-    }
-
-    function renderEventsList() {
-      const eventsSummary = document.getElementById('eventsSummary');
-      const today = new Date();
-      const upcomingEvents = [];
-      
-      Object.keys(userEvents).forEach(dateKey => {
-        const [year, month, day] = dateKey.split('-').map(Number);
-        const eventDate = new Date(year, month - 1, day);
-        
-        if (eventDate >= today) {
-          userEvents[dateKey].forEach(event => {
-            upcomingEvents.push({
-              ...event,
-              date: eventDate,
-              dateKey: dateKey
-            });
-          });
-        }
-      });
-      
-      upcomingEvents.sort((a, b) => a.date - b.date);
-      
-      if (upcomingEvents.length === 0) {
-        eventsSummary.innerHTML = '<li style="list-style:none;color:#999;text-align:center;padding:10px"><em>No upcoming events</em></li>';
-        return;
-      }
-      
-      eventsSummary.innerHTML = upcomingEvents.slice(0, 5).map(event => {
-        const dateStr = event.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        return `
-          <li>
-            <div>
-              <div class="event-date">${dateStr}</div>
-              <div class="event-title">${event.title}</div>
-            </div>
-            <button class="delete-event" onclick="deleteEvent('${event.id}', '${event.dateKey}')">
-              <i class="fa fa-trash"></i>
-            </button>
-          </li>
-        `;
-      }).join('');
-    }
-
-    window.prevMonth = function() {
-      currentMonth--;
-      if(currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
-      }
-      renderCalendar();
-    };
-
-    window.nextMonth = function() {
-      currentMonth++;
-      if(currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-      }
-      renderCalendar();
-    };
-
-    // ---------- Event Modal Functions ----------
-    const eventModal = document.getElementById('eventModal');
-    
-    window.openEventModal = function(year, month, day) {
-      selectedDate = { year, month, day };
-      const dateKey = getDateKey(year, month, day);
-      const dateObj = new Date(year, month, day);
-      const dateStr = dateObj.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-      
-      document.getElementById('eventDate').value = dateStr;
-      document.getElementById('eventTitle').value = '';
-      document.getElementById('eventDescription').value = '';
-      
-      eventModal.style.display = 'flex';
-    };
-    
-    window.closeEventModal = function() {
-      eventModal.style.display = 'none';
-      selectedDate = null;
-    };
-    
-    window.saveEvent = async function() {
-      if (!currentUser || !selectedDate) return;
-      
-      const title = document.getElementById('eventTitle').value.trim();
-      const description = document.getElementById('eventDescription').value.trim();
-      
-      if (!title) {
-        alert('Please enter an event title');
-        return;
-      }
-      
-      const saveBtn = document.getElementById('saveEventBtn');
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
-      
-      try {
-        const { addDoc, collection, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-        const dateKey = getDateKey(selectedDate.year, selectedDate.month, selectedDate.day);
-        const eventsRef = collection(window.db, 'users', currentUser.uid, 'events');
-        
-        await addDoc(eventsRef, {
-          title: title,
-          description: description,
-          dateKey: dateKey,
-          year: selectedDate.year,
-          month: selectedDate.month,
-          day: selectedDate.day,
-          createdAt: serverTimestamp()
-        });
-        
-        closeEventModal();
-      } catch (err) {
-        console.error("Error saving event:", err);
-        alert("Error saving event: " + err.message);
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fa fa-plus"></i> Add Event';
-      }
-    };
-    
-    window.deleteEvent = async function(eventId, dateKey) {
-      if (!confirm('Delete this event?')) return;
-      
-      try {
-        const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-        await deleteDoc(doc(window.db, 'users', currentUser.uid, 'events', eventId));
-      } catch (err) {
-        console.error("Error deleting event:", err);
-        alert("Error deleting event: " + err.message);
-      }
-    };
 
     // ---------- Edit Profile Modal ----------
     const editModal = document.getElementById("editModal");
@@ -970,11 +908,8 @@
       }
     };
 
-    renderCalendar();
-
     window.addEventListener("click", (e) => {
       if (e.target === editModal) closeEditModal();
-      if (e.target === eventModal) closeEventModal();
     });
   </script>
 
@@ -982,7 +917,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, onSnapshot, query, where, addDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, onSnapshot, query, where, addDoc, orderBy, serverTimestamp, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
@@ -1070,26 +1005,26 @@
       });
     }
 
-    async function loadEvents() {
+    // Load calendar sync status
+    async function loadCalendarSyncStatus() {
       if (!currentUser) return;
       
       try {
-        const eventsRef = collection(db, 'users', currentUser.uid, 'events');
-        onSnapshot(eventsRef, (snapshot) => {
-          userEvents = {};
-          snapshot.forEach(docSnap => {
-            const event = docSnap.data();
-            userEvents[event.dateKey] = userEvents[event.dateKey] || [];
-            userEvents[event.dateKey].push({
-              id: docSnap.id,
-              ...event
-            });
-          });
-          renderCalendar();
-          renderEventsList();
-        });
+        const metaRef = collection(db, 'users', currentUser.uid, 'calendar_meta');
+        const q = query(metaRef, orderBy('lastSync', 'desc'));
+        const metaSnapshot = await getDocs(q);
+        
+        if (!metaSnapshot.empty) {
+          const lastMeta = metaSnapshot.docs[0].data();
+          if (lastMeta.lastSync) {
+            const lastSyncDate = lastMeta.lastSync.toDate();
+            document.getElementById('syncStatus').textContent = 
+              `Last synced: ${lastSyncDate.toLocaleString()} (${lastMeta.eventCount || 0} events)`;
+          }
+        }
       } catch (err) {
-        console.error("Error loading events:", err);
+        console.error("Error loading sync status:", err);
+        document.getElementById('syncStatus').textContent = "Last synced: Never";
       }
     }
 
@@ -1112,6 +1047,17 @@
         return;
       }
       currentUser = user;
+      window.currentUser = user;
+
+      // Update last login timestamp
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          lastLogin: serverTimestamp()
+        });
+      } catch (err) {
+        console.error("Error updating last login:", err);
+      }
 
       const ref = doc(db, 'users', user.uid);
       onSnapshot(ref, docSnap => {
@@ -1153,7 +1099,7 @@
         }
       });
 
-      loadEvents();
+      loadCalendarSyncStatus();
       setupNotificationListener();
       setupRealtimeTracking();
     });
