@@ -96,7 +96,7 @@
     }
 
     input {
-      width: 90%;
+      width: 100%;
       padding: 0.9rem;
       margin-bottom: 1rem;
       border: 1px solid #ccc;
@@ -246,7 +246,7 @@
     }
 
 
-    // ✅ Login Function with strict role check
+    // ✅ Login Function with strict role check and status validation
     window.loginUser = async function(type) {
 
       const email = document.getElementById(type + "-email").value;
@@ -274,6 +274,7 @@
 
         const userData = userDoc.data();
         const position = userData.position; // "Super Admin" or "Admin"
+        const status = userData.status; // "Active", "Inactive", or "Pending"
 
         // 🔒 Strict role check
         if ((type === "super" && position !== "Super Admin") ||
@@ -281,6 +282,23 @@
           alert("You are not authorized to login here.");
           await signOut(auth);
           return;
+        }
+
+        // 🔒 Status check for Admin accounts
+        if (position === "Admin") {
+          if (status === "Pending") {
+            alert("Your account is pending approval. Please wait for the Super Admin to approve your account.");
+            await signOut(auth);
+            return;
+          } else if (status === "Inactive") {
+            alert("Your account has been deactivated. Please contact the Super Admin for assistance.");
+            await signOut(auth);
+            return;
+          } else if (status !== "Active") {
+            alert("Your account status is not active. Please contact the Super Admin.");
+            await signOut(auth);
+            return;
+          }
         }
 
         // Redirect based on actual position
