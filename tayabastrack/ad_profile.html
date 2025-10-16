@@ -149,6 +149,7 @@
       color: #004aad;
       cursor: pointer;
       font-size: 0.85rem;
+      font-weight: 500;
     }
     .notification-list {
       max-height: 300px;
@@ -160,9 +161,14 @@
       display: flex;
       gap: 0.8rem;
       transition: background 0.2s;
+      cursor: pointer;
     }
     .notification-item:hover {
       background: #f9f9f9;
+    }
+    .notification-item.read {
+      background: #f9f9f9;
+      opacity: 0.7;
     }
     .notification-icon {
       width: 35px;
@@ -197,6 +203,12 @@
       padding: 2rem;
       text-align: center;
       color: #999;
+    }
+    .unread-indicator {
+      width: 8px;
+      height: 8px;
+      background: #004aad;
+      border-radius: 50%;
     }
 
     .main {
@@ -255,11 +267,11 @@
     .events-list li .delete-event{background:#ef4444;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px}
     .events-list li .delete-event:hover{background:#c82333}
 
-/* Modal */
+    /* Modal */
     .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:50}
     .modal .content{background:white;padding:20px;border-radius:10px;width:420px;max-width:95%;box-shadow:0 14px 40px rgba(2,6,23,0.15);max-height:90vh;overflow-y:auto}
     .modal .content h2{color:#004aad;margin-bottom:16px;text-align:center}
-    .modal input[type="text"], .modal input[type="email"], .modal input[type="tel"]{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #d7dce6;font-size:14px}
+    .modal input[type="text"], .modal input[type="email"], .modal input[type="tel"], .modal textarea{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #d7dce6;font-size:14px}
     .modal label{display:block;font-weight:600;margin-top:12px;font-size:13px;color:#333}
     
     .photo-upload-section{text-align:center;margin-bottom:16px;padding:16px;background:#f9fafb;border-radius:8px}
@@ -273,9 +285,11 @@
     .btn-cancel{background:#6c757d}
     .btn-cancel:hover{background:#5a6268}
 
-    .dropdown-menu{display:none;position:absolute;right:0;top:50px;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.12);min-width:150px;z-index:100}
-    .dropdown-menu a{display:block;padding:10px 16px;text-decoration:none;color:#222;font-size:14px}
-    .dropdown-menu a:hover{background:#f0f2f7}
+    /* Notification Modal */
+    #notificationModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+    #notificationModal > div { background: #fff; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    .modal-filter-btn { padding: 0.5rem 1rem; border: 1px solid #ddd; background: #fff; color: #333; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .modal-filter-btn.active { background: #004aad; color: #fff; border-color: #004aad; }
 
     /* small screens */
     @media (max-width:980px){
@@ -309,31 +323,31 @@
   </aside>
 
   <nav class="navbar">
-      <h1>User Profile</h1>
-      <div class="profile">
-        <div style="position:relative">
-          <i class="fa fa-bell" id="notificationBell"></i>
-          <span class="badge" id="notificationBadge">0</span>
-          
-          <!-- Notification Menu -->
-          <div class="notification-menu" id="notificationMenu">
-            <div class="notification-header">
-              <h3>Notifications</h3>
-              <button class="clear-btn" id="clearNotificationsBtn">Clear all</button>
-            </div>
-            <div class="notification-list" id="notificationList">
-              <div class="notification-empty">No new notifications</div>
-            </div>
+    <h1>User Profile</h1>
+    <div class="profile">
+      <div style="position:relative">
+        <i class="fa fa-bell" id="notificationBell"></i>
+        <span class="badge" id="notificationBadge">0</span>
+        
+        <!-- Notification Menu -->
+        <div class="notification-menu" id="notificationMenu">
+          <div class="notification-header">
+            <h3>Notifications</h3>
+            <button class="clear-btn" id="clearNotificationsBtn">Mark all as read</button>
+          </div>
+          <div class="notification-list" id="notificationList">
+            <div class="notification-empty">No new notifications</div>
           </div>
         </div>
-        
-        <img src="image.png" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
-        <div class="dropdown-menu" id="dropdownMenu">
-          <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
-        </div>
-        <div id="navUsername" style="font-weight:600"></div>
       </div>
-    </nav>
+      
+      <img src="image.png" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
+      <div class="dropdown-menu" id="dropdownMenu">
+        <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
+      </div>
+      <div id="navUsername" style="font-weight:600"></div>
+    </div>
+  </nav>
 
   <!-- Main -->
   <main class="main">
@@ -471,146 +485,209 @@
     </div>
   </div>
 
-  <!-- Firebase compat libs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <!-- Notification Modal -->
+  <div id="notificationModal">
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #eee;">
+        <h2 style="margin: 0; color: #004aad; font-size: 1.3rem;">Notification History</h2>
+        <button onclick="window.closeNotificationModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">×</button>
+      </div>
 
+      <div style="display: flex; gap: 0.5rem; padding: 1rem; border-bottom: 1px solid #eee; flex-wrap: wrap;">
+        <button class="modal-filter-btn active" onclick="window.filterNotifications('all')">All</button>
+        <button class="modal-filter-btn" onclick="window.filterNotifications('report')">Reports</button>
+        <button class="modal-filter-btn" onclick="window.filterNotifications('user')">Users</button>
+        <button class="modal-filter-btn" onclick="window.filterNotifications('24h')">Last 24h</button>
+      </div>
+
+      <div id="notificationModalList" style="flex: 1; overflow-y: auto; padding: 0;"></div>
+
+      <div style="padding: 1rem; border-top: 1px solid #eee; display: flex; gap: 0.5rem;">
+        <button onclick="window.markAllNotificationsAsRead()" style="flex: 1; padding: 0.7rem; background: #004aad; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Mark all as read</button>
+        <button onclick="window.clearAllNotifications()" style="flex: 1; padding: 0.7rem; background: #f0f0f0; color: #333; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Clear all</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification System -->
   <script>
-    // ---------- Firebase config ----------
-    const firebaseConfig = {
-      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
-      authDomain: "tayabastrack-23b95.firebaseapp.com",
-      projectId: "tayabastrack-23b95",
-      storageBucket: "tayabastrack-23b95.appspot.com",
-      messagingSenderId: "674055915366",
-      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+    function initNotificationSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      return function playChime() {
+        try {
+          const now = audioContext.currentTime;
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          osc.frequency.setValueAtTime(1046.50, now);
+          osc.frequency.setValueAtTime(783.99, now + 0.1);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+          osc.start(now);
+          osc.stop(now + 0.6);
+        } catch (error) {
+          console.log("Chime sound error:", error);
+        }
+      };
+    }
 
+    let allNotifications = [];
+    const playChime = initNotificationSound();
+
+    function updateNotificationUI() {
+      const badge = document.getElementById('notificationBadge');
+      const list = document.getElementById('notificationList');
+      
+      const unreadCount = allNotifications.filter(n => !n.read).length;
+      
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.classList.add("show");
+      } else {
+        badge.textContent = "";
+        badge.classList.remove("show");
+      }
+
+      const recentNotifications = allNotifications.slice(0, 5);
+      if (allNotifications.length === 0) {
+        list.innerHTML = `<div class="notification-empty">No notifications</div>`;
+      } else {
+        list.innerHTML = recentNotifications.map(n => `
+          <div class="notification-item ${n.read ? 'read' : 'unread'}" onclick="window.markNotificationAsRead('${n.id}')">
+            <div class="notification-icon ${n.type}">
+              ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
+            </div>
+            <div class="notification-content">
+              <p><strong>${n.message}</strong></p>
+              <p>${n.detail}</p>
+              <span class="time">${new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            ${!n.read ? '<div class="unread-indicator"></div>' : ''}
+          </div>
+        `).join('');
+
+        if (allNotifications.length > 5) {
+          list.innerHTML += `
+            <div style="padding: 0.8rem 1rem; border-top: 1px solid #eee; text-align: center;">
+              <button onclick="window.openNotificationModal()" style="background: none; border: none; color: #004aad; cursor: pointer; font-weight: 500; font-size: 0.85rem;">
+                View all (${allNotifications.length}) →
+              </button>
+            </div>
+          `;
+        }
+      }
+    }
+
+    window.openNotificationModal = function() {
+      document.getElementById('notificationModal').style.display = 'flex';
+      window.filterNotifications('all');
+    };
+
+    window.closeNotificationModal = function() {
+      document.getElementById('notificationModal').style.display = 'none';
+    };
+
+    window.filterNotifications = function(filter) {
+      let notifications = [];
+      if (filter === 'all') {
+        notifications = allNotifications;
+      } else if (filter === 'report') {
+        notifications = allNotifications.filter(n => n.type === 'report');
+      } else if (filter === 'user') {
+        notifications = allNotifications.filter(n => n.type === 'user');
+      } else if (filter === '24h') {
+        const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+        notifications = allNotifications.filter(n => n.timestamp > twentyFourHoursAgo);
+      }
+
+      const list = document.getElementById('notificationModalList');
+      if (notifications.length === 0) {
+        list.innerHTML = '<div style="padding: 2rem; text-align: center; color: #999;">No notifications</div>';
+      } else {
+        list.innerHTML = notifications.map(n => `
+          <div style="padding: 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; ${n.read ? 'background: #f9f9f9;' : 'background: #f0f6ff;'}">
+            <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; ${n.type === 'user' ? 'background: #e3f2fd; color: #1976d2;' : 'background: #fff3e0; color: #f57c00;'}">
+              ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
+            </div>
+            <div style="flex: 1;">
+              <p style="margin: 0 0 0.3rem 0; font-weight: 500; color: #333;"><strong>${n.message}</strong></p>
+              <p style="margin: 0 0 0.3rem 0; font-size: 0.9rem; color: #666;">${n.detail}</p>
+              <span style="font-size: 0.75rem; color: #999;">${new Date(n.timestamp).toLocaleString()}</span>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <span style="font-size: 0.75rem; color: #999; padding: 0.2rem 0.5rem; background: #eee; border-radius: 4px;">${n.read ? 'Read' : 'New'}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.querySelectorAll('.modal-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(filter.toLowerCase()));
+      });
+    };
+
+    window.markNotificationAsRead = async function(notifId) {
+      try {
+        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        await updateDoc(doc(window.db, "admin_notifications", notifId), {
+          read: true
+        });
+      } catch (err) {
+        console.error("Error marking notification as read:", err);
+      }
+    };
+
+    window.markAllNotificationsAsRead = async function() {
+      try {
+        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const unread = allNotifications.filter(n => !n.read);
+        for (const notif of unread) {
+          await updateDoc(doc(window.db, "admin_notifications", notif.id), {
+            read: true
+          });
+        }
+      } catch (err) {
+        console.error("Error marking all as read:", err);
+      }
+    };
+
+    window.clearAllNotifications = async function() {
+      if (confirm('Are you sure you want to clear all notifications?')) {
+        try {
+          const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          for (const notif of allNotifications) {
+            await deleteDoc(doc(window.db, "admin_notifications", notif.id));
+          }
+        } catch (err) {
+          console.error("Error clearing notifications:", err);
+        }
+      }
+    };
+
+    // Calendar and other page-specific variables
     let currentUser = null;
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
     let selectedDate = null;
     let userEvents = {};
-    let notificationsList = [];
-    let trackedUsers = new Set();
-    let trackedReports = new Set();
-
-    // Notification functions
-    const notificationBell = document.getElementById("notificationBell");
-    const notificationBadge = document.getElementById("notificationBadge");
-    const notificationMenu = document.getElementById("notificationMenu");
-    const notificationList = document.getElementById("notificationList");
-    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
-
-    function addNotification(type, message, detail) {
-      const notification = {
-        id: Date.now(),
-        type,
-        message,
-        detail,
-        timestamp: new Date()
-      };
-      notificationsList.unshift(notification);
-      updateNotificationUI();
-    }
-
-    function updateNotificationUI() {
-      const count = notificationsList.length;
-      if (count > 0) {
-        notificationBadge.textContent = count;
-        notificationBadge.classList.add("show");
-      } else {
-        notificationBadge.textContent = "";
-        notificationBadge.classList.remove("show");
-      }
-
-      if (notificationsList.length === 0) {
-        notificationList.innerHTML = `<div class="notification-empty">No new notifications</div>`;
-        return;
-      }
-
-      notificationList.innerHTML = notificationsList.map(n => `
-        <div class="notification-item">
-          <div class="notification-icon ${n.type}">
-            ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
-          </div>
-          <div class="notification-content">
-            <p><strong>${n.message}</strong></p>
-            <p>${n.detail}</p>
-            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    notificationBell.addEventListener("click", (e) => {
-      e.stopPropagation();
-      notificationMenu.classList.toggle("show");
-    });
-
-    clearNotificationsBtn.addEventListener("click", () => {
-      notificationsList = [];
-      updateNotificationUI();
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!notificationMenu.contains(e.target) && e.target !== notificationBell) {
-        notificationMenu.classList.remove("show");
-      }
-    });
 
     // Dropdown
     const dropdownMenu = document.getElementById('dropdownMenu');
-    function toggleDropdown(){
-      dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block'
-    }
-    window.addEventListener('click', (e)=>{
-      if(!e.target.closest('.avatar') && !e.target.closest('#dropdownMenu')) dropdownMenu.style.display = 'none'
-    });
+    window.toggleDropdown = function() {
+      dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    };
 
-    function isBarangayPosition(position) {
-      if (!position) return false;
-      const pos = position.toLowerCase().trim();
-      return pos.includes("barangay captain") || 
-             pos.includes("brgy captain") || 
-             pos.includes("brgy. captain") ||
-             pos.includes("barangay official") || 
-             pos.includes("brgy official") || 
-             pos.includes("brgy. official");
-    }
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('.avatar') && !e.target.closest('#dropdownMenu') && !e.target.closest('.notification-menu')) {
+        dropdownMenu.style.display = 'none';
+        document.getElementById("notificationMenu").classList.remove("show");
+      }
+    });
 
     // ---------- Calendar Functions ----------
     function getDateKey(year, month, day) {
       return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    }
-
-    async function loadEvents() {
-      if (!currentUser) return;
-      
-      try {
-        const eventsRef = db.collection('users').doc(currentUser.uid).collection('events');
-        eventsRef.onSnapshot((snapshot) => {
-          userEvents = {};
-          snapshot.forEach(doc => {
-            const event = doc.data();
-            userEvents[event.dateKey] = userEvents[event.dateKey] || [];
-            userEvents[event.dateKey].push({
-              id: doc.id,
-              ...event
-            });
-          });
-          renderCalendar();
-          renderEventsList();
-        });
-      } catch (err) {
-        console.error("Error loading events:", err);
-      }
     }
 
     function renderCalendar() {
@@ -628,13 +705,11 @@
       
       calendarDays.innerHTML = '';
       
-      // Empty cells before first day
       for(let i = 0; i < firstDay.getDay(); i++) {
         const emptyDiv = document.createElement('div');
         calendarDays.appendChild(emptyDiv);
       }
       
-      // Days of month
       for(let day = 1; day <= lastDay.getDate(); day++) {
         const dayDiv = document.createElement('div');
         dayDiv.className = 'calendar-day';
@@ -642,19 +717,16 @@
         
         const dateKey = getDateKey(currentYear, currentMonth, day);
         
-        // Check if today
         if(day === today.getDate() && 
            currentMonth === today.getMonth() && 
            currentYear === today.getFullYear()) {
           dayDiv.classList.add('today');
         }
         
-        // Check if has events
         if(userEvents[dateKey] && userEvents[dateKey].length > 0) {
           dayDiv.classList.add('has-event');
         }
         
-        // Add click event
         dayDiv.addEventListener('click', () => {
           document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
           dayDiv.classList.add('selected');
@@ -670,7 +742,6 @@
       const today = new Date();
       const upcomingEvents = [];
       
-      // Get all events and sort by date
       Object.keys(userEvents).forEach(dateKey => {
         const [year, month, day] = dateKey.split('-').map(Number);
         const eventDate = new Date(year, month - 1, day);
@@ -709,28 +780,28 @@
       }).join('');
     }
 
-    function prevMonth() {
+    window.prevMonth = function() {
       currentMonth--;
       if(currentMonth < 0) {
         currentMonth = 11;
         currentYear--;
       }
       renderCalendar();
-    }
+    };
 
-    function nextMonth() {
+    window.nextMonth = function() {
       currentMonth++;
       if(currentMonth > 11) {
         currentMonth = 0;
         currentYear++;
       }
       renderCalendar();
-    }
+    };
 
     // ---------- Event Modal Functions ----------
     const eventModal = document.getElementById('eventModal');
     
-    function openEventModal(year, month, day) {
+    window.openEventModal = function(year, month, day) {
       selectedDate = { year, month, day };
       const dateKey = getDateKey(year, month, day);
       const dateObj = new Date(year, month, day);
@@ -746,14 +817,14 @@
       document.getElementById('eventDescription').value = '';
       
       eventModal.style.display = 'flex';
-    }
+    };
     
-    function closeEventModal() {
+    window.closeEventModal = function() {
       eventModal.style.display = 'none';
       selectedDate = null;
-    }
+    };
     
-    async function saveEvent() {
+    window.saveEvent = async function() {
       if (!currentUser || !selectedDate) return;
       
       const title = document.getElementById('eventTitle').value.trim();
@@ -769,17 +840,18 @@
       saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
       
       try {
+        const { addDoc, collection, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
         const dateKey = getDateKey(selectedDate.year, selectedDate.month, selectedDate.day);
-        const eventsRef = db.collection('users').doc(currentUser.uid).collection('events');
+        const eventsRef = collection(window.db, 'users', currentUser.uid, 'events');
         
-        await eventsRef.add({
+        await addDoc(eventsRef, {
           title: title,
           description: description,
           dateKey: dateKey,
           year: selectedDate.year,
           month: selectedDate.month,
           day: selectedDate.day,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          createdAt: serverTimestamp()
         });
         
         closeEventModal();
@@ -790,117 +862,34 @@
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<i class="fa fa-plus"></i> Add Event';
       }
-    }
+    };
     
-    async function deleteEvent(eventId, dateKey) {
+    window.deleteEvent = async function(eventId, dateKey) {
       if (!confirm('Delete this event?')) return;
       
       try {
-        await db.collection('users').doc(currentUser.uid).collection('events').doc(eventId).delete();
+        const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        await deleteDoc(doc(window.db, 'users', currentUser.uid, 'events', eventId));
       } catch (err) {
         console.error("Error deleting event:", err);
         alert("Error deleting event: " + err.message);
       }
-    }
-
-    // ---------- Auth state & load profile ----------
-    auth.onAuthStateChanged(async (user)=>{
-      if(!user) {
-        console.warn("No user logged in.");
-        window.location.href = "logout.html";
-        return;
-      }
-      currentUser = user;
-
-      const ref = db.collection('users').doc(user.uid);
-      ref.onSnapshot(doc=>{
-        if(!doc.exists) return;
-        const data = doc.data();
-        
-        // Update navbar
-        document.getElementById("navUsername").textContent = data.name || "User";
-        
-        // Update profile pictures from Firestore
-        const photoURL = data.photoURL || "image.png";
-        document.getElementById("profilePic").src = photoURL;
-        document.getElementById("navAvatar").src = photoURL;
-        document.getElementById("previewImg").src = photoURL;
-
-        // Update display info
-        document.getElementById("displayName").textContent = data.name || "—";
-        document.getElementById("displayRole").textContent = data.position || data.role || "Administrator";
-
-        // Update form fields
-        document.getElementById("cardName").value = data.name || "";
-        document.getElementById("cardID").value = data.id || "";
-        document.getElementById("cardEmail").value = data.email || user.email;
-        document.getElementById("cardPhone").value = data.phone || "";
-        document.getElementById("cardAddress").value = data.address || "";
-        document.getElementById("cardGender").value = data.gender || "";
-
-        // Update edit modal fields
-        document.getElementById("editName").value = data.name || "";
-        document.getElementById("editID").value = data.id || "";
-        document.getElementById("editEmail").value = data.email || user.email;
-        document.getElementById("editPhone").value = data.phone || "";
-        document.getElementById("editAddress").value = data.address || "";
-        document.getElementById("editGender").value = data.gender || "";
-
-        // Update account info
-        document.getElementById("accountType").textContent = data.position || data.role || "Administrator";
-        if(data.createdAt) {
-          const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-          document.getElementById("registeredAt").textContent = date.toLocaleDateString();
-        }
-        if(data.lastLogin) {
-          const date = data.lastLogin.toDate ? data.lastLogin.toDate() : new Date(data.lastLogin);
-          document.getElementById("lastLogin").textContent = date.toLocaleString();
-        }
-      });
-
-      // Load calendar events
-      loadEvents();
-
-      // Live Firestore Notifications - New Users
-      db.collection("users").where("status", "==", "pending").onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
-            trackedUsers.add(change.doc.id);
-            const u = change.doc.data();
-            if (isBarangayPosition(u.position)) {
-              addNotification("user", `New registration: ${u.firstName || ""} ${u.surname || ""}`, u.email);
-            }
-          }
-        });
-      });
-
-      // Watch for new reports
-      db.collection("reports").onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === "added" && !trackedReports.has(change.doc.id)) {
-            trackedReports.add(change.doc.id);
-            const r = change.doc.data();
-            addNotification("report", `New report submitted in ${r.barangay || "a barangay"}`, r.type || "");
-          }
-        });
-      });
-    });
+    };
 
     // ---------- Edit Profile Modal ----------
     const editModal = document.getElementById("editModal");
     const editPhoto = document.getElementById("editPhoto");
     const previewImg = document.getElementById("previewImg");
 
-    function openEditModal(){ 
+    window.openEditModal = function() { 
       editModal.style.display="flex";
-    }
+    };
     
-    function closeEditModal(){ 
+    window.closeEditModal = function() { 
       editModal.style.display="none";
-    }
+    };
 
-    // Preview image when file is selected
-    editPhoto.addEventListener("change", e=>{
+    editPhoto.addEventListener("change", e => {
       const file = e.target.files[0];
       if(!file) return;
       
@@ -917,21 +906,24 @@
       }
       
       const reader = new FileReader();
-      reader.onload = ev=>{
+      reader.onload = ev => {
         previewImg.src = ev.target.result;
       };
       reader.readAsDataURL(file);
     });
 
-    // ---------- Save profile ----------
-    async function saveEdit(){
+    window.saveEdit = async function() {
       if(!currentUser) {
         alert("No user logged in");
         return;
       }
       
+      const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const { ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+      const { getStorage } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+      
       const uid = currentUser.uid;
-      const ref = db.collection("users").doc(uid);
+      const userRef = doc(window.db, "users", uid);
       const saveBtn = document.getElementById("saveBtn");
 
       const updated = {
@@ -954,60 +946,227 @@
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
 
-        if(file){
-          const storageRef = storage.ref().child(`profilePics/${uid}/avatar.jpg`);
-          const uploadTask = await storageRef.put(file);
-          const url = await storageRef.getDownloadURL();
+        if(file) {
+          const storage = getStorage();
+          const storageRef = ref(storage, `profilePics/${uid}/avatar.jpg`);
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
           updated.photoURL = url;
         }
         
-        await ref.set(updated, { merge:true });
+        await updateDoc(userRef, updated);
         
         alert("Profile updated successfully!");
         closeEditModal();
         
         editPhoto.value = '';
         
-      } catch(err){
+      } catch(err) {
         console.error(err);
         alert("Error updating profile: " + err.message);
       } finally {
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
       }
-    }
+    };
 
-    // Initialize calendar on load
     renderCalendar();
 
-    // Logout
+    window.addEventListener("click", (e) => {
+      if (e.target === editModal) closeEditModal();
+      if (e.target === eventModal) closeEventModal();
+    });
+  </script>
+
+  <!-- Firebase + Main Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, onSnapshot, query, where, addDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.appspot.com",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.db = db;
+
+    const trackedUsers = new Set();
+    const trackedReports = new Set();
+
+    function isBarangayPosition(position) {
+      if (!position) return false;
+      const pos = position.toLowerCase().trim();
+      return pos.includes("barangay captain") || pos.includes("brgy captain") || 
+             pos.includes("brgy. captain") || pos.includes("barangay official") || 
+             pos.includes("brgy official") || pos.includes("brgy. official");
+    }
+
+    // Listen to Firestore notifications
+    function setupNotificationListener() {
+      const q = query(collection(db, "admin_notifications"), orderBy("timestamp", "desc"));
+      onSnapshot(q, (snapshot) => {
+        const previousUnreadCount = allNotifications.filter(n => !n.read).length;
+        
+        allNotifications = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          timestamp: doc.data().timestamp?.toMillis() || Date.now()
+        }));
+
+        const newUnreadCount = allNotifications.filter(n => !n.read).length;
+        
+        if (newUnreadCount > previousUnreadCount) {
+          playChime();
+        }
+        
+        updateNotificationUI();
+      });
+    }
+
+    // Setup realtime tracking
+    function setupRealtimeTracking() {
+      const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
+      onSnapshot(qNewUsers, async (snapshot) => {
+        for (const change of snapshot.docChanges()) {
+          if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
+            trackedUsers.add(change.doc.id);
+            const u = change.doc.data();
+            if (isBarangayPosition(u.position)) {
+              await addDoc(collection(db, "admin_notifications"), {
+                type: "user",
+                message: `New User: ${u.firstName || ""} ${u.surname || ""}`,
+                detail: u.email || "",
+                timestamp: serverTimestamp(),
+                read: false
+              });
+            }
+          }
+        }
+      });
+
+      const qReports = query(collection(db, "reports"));
+      onSnapshot(qReports, async (snapshot) => {
+        for (const change of snapshot.docChanges()) {
+          if (change.type === "added" && !trackedReports.has(change.doc.id)) {
+            trackedReports.add(change.doc.id);
+            const r = change.doc.data();
+            await addDoc(collection(db, "admin_notifications"), {
+              type: "report",
+              message: `New Report in ${r.barangay || "a barangay"}`,
+              detail: r.reportType || r.type || "Unknown type",
+              timestamp: serverTimestamp(),
+              read: false
+            });
+          }
+        }
+      });
+    }
+
+    async function loadEvents() {
+      if (!currentUser) return;
+      
+      try {
+        const eventsRef = collection(db, 'users', currentUser.uid, 'events');
+        onSnapshot(eventsRef, (snapshot) => {
+          userEvents = {};
+          snapshot.forEach(docSnap => {
+            const event = docSnap.data();
+            userEvents[event.dateKey] = userEvents[event.dateKey] || [];
+            userEvents[event.dateKey].push({
+              id: docSnap.id,
+              ...event
+            });
+          });
+          renderCalendar();
+          renderEventsList();
+        });
+      } catch (err) {
+        console.error("Error loading events:", err);
+      }
+    }
+
+    const notificationBell = document.getElementById("notificationBell");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.getElementById("notificationMenu").classList.toggle("show");
+    });
+
+    clearNotificationsBtn.addEventListener("click", () => {
+      window.markAllNotificationsAsRead();
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if(!user) {
+        console.warn("No user logged in.");
+        window.location.href = "logout.html";
+        return;
+      }
+      currentUser = user;
+
+      const ref = doc(db, 'users', user.uid);
+      onSnapshot(ref, docSnap => {
+        if(!docSnap.exists()) return;
+        const data = docSnap.data();
+        
+        document.getElementById("navUsername").textContent = data.name || "User";
+        
+        const photoURL = data.photoURL || "image.png";
+        document.getElementById("profilePic").src = photoURL;
+        document.getElementById("navAvatar").src = photoURL;
+        document.getElementById("previewImg").src = photoURL;
+
+        document.getElementById("displayName").textContent = data.name || "—";
+        document.getElementById("displayRole").textContent = data.position || data.role || "Administrator";
+
+        document.getElementById("cardName").value = data.name || "";
+        document.getElementById("cardID").value = data.id || "";
+        document.getElementById("cardEmail").value = data.email || user.email;
+        document.getElementById("cardPhone").value = data.phone || "";
+        document.getElementById("cardAddress").value = data.address || "";
+        document.getElementById("cardGender").value = data.gender || "";
+
+        document.getElementById("editName").value = data.name || "";
+        document.getElementById("editID").value = data.id || "";
+        document.getElementById("editEmail").value = data.email || user.email;
+        document.getElementById("editPhone").value = data.phone || "";
+        document.getElementById("editAddress").value = data.address || "";
+        document.getElementById("editGender").value = data.gender || "";
+
+        document.getElementById("accountType").textContent = data.position || data.role || "Administrator";
+        if(data.createdAt) {
+          const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+          document.getElementById("registeredAt").textContent = date.toLocaleDateString();
+        }
+        if(data.lastLogin) {
+          const date = data.lastLogin.toDate ? data.lastLogin.toDate() : new Date(data.lastLogin);
+          document.getElementById("lastLogin").textContent = date.toLocaleString();
+        }
+      });
+
+      loadEvents();
+      setupNotificationListener();
+      setupRealtimeTracking();
+    });
+
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       try {
-        await auth.signOut();
+        await signOut(auth);
         console.log("Admin signed out.");
         window.location.href = "logout.html";
       } catch (err) {
         console.error("Logout error:", err);
       }
     });
-
-    // Close modals on outside click
-    window.addEventListener("click", (e) => {
-      if (e.target === editModal) closeEditModal();
-      if (e.target === eventModal) closeEventModal();
-    });
-
-    // Make functions global
-    window.openEditModal = openEditModal;
-    window.closeEditModal = closeEditModal;
-    window.saveEdit = saveEdit;
-    window.toggleDropdown = toggleDropdown;
-    window.prevMonth = prevMonth;
-    window.nextMonth = nextMonth;
-    window.openEventModal = openEventModal;
-    window.closeEventModal = closeEventModal;
-    window.saveEvent = saveEvent;
-    window.deleteEvent = deleteEvent;
   </script>
 </body>
 </html>

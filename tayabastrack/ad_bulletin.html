@@ -82,7 +82,14 @@
   }
   .navbar h1{font-size:1.4rem;color:#004aad}
   .profile{display:flex;align-items:center;gap:1rem}
-  .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
+  
+  /* Notification Bell */
+  .notification-bell-wrapper {
+    position: relative;
+    cursor: pointer;
+  }
+  .fa-bell{font-size:1.2rem;position:relative;cursor:pointer;transition:color 0.3s}
+  .fa-bell:hover{color:#004aad}
   .badge{
     background:red;
     color:#fff;
@@ -93,6 +100,8 @@
     top:-8px;
     right:-8px;
     display:none;
+    min-width:20px;
+    text-align:center;
   }
   .badge.show{display:flex;align-items:center;justify-content:center}
 
@@ -104,15 +113,16 @@
     right: 0;
     background: #fff;
     border: 1px solid #ddd;
-    border-radius: 6px;
-    box-shadow: 0 4px 8px rgba(0,0,0,.15);
-    width: 320px;
-    max-height: 400px;
-    overflow-y: auto;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.15);
+    width: 380px;
+    max-height: 500px;
+    overflow: hidden;
     z-index: 1000;
   }
   .notification-menu.show {
-    display: block;
+    display: flex;
+    flex-direction: column;
   }
   .notification-header {
     padding: 1rem;
@@ -120,36 +130,89 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: #f8f9fa;
   }
   .notification-header h3 {
     font-size: 1rem;
     color: #333;
     margin: 0;
   }
-  .clear-btn {
+  .notification-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .action-btn {
     background: none;
     border: none;
     color: #004aad;
     cursor: pointer;
     font-size: 0.85rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
   }
+  .action-btn:hover {
+    background: #e3f2fd;
+  }
+  
+  /* Notification Filters */
+  .notification-filters {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+  }
+  .filter-btn {
+    padding: 4px 12px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    color: #666;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover {
+    background: #f5f5f5;
+  }
+  .filter-btn.active {
+    background: #004aad;
+    color: #fff;
+    border-color: #004aad;
+  }
+  
   .notification-list {
-    max-height: 300px;
+    max-height: 360px;
     overflow-y: auto;
   }
   .notification-item {
-    padding: 0.8rem 1rem;
+    padding: 0.9rem 1rem;
     border-bottom: 1px solid #f0f0f0;
     display: flex;
     gap: 0.8rem;
     transition: background 0.2s;
+    cursor: pointer;
+    position: relative;
   }
   .notification-item:hover {
     background: #f9f9f9;
   }
+  .notification-item.unread {
+    background: #e3f2fd;
+  }
+  .notification-item.unread::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #004aad;
+  }
   .notification-icon {
-    width: 35px;
-    height: 35px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -174,12 +237,17 @@
   .notification-content .time {
     color: #999;
     font-size: 0.75rem;
-    margin-top: 0.2rem;
+    margin-top: 0.3rem;
   }
   .notification-empty {
-    padding: 2rem;
+    padding: 3rem;
     text-align: center;
     color: #999;
+  }
+  .notification-empty i {
+    font-size: 3rem;
+    color: #ddd;
+    margin-bottom: 1rem;
   }
 
   .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
@@ -200,7 +268,7 @@
   .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
   .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
 
-  /* ---------- MAIN CONTENT (space for fixed sidebar & navbar) ---------- */
+  /* ---------- MAIN CONTENT ---------- */
   .main {
     margin-left:250px;
     margin-top:74px;
@@ -219,7 +287,7 @@
     overflow-x:hidden;
   }
 
-  /* ---------- REPORT BOX & SEARCH ---------- */
+  /* ---------- REPORT BOX ---------- */
   .report-box{
     background:#fff;
     border-radius:10px;
@@ -270,7 +338,7 @@
     50% { transform: translateX(4px); }
   }
 
-  /* ---------- TABLE CONTAINER WITH SCROLL ---------- */
+  /* ---------- TABLE ---------- */
   .table-wrapper {
     position: relative;
   }
@@ -286,7 +354,6 @@
     position: relative;
   }
 
-  /* Enhanced scrollbar */
   .table-card::-webkit-scrollbar {
     height: 10px;
   }
@@ -298,47 +365,6 @@
     background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
     border-radius: 5px;
     border: 2px solid #e9eef5;
-  }
-  .table-card::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #003580 0%, #004aad 100%);
-  }
-
-  /* Firefox scrollbar */
-  .table-card {
-    scrollbar-width: thin;
-    scrollbar-color: #004aad #e9eef5;
-  }
-
-  /* Scroll shadow indicators */
-  .table-card::before,
-  .table-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 12px;
-    width: 30px;
-    pointer-events: none;
-    z-index: 2;
-    transition: opacity 0.3s;
-  }
-
-  .table-card::before {
-    left: 8px;
-    background: linear-gradient(to right, rgba(255,255,255,0.95), transparent);
-    opacity: 0;
-  }
-
-  .table-card::after {
-    right: 8px;
-    background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
-  }
-
-  .table-card.scrolled-left::before {
-    opacity: 1;
-  }
-
-  .table-card.scrolled-right::after {
-    opacity: 0;
   }
 
   table{
@@ -388,7 +414,6 @@
   .ongoing{background:#36b9cc;color:#fff}
   .completed{background:#1cc88a;color:#fff}
   .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
-  .action a.delete{color:#d9534f}
 
   /* ---------- MODAL ---------- */
   .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
@@ -399,24 +424,23 @@
   .modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
   .modal-row{display:flex;flex-direction:column}
   .modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
-  .modal-row input[type="text"],.modal-row input[type="number"],.modal-row textarea,.modal-row select{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
+  .modal-row input[type="text"],.modal-row textarea{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
   .modal-row textarea{min-height:80px;resize:vertical}
   .img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px}
   .modal-footer{text-align:right;margin-top:12px}
   .btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;margin-left:8px}
   .btn-save{background:#004aad;color:#fff}
-  .btn-post{background:#1cc88a;color:#fff}
   .btn-cancel{background:#9e9e9e;color:#fff}
-
-  @media (max-width:900px) {
-    .modal-grid{grid-template-columns:1fr}
-    .report-actions input{width:100%}
-  }
 
   /* ---------- LOADING ---------- */
   .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
   .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
   @keyframes spin { to { transform:rotate(360deg); } }
+
+  @media (max-width:900px) {
+    .modal-grid{grid-template-columns:1fr}
+    .report-actions input{width:100%}
+  }
 </style>
 </head>
 
@@ -444,30 +468,48 @@
 </aside>
 
 <!-- Navbar -->
-<nav class="navbar" role="navigation" aria-label="Main navigation">
+<nav class="navbar">
   <h1>Report Bulletin</h1>
   <div style="display:flex;align-items:center;gap:14px">
-    <div style="position:relative">
-      <i class="fa fa-bell" id="notificationBell" aria-hidden="true"></i>
+    <div class="notification-bell-wrapper">
+      <i class="fa fa-bell" id="notificationBell"></i>
       <span class="badge" id="notificationBadge">0</span>
       
       <!-- Notification Menu -->
       <div class="notification-menu" id="notificationMenu">
         <div class="notification-header">
           <h3>Notifications</h3>
-          <button class="clear-btn" id="clearNotificationsBtn">Clear all</button>
+          <div class="notification-actions">
+            <button class="action-btn" id="markAllReadBtn" title="Mark all as read">
+              <i class="fa fa-check-double"></i>
+            </button>
+            <button class="action-btn" id="clearAllBtn" title="Clear all">
+              <i class="fa fa-trash"></i>
+            </button>
+            <button class="action-btn" id="viewHistoryBtn" title="View history">
+              <i class="fa fa-history"></i>
+            </button>
+          </div>
+        </div>
+        <div class="notification-filters">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="report">Reports</button>
+          <button class="filter-btn" data-filter="user">Users</button>
+          <button class="filter-btn" data-filter="24h">Last 24h</button>
         </div>
         <div class="notification-list" id="notificationList">
-          <div class="notification-empty">No new notifications</div>
+          <div class="notification-empty">
+            <i class="fa fa-bell-slash"></i>
+            <p>No new notifications</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
+    <div class="profile-dropdown" id="profileToggle">
       <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar">
       <span class="username" id="navUsername">Loading...</span>
-
-      <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
+      <div class="dropdown-menu" id="dropdownMenu">
         <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
       </div>
     </div>
@@ -475,19 +517,17 @@
 </nav>
 
 <!-- Main -->
-<main class="main" role="main">
-  <!-- Reports section -->
+<main class="main">
   <section class="reports-section">
-    <!-- Loading overlay -->
-    <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
-      <div class="spinner" role="status" aria-label="Loading"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
     </div>
 
     <div class="report-box">
       <div class="report-box-header">
         <h2>Completed Reports</h2>
         <div class="report-actions">
-          <input id="searchCompleted" placeholder="Search completed..." aria-label="Search completed reports">
+          <input id="searchCompleted" placeholder="Search completed...">
         </div>
       </div>
       <div class="scroll-hint">
@@ -495,7 +535,7 @@
         <span>Scroll horizontally to view all columns</span>
       </div>
       <div class="table-wrapper">
-        <div class="table-card" id="completedTableCard" aria-live="polite">
+        <div class="table-card" id="completedTableCard">
           <table>
             <thead>
               <tr>
@@ -505,10 +545,16 @@
                 <th>Age Groups / People</th>
                 <th class="col-small">Dimensions (W×H)</th>
                 <th>Image</th>
+                <th>After Image</th>
                 <th class="col-small">Coordinates</th>
                 <th class="col-small">Status</th>
                 <th style="min-width:180px">Timestamp</th>
-                <th class="col-id">User ID</th>
+                <th>Reporter Name</th>
+                <th>Inspection Date</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Budget Allocation</th>
+                <th>Completion Date</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -521,41 +567,33 @@
 </main>
 
 <!-- Edit Modal -->
-<div class="modal" id="editModal" aria-hidden="true">
-  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+<div class="modal" id="editModal">
+  <div class="modal-content">
     <div class="modal-header">
-      <h2 id="modalTitle">Edit Report</h2>
-      <button class="close-btn" id="closeModal" title="Close">&times;</button>
+      <h2>View Report</h2>
+      <button class="close-btn" id="closeModal">&times;</button>
     </div>
-
     <div class="modal-body">
       <div class="modal-grid" id="modalGrid"></div>
     </div>
-
     <div class="modal-footer">
-      <button class="btn btn-cancel" id="cancelBtn">Cancel</button>
+      <button class="btn btn-cancel" id="cancelBtn">Close</button>
       <button class="btn btn-save" id="saveChangesBtn">Save Changes</button>
-      <button class="btn btn-post" id="postToBulletinBtn">Post to Bulletin</button>
+      <button class="btn btn-save" id="postToBulletinBtn">Post to Bulletin</button>
     </div>
   </div>
 </div>
 
-<!-- Firebase + logic -->
+<!-- Audio for notification sound -->
+<audio id="notificationSound" preload="auto">
+  <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADhAC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAA4Smq7XnAAAAAAAAAAAAAAAAAAD/+xBkAAP8AAAaQAAAAgAAA0gAAABAAABpAAAAACAAADSAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/w==" type="audio/mpeg">
+</audio>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  getDoc,
-  doc,
-  updateDoc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, orderBy, onSnapshot, getDoc, doc, updateDoc, setDoc, addDoc, serverTimestamp, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
@@ -569,19 +607,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // DOM references
 const completedBody = document.getElementById("completedBody");
 const completedTableCard = document.getElementById("completedTableCard");
 const searchCompleted = document.getElementById("searchCompleted");
-
 const editModal = document.getElementById("editModal");
 const modalGrid = document.getElementById("modalGrid");
 const closeModal = document.getElementById("closeModal");
 const cancelBtn = document.getElementById("cancelBtn");
-const saveChangesBtn = document.getElementById("saveChangesBtn");
-const postToBulletinBtn = document.getElementById("postToBulletinBtn");
-
 const dropdownMenu = document.getElementById("dropdownMenu");
 const profileToggle = document.getElementById("profileToggle");
 const navUsername = document.getElementById("navUsername");
@@ -592,54 +627,183 @@ const notificationBell = document.getElementById("notificationBell");
 const notificationBadge = document.getElementById("notificationBadge");
 const notificationMenu = document.getElementById("notificationMenu");
 const notificationList = document.getElementById("notificationList");
-const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+const markAllReadBtn = document.getElementById("markAllReadBtn");
+const clearAllBtn = document.getElementById("clearAllBtn");
+const viewHistoryBtn = document.getElementById("viewHistoryBtn");
+const postToBulletinBtn = document.getElementById("postToBulletinBtn");
+const saveChangesBtn = document.getElementById("saveChangesBtn");
+const notificationSound = document.getElementById("notificationSound");
 
 let currentDocId = null;
 let currentDocData = null;
-let notificationsList = [];
-let trackedUsers = new Set();
-let trackedReports = new Set();
+let currentFilter = "all";
+let previousUnreadCount = 0;
 
-// Notification functions
-function addNotification(type, message, detail) {
-  const notification = {
-    id: Date.now(),
-    type,
-    message,
-    detail,
-    timestamp: new Date()
-  };
-  notificationsList.unshift(notification);
-  updateNotificationUI();
+// ============================================
+// NOTIFICATION SYSTEM WITH FIRESTORE
+// ============================================
+
+// Create notification in Firestore
+async function createNotification(type, message, detail) {
+  try {
+    await addDoc(collection(db, "admin_notifications"), {
+      type,
+      message,
+      detail,
+      timestamp: serverTimestamp(),
+      read: false
+    });
+  } catch (err) {
+    console.error("Error creating notification:", err);
+  }
 }
 
-function updateNotificationUI() {
-  const count = notificationsList.length;
-  if (count > 0) {
-    notificationBadge.textContent = count;
+// Mark notification as read
+async function markNotificationRead(notificationId) {
+  try {
+    await updateDoc(doc(db, "admin_notifications", notificationId), {
+      read: true
+    });
+  } catch (err) {
+    console.error("Error marking notification as read:", err);
+  }
+}
+
+// Mark all notifications as read
+async function markAllNotificationsRead() {
+  try {
+    const q = query(collection(db, "admin_notifications"), where("read", "==", false));
+    const snapshot = await getDocs(q);
+    const updates = snapshot.docs.map(doc => 
+      updateDoc(doc.ref, { read: true })
+    );
+    await Promise.all(updates);
+  } catch (err) {
+    console.error("Error marking all as read:", err);
+  }
+}
+
+// Clear all notifications
+async function clearAllNotifications() {
+  if (!confirm("Are you sure you want to clear all notifications?")) return;
+  try {
+    const snapshot = await getDocs(collection(db, "admin_notifications"));
+    const deletes = snapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletes);
+  } catch (err) {
+    console.error("Error clearing notifications:", err);
+  }
+}
+
+// Play notification sound (only for NEW unread notifications)
+function playNotificationSound() {
+  notificationSound.play().catch(err => {
+    console.log("Could not play notification sound:", err);
+  });
+}
+
+// Format time ago
+function getTimeAgo(timestamp) {
+  if (!timestamp) return "";
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const seconds = Math.floor((new Date() - date) / 1000);
+  
+  if (seconds < 60) return "Just now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+  return date.toLocaleDateString();
+}
+
+// Filter notifications
+function filterNotifications(notifications) {
+  const now = new Date();
+  const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+  
+  return notifications.filter(n => {
+    if (currentFilter === "all") return true;
+    if (currentFilter === "report") return n.type === "report";
+    if (currentFilter === "user") return n.type === "user";
+    if (currentFilter === "24h") {
+      const nDate = n.timestamp.toDate ? n.timestamp.toDate() : new Date(n.timestamp);
+      return nDate >= oneDayAgo;
+    }
+    return true;
+  });
+}
+
+// Update notification UI
+function updateNotificationUI(notifications) {
+  const unreadCount = notifications.filter(n => !n.read).length;
+  
+  // Update badge
+  if (unreadCount > 0) {
+    notificationBadge.textContent = unreadCount > 99 ? "99+" : unreadCount;
     notificationBadge.classList.add("show");
+    
+    // Play sound only if unread count increased (new notification)
+    if (unreadCount > previousUnreadCount && previousUnreadCount > 0) {
+      playNotificationSound();
+    }
   } else {
-    notificationBadge.textContent = "";
     notificationBadge.classList.remove("show");
   }
+  
+  previousUnreadCount = unreadCount;
 
-  if (notificationsList.length === 0) {
-    notificationList.innerHTML = `<div class="notification-empty">No new notifications</div>`;
+  // Filter notifications
+  const filtered = filterNotifications(notifications);
+
+  // Render notifications
+  if (filtered.length === 0) {
+    notificationList.innerHTML = `
+      <div class="notification-empty">
+        <i class="fa fa-bell-slash"></i>
+        <p>No notifications</p>
+      </div>
+    `;
     return;
   }
 
-  notificationList.innerHTML = notificationsList.map(n => `
-    <div class="notification-item">
+  notificationList.innerHTML = filtered.map(n => `
+    <div class="notification-item ${!n.read ? 'unread' : ''}" data-id="${n.id}">
       <div class="notification-icon ${n.type}">
         ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
       </div>
       <div class="notification-content">
         <p><strong>${n.message}</strong></p>
         <p>${n.detail}</p>
-        <span class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        <span class="time">${getTimeAgo(n.timestamp)}</span>
       </div>
     </div>
   `).join("");
+
+  // Attach click handlers to mark as read
+  document.querySelectorAll('.notification-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const id = item.dataset.id;
+      if (item.classList.contains('unread')) {
+        markNotificationRead(id);
+      }
+    });
+  });
+}
+
+// Listen to notifications in real-time
+function listenToNotifications() {
+  const q = query(
+    collection(db, "admin_notifications"), 
+    orderBy("timestamp", "desc")
+  );
+  
+  onSnapshot(q, (snapshot) => {
+    const notifications = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    updateNotificationUI(notifications);
+  });
 }
 
 // Toggle notification menu
@@ -648,10 +812,41 @@ notificationBell.addEventListener("click", (e) => {
   notificationMenu.classList.toggle("show");
 });
 
-// Clear all notifications
-clearNotificationsBtn.addEventListener("click", () => {
-  notificationsList = [];
-  updateNotificationUI();
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    
+    // Re-fetch and filter
+    const q = query(collection(db, "admin_notifications"), orderBy("timestamp", "desc"));
+    getDocs(q).then(snapshot => {
+      const notifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      updateNotificationUI(notifications);
+    });
+  });
+});
+
+// Mark all as read
+markAllReadBtn.addEventListener("click", async (e) => {
+  e.stopPropagation();
+  await markAllNotificationsRead();
+});
+
+// Clear all
+clearAllBtn.addEventListener("click", async (e) => {
+  e.stopPropagation();
+  await clearAllNotifications();
+});
+
+// View history (could open a modal with all notifications)
+viewHistoryBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  alert("Notification history modal - implement as needed");
 });
 
 // Hide notification menu on outside click
@@ -661,7 +856,10 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// Helper function to check if position is Barangay
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
 function isBarangayPosition(position) {
   if (!position) return false;
   const pos = position.toLowerCase().trim();
@@ -673,24 +871,10 @@ function isBarangayPosition(position) {
          pos.includes("brgy. official");
 }
 
-// Handle scroll shadows
-function handleScrollShadows(el) {
-  const isScrolledLeft = el.scrollLeft > 10;
-  const isScrolledRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 10);
-  
-  el.classList.toggle('scrolled-left', isScrolledLeft);
-  el.classList.toggle('scrolled-right', isScrolledRight);
-}
-
-// Attach scroll listeners
-completedTableCard.addEventListener('scroll', () => handleScrollShadows(completedTableCard));
-
 function showLoading(show = true) {
   loadingOverlay.style.display = show ? "flex" : "none";
-  loadingOverlay.setAttribute("aria-hidden", show ? "false" : "true");
 }
 
-// Format timestamp
 function formatTimestamp(timestamp) {
   if (!timestamp) return "";
   let date;
@@ -712,19 +896,46 @@ function formatTimestamp(timestamp) {
   return `${month}/${day}/${year} | ${hours}:${minutes} ${ampm}`;
 }
 
-function createFieldRow(key, value, opts = {}) {
+function formatDate(timestamp) {
+  if (!timestamp) return "Not Set";
+  let date;
+  if (timestamp.toDate) date = timestamp.toDate();
+  else if (typeof timestamp === 'string') date = new Date(timestamp);
+  else return "Not Set";
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const m = months[date.getMonth()];
+  const d = String(date.getDate()).padStart(2,'0');
+  const y = date.getFullYear();
+  return `${m} ${d}, ${y}`;
+}
+
+async function getReporterName(userId) {
+  if (!userId) return "Unknown";
+  try {
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      return `${userData.firstName || ""} ${userData.surname || ""}`.trim() || "Unknown";
+    }
+  } catch (err) {
+    console.error("Error getting user name:", err);
+  }
+  return "Unknown";
+}
+
+function createFieldRow(key, value) {
   const wrapper = document.createElement("div");
   wrapper.className = "modal-row";
   const label = document.createElement("label");
   label.textContent = key;
   wrapper.appendChild(label);
 
-  if (key === "incidentImage" || key === "imageUrl") {
+  if (key === "incidentImage" || key === "imageUrl" || key === "afterImage") {
     const input = document.createElement("input");
     input.type = "text";
     input.id = `field-${key}`;
     input.value = value || "";
-    if (opts.readonly) input.readOnly = true;
+    input.readOnly = true;
     wrapper.appendChild(input);
 
     if (value) {
@@ -754,50 +965,60 @@ function createFieldRow(key, value, opts = {}) {
     return wrapper;
   }
 
-  if (opts.readonly) {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.id = `field-${key}`;
-    input.value = value === undefined ? "" : String(value);
-    input.readOnly = true;
-    wrapper.appendChild(input);
-    return wrapper;
-  }
-
-  if (typeof value === "number") {
-    const input = document.createElement("input");
-    input.type = "number";
-    input.id = `field-${key}`;
-    input.value = value;
-    wrapper.appendChild(input);
-    return wrapper;
-  }
-
-  if (typeof value === "string") {
-    if (value.length > 120 || key.toLowerCase().includes("description") || key.toLowerCase().includes("remarks")) {
-      const ta = document.createElement("textarea");
-      ta.id = `field-${key}`;
-      ta.value = value;
-      wrapper.appendChild(ta);
-      return wrapper;
-    } else {
-      const input = document.createElement("input");
-      input.type = "text";
-      input.id = `field-${key}`;
-      input.value = value;
-      wrapper.appendChild(input);
-      return wrapper;
-    }
-  }
-
-  const ta = document.createElement("textarea");
-  ta.id = `field-${key}`;
-  try { ta.value = JSON.stringify(value); } catch(e) { ta.value = String(value); }
-  wrapper.appendChild(ta);
+  const input = document.createElement("input");
+  input.type = "text";
+  input.id = `field-${key}`;
+  input.value = value === undefined ? "" : String(value);
+  input.readOnly = true;
+  wrapper.appendChild(input);
   return wrapper;
 }
 
-function buildTableRow(docSnap) {
+async function handleAfterImageUpload(file) {
+  if (!currentDocId) {
+    alert("No report selected");
+    return false;
+  }
+  
+  if (!file) {
+    alert("Please select a file");
+    return false;
+  }
+  
+  try {
+    const fileName = `afterImages/${currentDocId}_${Date.now()}_${file.name}`;
+    const storageRef = ref(storage, fileName);
+    const snapshot = await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(snapshot.ref);
+    
+    currentDocData.afterImage = url;
+    
+    const afterImageField = document.getElementById("field-afterImage");
+    if (afterImageField) {
+      afterImageField.value = url;
+      const parent = afterImageField.parentElement;
+      let img = parent.querySelector(".img-preview");
+      if (!img) {
+        img = document.createElement("img");
+        img.className = "img-preview";
+        parent.appendChild(img);
+      }
+      img.src = url;
+    }
+    
+    return true;
+  } catch (err) {
+    console.error("Error uploading image:", err);
+    alert("Error uploading image: " + err.message);
+    return false;
+  }
+}
+
+// ============================================
+// TABLE BUILDING
+// ============================================
+
+async function buildTableRow(docSnap) {
   const r = docSnap.data();
   const tr = document.createElement("tr");
 
@@ -863,6 +1084,40 @@ function buildTableRow(docSnap) {
   }
   tr.appendChild(imgTd);
 
+  const afterImgTd = document.createElement("td");
+  const afterImageData = r.afterImage || r.completionImage || "";
+  
+  if (afterImageData) {
+    const link = document.createElement("a");
+    link.href = "#";
+    link.textContent = "View";
+    link.style.cursor = "pointer";
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const imgModal = document.createElement("div");
+      imgModal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
+      
+      const img = document.createElement("img");
+      img.src = afterImageData;
+      img.style.cssText = "max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
+      
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "×";
+      closeBtn.style.cssText = "position:absolute;top:20px;right:20px;background:white;border:none;font-size:30px;cursor:pointer;width:40px;height:40px;border-radius:50%;";
+      
+      imgModal.appendChild(img);
+      imgModal.appendChild(closeBtn);
+      document.body.appendChild(imgModal);
+      
+      imgModal.addEventListener("click", () => imgModal.remove());
+      closeBtn.addEventListener("click", () => imgModal.remove());
+    });
+    afterImgTd.appendChild(link);
+  } else {
+    afterImgTd.textContent = "No";
+  }
+  tr.appendChild(afterImgTd);
+
   const lat = r.latitude || "";
   const lng = r.longitude || "";
   const coords = lat && lng ? `${lat}, ${lng}` : (lat || lng || "");
@@ -878,19 +1133,33 @@ function buildTableRow(docSnap) {
   tr.appendChild(statusTd);
 
   addCell(formatTimestamp(r.timestamp || r.createdAt));
-  addCell(r.userId || "", "col-id");
+  
+  const reporterName = await getReporterName(r.userId);
+  addCell(reporterName);
 
-  const actionContent = document.createElement("span");
+  addCell(formatDate(r.inspectionDate));
+  addCell(formatDate(r.startDate));
+  addCell(formatDate(r.endDate));
+  
+  let budgetDisplay = "Not Set";
+  if(r.budgetAllocation) {
+    budgetDisplay = r.budgetAllocation;
+  } else if(r.budgetMin && r.budgetMax) {
+    budgetDisplay = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
+  }
+  addCell(budgetDisplay);
+  
+  addCell(formatDate(r.completionDate));
+
   const edit = document.createElement("a");
   edit.href = "#";
   edit.textContent = "Edit";
   edit.dataset.id = docSnap.id;
   edit.className = "edit-link";
-  actionContent.appendChild(edit);
 
   const actionTd = document.createElement("td");
   actionTd.className = "action";
-  actionTd.appendChild(actionContent);
+  actionTd.appendChild(edit);
   tr.appendChild(actionTd);
 
   return tr;
@@ -928,19 +1197,70 @@ async function openModalForDoc(id) {
     currentDocData = snap.data();
     modalGrid.innerHTML = "";
 
-    const ordered = ["reportId","barangay","description","affectedAgeGroups","peopleInvolved","width","height","incidentImage","imageUrl","latitude","longitude","status","timestamp","createdAt","userId"];
+    const ordered = ["reportId","barangay","description","affectedAgeGroups","peopleInvolved","width","height","incidentImage","imageUrl","afterImage","completionImage","latitude","longitude","status","timestamp","createdAt","userId"];
     const extras = Object.keys(currentDocData).filter(k => !ordered.includes(k));
     const keys = ordered.concat(extras);
 
     keys.forEach(k => {
       if (!(k in currentDocData)) return;
-      const readonly = k === "createdAt";
-      const row = createFieldRow(k, currentDocData[k], { readonly });
+      const row = createFieldRow(k, currentDocData[k]);
       modalGrid.appendChild(row);
     });
 
+    const uploadSection = document.createElement("div");
+    uploadSection.style.cssText = "grid-column: 1 / -1; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;";
+    
+    const uploadTitle = document.createElement("h3");
+    uploadTitle.textContent = "Upload After Image";
+    uploadTitle.style.cssText = "color: #004aad; font-size: 1rem; margin-bottom: 12px;";
+    uploadSection.appendChild(uploadTitle);
+
+    const fileInputContainer = document.createElement("div");
+    fileInputContainer.className = "modal-row";
+    
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.id = "afterImageFile";
+    fileInput.accept = "image/*";
+    fileInput.style.cssText = "padding: 8px; border: 1px solid #e0e0e0; border-radius: 8px;";
+    
+    fileInputContainer.appendChild(fileInput);
+    uploadSection.appendChild(fileInputContainer);
+
+    const uploadBtn = document.createElement("button");
+    uploadBtn.textContent = "Upload Image";
+    uploadBtn.style.cssText = "background: #36b9cc; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; margin-top: 12px; font-weight: 700;";
+    uploadBtn.addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = "Uploading...";
+      
+      const success = await handleAfterImageUpload(file);
+      
+      if (success) {
+        try {
+          await updateDoc(doc(db, "reports", currentDocId), {
+            afterImage: currentDocData.afterImage
+          });
+          alert("Image uploaded and saved successfully!");
+        } catch (err) {
+          console.error("Error saving to Firestore:", err);
+          alert("Image uploaded but couldn't save to database: " + err.message);
+        }
+        
+        uploadBtn.textContent = "Upload Image";
+        fileInput.value = "";
+      }
+      
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = "Upload Image";
+    });
+    uploadSection.appendChild(uploadBtn);
+
+    modalGrid.appendChild(uploadSection);
+
     editModal.style.display = "flex";
-    editModal.setAttribute("aria-hidden","false");
     editModal.querySelector(".modal-content").scrollTop = 0;
   } catch (err) {
     console.error(err);
@@ -952,8 +1272,10 @@ function closeEditModal() {
   currentDocId = null;
   currentDocData = null;
   editModal.style.display = "none";
-  editModal.setAttribute("aria-hidden","true");
 }
+
+cancelBtn.addEventListener("click", closeEditModal);
+closeModal.addEventListener("click", closeEditModal);
 
 saveChangesBtn.addEventListener("click", async () => {
   if (!currentDocId) return;
@@ -961,6 +1283,7 @@ saveChangesBtn.addEventListener("click", async () => {
   const updates = {};
   inputs.forEach(inp => {
     const key = inp.id.replace("field-","");
+    if (key === "afterImageFile") return;
     if (inp.type === "number") {
       updates[key] = inp.value === "" ? null : Number(inp.value);
     } else {
@@ -998,7 +1321,9 @@ postToBulletinBtn.addEventListener("click", async () => {
       barangay: currentDocData.barangay || "",
       issue: currentDocData.description || "",
       date: dateValue,
+      completionDate: currentDocData.completionDate || "",
       imageURL: currentDocData.imageUrl || currentDocData.incidentImage || "",
+      afterImage: currentDocData.afterImage || "",
       description: currentDocData.description || "",
       affectedAgeGroups: currentDocData.affectedAgeGroups || "",
       peopleInvolved: currentDocData.peopleInvolved || "",
@@ -1016,9 +1341,6 @@ postToBulletinBtn.addEventListener("click", async () => {
   }
 });
 
-closeModal.addEventListener("click", closeEditModal);
-cancelBtn.addEventListener("click", closeEditModal);
-
 window.addEventListener("click", (ev) => {
   if (ev.target === editModal) closeEditModal();
   if (!ev.target.closest(".profile")) {
@@ -1030,6 +1352,21 @@ profileToggle.addEventListener("click", (e) => {
   e.stopPropagation();
   dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
 });
+
+logoutBtn.addEventListener("click", async () => {
+  if (confirm("Are you sure you want to logout?")) {
+    await signOut(auth);
+    window.location.href = "logout.html";
+  }
+});
+
+// ============================================
+// AUTH & MAIN LISTENERS
+// ============================================
+
+let trackedUsers = new Set();
+let trackedReports = new Set();
+let isFirstLoad = true;
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = "logout.html"; return; }
@@ -1044,41 +1381,47 @@ onAuthStateChanged(auth, async (user) => {
       navbarAvatar.src = d.photoURL || d.profilePic;
     }
 
-    // Query all reports and filter for completed status (case-insensitive)
+    // Start listening to notifications
+    listenToNotifications();
+
+    // Query completed reports
     const reportsQuery = query(collection(db,"reports"), orderBy("createdAt","desc"));
-    onSnapshot(reportsQuery, snapshot => {
+    onSnapshot(reportsQuery, async snapshot => {
       completedBody.innerHTML = "";
 
-      snapshot.forEach(docSnap => {
+      for (const docSnap of snapshot.docs) {
         const r = docSnap.data();
         const status = (r.status || "").toString().toLowerCase().trim();
         
-        // Show if status is completed (case insensitive)
-        if (status === "completed" || status === "posted") {
-          const row = buildTableRow(docSnap);
+        if (status === "completed" || status === "repaired" || status === "posted") {
+          const row = await buildTableRow(docSnap);
           completedBody.appendChild(row);
         }
-      });
+      }
 
       document.querySelectorAll(".edit-link").forEach(a => a.removeEventListener("click", openEditFromRow));
       document.querySelectorAll(".edit-link").forEach(a => a.addEventListener("click", openEditFromRow));
-
-      setTimeout(() => {
-        handleScrollShadows(completedTableCard);
-      }, 100);
-    }, err => {
-      console.error("Realtime listener failed:", err);
     });
 
-    // Live Firestore Notifications - New Users
+    // Watch for new users with pending status
     const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
     onSnapshot(qNewUsers, (snapshot) => {
       snapshot.docChanges().forEach(change => {
-        if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
-          trackedUsers.add(change.doc.id);
-          const u = change.doc.data();
-          if (isBarangayPosition(u.position)) {
-            addNotification("user", `New registration: ${u.firstName || ""} ${u.surname || ""}`, u.email);
+        if (change.type === "added") {
+          if (!trackedUsers.has(change.doc.id)) {
+            trackedUsers.add(change.doc.id);
+            
+            // Skip notification on first load
+            if (isFirstLoad) return;
+            
+            const u = change.doc.data();
+            if (isBarangayPosition(u.position)) {
+              createNotification(
+                "user", 
+                `New registration: ${u.firstName || ""} ${u.surname || ""}`, 
+                u.email || "No email provided"
+              );
+            }
           }
         }
       });
@@ -1088,13 +1431,28 @@ onAuthStateChanged(auth, async (user) => {
     const qReports = query(collection(db, "reports"));
     onSnapshot(qReports, (snapshot) => {
       snapshot.docChanges().forEach(change => {
-        if (change.type === "added" && !trackedReports.has(change.doc.id)) {
-          trackedReports.add(change.doc.id);
-          const r = change.doc.data();
-          addNotification("report", `New report submitted in ${r.barangay || "a barangay"}`, r.type || "");
+        if (change.type === "added") {
+          if (!trackedReports.has(change.doc.id)) {
+            trackedReports.add(change.doc.id);
+            
+            // Skip notification on first load
+            if (isFirstLoad) return;
+            
+            const r = change.doc.data();
+            createNotification(
+              "report", 
+              `New report in ${r.barangay || "a barangay"}`, 
+              r.description || r.type || "No description"
+            );
+          }
         }
       });
     });
+
+    // After initial load, set flag to false
+    setTimeout(() => {
+      isFirstLoad = false;
+    }, 2000);
 
   } catch (err) {
     console.error(err);
@@ -1102,10 +1460,6 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-logoutBtn.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "logout.html";
-});
 </script>
 </body>
 </html>

@@ -80,7 +80,69 @@
       box-shadow: 0 0 0 3px rgba(33, 100, 243, 0.1);
     }
 
+    .carousel-section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .carousel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .carousel-title {
+      font-size: 1.2rem;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .carousel-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .carousel-btn {
+      background: #2164f3;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+
+    .carousel-btn:hover {
+      background: #1a52cc;
+    }
+
+    .carousel-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
     .carousel-wrapper {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .carousel-container {
+      display: flex;
+      gap: 20px;
+      transition: transform 0.5s ease;
+    }
+
+    .older-posts-section {
       background: white;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -88,34 +150,20 @@
       padding: 20px;
     }
 
-    .carousel-container {
-      display: flex;
+    .older-posts-title {
+      font-size: 1.2rem;
+      color: #333;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      padding-bottom: 15px;
-    }
-
-    .carousel-container::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    .carousel-container::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 4px;
-    }
-
-    .carousel-container::-webkit-scrollbar-thumb {
-      background: #2164f3;
-      border-radius: 4px;
-    }
-
-    .carousel-container::-webkit-scrollbar-thumb:hover {
-      background: #1a52cc;
     }
 
     .card {
-      flex: 0 0 280px;
       background: #fafafa;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -126,8 +174,12 @@
     }
 
     .card:hover {
-      transform: scale(1.08);
+      transform: scale(1.05);
       box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .carousel-container .card {
+      flex: 0 0 280px;
     }
 
     .card-image-wrapper {
@@ -236,7 +288,6 @@
       border: 1px solid #f5c6cb;
     }
 
-    /* Modal Styles */
     .modal {
       display: none;
       position: fixed;
@@ -308,7 +359,6 @@
       clear: both;
     }
 
-    /* Side-by-side images container */
     .images-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -375,27 +425,6 @@
       word-break: break-all;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .images-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .modal-content {
-        padding: 20px;
-        margin: 20px;
-      }
-
-      .card {
-        flex: 0 0 250px;
-      }
-
-      .container {
-        padding: 15px;
-      }
-    }
-
-    /* Image preview modal */
     .image-preview-modal {
       display: none;
       position: fixed;
@@ -435,6 +464,53 @@
     .image-preview-close:hover {
       color: #ccc;
     }
+
+    @media (max-width: 768px) {
+      .images-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        padding: 20px;
+        margin: 20px;
+      }
+
+      .card {
+        flex: 0 0 250px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+
+      .posts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .carousel-controls {
+        display: none;
+      }
+
+      .carousel-container {
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding-bottom: 10px;
+      }
+
+      .carousel-container::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      .carousel-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      .carousel-container::-webkit-scrollbar-thumb {
+        background: #2164f3;
+        border-radius: 4px;
+      }
+    }
   </style>
 </head>
 
@@ -457,12 +533,32 @@
 
     <div id="errorMessage" class="error" style="display:none;"></div>
 
-    <div class="carousel-wrapper">
-      <div id="loadingMessage" class="loading">Loading bulletins...</div>
-      <div id="noDataMessage" class="no-data" style="display:none;">No bulletins available at the moment.</div>
+    <!-- Recent Posts Carousel -->
+    <div class="carousel-section" id="carouselSection">
+      <div class="carousel-header">
+        <div class="carousel-title">Latest Updates</div>
+        <div class="carousel-controls">
+          <button class="carousel-btn" id="prevBtn">‹</button>
+          <button class="carousel-btn" id="nextBtn">›</button>
+        </div>
+      </div>
+      <div id="loadingCarousel" class="loading">Loading latest bulletins...</div>
+      <div id="noDataCarousel" class="no-data" style="display:none;">No recent bulletins available.</div>
+      <div class="carousel-wrapper">
+        <div class="carousel-container" id="carouselContainer">
+          <!-- Recent posts appear here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Older Posts Grid -->
+    <div class="older-posts-section" id="olderPostsSection" style="display:none;">
+      <div class="older-posts-title">Previous Updates</div>
+      <div id="loadingOlder" class="loading">Loading previous bulletins...</div>
+      <div id="noDataOlder" class="no-data" style="display:none;">No previous bulletins available.</div>
       <div id="noSearchMessage" class="no-data" style="display:none;">No bulletins match your search.</div>
-      <div class="carousel-container" id="newsContainer">
-        <!-- Posts appear here dynamically -->
+      <div class="posts-grid" id="olderPostsContainer">
+        <!-- Older posts appear here -->
       </div>
     </div>
   </div>
@@ -473,7 +569,6 @@
       <span class="close-btn">&times;</span>
       <h2 class="modal-title">Barangay <span id="modalBarangay"></span></h2>
 
-      <!-- Side-by-side images -->
       <div class="images-grid">
         <div class="image-container">
           <img id="modalBeforeImage" class="modal-image" src="" alt="Before" onclick="previewImage(this.src)">
@@ -534,10 +629,10 @@
     <img id="imagePreviewContent" class="image-preview-content" src="" alt="Preview">
   </div>
 
-  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
@@ -550,11 +645,15 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    const newsContainer = document.getElementById("newsContainer");
-    const loadingMessage = document.getElementById("loadingMessage");
+    const carouselContainer = document.getElementById("carouselContainer");
+    const olderPostsContainer = document.getElementById("olderPostsContainer");
+    const loadingCarousel = document.getElementById("loadingCarousel");
+    const loadingOlder = document.getElementById("loadingOlder");
     const errorMessage = document.getElementById("errorMessage");
-    const noDataMessage = document.getElementById("noDataMessage");
+    const noDataCarousel = document.getElementById("noDataCarousel");
+    const noDataOlder = document.getElementById("noDataOlder");
     const noSearchMessage = document.getElementById("noSearchMessage");
     const searchInput = document.getElementById("searchInput");
     const modal = document.getElementById("bulletinModal");
@@ -562,16 +661,33 @@
     const imagePreviewModal = document.getElementById("imagePreviewModal");
     const imagePreviewContent = document.getElementById("imagePreviewContent");
     const imagePreviewClose = document.querySelector(".image-preview-close");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const olderPostsSection = document.getElementById("olderPostsSection");
 
     let allBulletins = [];
+    let currentCarouselIndex = 0;
+    const cardsPerView = 3;
 
-    // Image preview function (global scope)
     window.previewImage = function(src) {
       if (src && !src.includes('placeholder')) {
         imagePreviewContent.src = src;
         imagePreviewModal.classList.add("active");
       }
     };
+
+    async function getImageUrl(imagePath) {
+      try {
+        if (!imagePath) return null;
+        if (imagePath.startsWith('http')) return imagePath;
+        
+        const url = await getDownloadURL(ref(storage, imagePath));
+        return url;
+      } catch (error) {
+        console.error("Error getting image URL:", error);
+        return null;
+      }
+    }
 
     function formatDate(date) {
       if (!date) return 'N/A';
@@ -589,7 +705,6 @@
           day: 'numeric'
         });
       }
-      // Try to parse string date
       try {
         const parsedDate = new Date(date);
         if (!isNaN(parsedDate.getTime())) {
@@ -614,15 +729,14 @@
       return 'status-reported';
     }
 
-    function createCard(data, index) {
+    function createCard(data, index, showNewLabel = false) {
       const card = document.createElement("div");
       card.classList.add("card");
       
-      const isNew = index === 0;
-      const imageUrl = data.imageURL || data.beforeImageURL || 'https://via.placeholder.com/300x200?text=No+Image';
+      const imageUrl = data.imageURL || 'https://via.placeholder.com/300x200?text=No+Image';
       
       card.innerHTML = `
-        ${isNew ? '<div class="new-label">NEW</div>' : ''}
+        ${showNewLabel ? '<div class="new-label">NEW</div>' : ''}
         <div class="card-image-wrapper">
           <img src="${imageUrl}" 
                alt="bulletin image"
@@ -646,22 +760,27 @@
       return card;
     }
 
-    function openModal(data) {
+    async function openModal(data) {
       document.getElementById("modalBarangay").textContent = data.barangay || 'N/A';
       
-      // Handle before image
-      const beforeImg = data.beforeImageURL || data.imageURL || 'https://via.placeholder.com/400x300?text=No+Before+Image';
-      document.getElementById("modalBeforeImage").src = beforeImg;
+      // Handle BEFORE image
+      const beforeImageUrl = data.imageURL || 'https://via.placeholder.com/400x300?text=No+Before+Image';
+      document.getElementById("modalBeforeImage").src = beforeImageUrl;
       document.getElementById("modalBeforeImage").onerror = function() {
         this.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
       };
       
-      // Handle after image
-      const afterImg = data.afterImageURL || 'https://via.placeholder.com/400x300?text=No+After+Image';
-      document.getElementById("modalAfterImage").src = afterImg;
-      document.getElementById("modalAfterImage").onerror = function() {
-        this.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
-      };
+      // Handle AFTER image - FIXED: Check if afterImage exists first
+      const afterImageUrl = data.afterImage || data.completionImage;
+      if (afterImageUrl) {
+        document.getElementById("modalAfterImage").src = afterImageUrl;
+        document.getElementById("modalAfterImage").onerror = function() {
+          this.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
+        };
+      } else {
+        // Only show placeholder if there's no afterImage
+        document.getElementById("modalAfterImage").src = 'https://via.placeholder.com/400x300?text=No+After+Image';
+      }
       
       document.getElementById("modalDescription").textContent = data.description || data.issue || 'No description available';
       document.getElementById("modalAffected").textContent = data.affected || data.peopleInvolved || 'Not specified';
@@ -686,12 +805,28 @@
       imagePreviewModal.classList.remove("active");
     }
 
+    function updateCarousel() {
+      const cardWidth = 280;
+      const gap = 20;
+      const offset = -(currentCarouselIndex * (cardWidth + gap));
+      carouselContainer.style.transform = `translateX(${offset}px)`;
+
+      const recentBulletins = allBulletins.slice(0, 10);
+      const maxIndex = Math.max(0, recentBulletins.length - cardsPerView);
+      
+      prevBtn.disabled = currentCarouselIndex === 0;
+      nextBtn.disabled = currentCarouselIndex >= maxIndex;
+    }
+
     function filterBulletins(searchTerm) {
-      loadingMessage.style.display = "none";
+      loadingCarousel.style.display = "none";
+      loadingOlder.style.display = "none";
       errorMessage.style.display = "none";
-      noDataMessage.style.display = "none";
+      noDataCarousel.style.display = "none";
+      noDataOlder.style.display = "none";
       noSearchMessage.style.display = "none";
-      newsContainer.innerHTML = "";
+      carouselContainer.innerHTML = "";
+      olderPostsContainer.innerHTML = "";
 
       const term = searchTerm.toLowerCase();
       const filtered = allBulletins.filter(data => {
@@ -712,22 +847,42 @@
         if (searchTerm) {
           noSearchMessage.style.display = "block";
         } else {
-          noDataMessage.style.display = "block";
+          noDataCarousel.style.display = "block";
         }
+        olderPostsSection.style.display = "none";
         return;
       }
 
-      filtered.forEach((data, index) => {
-        newsContainer.appendChild(createCard(data, index));
+      const recentBulletins = filtered.slice(0, 10);
+      const olderBulletins = filtered.slice(10);
+
+      // Render carousel
+      recentBulletins.forEach((data, index) => {
+        carouselContainer.appendChild(createCard(data, index, index === 0 && !searchTerm));
       });
+
+      // Render older posts
+      if (olderBulletins.length > 0) {
+        olderPostsSection.style.display = "block";
+        olderBulletins.forEach((data, index) => {
+          olderPostsContainer.appendChild(createCard(data, index + 10));
+        });
+      } else {
+        olderPostsSection.style.display = "none";
+      }
+
+      currentCarouselIndex = 0;
+      updateCarousel();
     }
 
     function renderBulletins(snapshot) {
-      loadingMessage.style.display = "none";
+      loadingCarousel.style.display = "none";
+      loadingOlder.style.display = "none";
 
       if (snapshot.empty) {
         allBulletins = [];
-        noDataMessage.style.display = "block";
+        noDataCarousel.style.display = "block";
+        olderPostsSection.style.display = "none";
         return;
       }
 
@@ -740,12 +895,28 @@
 
     function handleError(error) {
       console.error("Error loading bulletins:", error);
-      loadingMessage.style.display = "none";
+      loadingCarousel.style.display = "none";
+      loadingOlder.style.display = "none";
       errorMessage.textContent = "Error loading bulletins. Please try refreshing the page.";
       errorMessage.style.display = "block";
     }
 
-    // Event Listeners
+    prevBtn.addEventListener("click", () => {
+      if (currentCarouselIndex > 0) {
+        currentCarouselIndex--;
+        updateCarousel();
+      }
+    });
+
+    nextBtn.addEventListener("click", () => {
+      const recentBulletins = allBulletins.slice(0, 10);
+      const maxIndex = Math.max(0, recentBulletins.length - cardsPerView);
+      if (currentCarouselIndex < maxIndex) {
+        currentCarouselIndex++;
+        updateCarousel();
+      }
+    });
+
     closeBtn.addEventListener("click", closeModal);
     modal.addEventListener("click", (e) => {
       if (e.target === modal) closeModal();
@@ -760,7 +931,6 @@
       filterBulletins(e.target.value);
     });
 
-    // Keyboard shortcuts
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         if (imagePreviewModal.classList.contains("active")) {
@@ -771,7 +941,6 @@
       }
     });
 
-    // Listen for real-time updates
     try {
       const q = query(collection(db, "ad_bulletin"), orderBy("date", "desc"));
       onSnapshot(q, renderBulletins, handleError);

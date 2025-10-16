@@ -44,8 +44,8 @@
 
     .profile { display: flex; align-items: center; gap: 1rem; position: relative; cursor: pointer; flex-shrink: 0; }
     .profile .fa-bell { font-size: 1.2rem; cursor: pointer; position: relative; }
-    .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; }
-    .avatar { width: 35px; height: 35px; border-radius: 50%; flex-shrink: 0; }
+ .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; }
+        .badge.show { display: flex; align-items: center; justify-content: center; }    .avatar { width: 35px; height: 35px; border-radius: 50%; flex-shrink: 0; }
     .username { font-weight: 500; white-space: nowrap; }
     .profile-dropdown { position: relative; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
     .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 10000; }
@@ -60,7 +60,21 @@
     .actions button:hover { background: #005ce6; }
     .actions input { padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; }
 
-    .scroll-hint { background: linear-gradient(135deg, #004aad 0%, #0066cc 100%); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; text-align: center; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(0,74,173,0.2); }
+.scroll-hint {
+      background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      text-align: center;
+      margin: 10px 0 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0, 74, 173, 0.2);
+      flex-shrink: 0;
+    }
     .scroll-hint i { animation: slideHint 2s ease-in-out infinite; }
     @keyframes slideHint { 0%, 100% { transform: translateX(-4px); } 50% { transform: translateX(4px); } }
 
@@ -105,8 +119,8 @@
 table { 
   width: 100%; 
   border-collapse: collapse; 
-  table-layout: auto; /* ✅ now respects min-width settings */
-  min-width: 1200px; /* ⬆ gives more space for long content */
+  table-layout: auto;
+  min-width: 1400px;
 }
 
 thead { 
@@ -126,8 +140,8 @@ th, td {
   padding: 0.6rem 0.8rem; 
   font-size: 0.85rem; 
   border-bottom: 1px solid #f0f2f5; 
-  overflow: visible; /* ✅ allow full text */
-  white-space: nowrap; /* keeps long emails in one line */
+  overflow: visible;
+  white-space: nowrap;
 }
 
 tbody tr:nth-child(even) { 
@@ -138,29 +152,64 @@ tbody tr:hover {
   background: #f1f8ff; 
 }
 
-/* 📏 Column width distribution */
+/* Column width distribution */
 th:nth-child(1), td:nth-child(1) { 
-  min-width: 300px; /* ⬆ Name wider */
+  min-width: 250px;
 }
 
 th:nth-child(2), td:nth-child(2) { 
-  min-width: 320px; /* ⬆ Email wider */
+  min-width: 280px;
 }
 
 th:nth-child(3), td:nth-child(3) { 
-  min-width: 180px; /* Address */
+  min-width: 180px;
 }
 
 th:nth-child(4), td:nth-child(4) { 
-  min-width: 140px; /* Position */
+  min-width: 140px;
 }
 
 th:nth-child(5), td:nth-child(5) { 
-  min-width: 100px; /* Status */
+  min-width: 100px;
 }
 
 th:nth-child(6), td:nth-child(6) { 
-  min-width: 220px; /* ⬆ Actions wider for buttons */
+  min-width: 180px;
+}
+
+th:nth-child(7), td:nth-child(7) { 
+  min-width: 220px;
+}
+
+/* Password cell styling */
+.password-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.password-text {
+  font-family: monospace;
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.copy-btn {
+  background: #28a745 !important;
+  color: #fff;
+  border: none;
+  padding: 4px 8px !important;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: 0.3s;
+  margin: 0 !important;
+}
+
+.copy-btn:hover {
+  background: #218838 !important;
 }
 
 td button { 
@@ -236,7 +285,6 @@ td button:last-child {
         <li><a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
         <li class="active"><a href="usermanagement.html"><i class="fa fa-tasks"></i> User Management</a></li>
         <li><a href="reports.html"><i class="fa fa-map-marker-alt"></i> Manage Reports</a></li>
-        <li><a href="bdatemanagement.html"><i class="fa fa-coins"></i> Budget & Date Management</a></li>
       </ul>
     </div>  
         <div class="sidebar-footer">
@@ -256,8 +304,7 @@ td button:last-child {
           <span class="badge" id="notifBadge">0</span>
         </div>
         <div class="profile-dropdown">
-          <img src="mark.jpg" alt="Profile" class="avatar">
-          <span class="username" id="navUsername">---</span>
+            <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar" />          <span class="username" id="navUsername">---</span>
           <i class="fas fa-chevron-down" style="font-size:0.7rem;color:#666;"></i>
           <div class="dropdown-menu" id="dropdownMenu">
             <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
@@ -285,7 +332,7 @@ td button:last-child {
       <h3>Pending Admins</h3>
       <div class="table-wrapper">
         <div class="table-card"><table><thead><tr>
-          <th>Name</th><th>Email</th><th>Address</th><th>Position</th><th>Status</th><th>Actions</th>
+          <th>Name</th><th>Email</th><th>Address</th><th>Position</th><th>Status</th><th>Password</th><th>Actions</th>
         </tr></thead><tbody id="pendingAdmins"></tbody></table></div>
       </div>
 
@@ -293,7 +340,7 @@ td button:last-child {
       <h3>Active Admins</h3>
       <div class="table-wrapper">
         <div class="table-card"><table><thead><tr>
-          <th>Name</th><th>Email</th><th>Address</th><th>Position</th><th>Status</th><th>Actions</th>
+          <th>Name</th><th>Email</th><th>Address</th><th>Position</th><th>Status</th><th>Password</th><th>Actions</th>
         </tr></thead><tbody id="activeAdmins"></tbody></table></div>
       </div>
 
@@ -301,7 +348,7 @@ td button:last-child {
       <h3>Inactive Admins</h3>
       <div class="table-wrapper">
         <div class="table-card"><table><thead><tr>
-          <th>Name</th><th>Email</th><th>Address</th><th>Position</th><th>Status</th><th>Actions</th>
+          <th>Name</th><th>Email</th><th>Address</th><th>Position</th><th>Status</th><th>Password</th><th>Actions</th>
         </tr></thead><tbody id="inactiveAdmins"></tbody></table></div>
       </div>
     </div>
@@ -424,6 +471,15 @@ td button:last-child {
     p.type = p.type === "password" ? "text" : "password";
   };
 
+  // Copy password function
+  window.copyPassword = (password) => {
+    navigator.clipboard.writeText(password).then(() => {
+      alert("Password copied to clipboard!");
+    }).catch(err => {
+      alert("Failed to copy password");
+    });
+  };
+
   // Add User
   document.getElementById("addUserForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -435,7 +491,11 @@ td button:last-child {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await setDoc(doc(db, "users", cred.user.uid), {
-        name, email, address, position,
+        name, 
+        email, 
+        address, 
+        position,
+        password: password,
         status: "Pending",
         role: "Admin",
         createdAt: serverTimestamp()
@@ -461,6 +521,16 @@ td button:last-child {
     snap.forEach(docSnap => {
       const u = docSnap.data();
       if (u.position !== "Admin") return;
+      
+      const passwordDisplay = u.password 
+        ? `<div class="password-cell">
+             <span class="password-text">${u.password}</span>
+             <button class="copy-btn" onclick="copyPassword('${u.password}')">
+               <i class="fa fa-copy"></i>
+             </button>
+           </div>`
+        : '<span style="color: #999;">N/A</span>';
+      
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${u.name || ""}</td>
@@ -468,6 +538,7 @@ td button:last-child {
         <td>${u.address || ""}</td>
         <td>${u.position || ""}</td>
         <td>${u.status || ""}</td>
+        <td>${passwordDisplay}</td>
         <td>
           ${
             u.status === "Pending" ? `<button onclick="approveUser('${docSnap.id}')">Approve</button>` :
@@ -537,7 +608,7 @@ td button:last-child {
   document.getElementById("logoutBtn").addEventListener("click", async (e) => {
     e.preventDefault();
     await signOut(auth);
-    window.location.href = "index.html";
+    window.location.href = "logout.html";
   });
 
   // 🧑 Auth State
@@ -547,8 +618,6 @@ td button:last-child {
       if (userDoc.exists()) {
         const data = userDoc.data();
         document.getElementById("navUsername").textContent = data.name || "Unknown";
-        document.getElementById("footerName").textContent = data.name || "Unknown";
-        document.getElementById("footerPosition").textContent = data.position || "---";
 
         if (data.position !== "Super Admin") {
           alert("Access denied. Only Super Admins can manage users.");
