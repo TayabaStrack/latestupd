@@ -5,7 +5,7 @@ admi
 - profile picture changes  (LAHAT kahit sa other day na)
 - img edit/upload (PROFILE done pero not tested yet)
 - fix notifications(REPORTS, USERS, PROFILE)
-- fix table (BULLETIN & REPORTS completed table add penalties if lampas deadline/end date & add peso sign before the budget)
+- fix table (BULLETIN duplicate completed table to bulletin)
 - fix modal (PUBLIC DASHBOARD remove people afftected & ages)
 
 s-admin
