@@ -263,7 +263,7 @@
         </div>
 
         <div class="profile-dropdown" id="profileToggle">
-          <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar" />
+          <img src="image.png" alt="Profile" class="avatar" id="navAvatar" />
           <span class="username" id="navUsername">Admin</span>
           <div class="dropdown-menu" id="dropdownMenu">
             <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
@@ -805,6 +805,7 @@
       }
     });
 
+    // ===== REAL-TIME PROFILE PICTURE SYNC - THE KEY PART =====
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "logout.html";
@@ -813,20 +814,33 @@
 
       try {
         const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
+        
+        // USE onSnapshot FOR REAL-TIME UPDATES!
+        onSnapshot(userDocRef, (userDocSnap) => {
+          if (!userDocSnap.exists()) {
+            alert("User data not found! Redirecting...");
+            window.location.href = "logout.html";
+            return;
+          }
 
-        if (!userDocSnap.exists() || userDocSnap.data().position !== "Admin") {
-          alert("Unauthorized access! You will be redirected.");
-          window.location.href = "logout.html";
-          return;
-        }
+          const data = userDocSnap.data();
+          
+          // Check if user is admin
+          if (data.position !== "Admin") {
+            alert("Unauthorized access! You will be redirected.");
+            window.location.href = "logout.html";
+            return;
+          }
 
-        const data = userDocSnap.data();
-        document.getElementById("navUsername").textContent = data.name || "Admin";
-        if (data.photoURL || data.profilePic) {
-          document.getElementById("navbarAvatar").src = data.photoURL || data.profilePic;
-        }
+          // Update username in navbar - updates automatically when changed!
+          document.getElementById("navUsername").textContent = data.name || "Admin";
+          
+          // Update profile picture in navbar - THIS UPDATES IN REAL-TIME!
+          const photoURL = data.photoURL || data.profilePic || "image.png";
+          document.getElementById("navAvatar").src = photoURL;
+        });
 
+        // Load reports data (only once)
         const reportsCollection = collection(db, "reports");
         const reportsSnapshot = await getDocs(reportsCollection);
         

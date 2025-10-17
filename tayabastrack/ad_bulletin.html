@@ -370,7 +370,7 @@
   table{
     width:100%;
     border-collapse:collapse;
-    min-width:1200px;
+    min-width:1400px;
   }
   thead th{
     background:#f5f8fb;
@@ -392,8 +392,9 @@
   
   .col-id{width:160px;color:#444;font-weight:600}
   .col-small{width:110px}
+  .col-coords{width:140px}
   .truncate{
-    max-width:420px;
+    max-width:300px;
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
@@ -415,6 +416,17 @@
   .completed{background:#1cc88a;color:#fff}
   .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
 
+  /* Coordinates vertical display */
+  .coords-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+  }
+  .coords-vertical div {
+    white-space: nowrap;
+  }
+
   /* ---------- MODAL ---------- */
   .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
   .modal-content{background:#fff;width:100%;max-width:980px;border-radius:12px;padding:18px;max-height:92vh;overflow:auto}
@@ -424,7 +436,7 @@
   .modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
   .modal-row{display:flex;flex-direction:column}
   .modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
-  .modal-row input[type="text"],.modal-row textarea{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
+  .modal-row input[type="text"],.modal-row textarea,.modal-row input[type="date"],.modal-row input[type="number"]{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
   .modal-row textarea{min-height:80px;resize:vertical}
   .img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px}
   .modal-footer{text-align:right;margin-top:12px}
@@ -541,19 +553,16 @@
               <tr>
                 <th class="col-id">Report ID</th>
                 <th>Barangay</th>
-                <th style="min-width:300px">Description</th>
-                <th>Age Groups / People</th>
+                <th style="min-width:250px">Description</th>
                 <th class="col-small">Dimensions (W×H)</th>
                 <th>Image</th>
                 <th>After Image</th>
-                <th class="col-small">Coordinates</th>
-                <th class="col-small">Status</th>
+                <th class="col-coords">Coordinates</th>
+                <th class="col-small">Status</th><th style="min-width:200px">Start Date & Deadline</th>
+                <th style="min-width:180px">Contractor & Supplier</th>
                 <th style="min-width:180px">Timestamp</th>
-                <th>Reporter Name</th>
+                <th>Reporter Position</th>
                 <th>Inspection Date</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Budget Allocation</th>
                 <th>Completion Date</th>
                 <th>Action</th>
               </tr>
@@ -570,7 +579,7 @@
 <div class="modal" id="editModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>View Report</h2>
+      <h2>Edit Report Details</h2>
       <button class="close-btn" id="closeModal">&times;</button>
     </div>
     <div class="modal-body">
@@ -643,7 +652,6 @@ let previousUnreadCount = 0;
 // NOTIFICATION SYSTEM WITH FIRESTORE
 // ============================================
 
-// Create notification in Firestore
 async function createNotification(type, message, detail) {
   try {
     await addDoc(collection(db, "admin_notifications"), {
@@ -658,7 +666,6 @@ async function createNotification(type, message, detail) {
   }
 }
 
-// Mark notification as read
 async function markNotificationRead(notificationId) {
   try {
     await updateDoc(doc(db, "admin_notifications", notificationId), {
@@ -669,7 +676,6 @@ async function markNotificationRead(notificationId) {
   }
 }
 
-// Mark all notifications as read
 async function markAllNotificationsRead() {
   try {
     const q = query(collection(db, "admin_notifications"), where("read", "==", false));
@@ -683,7 +689,6 @@ async function markAllNotificationsRead() {
   }
 }
 
-// Clear all notifications
 async function clearAllNotifications() {
   if (!confirm("Are you sure you want to clear all notifications?")) return;
   try {
@@ -695,14 +700,12 @@ async function clearAllNotifications() {
   }
 }
 
-// Play notification sound (only for NEW unread notifications)
 function playNotificationSound() {
   notificationSound.play().catch(err => {
     console.log("Could not play notification sound:", err);
   });
 }
 
-// Format time ago
 function getTimeAgo(timestamp) {
   if (!timestamp) return "";
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -715,7 +718,6 @@ function getTimeAgo(timestamp) {
   return date.toLocaleDateString();
 }
 
-// Filter notifications
 function filterNotifications(notifications) {
   const now = new Date();
   const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
@@ -732,16 +734,13 @@ function filterNotifications(notifications) {
   });
 }
 
-// Update notification UI
 function updateNotificationUI(notifications) {
   const unreadCount = notifications.filter(n => !n.read).length;
   
-  // Update badge
   if (unreadCount > 0) {
     notificationBadge.textContent = unreadCount > 99 ? "99+" : unreadCount;
     notificationBadge.classList.add("show");
     
-    // Play sound only if unread count increased (new notification)
     if (unreadCount > previousUnreadCount && previousUnreadCount > 0) {
       playNotificationSound();
     }
@@ -751,10 +750,8 @@ function updateNotificationUI(notifications) {
   
   previousUnreadCount = unreadCount;
 
-  // Filter notifications
   const filtered = filterNotifications(notifications);
 
-  // Render notifications
   if (filtered.length === 0) {
     notificationList.innerHTML = `
       <div class="notification-empty">
@@ -778,7 +775,6 @@ function updateNotificationUI(notifications) {
     </div>
   `).join("");
 
-  // Attach click handlers to mark as read
   document.querySelectorAll('.notification-item').forEach(item => {
     item.addEventListener('click', () => {
       const id = item.dataset.id;
@@ -789,7 +785,6 @@ function updateNotificationUI(notifications) {
   });
 }
 
-// Listen to notifications in real-time
 function listenToNotifications() {
   const q = query(
     collection(db, "admin_notifications"), 
@@ -806,20 +801,17 @@ function listenToNotifications() {
   });
 }
 
-// Toggle notification menu
 notificationBell.addEventListener("click", (e) => {
   e.stopPropagation();
   notificationMenu.classList.toggle("show");
 });
 
-// Filter buttons
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentFilter = btn.dataset.filter;
     
-    // Re-fetch and filter
     const q = query(collection(db, "admin_notifications"), orderBy("timestamp", "desc"));
     getDocs(q).then(snapshot => {
       const notifications = snapshot.docs.map(doc => ({
@@ -831,25 +823,21 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
-// Mark all as read
 markAllReadBtn.addEventListener("click", async (e) => {
   e.stopPropagation();
   await markAllNotificationsRead();
 });
 
-// Clear all
 clearAllBtn.addEventListener("click", async (e) => {
   e.stopPropagation();
   await clearAllNotifications();
 });
 
-// View history (could open a modal with all notifications)
 viewHistoryBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   alert("Notification history modal - implement as needed");
 });
 
-// Hide notification menu on outside click
 document.addEventListener("click", (e) => {
   if (!notificationMenu.contains(e.target) && e.target !== notificationBell) {
     notificationMenu.classList.remove("show");
@@ -909,25 +897,25 @@ function formatDate(timestamp) {
   return `${m} ${d}, ${y}`;
 }
 
-async function getReporterName(userId) {
+async function getReporterPosition(userId) {
   if (!userId) return "Unknown";
   try {
     const userDoc = await getDoc(doc(db, "users", userId));
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      return `${userData.firstName || ""} ${userData.surname || ""}`.trim() || "Unknown";
+      return userData.position || "Unknown";
     }
   } catch (err) {
-    console.error("Error getting user name:", err);
+    console.error("Error getting user position:", err);
   }
   return "Unknown";
 }
 
-function createFieldRow(key, value) {
+function createEditableField(key, value, type = "text") {
   const wrapper = document.createElement("div");
   wrapper.className = "modal-row";
   const label = document.createElement("label");
-  label.textContent = key;
+  label.textContent = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
   wrapper.appendChild(label);
 
   if (key === "incidentImage" || key === "imageUrl" || key === "afterImage") {
@@ -955,21 +943,21 @@ function createFieldRow(key, value) {
     return wrapper;
   }
 
-  if (key === "createdAt" && value && typeof value === "object" && value.toDate) {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.id = `field-${key}`;
-    input.value = value.toDate ? value.toDate().toLocaleString() : String(value);
-    input.readOnly = true;
-    wrapper.appendChild(input);
-    return wrapper;
-  }
-
   const input = document.createElement("input");
-  input.type = "text";
+  input.type = type;
   input.id = `field-${key}`;
-  input.value = value === undefined ? "" : String(value);
-  input.readOnly = true;
+  
+  if (type === "date" && value) {
+    if (value.toDate) {
+      const date = value.toDate();
+      input.value = date.toISOString().split('T')[0];
+    } else if (typeof value === 'string') {
+      input.value = value.split('T')[0];
+    }
+  } else {
+    input.value = value === undefined ? "" : String(value);
+  }
+  
   wrapper.appendChild(input);
   return wrapper;
 }
@@ -1037,19 +1025,22 @@ async function buildTableRow(docSnap) {
     tr.appendChild(td);
   }
 
+  // Report ID
   addCell(r.reportId || "", "col-id");
+  
+  // Barangay
   addCell(r.barangay || "");
+  
+  // Description
   addCell(r.description || "", "truncate");
 
-  const ageGroup = r.affectedAgeGroups || "";
-  const people = r.peopleInvolved || "";
-  addCell(ageGroup + (ageGroup && people ? " / " : "") + people);
-
+  // Dimensions
   const width = r.width || "";
   const height = r.height || "";
   const dimensions = width && height ? `${width}×${height}` : (width || height || "");
   addCell(dimensions, "col-small");
 
+  // Image
   const imgTd = document.createElement("td");
   const imageData = r.incidentImage || r.imageUrl || r.image;
   
@@ -1084,6 +1075,7 @@ async function buildTableRow(docSnap) {
   }
   tr.appendChild(imgTd);
 
+  // After Image
   const afterImgTd = document.createElement("td");
   const afterImageData = r.afterImage || r.completionImage || "";
   
@@ -1118,11 +1110,31 @@ async function buildTableRow(docSnap) {
   }
   tr.appendChild(afterImgTd);
 
+  // Coordinates (Vertical)
+  const coordsTd = document.createElement("td");
+  coordsTd.className = "col-coords";
   const lat = r.latitude || "";
   const lng = r.longitude || "";
-  const coords = lat && lng ? `${lat}, ${lng}` : (lat || lng || "");
-  addCell(coords, "col-small");
+  
+  if (lat && lng) {
+    const coordsDiv = document.createElement("div");
+    coordsDiv.className = "coords-vertical";
+    
+    const latDiv = document.createElement("div");
+    latDiv.textContent = `Lat: ${lat}`;
+    
+    const lngDiv = document.createElement("div");
+    lngDiv.textContent = `Lng: ${lng}`;
+    
+    coordsDiv.appendChild(latDiv);
+    coordsDiv.appendChild(lngDiv);
+    coordsTd.appendChild(coordsDiv);
+  } else {
+    coordsTd.textContent = lat || lng || "—";
+  }
+  tr.appendChild(coordsTd);
 
+  // Status
   const statusSpan = document.createElement("span");
   const st = (r.status || "pending").toString().toLowerCase();
   statusSpan.className = `status ${st==='pending'?'pending':st==='ongoing'?'ongoing':'completed'}`;
@@ -1132,25 +1144,44 @@ async function buildTableRow(docSnap) {
   statusTd.appendChild(statusSpan);
   tr.appendChild(statusTd);
 
+  // Proposed Budget
+  let proposedBudget = "Not Set";
+  if(r.proposedBudget) {
+    proposedBudget = `₱${parseFloat(r.proposedBudget).toLocaleString()}`;
+  } else if(r.budgetMin && r.budgetMax) {
+    proposedBudget = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
+  }
+  addCell(proposedBudget);
+
+  // Start Date & Deadline
+  const datesTd = document.createElement("td");
+  const startDate = r.startDate ? formatDate(r.startDate) : "Not Set";
+  const deadline = r.endDate || r.deadline ? formatDate(r.endDate || r.deadline) : "Not Set";
+  datesTd.textContent = `${startDate} - ${deadline}`;
+  tr.appendChild(datesTd);
+
+  // Allocated Budget
+  const allocatedBudget = r.allocatedBudget ? `₱${parseFloat(r.allocatedBudget).toLocaleString()}` : "Not Set";
+  addCell(allocatedBudget);
+
+  // Contractor & Supplier
+  const contractorSupplier = `${r.contractor || "—"} / ${r.supplier || "—"}`;
+  addCell(contractorSupplier);
+
+  // Timestamp
   addCell(formatTimestamp(r.timestamp || r.createdAt));
   
-  const reporterName = await getReporterName(r.userId);
-  addCell(reporterName);
+  // Reporter Position (instead of name)
+  const reporterPosition = await getReporterPosition(r.userId);
+  addCell(reporterPosition);
 
+  // Inspection Date
   addCell(formatDate(r.inspectionDate));
-  addCell(formatDate(r.startDate));
-  addCell(formatDate(r.endDate));
   
-  let budgetDisplay = "Not Set";
-  if(r.budgetAllocation) {
-    budgetDisplay = r.budgetAllocation;
-  } else if(r.budgetMin && r.budgetMax) {
-    budgetDisplay = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
-  }
-  addCell(budgetDisplay);
-  
+  // Completion Date
   addCell(formatDate(r.completionDate));
 
+  // Action
   const edit = document.createElement("a");
   edit.href = "#";
   edit.textContent = "Edit";
@@ -1197,16 +1228,41 @@ async function openModalForDoc(id) {
     currentDocData = snap.data();
     modalGrid.innerHTML = "";
 
-    const ordered = ["reportId","barangay","description","affectedAgeGroups","peopleInvolved","width","height","incidentImage","imageUrl","afterImage","completionImage","latitude","longitude","status","timestamp","createdAt","userId"];
-    const extras = Object.keys(currentDocData).filter(k => !ordered.includes(k));
-    const keys = ordered.concat(extras);
+    // Core fields with editable types
+    const fields = [
+      { key: "reportId", type: "text", editable: false },
+      { key: "barangay", type: "text", editable: true },
+      { key: "description", type: "text", editable: true },
+      { key: "width", type: "number", editable: true },
+      { key: "height", type: "number", editable: true },
+      { key: "incidentImage", type: "image", editable: false },
+      { key: "afterImage", type: "image", editable: false },
+      { key: "latitude", type: "text", editable: true },
+      { key: "longitude", type: "text", editable: true },
+      { key: "status", type: "text", editable: true },
+      { key: "proposedBudget", type: "number", editable: true },
+      { key: "startDate", type: "date", editable: true },
+      { key: "endDate", type: "date", editable: true },
+      { key: "deadline", type: "date", editable: true },
+      { key: "allocatedBudget", type: "number", editable: true },
+      { key: "contractor", type: "text", editable: true },
+      { key: "supplier", type: "text", editable: true },
+      { key: "inspectionDate", type: "date", editable: true },
+      { key: "completionDate", type: "date", editable: true }
+    ];
 
-    keys.forEach(k => {
-      if (!(k in currentDocData)) return;
-      const row = createFieldRow(k, currentDocData[k]);
-      modalGrid.appendChild(row);
+    fields.forEach(field => {
+      if (field.key in currentDocData) {
+        const row = createEditableField(field.key, currentDocData[field.key], field.type);
+        if (!field.editable) {
+          const input = row.querySelector('input');
+          if (input && field.type !== "image") input.readOnly = true;
+        }
+        modalGrid.appendChild(row);
+      }
     });
 
+    // Upload section for after image
     const uploadSection = document.createElement("div");
     uploadSection.style.cssText = "grid-column: 1 / -1; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;";
     
@@ -1229,7 +1285,8 @@ async function openModalForDoc(id) {
 
     const uploadBtn = document.createElement("button");
     uploadBtn.textContent = "Upload Image";
-    uploadBtn.style.cssText = "background: #36b9cc; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; margin-top: 12px; font-weight: 700;";
+    uploadBtn.className = "btn btn-save";
+    uploadBtn.style.marginTop = "12px";
     uploadBtn.addEventListener("click", async () => {
       const file = fileInput.files[0];
       
@@ -1244,13 +1301,11 @@ async function openModalForDoc(id) {
             afterImage: currentDocData.afterImage
           });
           alert("Image uploaded and saved successfully!");
+          fileInput.value = "";
         } catch (err) {
           console.error("Error saving to Firestore:", err);
           alert("Image uploaded but couldn't save to database: " + err.message);
         }
-        
-        uploadBtn.textContent = "Upload Image";
-        fileInput.value = "";
       }
       
       uploadBtn.disabled = false;
@@ -1281,24 +1336,23 @@ saveChangesBtn.addEventListener("click", async () => {
   if (!currentDocId) return;
   const inputs = modalGrid.querySelectorAll("[id^='field-']");
   const updates = {};
+  
   inputs.forEach(inp => {
     const key = inp.id.replace("field-","");
-    if (key === "afterImageFile") return;
+    if (key === "afterImageFile" || inp.readOnly) return;
+    
     if (inp.type === "number") {
       updates[key] = inp.value === "" ? null : Number(inp.value);
+    } else if (inp.type === "date") {
+      updates[key] = inp.value === "" ? null : inp.value;
     } else {
-      const orig = currentDocData ? currentDocData[key] : undefined;
-      if (orig !== undefined && typeof orig === "object" && !(orig && orig.toDate)) {
-        try { updates[key] = JSON.parse(inp.value); } catch(e) { updates[key] = inp.value; }
-      } else {
-        updates[key] = inp.value;
-      }
+      updates[key] = inp.value;
     }
   });
 
   try {
     await updateDoc(doc(db,"reports",currentDocId), updates);
-    alert("Changes saved.");
+    alert("Changes saved successfully!");
     closeEditModal();
   } catch (err) {
     console.error(err);
@@ -1325,11 +1379,15 @@ postToBulletinBtn.addEventListener("click", async () => {
       imageURL: currentDocData.imageUrl || currentDocData.incidentImage || "",
       afterImage: currentDocData.afterImage || "",
       description: currentDocData.description || "",
-      affectedAgeGroups: currentDocData.affectedAgeGroups || "",
-      peopleInvolved: currentDocData.peopleInvolved || "",
       latitude: currentDocData.latitude || "",
       longitude: currentDocData.longitude || "",
-      status: currentDocData.status || "Completed"
+      status: currentDocData.status || "Completed",
+      proposedBudget: currentDocData.proposedBudget || "",
+      allocatedBudget: currentDocData.allocatedBudget || "",
+      startDate: currentDocData.startDate || "",
+      endDate: currentDocData.endDate || "",
+      contractor: currentDocData.contractor || "",
+      supplier: currentDocData.supplier || ""
     };
 
     await setDoc(doc(db, "ad_bulletin", currentDocId), bulletinData);
@@ -1381,10 +1439,8 @@ onAuthStateChanged(auth, async (user) => {
       navbarAvatar.src = d.photoURL || d.profilePic;
     }
 
-    // Start listening to notifications
     listenToNotifications();
 
-    // Query completed reports
     const reportsQuery = query(collection(db,"reports"), orderBy("createdAt","desc"));
     onSnapshot(reportsQuery, async snapshot => {
       completedBody.innerHTML = "";
@@ -1403,7 +1459,6 @@ onAuthStateChanged(auth, async (user) => {
       document.querySelectorAll(".edit-link").forEach(a => a.addEventListener("click", openEditFromRow));
     });
 
-    // Watch for new users with pending status
     const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
     onSnapshot(qNewUsers, (snapshot) => {
       snapshot.docChanges().forEach(change => {
@@ -1411,7 +1466,6 @@ onAuthStateChanged(auth, async (user) => {
           if (!trackedUsers.has(change.doc.id)) {
             trackedUsers.add(change.doc.id);
             
-            // Skip notification on first load
             if (isFirstLoad) return;
             
             const u = change.doc.data();
@@ -1427,7 +1481,6 @@ onAuthStateChanged(auth, async (user) => {
       });
     });
 
-    // Watch for new reports
     const qReports = query(collection(db, "reports"));
     onSnapshot(qReports, (snapshot) => {
       snapshot.docChanges().forEach(change => {
@@ -1435,7 +1488,6 @@ onAuthStateChanged(auth, async (user) => {
           if (!trackedReports.has(change.doc.id)) {
             trackedReports.add(change.doc.id);
             
-            // Skip notification on first load
             if (isFirstLoad) return;
             
             const r = change.doc.data();
@@ -1449,7 +1501,6 @@ onAuthStateChanged(auth, async (user) => {
       });
     });
 
-    // After initial load, set flag to false
     setTimeout(() => {
       isFirstLoad = false;
     }, 2000);
@@ -1458,6 +1509,28 @@ onAuthStateChanged(auth, async (user) => {
     console.error(err);
     window.location.href = "logout.html";
   }
+});
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "logout.html";
+    return;
+  }
+
+  const userRef = doc(db, 'users', user.uid);
+  
+  onSnapshot(userRef, (docSnap) => {
+    if (!docSnap.exists()) return;
+    
+    const data = docSnap.data();
+    const photoURL = data.photoURL || "image.png";
+    
+    const navAvatar = document.getElementById("navbarAvatar");
+    if (navAvatar) navAvatar.src = photoURL;
+    
+    const navUsername = document.getElementById("navUsername");
+    if (navUsername) navUsername.textContent = data.name || "User";
+  });
 });
 
 </script>

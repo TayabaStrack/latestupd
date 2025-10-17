@@ -82,21 +82,45 @@
     }
     .navbar h1{font-size:1.4rem;color:#004aad}
     .profile{display:flex;align-items:center;gap:1rem}
-    .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
-    .badge{
-      background:red;
-      color:#fff;
-      font-size:.7rem;
-      border-radius:50%;
-      padding:3px 6px;
-      position:absolute;
-      top:-8px;
-      right:-8px;
-      display:none;
-    }
-    .badge.show{display:flex;align-items:center;justify-content:center}
+
+     /* Notification Bell */
+    .notification-bell-wrapper { position: relative; cursor: pointer; }
+    .fa-bell { font-size: 1.2rem; position: relative; cursor: pointer; transition: color 0.3s; }
+    .fa-bell:hover { color: #004aad; }
+    .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; min-width: 20px; text-align: center; }
+    .badge.show { display: flex; align-items: center; justify-content: center; }
+
+    /* Notification Menu */
+    .notification-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.15); width: 380px; max-height: 500px; overflow: hidden; z-index: 1000; }
+    .notification-menu.show { display: flex; flex-direction: column; }
+    .notification-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; }
+    .notification-header h3 { font-size: 1rem; color: #333; margin: 0; }
+    .notification-actions { display: flex; gap: 8px; }
+    .action-btn { background: none; border: none; color: #004aad; cursor: pointer; font-size: 0.85rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
+    .action-btn:hover { background: #e3f2fd; }
+    
+    /* Notification Filters */
+    .notification-filters { display: flex; gap: 4px; padding: 8px 12px; border-bottom: 1px solid #eee; background: #fff; }
+    .filter-btn { padding: 4px 12px; border: 1px solid #e0e0e0; background: #fff; color: #666; border-radius: 16px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { background: #f5f5f5; }
+    .filter-btn.active { background: #004aad; color: #fff; border-color: #004aad; }
+    
+    .notification-list { max-height: 360px; overflow-y: auto; }
+    .notification-item { padding: 0.9rem 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; transition: background 0.2s; cursor: pointer; position: relative; }
+    .notification-item:hover { background: #f9f9f9; }
+    .notification-item.unread { background: #e3f2fd; }
+    .notification-item.unread::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #004aad; }
+    .notification-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .notification-icon.user { background: #e3f2fd; color: #1976d2; }
+    .notification-icon.report { background: #fff3e0; color: #f57c00; }
+    .notification-content { flex: 1; }
+    .notification-content p { margin: 0; font-size: 0.85rem; }
+    .notification-content .time { color: #999; font-size: 0.75rem; margin-top: 0.3rem; }
+    .notification-empty { padding: 3rem; text-align: center; color: #999; }
+    .notification-empty i { font-size: 3rem; color: #ddd; margin-bottom: 1rem; }
+
     .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-    .avatar{width:35px;height:35px;border-radius:50%}
+    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
     .username{font-weight:500}
     .dropdown-menu{
       display:none;
@@ -112,104 +136,6 @@
     }
     .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
     .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
-
-    /* Notification Menu */
-    .notification-menu {
-      display: none;
-      position: absolute;
-      top: 120%;
-      right: 0;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      box-shadow: 0 4px 8px rgba(0,0,0,.15);
-      width: 320px;
-      max-height: 400px;
-      overflow-y: auto;
-      z-index: 1000;
-    }
-    .notification-menu.show {
-      display: block;
-    }
-    .notification-header {
-      padding: 1rem;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .notification-header h3 {
-      font-size: 1rem;
-      color: #333;
-      margin: 0;
-    }
-    .clear-btn {
-      background: none;
-      border: none;
-      color: #004aad;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-    .notification-list {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    .notification-item {
-      padding: 0.8rem 1rem;
-      border-bottom: 1px solid #f0f0f0;
-      display: flex;
-      gap: 0.8rem;
-      transition: background 0.2s;
-      cursor: pointer;
-    }
-    .notification-item:hover {
-      background: #f9f9f9;
-    }
-    .notification-item.read {
-      background: #f9f9f9;
-      opacity: 0.7;
-    }
-    .notification-icon {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .notification-icon.user {
-      background: #e3f2fd;
-      color: #1976d2;
-    }
-    .notification-icon.report {
-      background: #fff3e0;
-      color: #f57c00;
-    }
-    .notification-content {
-      flex: 1;
-    }
-    .notification-content p {
-      margin: 0;
-      font-size: 0.85rem;
-    }
-    .notification-content .time {
-      color: #999;
-      font-size: 0.75rem;
-      margin-top: 0.2rem;
-    }
-    .notification-empty {
-      padding: 2rem;
-      text-align: center;
-      color: #999;
-    }
-    .unread-indicator {
-      width: 8px;
-      height: 8px;
-      background: #004aad;
-      border-radius: 50%;
-    }
 
     .main {
       margin-left:250px;
@@ -400,13 +326,33 @@
         <div class="notification-menu" id="notificationMenu">
           <div class="notification-header">
             <h3>Notifications</h3>
-            <button class="clear-btn" id="clearNotificationsBtn">Mark all as read</button>
+            <div class="notification-actions">
+              <button class="action-btn" id="markAllReadBtn" title="Mark all as read">
+                <i class="fa fa-check-double"></i>
+              </button>
+              <button class="action-btn" id="clearAllBtn" title="Clear all">
+                <i class="fa fa-trash"></i>
+              </button>
+              <button class="action-btn" id="viewHistoryBtn" title="View history">
+                <i class="fa fa-history"></i>
+              </button>
+            </div>
+          </div>
+          <div class="notification-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="report">Reports</button>
+            <button class="filter-btn" data-filter="user">Users</button>
+            <button class="filter-btn" data-filter="24h">Last 24h</button>
           </div>
           <div class="notification-list" id="notificationList">
-            <div class="notification-empty">No new notifications</div>
+            <div class="notification-empty">
+              <i class="fa fa-bell-slash"></i>
+              <p>No new notifications</p>
+            </div>
           </div>
         </div>
       </div>
+
       
       <img src="image.png" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
       <div class="dropdown-menu" id="dropdownMenu">
@@ -1036,10 +982,7 @@
       document.getElementById("notificationMenu").classList.toggle("show");
     });
 
-    clearNotificationsBtn.addEventListener("click", () => {
-      window.markAllNotificationsAsRead();
-    });
-
+    // THIS IS THE KEY PART - Real-time profile picture sync
     onAuthStateChanged(auth, async (user) => {
       if(!user) {
         console.warn("No user logged in.");
@@ -1060,42 +1003,89 @@
       }
 
       const ref = doc(db, 'users', user.uid);
+      
+      // USE onSnapshot FOR REAL-TIME UPDATES - This is the magic!
       onSnapshot(ref, docSnap => {
         if(!docSnap.exists()) return;
         const data = docSnap.data();
         
+        // Update username
         document.getElementById("navUsername").textContent = data.name || "User";
         
+        // Update ALL profile pictures in real-time
         const photoURL = data.photoURL || "image.png";
-        document.getElementById("profilePic").src = photoURL;
-        document.getElementById("navAvatar").src = photoURL;
-        document.getElementById("previewImg").src = photoURL;
+        
+        // Navbar avatar (appears on ALL pages)
+        const navAvatar = document.getElementById("navAvatar");
+        if(navAvatar) navAvatar.src = photoURL;
+        
+        // Profile page main picture
+        const profilePic = document.getElementById("profilePic");
+        if(profilePic) profilePic.src = photoURL;
+        
+        // Edit modal preview
+        const previewImg = document.getElementById("previewImg");
+        if(previewImg) previewImg.src = photoURL;
 
-        document.getElementById("displayName").textContent = data.name || "—";
-        document.getElementById("displayRole").textContent = data.position || data.role || "Administrator";
+        // Update display info
+        const displayName = document.getElementById("displayName");
+        if(displayName) displayName.textContent = data.name || "—";
+        
+        const displayRole = document.getElementById("displayRole");
+        if(displayRole) displayRole.textContent = data.position || data.role || "Administrator";
 
-        document.getElementById("cardName").value = data.name || "";
-        document.getElementById("cardID").value = data.id || "";
-        document.getElementById("cardEmail").value = data.email || user.email;
-        document.getElementById("cardPhone").value = data.phone || "";
-        document.getElementById("cardAddress").value = data.address || "";
-        document.getElementById("cardGender").value = data.gender || "";
+        // Update form fields if they exist
+        const cardName = document.getElementById("cardName");
+        if(cardName) cardName.value = data.name || "";
+        
+        const cardID = document.getElementById("cardID");
+        if(cardID) cardID.value = data.id || "";
+        
+        const cardEmail = document.getElementById("cardEmail");
+        if(cardEmail) cardEmail.value = data.email || user.email;
+        
+        const cardPhone = document.getElementById("cardPhone");
+        if(cardPhone) cardPhone.value = data.phone || "";
+        
+        const cardAddress = document.getElementById("cardAddress");
+        if(cardAddress) cardAddress.value = data.address || "";
+        
+        const cardGender = document.getElementById("cardGender");
+        if(cardGender) cardGender.value = data.gender || "";
 
-        document.getElementById("editName").value = data.name || "";
-        document.getElementById("editID").value = data.id || "";
-        document.getElementById("editEmail").value = data.email || user.email;
-        document.getElementById("editPhone").value = data.phone || "";
-        document.getElementById("editAddress").value = data.address || "";
-        document.getElementById("editGender").value = data.gender || "";
+        // Update edit modal fields
+        const editName = document.getElementById("editName");
+        if(editName) editName.value = data.name || "";
+        
+        const editID = document.getElementById("editID");
+        if(editID) editID.value = data.id || "";
+        
+        const editEmail = document.getElementById("editEmail");
+        if(editEmail) editEmail.value = data.email || user.email;
+        
+        const editPhone = document.getElementById("editPhone");
+        if(editPhone) editPhone.value = data.phone || "";
+        
+        const editAddress = document.getElementById("editAddress");
+        if(editAddress) editAddress.value = data.address || "";
+        
+        const editGender = document.getElementById("editGender");
+        if(editGender) editGender.value = data.gender || "";
 
-        document.getElementById("accountType").textContent = data.position || data.role || "Administrator";
+        // Update account info
+        const accountType = document.getElementById("accountType");
+        if(accountType) accountType.textContent = data.position || data.role || "Administrator";
+        
         if(data.createdAt) {
           const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-          document.getElementById("registeredAt").textContent = date.toLocaleDateString();
+          const registeredAt = document.getElementById("registeredAt");
+          if(registeredAt) registeredAt.textContent = date.toLocaleDateString();
         }
+        
         if(data.lastLogin) {
           const date = data.lastLogin.toDate ? data.lastLogin.toDate() : new Date(data.lastLogin);
-          document.getElementById("lastLogin").textContent = date.toLocaleString();
+          const lastLogin = document.getElementById("lastLogin");
+          if(lastLogin) lastLogin.textContent = date.toLocaleString();
         }
       });
 

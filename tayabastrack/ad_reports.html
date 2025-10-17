@@ -1247,6 +1247,31 @@
         window.location.href="logout.html";
       }
     });
+
+    onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "logout.html";
+      return;
+    }
+
+    const userRef = doc(db, 'users', user.uid);
+    
+    // Listen for real-time updates
+    onSnapshot(userRef, (docSnap) => {
+      if (!docSnap.exists()) return;
+      
+      const data = docSnap.data();
+      const photoURL = data.photoURL || "image.png";
+      
+      // Update navbar avatar (this updates automatically when profile changes!)
+      const navAvatar = document.getElementById("navAvatar");
+      if (navAvatar) navAvatar.src = photoURL;
+      
+      // Update username
+      const navUsername = document.getElementById("navUsername");
+      if (navUsername) navUsername.textContent = data.name || "User";
+    });
+  });
   </script>
 </body>
 </html>
