@@ -5,7 +5,7 @@ admi
 - fix notifications(REPORTS, USERS, PROFILE)
 
 s-admin
-- notifs na lang
+- notifs na lang (all pages)
 
 not as urgent
 - profile picture changes  (done pero not tested yet)
