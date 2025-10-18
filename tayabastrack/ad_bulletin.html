@@ -558,9 +558,9 @@
                 <th>Image</th>
                 <th>After Image</th>
                 <th class="col-coords">Coordinates</th>
-                <th class="col-small">Status</th><th style="min-width:200px">Start Date & Deadline</th>
+                <th class="col-small">Status</th>
+                <th style="min-width:200px">Start Date & Deadline</th>
                 <th style="min-width:180px">Contractor & Supplier</th>
-                <th style="min-width:180px">Timestamp</th>
                 <th>Reporter Position</th>
                 <th>Inspection Date</th>
                 <th>Completion Date</th>
@@ -1010,114 +1010,83 @@ async function buildTableRow(docSnap) {
   const r = docSnap.data();
   const tr = document.createElement("tr");
 
-  function addCell(text, classes = "") {
+  function addCell(content, classes = "") {
     const td = document.createElement("td");
     if (classes) td.className = classes;
-    if (classes.includes("truncate")) {
-      const span = document.createElement("span");
-      span.className = "truncate";
-      span.textContent = (text === undefined || text === null) ? "" : String(text);
-      span.title = (text === undefined || text === null) ? "" : String(text);
-      td.appendChild(span);
+    
+    if (typeof content === 'string') {
+      if (classes.includes("truncate")) {
+        const span = document.createElement("span");
+        span.className = "truncate";
+        span.textContent = content;
+        span.title = content;
+        td.appendChild(span);
+      } else {
+        td.textContent = content;
+      }
     } else {
-      td.textContent = (text === undefined || text === null) ? "" : String(text);
+      td.appendChild(content);
     }
+    
     tr.appendChild(td);
+    return td;
   }
 
-  // Report ID
-  addCell(r.reportId || "", "col-id");
+  // 1. Report ID
+  addCell(r.reportId || "—", "col-id");
   
-  // Barangay
-  addCell(r.barangay || "");
+  // 2. Barangay
+  addCell(r.barangay || "—");
   
-  // Description
-  addCell(r.description || "", "truncate");
+  // 3. Description
+  addCell(r.description || "—", "truncate");
 
-  // Dimensions
+  // 4. Dimensions (W×H)
   const width = r.width || "";
   const height = r.height || "";
-  const dimensions = width && height ? `${width}×${height}` : (width || height || "");
+  const dimensions = width && height ? `${width}×${height}` : (width || height || "—");
   addCell(dimensions, "col-small");
 
-  // Image
-  const imgTd = document.createElement("td");
-  const imageData = r.incidentImage || r.imageUrl || r.image;
+  // 5. Image (Before)
+  const imgLink = document.createElement("a");
+  const imageData = r.incidentImage || r.imageUrl || r.image || "";
   
   if (imageData) {
-    const link = document.createElement("a");
-    link.href = "#";
-    link.textContent = "View";
-    link.style.cursor = "pointer";
-    link.addEventListener("click", (e) => {
+    imgLink.href = "#";
+    imgLink.textContent = "View";
+    imgLink.style.cssText = "color:#004aad;text-decoration:none;font-weight:700;cursor:pointer";
+    imgLink.addEventListener("click", (e) => {
       e.preventDefault();
-      const imgModal = document.createElement("div");
-      imgModal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
-      
-      const img = document.createElement("img");
-      img.src = imageData;
-      img.style.cssText = "max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
-      
-      const closeBtn = document.createElement("button");
-      closeBtn.textContent = "×";
-      closeBtn.style.cssText = "position:absolute;top:20px;right:20px;background:white;border:none;font-size:30px;cursor:pointer;width:40px;height:40px;border-radius:50%;";
-      
-      imgModal.appendChild(img);
-      imgModal.appendChild(closeBtn);
-      document.body.appendChild(imgModal);
-      
-      imgModal.addEventListener("click", () => imgModal.remove());
-      closeBtn.addEventListener("click", () => imgModal.remove());
+      showImageModal(imageData);
     });
-    imgTd.appendChild(link);
+    addCell(imgLink);
   } else {
-    imgTd.textContent = "No";
+    addCell("No");
   }
-  tr.appendChild(imgTd);
 
-  // After Image
-  const afterImgTd = document.createElement("td");
+  // 6. After Image
+  const afterImgLink = document.createElement("a");
   const afterImageData = r.afterImage || r.completionImage || "";
   
   if (afterImageData) {
-    const link = document.createElement("a");
-    link.href = "#";
-    link.textContent = "View";
-    link.style.cursor = "pointer";
-    link.addEventListener("click", (e) => {
+    afterImgLink.href = "#";
+    afterImgLink.textContent = "View";
+    afterImgLink.style.cssText = "color:#004aad;text-decoration:none;font-weight:700;cursor:pointer";
+    afterImgLink.addEventListener("click", (e) => {
       e.preventDefault();
-      const imgModal = document.createElement("div");
-      imgModal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
-      
-      const img = document.createElement("img");
-      img.src = afterImageData;
-      img.style.cssText = "max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
-      
-      const closeBtn = document.createElement("button");
-      closeBtn.textContent = "×";
-      closeBtn.style.cssText = "position:absolute;top:20px;right:20px;background:white;border:none;font-size:30px;cursor:pointer;width:40px;height:40px;border-radius:50%;";
-      
-      imgModal.appendChild(img);
-      imgModal.appendChild(closeBtn);
-      document.body.appendChild(imgModal);
-      
-      imgModal.addEventListener("click", () => imgModal.remove());
-      closeBtn.addEventListener("click", () => imgModal.remove());
+      showImageModal(afterImageData);
     });
-    afterImgTd.appendChild(link);
+    addCell(afterImgLink);
   } else {
-    afterImgTd.textContent = "No";
+    addCell("No");
   }
-  tr.appendChild(afterImgTd);
 
-  // Coordinates (Vertical)
-  const coordsTd = document.createElement("td");
-  coordsTd.className = "col-coords";
+  // 7. Coordinates (Vertical)
   const lat = r.latitude || "";
   const lng = r.longitude || "";
   
+  const coordsDiv = document.createElement("div");
   if (lat && lng) {
-    const coordsDiv = document.createElement("div");
     coordsDiv.className = "coords-vertical";
     
     const latDiv = document.createElement("div");
@@ -1128,72 +1097,72 @@ async function buildTableRow(docSnap) {
     
     coordsDiv.appendChild(latDiv);
     coordsDiv.appendChild(lngDiv);
-    coordsTd.appendChild(coordsDiv);
   } else {
-    coordsTd.textContent = lat || lng || "—";
+    coordsDiv.textContent = lat || lng || "—";
   }
-  tr.appendChild(coordsTd);
+  addCell(coordsDiv, "col-coords");
 
-  // Status
+  // 8. Status
   const statusSpan = document.createElement("span");
   const st = (r.status || "pending").toString().toLowerCase();
   statusSpan.className = `status ${st==='pending'?'pending':st==='ongoing'?'ongoing':'completed'}`;
   statusSpan.textContent = r.status || "Pending";
-  const statusTd = document.createElement("td");
-  statusTd.className = "col-small";
-  statusTd.appendChild(statusSpan);
-  tr.appendChild(statusTd);
+  addCell(statusSpan, "col-small");
 
-  // Proposed Budget
-  let proposedBudget = "Not Set";
-  if(r.proposedBudget) {
-    proposedBudget = `₱${parseFloat(r.proposedBudget).toLocaleString()}`;
-  } else if(r.budgetMin && r.budgetMax) {
-    proposedBudget = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
-  }
-  addCell(proposedBudget);
-
-  // Start Date & Deadline
-  const datesTd = document.createElement("td");
+  // 10. Start Date & Deadline (horizontal)
   const startDate = r.startDate ? formatDate(r.startDate) : "Not Set";
   const deadline = r.endDate || r.deadline ? formatDate(r.endDate || r.deadline) : "Not Set";
-  datesTd.textContent = `${startDate} - ${deadline}`;
-  tr.appendChild(datesTd);
+  addCell(`${startDate} - ${deadline}`);
 
-  // Allocated Budget
-  const allocatedBudget = r.allocatedBudget ? `₱${parseFloat(r.allocatedBudget).toLocaleString()}` : "Not Set";
-  addCell(allocatedBudget);
+  // 12. Contractor & Supplier
+  const contractor = r.contractor || "—";
+  const supplier = r.supplier || "—";
+  addCell(`${contractor} / ${supplier}`);
 
-  // Contractor & Supplier
-  const contractorSupplier = `${r.contractor || "—"} / ${r.supplier || "—"}`;
-  addCell(contractorSupplier);
-
-  // Timestamp
-  addCell(formatTimestamp(r.timestamp || r.createdAt));
-  
-  // Reporter Position (instead of name)
+  // 14. Reporter Position
   const reporterPosition = await getReporterPosition(r.userId);
   addCell(reporterPosition);
 
-  // Inspection Date
+  // 15. Inspection Date
   addCell(formatDate(r.inspectionDate));
   
-  // Completion Date
+  // 16. Completion Date
   addCell(formatDate(r.completionDate));
 
-  // Action
-  const edit = document.createElement("a");
-  edit.href = "#";
-  edit.textContent = "Edit";
-  edit.dataset.id = docSnap.id;
-  edit.className = "edit-link";
-
-  const actionTd = document.createElement("td");
-  actionTd.className = "action";
-  actionTd.appendChild(edit);
-  tr.appendChild(actionTd);
+  // 17. Action
+  const editLink = document.createElement("a");
+  editLink.href = "#";
+  editLink.textContent = "Edit";
+  editLink.dataset.id = docSnap.id;
+  editLink.className = "edit-link";
+  editLink.style.cssText = "color:#004aad;text-decoration:none;font-weight:700;cursor:pointer";
+  addCell(editLink, "action");
 
   return tr;
+}
+
+// Helper function to show image modal
+function showImageModal(imageUrl) {
+  const imgModal = document.createElement("div");
+  imgModal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer";
+  
+  const img = document.createElement("img");
+  img.src = imageUrl;
+  img.style.cssText = "max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
+  
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "×";
+  closeBtn.style.cssText = "position:absolute;top:20px;right:20px;background:white;border:none;font-size:30px;cursor:pointer;width:40px;height:40px;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,0.3)";
+  
+  imgModal.appendChild(img);
+  imgModal.appendChild(closeBtn);
+  document.body.appendChild(imgModal);
+  
+  imgModal.addEventListener("click", () => imgModal.remove());
+  closeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    imgModal.remove();
+  });
 }
 
 function attachSearch(inputElem, tableBody) {
@@ -1240,11 +1209,9 @@ async function openModalForDoc(id) {
       { key: "latitude", type: "text", editable: true },
       { key: "longitude", type: "text", editable: true },
       { key: "status", type: "text", editable: true },
-      { key: "proposedBudget", type: "number", editable: true },
       { key: "startDate", type: "date", editable: true },
       { key: "endDate", type: "date", editable: true },
       { key: "deadline", type: "date", editable: true },
-      { key: "allocatedBudget", type: "number", editable: true },
       { key: "contractor", type: "text", editable: true },
       { key: "supplier", type: "text", editable: true },
       { key: "inspectionDate", type: "date", editable: true },
@@ -1382,8 +1349,6 @@ postToBulletinBtn.addEventListener("click", async () => {
       latitude: currentDocData.latitude || "",
       longitude: currentDocData.longitude || "",
       status: currentDocData.status || "Completed",
-      proposedBudget: currentDocData.proposedBudget || "",
-      allocatedBudget: currentDocData.allocatedBudget || "",
       startDate: currentDocData.startDate || "",
       endDate: currentDocData.endDate || "",
       contractor: currentDocData.contractor || "",
@@ -1444,19 +1409,37 @@ onAuthStateChanged(auth, async (user) => {
     const reportsQuery = query(collection(db,"reports"), orderBy("createdAt","desc"));
     onSnapshot(reportsQuery, async snapshot => {
       completedBody.innerHTML = "";
+      
+      if (snapshot.empty) {
+        completedBody.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:2rem;color:#999">No completed reports found.</td></tr>';
+        return;
+      }
 
+      const completedReports = [];
+      
       for (const docSnap of snapshot.docs) {
         const r = docSnap.data();
         const status = (r.status || "").toString().toLowerCase().trim();
         
         if (status === "completed" || status === "repaired" || status === "posted") {
-          const row = await buildTableRow(docSnap);
-          completedBody.appendChild(row);
+          completedReports.push(docSnap);
         }
       }
+      
+      if (completedReports.length === 0) {
+        completedBody.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:2rem;color:#999">No completed reports found.</td></tr>';
+        return;
+      }
 
-      document.querySelectorAll(".edit-link").forEach(a => a.removeEventListener("click", openEditFromRow));
-      document.querySelectorAll(".edit-link").forEach(a => a.addEventListener("click", openEditFromRow));
+      for (const docSnap of completedReports) {
+        const row = await buildTableRow(docSnap);
+        completedBody.appendChild(row);
+      }
+
+      document.querySelectorAll(".edit-link").forEach(a => {
+        a.removeEventListener("click", openEditFromRow);
+        a.addEventListener("click", openEditFromRow);
+      });
     });
 
     const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));

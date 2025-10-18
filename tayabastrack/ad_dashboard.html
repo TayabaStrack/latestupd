@@ -163,8 +163,8 @@
                 </div>
                 
                 <div class="profile-dropdown" id="profileToggle">
-                    <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar" />
-                    <span class="username" id="navbarName">---</span>
+                    <img src="image.png" alt="Profile" class="avatar" id="navAvatar" />
+                    <span class="username" id="navUsername">---</span>
                     <div class="dropdown-menu" id="dropdownMenu">
                         <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
                     </div>
@@ -262,7 +262,7 @@
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJkfi59FibsnD-dxAdyYUohj36N_bOtfE&callback=initMiniMap"></script>
 
-  <!-- Notification System -->
+    <!-- Notification System -->
     <script>
         function initNotificationSound() {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -480,49 +480,6 @@
             }
         };
 
-        // Clear duplicate notifications
-        window.clearDuplicateNotifications = async function() {
-            if (!confirm('This will remove duplicate notifications. Continue?')) return;
-            
-            try {
-                const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-                
-                // Group notifications by message
-                const notifMap = new Map();
-                allNotifications.forEach(n => {
-                    const key = `${n.type}-${n.message}`;
-                    if (!notifMap.has(key)) {
-                        notifMap.set(key, []);
-                    }
-                    notifMap.get(key).push(n);
-                });
-                
-                // Delete duplicates (keep the most recent one)
-                let deleted = 0;
-                for (const [key, notifs] of notifMap) {
-                    if (notifs.length > 1) {
-                        // Sort by timestamp, keep newest
-                        notifs.sort((a, b) => {
-                            const dateA = a.timestamp?.toDate?.() || new Date(a.timestamp);
-                            const dateB = b.timestamp?.toDate?.() || new Date(b.timestamp);
-                            return dateB - dateA;
-                        });
-                        
-                        // Delete all except the first (newest)
-                        for (let i = 1; i < notifs.length; i++) {
-                            await deleteDoc(doc(window.db, "admin_notifications", notifs[i].id));
-                            deleted++;
-                        }
-                    }
-                }
-                
-                alert(`Removed ${deleted} duplicate notifications`);
-            } catch (err) {
-                console.error("Error clearing duplicates:", err);
-                alert("Error clearing duplicates: " + err.message);
-            }
-        };
-
         // Toggle notification menu
         document.getElementById('notificationBell').addEventListener("click", (e) => {
             e.stopPropagation();
@@ -586,10 +543,6 @@
         const storage = getStorage(app);
         window.db = db;
 
-        const navbarName = document.getElementById("navbarName");
-        const navbarAvatar = document.getElementById("navbarAvatar");
-        const logoutBtn = document.getElementById("logoutBtn");
-
         const totalReportsEl = document.getElementById("totalReports");
         const pendingEl = document.getElementById("pendingReports");
         const ongoingEl = document.getElementById("ongoingReports");
@@ -629,7 +582,7 @@
             });
         }
 
-        // Setup realtime tracking for new users and reports - FIXED VERSION
+        // Setup realtime tracking for new users and reports
         async function setupRealtimeTracking() {
             // Get existing IDs to avoid duplicates
             const existingNotifs = await getDocs(collection(db, "admin_notifications"));
@@ -656,7 +609,7 @@
                         if (isBarangayPosition(u.position)) {
                             await addDoc(collection(db, "admin_notifications"), {
                                 type: "user",
-                                userId: userId, // Store the user ID
+                                userId: userId,
                                 message: `New registration: ${u.firstName || ""} ${u.surname || ""}`,
                                 detail: u.email || "No email provided",
                                 timestamp: serverTimestamp(),
@@ -680,7 +633,7 @@
                         const r = change.doc.data();
                         await addDoc(collection(db, "admin_notifications"), {
                             type: "report",
-                            reportId: reportId, // Store the report ID
+                            reportId: reportId,
                             message: `New report in ${r.barangay || "a barangay"}`,
                             detail: r.description || r.type || "No description",
                             timestamp: serverTimestamp(),
@@ -691,28 +644,40 @@
             });
         }
 
+        // ===== REAL-TIME PROFILE PICTURE SYNC - THE KEY PART =====
         onAuthStateChanged(auth, async (user) => {
             if (!user) return (window.location.href = "logout.html");
 
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (!userDoc.exists() || userDoc.data().position !== "Admin") {
-                alert("Unauthorized access! Redirecting...");
-                return (window.location.href = "logout.html");
-            }
+            // USE onSnapshot FOR REAL-TIME UPDATES!
+            const userDocRef = doc(db, "users", user.uid);
+            onSnapshot(userDocRef, async (userDoc) => {
+                if (!userDoc.exists()) {
+                    alert("User data not found! Redirecting...");
+                    return (window.location.href = "logout.html");
+                }
 
-            const data = userDoc.data();
-            navbarName.textContent = data.name || data.firstName || "Admin";
-            
-            if (data.photoURL || data.profilePic) {
-                navbarAvatar.src = data.photoURL || data.profilePic;
-            }
-            
+                const data = userDoc.data();
+                
+                if (data.position !== "Admin") {
+                    alert("Unauthorized access! Redirecting...");
+                    return (window.location.href = "logout.html");
+                }
+
+                // Update username - updates automatically when changed!
+                document.getElementById("navUsername").textContent = data.name || data.firstName || "Admin";
+                
+                // Update profile picture - THIS UPDATES IN REAL-TIME!
+                const photoURL = data.photoURL || data.profilePic || "image.png";
+                document.getElementById("navAvatar").src = photoURL;
+            });
+
+            // Load dashboard data (only once)
             await loadDashboardData();
             setupNotificationListener();
             setupRealtimeTracking();
         });
 
-        logoutBtn.addEventListener("click", async () => {
+        document.getElementById("logoutBtn").addEventListener("click", async () => {
             if (confirm("Are you sure you want to logout?")) {
                 await signOut(auth);
                 window.location.href = "logout.html";

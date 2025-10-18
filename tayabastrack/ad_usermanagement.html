@@ -117,7 +117,7 @@
     .notification-empty i { font-size: 3rem; color: #ddd; margin-bottom: 1rem; }
 
     .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-    .avatar{width:35px;height:35px;border-radius:50%}
+    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
     .username{font-weight:500}
     .dropdown-menu{
       display:none;
@@ -490,8 +490,8 @@
       </div>
 
       <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
-        <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar">
-        <span class="username" id="navbarName">Loading...</span>
+        <img src="image.png" alt="Profile" class="avatar" id="navAvatar">
+        <span class="username" id="navUsername">Loading...</span>
 
         <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
           <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
@@ -934,7 +934,6 @@
     window.db = db;
 
     // DOM elements
-    const navbarName = document.getElementById("navbarName");
     const pendingTable = document.getElementById("pendingTable");
     const activeTable = document.getElementById("activeTable");
     const inactiveTable = document.getElementById("inactiveTable");
@@ -1200,7 +1199,7 @@
       if (!profileToggle.contains(e.target)) dropdownMenu.style.display = "none";
     });
 
-    // Auth check and data loading
+    // ===== REAL-TIME PROFILE PICTURE SYNC - THE KEY PART =====
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         console.warn("No user detected. Redirecting to login...");
@@ -1210,26 +1209,32 @@
 
       try {
         const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
 
-        if (!userDocSnap.exists()) {
-          console.error("User document not found.");
-          window.location.href = "logout.html";
-          return;
-        }
+        // USE onSnapshot FOR REAL-TIME UPDATES!
+        onSnapshot(userDocRef, async (userDocSnap) => {
+          if (!userDocSnap.exists()) {
+            console.error("User document not found.");
+            window.location.href = "logout.html";
+            return;
+          }
 
-        const data = userDocSnap.data();
+          const data = userDocSnap.data();
 
-        if (data.position !== "Admin") {
-          alert("Unauthorized access!");
-          window.location.href = "logout.html";
-          return;
-        }
+          if (data.position !== "Admin") {
+            alert("Unauthorized access!");
+            window.location.href = "logout.html";
+            return;
+          }
 
-        navbarName.textContent = data.name || data.firstName || "Admin";
-        document.getElementById("navbarAvatar").src = data.profilePic || data.photoURL || "image.png";
+          // Update username - updates automatically when changed!
+          document.getElementById("navUsername").textContent = data.name || data.firstName || "Admin";
+          
+          // Update profile picture - THIS UPDATES IN REAL-TIME!
+          const photoURL = data.profilePic || data.photoURL || "image.png";
+          document.getElementById("navAvatar").src = photoURL;
+        });
 
-        // Load pending users
+        // Load pending users (only set up once)
         const qPending = query(collection(db, "users"), where("status", "==", "pending"));
         onSnapshot(qPending, (snapshot) => {
           allPendingUsers = [];
@@ -1311,31 +1316,6 @@
         }
       }
     });
-
-    onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = "logout.html";
-      return;
-    }
-
-    const userRef = doc(db, 'users', user.uid);
-    
-    // Listen for real-time updates
-    onSnapshot(userRef, (docSnap) => {
-      if (!docSnap.exists()) return;
-      
-      const data = docSnap.data();
-      const photoURL = data.photoURL || "image.png";
-      
-      // Update navbar avatar (this updates automatically when profile changes!)
-      const navAvatar = document.getElementById("navAvatar");
-      if (navAvatar) navAvatar.src = photoURL;
-      
-      // Update username
-      const navUsername = document.getElementById("navUsername");
-      if (navUsername) navUsername.textContent = data.name || "User";
-    });
-  });
   </script>
 </body>
 </html>
