@@ -973,12 +973,13 @@
     function isBarangayPosition(position) {
       if (!position) return false;
       const pos = position.toLowerCase().trim();
-      return pos.includes("barangay captain") || 
-             pos.includes("brgy captain") || 
-             pos.includes("brgy. captain") ||
-             pos.includes("barangay official") || 
-             pos.includes("brgy official") || 
-             pos.includes("brgy. official");
+      return pos.includes("barangay") ||
+             pos.includes("Barangay") || 
+             pos.includes("brgy") || 
+             pos.includes("brgy.") ||
+             pos.includes("Brgy") ||
+             pos.includes("Brgy.") ||
+             pos.includes("SK Kagawad");
     }
 
     // Listen to Firestore notifications

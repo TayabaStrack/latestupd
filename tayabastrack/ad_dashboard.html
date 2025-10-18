@@ -222,391 +222,356 @@
     </div>
 
     <!-- Google Maps -->
-    <script>
-        let miniMap;
-        window.reportLocations = [];
+   <!-- Notification System -->
+<script>
+    function initNotificationSound() {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        return function playChime() {
+            try {
+                const now = audioContext.currentTime;
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                osc.frequency.setValueAtTime(1046.50, now);
+                osc.frequency.setValueAtTime(783.99, now + 0.1);
+                
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                
+                osc.start(now);
+                osc.stop(now + 0.6);
+            } catch (error) {
+                console.log("Chime sound error:", error);
+            }
+        };
+    }
 
-        function initMiniMap() {
-            const tayabasRizalPark = { lat: 14.0167747, lng: 121.5857253 };
-            miniMap = new google.maps.Map(document.getElementById("miniMap"), {
-                zoom: 13,
-                center: tayabasRizalPark,
-                mapTypeId: 'roadmap'
-            });
+    let allNotifications = [];
+    let currentFilter = "all";
+    let previousUnreadCount = 0;
+    const playChime = initNotificationSound();
 
-            new google.maps.Marker({
-                position: tayabasRizalPark,
-                map: miniMap,
-                title: "Tayabas City - Rizal Park",
-                icon: { url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" }
-            });
+    // Format time ago
+    function getTimeAgo(timestamp) {
+        if (!timestamp) return "";
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        const seconds = Math.floor((new Date() - date) / 1000);
+        
+        if (seconds < 60) return "Just now";
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+        if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+        return date.toLocaleDateString();
+    }
 
-            addReportMarkers();
-        }
+    // Filter notifications
+    function filterNotifications(notifications) {
+        const now = new Date();
+        const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+        
+        return notifications.filter(n => {
+            if (currentFilter === "all") return true;
+            if (currentFilter === "report") return n.type === "report";
+            if (currentFilter === "user") return n.type === "user";
+            if (currentFilter === "24h") {
+                const nDate = n.timestamp && n.timestamp.toDate ? n.timestamp.toDate() : new Date(n.timestamp);
+                return nDate >= oneDayAgo;
+            }
+            return true;
+        });
+    }
 
-        function addReportMarkers() {
-            if (!miniMap || !window.reportLocations) return;
-            window.reportLocations.forEach((report) => {
-                let markerColor = "red";
-                if (report.status === "resolved" || report.status === "completed") markerColor = "green";
-                else if (report.status === "ongoing" || report.status === "in-progress") markerColor = "yellow";
-
-                new google.maps.Marker({
-                    position: { lat: report.lat, lng: report.lng },
-                    map: miniMap,
-                    title: report.type,
-                    icon: { url: `http://maps.google.com/mapfiles/ms/icons/${markerColor}-dot.png` }
-                });
-            });
-        }
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJkfi59FibsnD-dxAdyYUohj36N_bOtfE&callback=initMiniMap"></script>
-
-    <!-- Notification System -->
-    <script>
-        function initNotificationSound() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            return function playChime() {
-                try {
-                    const now = audioContext.currentTime;
-                    const osc = audioContext.createOscillator();
-                    const gain = audioContext.createGain();
-                    
-                    osc.connect(gain);
-                    gain.connect(audioContext.destination);
-                    
-                    osc.frequency.setValueAtTime(1046.50, now);
-                    osc.frequency.setValueAtTime(783.99, now + 0.1);
-                    
-                    gain.gain.setValueAtTime(0.3, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-                    
-                    osc.start(now);
-                    osc.stop(now + 0.6);
-                } catch (error) {
-                    console.log("Chime sound error:", error);
-                }
-            };
-        }
-
-        let allNotifications = [];
-        let currentFilter = "all";
-        let previousUnreadCount = 0;
-        const playChime = initNotificationSound();
-
-        // Format time ago
-        function getTimeAgo(timestamp) {
-            if (!timestamp) return "";
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            const seconds = Math.floor((new Date() - date) / 1000);
+    // Update notification UI
+    function updateNotificationUI() {
+        const badge = document.getElementById('notificationBadge');
+        const list = document.getElementById('notificationList');
+        
+        const unreadCount = allNotifications.filter(n => !n.read).length;
+        
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount > 99 ? "99+" : unreadCount;
+            badge.classList.add("show");
             
-            if (seconds < 60) return "Just now";
-            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-            if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-            return date.toLocaleDateString();
+            // Play sound only if unread count increased AND we're not on initial load
+            if (unreadCount > previousUnreadCount && previousUnreadCount > 0) {
+                playChime();
+            }
+        } else {
+            badge.classList.remove("show");
         }
+        
+        previousUnreadCount = unreadCount;
 
         // Filter notifications
-        function filterNotifications(notifications) {
-            const now = new Date();
-            const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
-            
-            return notifications.filter(n => {
-                if (currentFilter === "all") return true;
-                if (currentFilter === "report") return n.type === "report";
-                if (currentFilter === "user") return n.type === "user";
-                if (currentFilter === "24h") {
-                    const nDate = n.timestamp && n.timestamp.toDate ? n.timestamp.toDate() : new Date(n.timestamp);
-                    return nDate >= oneDayAgo;
-                }
-                return true;
+        const filtered = filterNotifications(allNotifications).slice(0, 5);
+
+        if (filtered.length === 0) {
+            list.innerHTML = `
+                <div class="notification-empty">
+                    <i class="fa fa-bell-slash"></i>
+                    <p>No notifications</p>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = filtered.map(n => `
+            <div class="notification-item ${!n.read ? 'unread' : ''}" data-id="${n.id}" onclick="window.markNotificationAsRead('${n.id}')">
+                <div class="notification-icon ${n.type}">
+                    ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+                </div>
+                <div class="notification-content">
+                    <p><strong>${n.message}</strong></p>
+                    <p>${n.detail}</p>
+                    <span class="time">${getTimeAgo(n.timestamp)}</span>
+                </div>
+            </div>
+        `).join("");
+
+        if (allNotifications.length > 5) {
+            list.innerHTML += `
+                <div style="padding: 0.8rem 1rem; border-top: 1px solid #eee; text-align: center;">
+                    <button onclick="window.openNotificationModal()" style="background: none; border: none; color: #004aad; cursor: pointer; font-weight: 500; font-size: 0.85rem;">
+                        View all (${allNotifications.length}) →
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // Open notification modal
+    window.openNotificationModal = function() {
+        document.getElementById('notificationModal').style.display = 'flex';
+        window.filterModalNotifications('all');
+    };
+
+    // Close notification modal
+    window.closeNotificationModal = function() {
+        document.getElementById('notificationModal').style.display = 'none';
+    };
+
+    // Filter modal notifications
+    window.filterModalNotifications = function(filter) {
+        let notifications = [];
+        const now = new Date();
+        const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+        
+        if (filter === 'all') {
+            notifications = allNotifications;
+        } else if (filter === 'report') {
+            notifications = allNotifications.filter(n => n.type === 'report');
+        } else if (filter === 'user') {
+            notifications = allNotifications.filter(n => n.type === 'user');
+        } else if (filter === '24h') {
+            notifications = allNotifications.filter(n => {
+                const nDate = n.timestamp && n.timestamp.toDate ? n.timestamp.toDate() : new Date(n.timestamp);
+                return nDate >= oneDayAgo;
             });
         }
 
-        // Update notification UI
-        function updateNotificationUI() {
-            const badge = document.getElementById('notificationBadge');
-            const list = document.getElementById('notificationList');
-            
-            const unreadCount = allNotifications.filter(n => !n.read).length;
-            
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount > 99 ? "99+" : unreadCount;
-                badge.classList.add("show");
-                
-                // Play sound only if unread count increased
-                if (unreadCount > previousUnreadCount && previousUnreadCount >= 0) {
-                    playChime();
-                }
-            } else {
-                badge.classList.remove("show");
-            }
-            
-            previousUnreadCount = unreadCount;
-
-            // Filter notifications
-            const filtered = filterNotifications(allNotifications).slice(0, 5);
-
-            if (filtered.length === 0) {
-                list.innerHTML = `
-                    <div class="notification-empty">
-                        <i class="fa fa-bell-slash"></i>
-                        <p>No notifications</p>
+        const list = document.getElementById('notificationModalList');
+        if (notifications.length === 0) {
+            list.innerHTML = '<div style="padding: 2rem; text-align: center; color: #999;">No notifications</div>';
+        } else {
+            list.innerHTML = notifications.map(n => `
+                <div style="padding: 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; ${n.read ? 'background: #f9f9f9;' : 'background: #f0f6ff;'}">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; ${n.type === 'user' ? 'background: #e3f2fd; color: #1976d2;' : 'background: #fff3e0; color: #f57c00;'}">
+                        ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
                     </div>
-                `;
-                return;
-            }
-
-            list.innerHTML = filtered.map(n => `
-                <div class="notification-item ${!n.read ? 'unread' : ''}" data-id="${n.id}" onclick="window.markNotificationAsRead('${n.id}')">
-                    <div class="notification-icon ${n.type}">
-                        ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+                    <div style="flex: 1;">
+                        <p style="margin: 0 0 0.3rem 0; font-weight: 500; color: #333;"><strong>${n.message}</strong></p>
+                        <p style="margin: 0 0 0.3rem 0; font-size: 0.9rem; color: #666;">${n.detail}</p>
+                        <span style="font-size: 0.75rem; color: #999;">${n.timestamp && n.timestamp.toDate ? n.timestamp.toDate().toLocaleString() : new Date(n.timestamp).toLocaleString()}</span>
                     </div>
-                    <div class="notification-content">
-                        <p><strong>${n.message}</strong></p>
-                        <p>${n.detail}</p>
-                        <span class="time">${getTimeAgo(n.timestamp)}</span>
+                    <div style="display: flex; align-items: center;">
+                        <span style="font-size: 0.75rem; color: #999; padding: 0.2rem 0.5rem; background: #eee; border-radius: 4px;">${n.read ? 'Read' : 'New'}</span>
                     </div>
                 </div>
-            `).join("");
-
-            if (allNotifications.length > 5) {
-                list.innerHTML += `
-                    <div style="padding: 0.8rem 1rem; border-top: 1px solid #eee; text-align: center;">
-                        <button onclick="window.openNotificationModal()" style="background: none; border: none; color: #004aad; cursor: pointer; font-weight: 500; font-size: 0.85rem;">
-                            View all (${allNotifications.length}) →
-                        </button>
-                    </div>
-                `;
-            }
+            `).join('');
         }
 
-        // Open notification modal
-        window.openNotificationModal = function() {
-            document.getElementById('notificationModal').style.display = 'flex';
-            window.filterModalNotifications('all');
-        };
+        document.querySelectorAll('.modal-filter-btn').forEach(btn => {
+            const btnText = btn.textContent.toLowerCase();
+            btn.classList.toggle('active', btnText.includes(filter.toLowerCase()) || (filter === 'all' && btnText === 'all'));
+        });
+    };
 
-        // Close notification modal
-        window.closeNotificationModal = function() {
-            document.getElementById('notificationModal').style.display = 'none';
-        };
-
-        // Filter modal notifications
-        window.filterModalNotifications = function(filter) {
-            let notifications = [];
-            const now = new Date();
-            const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
-            
-            if (filter === 'all') {
-                notifications = allNotifications;
-            } else if (filter === 'report') {
-                notifications = allNotifications.filter(n => n.type === 'report');
-            } else if (filter === 'user') {
-                notifications = allNotifications.filter(n => n.type === 'user');
-            } else if (filter === '24h') {
-                notifications = allNotifications.filter(n => {
-                    const nDate = n.timestamp && n.timestamp.toDate ? n.timestamp.toDate() : new Date(n.timestamp);
-                    return nDate >= oneDayAgo;
-                });
-            }
-
-            const list = document.getElementById('notificationModalList');
-            if (notifications.length === 0) {
-                list.innerHTML = '<div style="padding: 2rem; text-align: center; color: #999;">No notifications</div>';
-            } else {
-                list.innerHTML = notifications.map(n => `
-                    <div style="padding: 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; ${n.read ? 'background: #f9f9f9;' : 'background: #f0f6ff;'}">
-                        <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; ${n.type === 'user' ? 'background: #e3f2fd; color: #1976d2;' : 'background: #fff3e0; color: #f57c00;'}">
-                            ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
-                        </div>
-                        <div style="flex: 1;">
-                            <p style="margin: 0 0 0.3rem 0; font-weight: 500; color: #333;"><strong>${n.message}</strong></p>
-                            <p style="margin: 0 0 0.3rem 0; font-size: 0.9rem; color: #666;">${n.detail}</p>
-                            <span style="font-size: 0.75rem; color: #999;">${n.timestamp && n.timestamp.toDate ? n.timestamp.toDate().toLocaleString() : new Date(n.timestamp).toLocaleString()}</span>
-                        </div>
-                        <div style="display: flex; align-items: center;">
-                            <span style="font-size: 0.75rem; color: #999; padding: 0.2rem 0.5rem; background: #eee; border-radius: 4px;">${n.read ? 'Read' : 'New'}</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            document.querySelectorAll('.modal-filter-btn').forEach(btn => {
-                const btnText = btn.textContent.toLowerCase();
-                btn.classList.toggle('active', btnText.includes(filter.toLowerCase()) || (filter === 'all' && btnText === 'all'));
+    // Mark notification as read
+    window.markNotificationAsRead = async function(notifId) {
+        try {
+            const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+            await updateDoc(doc(window.db, "admin_notifications", notifId), {
+                read: true
             });
-        };
+        } catch (err) {
+            console.error("Error marking notification as read:", err);
+        }
+    };
 
-        // Mark notification as read
-        window.markNotificationAsRead = async function(notifId) {
-            try {
-                const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-                await updateDoc(doc(window.db, "admin_notifications", notifId), {
+    // Mark all as read
+    window.markAllNotificationsAsRead = async function() {
+        try {
+            const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+            const unread = allNotifications.filter(n => !n.read);
+            for (const notif of unread) {
+                await updateDoc(doc(window.db, "admin_notifications", notif.id), {
                     read: true
                 });
-            } catch (err) {
-                console.error("Error marking notification as read:", err);
             }
-        };
+        } catch (err) {
+            console.error("Error marking all as read:", err);
+        }
+    };
 
-        // Mark all as read
-        window.markAllNotificationsAsRead = async function() {
+    // Clear all notifications
+    window.clearAllNotifications = async function() {
+        if (confirm('Are you sure you want to clear all notifications?')) {
             try {
-                const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-                const unread = allNotifications.filter(n => !n.read);
-                for (const notif of unread) {
-                    await updateDoc(doc(window.db, "admin_notifications", notif.id), {
-                        read: true
-                    });
+                const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                for (const notif of allNotifications) {
+                    await deleteDoc(doc(window.db, "admin_notifications", notif.id));
                 }
             } catch (err) {
-                console.error("Error marking all as read:", err);
-            }
-        };
-
-        // Clear all notifications
-        window.clearAllNotifications = async function() {
-            if (confirm('Are you sure you want to clear all notifications?')) {
-                try {
-                    const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-                    for (const notif of allNotifications) {
-                        await deleteDoc(doc(window.db, "admin_notifications", notif.id));
-                    }
-                } catch (err) {
-                    console.error("Error clearing notifications:", err);
-                }
-            }
-        };
-
-        // Toggle notification menu
-        document.getElementById('notificationBell').addEventListener("click", (e) => {
-            e.stopPropagation();
-            document.getElementById("notificationMenu").classList.toggle("show");
-            document.getElementById("dropdownMenu").style.display = "none";
-        });
-
-        // Filter buttons in dropdown
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentFilter = btn.dataset.filter;
-                updateNotificationUI();
-            });
-        });
-
-        // Action buttons
-        document.getElementById('markAllReadBtn').addEventListener("click", (e) => {
-            e.stopPropagation();
-            window.markAllNotificationsAsRead();
-        });
-
-        document.getElementById('clearAllBtn').addEventListener("click", (e) => {
-            e.stopPropagation();
-            window.clearAllNotifications();
-        });
-
-        document.getElementById('viewHistoryBtn').addEventListener("click", (e) => {
-            e.stopPropagation();
-            window.openNotificationModal();
-        });
-
-        // Hide notification menu on outside click
-        document.addEventListener("click", (e) => {
-            if (!e.target.closest('.notification-bell-wrapper') && !e.target.closest('.notification-menu')) {
-                document.getElementById("notificationMenu").classList.remove("show");
-            }
-        });
-    </script>
-
-    <!-- Firebase + Chart -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, getDocs, query, where, onSnapshot, addDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
-            authDomain: "tayabastrack-23b95.firebaseapp.com",
-            projectId: "tayabastrack-23b95",
-            storageBucket: "tayabastrack-23b95.firebasestorage.app",
-            messagingSenderId: "674055915366",
-            appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-        window.db = db;
-
-        const totalReportsEl = document.getElementById("totalReports");
-        const pendingEl = document.getElementById("pendingReports");
-        const ongoingEl = document.getElementById("ongoingReports");
-        const completedEl = document.getElementById("completedReports");
-
-        async function getImageUrl(imagePath) {
-            try {
-                if (!imagePath) return null;
-                if (imagePath.startsWith('http')) return imagePath;
-                
-                const url = await getDownloadURL(ref(storage, imagePath));
-                return url;
-            } catch (error) {
-                console.error("Error getting image URL:", error);
-                return null;
+                console.error("Error clearing notifications:", err);
             }
         }
+    };
 
-        function isBarangayPosition(position) {
-            if (!position) return false;
-            const pos = position.toLowerCase().trim();
-            return pos.includes("barangay captain") || pos.includes("brgy captain") || 
-                   pos.includes("brgy. captain") || pos.includes("barangay official") || 
-                   pos.includes("brgy official") || pos.includes("brgy. official");
+    // Toggle notification menu
+    document.getElementById('notificationBell').addEventListener("click", (e) => {
+        e.stopPropagation();
+        document.getElementById("notificationMenu").classList.toggle("show");
+        document.getElementById("dropdownMenu").style.display = "none";
+    });
+
+    // Filter buttons in dropdown
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            updateNotificationUI();
+        });
+    });
+
+    // Action buttons
+    document.getElementById('markAllReadBtn').addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.markAllNotificationsAsRead();
+    });
+
+    document.getElementById('clearAllBtn').addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.clearAllNotifications();
+    });
+
+    document.getElementById('viewHistoryBtn').addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.openNotificationModal();
+    });
+
+    // Hide notification menu on outside click
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest('.notification-bell-wrapper') && !e.target.closest('.notification-menu')) {
+            document.getElementById("notificationMenu").classList.remove("show");
         }
+    });
+</script>
 
-        // Listen to Firestore notifications
-        function setupNotificationListener() {
-            const q = query(collection(db, "admin_notifications"), orderBy("timestamp", "desc"));
-            onSnapshot(q, (snapshot) => {
-                allNotifications = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                
-                updateNotificationUI();
-            });
-        }
+<!-- Firebase + Chart -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, getDocs, query, where, onSnapshot, addDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-        // Setup realtime tracking for new users and reports
-        async function setupRealtimeTracking() {
-            // Get existing IDs to avoid duplicates
-            const existingNotifs = await getDocs(collection(db, "admin_notifications"));
-            const notifiedUserIds = new Set();
-            const notifiedReportIds = new Set();
+    const firebaseConfig = {
+        apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+        authDomain: "tayabastrack-23b95.firebaseapp.com",
+        projectId: "tayabastrack-23b95",
+        storageBucket: "tayabastrack-23b95.firebasestorage.app",
+        messagingSenderId: "674055915366",
+        appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    window.db = db;
+
+    const totalReportsEl = document.getElementById("totalReports");
+    const pendingEl = document.getElementById("pendingReports");
+    const ongoingEl = document.getElementById("ongoingReports");
+    const completedEl = document.getElementById("completedReports");
+
+    async function getImageUrl(imagePath) {
+        try {
+            if (!imagePath) return null;
+            if (imagePath.startsWith('http')) return imagePath;
             
-            existingNotifs.forEach(doc => {
-                const data = doc.data();
-                if (data.userId) notifiedUserIds.add(data.userId);
-                if (data.reportId) notifiedReportIds.add(data.reportId);
-            });
+            const url = await getDownloadURL(ref(storage, imagePath));
+            return url;
+        } catch (error) {
+            console.error("Error getting image URL:", error);
+            return null;
+        }
+    }
 
-            // Track new pending users
-            const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
-            onSnapshot(qNewUsers, async (snapshot) => {
-                for (const change of snapshot.docChanges()) {
+    function isBarangayPosition(position) {
+        if (!position) return false;
+        const pos = position.toLowerCase().trim();
+        return pos.includes("barangay captain") || pos.includes("brgy captain") || 
+               pos.includes("brgy. captain") || pos.includes("barangay official") || 
+               pos.includes("brgy official") || pos.includes("brgy. official");
+    }
+
+    // Listen to Firestore notifications
+    function setupNotificationListener() {
+        const q = query(collection(db, "admin_notifications"), orderBy("timestamp", "desc"));
+        let isFirstLoad = true;
+        
+        onSnapshot(q, (snapshot) => {
+            allNotifications = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            // Set initial count without playing sound
+            if (isFirstLoad) {
+                previousUnreadCount = allNotifications.filter(n => !n.read).length;
+                isFirstLoad = false;
+            }
+            
+            updateNotificationUI();
+        });
+    }
+
+    // Setup realtime tracking for new users and reports
+    async function setupRealtimeTracking() {
+        let isInitialLoad = true;
+        
+        // Track new pending users - ONLY notify about NEW additions after initial load
+        const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
+        onSnapshot(qNewUsers, async (snapshot) => {
+            // Skip initial load to avoid notifying about existing pending users
+            if (isInitialLoad) {
+                isInitialLoad = false;
+                return;
+            }
+            
+            for (const change of snapshot.docChanges()) {
+                // Only process newly added documents
+                if (change.type === "added") {
                     const userId = change.doc.id;
+                    const u = change.doc.data();
                     
-                    // Only notify if we haven't notified about this user before
-                    if (change.type === "added" && !notifiedUserIds.has(userId)) {
-                        notifiedUserIds.add(userId);
-                        
-                        const u = change.doc.data();
-                        if (isBarangayPosition(u.position)) {
+                    // Check if this is a barangay official
+                    if (isBarangayPosition(u.position)) {
+                        try {
                             await addDoc(collection(db, "admin_notifications"), {
                                 type: "user",
                                 userId: userId,
@@ -615,22 +580,32 @@
                                 timestamp: serverTimestamp(),
                                 read: false
                             });
+                            console.log("✓ New user notification created");
+                        } catch (error) {
+                            console.error("Error creating user notification:", error);
                         }
                     }
                 }
-            });
+            }
+        });
 
-            // Track new reports
-            const qReports = query(collection(db, "reports"));
-            onSnapshot(qReports, async (snapshot) => {
-                for (const change of snapshot.docChanges()) {
+        // Track new reports - ONLY notify about NEW reports after initial load
+        let isReportInitialLoad = true;
+        const qReports = query(collection(db, "reports"));
+        onSnapshot(qReports, async (snapshot) => {
+            // Skip initial load to avoid notifying about existing reports
+            if (isReportInitialLoad) {
+                isReportInitialLoad = false;
+                return;
+            }
+            
+            for (const change of snapshot.docChanges()) {
+                // Only process newly added documents
+                if (change.type === "added") {
                     const reportId = change.doc.id;
+                    const r = change.doc.data();
                     
-                    // Only notify if we haven't notified about this report before
-                    if (change.type === "added" && !notifiedReportIds.has(reportId)) {
-                        notifiedReportIds.add(reportId);
-                        
-                        const r = change.doc.data();
+                    try {
                         await addDoc(collection(db, "admin_notifications"), {
                             type: "report",
                             reportId: reportId,
@@ -639,144 +614,148 @@
                             timestamp: serverTimestamp(),
                             read: false
                         });
+                        console.log("✓ New report notification created");
+                    } catch (error) {
+                        console.error("Error creating report notification:", error);
                     }
                 }
-            });
-        }
-
-        // ===== REAL-TIME PROFILE PICTURE SYNC - THE KEY PART =====
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) return (window.location.href = "logout.html");
-
-            // USE onSnapshot FOR REAL-TIME UPDATES!
-            const userDocRef = doc(db, "users", user.uid);
-            onSnapshot(userDocRef, async (userDoc) => {
-                if (!userDoc.exists()) {
-                    alert("User data not found! Redirecting...");
-                    return (window.location.href = "logout.html");
-                }
-
-                const data = userDoc.data();
-                
-                if (data.position !== "Admin") {
-                    alert("Unauthorized access! Redirecting...");
-                    return (window.location.href = "logout.html");
-                }
-
-                // Update username - updates automatically when changed!
-                document.getElementById("navUsername").textContent = data.name || data.firstName || "Admin";
-                
-                // Update profile picture - THIS UPDATES IN REAL-TIME!
-                const photoURL = data.photoURL || data.profilePic || "image.png";
-                document.getElementById("navAvatar").src = photoURL;
-            });
-
-            // Load dashboard data (only once)
-            await loadDashboardData();
-            setupNotificationListener();
-            setupRealtimeTracking();
-        });
-
-        document.getElementById("logoutBtn").addEventListener("click", async () => {
-            if (confirm("Are you sure you want to logout?")) {
-                await signOut(auth);
-                window.location.href = "logout.html";
             }
         });
+    }
 
-        async function loadDashboardData() {
-            const snapshot = await getDocs(collection(db, "reports"));
-            let total = 0, pending = 0, ongoing = 0, completed = 0;
-            window.reportLocations = [];
+    // Real-time profile picture sync
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) return (window.location.href = "logout.html");
 
-            snapshot.forEach(docSnap => {
-                const report = docSnap.data();
-                total++;
-                const status = report.status?.toLowerCase();
-                if (status === "pending") pending++;
-                else if (status === "ongoing" || status === "in-progress") ongoing++;
-                else if (status === "resolved" || status === "completed" || status === "repaired" || status === "posted") completed++;
+        // USE onSnapshot FOR REAL-TIME UPDATES!
+        const userDocRef = doc(db, "users", user.uid);
+        onSnapshot(userDocRef, async (userDoc) => {
+            if (!userDoc.exists()) {
+                alert("User data not found! Redirecting...");
+                return (window.location.href = "logout.html");
+            }
 
-                const lat = report.latitude || report.lat || report.location?.latitude;
-                const lng = report.longitude || report.lng || report.location?.longitude;
-
-                if (lat && lng) {
-                    window.reportLocations.push({
-                        lat: parseFloat(lat),
-                        lng: parseFloat(lng),
-                        type: report.reportType || report.type || "Unknown",
-                        status: status || "pending"
-                    });
-                }
-            });
-
-            totalReportsEl.textContent = total;
-            pendingEl.textContent = pending;
-            ongoingEl.textContent = ongoing;
-            completedEl.textContent = completed;
-            updateChart(completed, ongoing, pending);
-            if (window.miniMap) addReportMarkers();
-            loadReportImages();
-        }
-
-        let chart;
-        function updateChart(completed, ongoing, pending) {
-            const ctx = document.getElementById("dashboardChart").getContext("2d");
-            if (chart) chart.destroy();
-            chart = new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: ["Completed", "Ongoing", "Pending"],
-                    datasets: [{
-                        label: "Reports",
-                        data: [completed, ongoing, pending],
-                        backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e"]
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } } }
-            });
-        }
-
-        async function loadReportImages() {
-            const gallery = document.getElementById("reportImages");
-            gallery.innerHTML = "";
-            const snapshot = await getDocs(collection(db, "reports"));
-            let count = 0;
+            const data = userDoc.data();
             
-            for (const docSnap of snapshot.docs) {
-                if (count >= 6) break;
-                
-                const report = docSnap.data();
-                const imagePath = report.incidentImage || report.imageUrl || report.image;
-                
-                if (imagePath) {
-                    const imageUrl = await getImageUrl(imagePath);
-                    if (imageUrl) {
-                        const img = document.createElement("img");
-                        img.src = imageUrl;
-                        img.onerror = function() { this.style.display = "none"; };
-                        gallery.appendChild(img);
-                        count++;
-                    }
+            if (data.position !== "Admin") {
+                alert("Unauthorized access! Redirecting...");
+                return (window.location.href = "logout.html");
+            }
+
+            // Update username - updates automatically when changed!
+            document.getElementById("navUsername").textContent = data.name || data.firstName || "Admin";
+            
+            // Update profile picture - THIS UPDATES IN REAL-TIME!
+            const photoURL = data.photoURL || data.profilePic || "image.png";
+            document.getElementById("navAvatar").src = photoURL;
+        });
+
+        // Load dashboard data (only once)
+        await loadDashboardData();
+        setupNotificationListener();
+        setupRealtimeTracking();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+        if (confirm("Are you sure you want to logout?")) {
+            await signOut(auth);
+            window.location.href = "logout.html";
+        }
+    });
+
+    async function loadDashboardData() {
+        const snapshot = await getDocs(collection(db, "reports"));
+        let total = 0, pending = 0, ongoing = 0, completed = 0;
+        window.reportLocations = [];
+
+        snapshot.forEach(docSnap => {
+            const report = docSnap.data();
+            total++;
+            const status = report.status?.toLowerCase();
+            if (status === "pending") pending++;
+            else if (status === "ongoing" || status === "in-progress") ongoing++;
+            else if (status === "resolved" || status === "completed" || status === "repaired" || status === "posted") completed++;
+
+            const lat = report.latitude || report.lat || report.location?.latitude;
+            const lng = report.longitude || report.lng || report.location?.longitude;
+
+            if (lat && lng) {
+                window.reportLocations.push({
+                    lat: parseFloat(lat),
+                    lng: parseFloat(lng),
+                    type: report.reportType || report.type || "Unknown",
+                    status: status || "pending"
+                });
+            }
+        });
+
+        totalReportsEl.textContent = total;
+        pendingEl.textContent = pending;
+        ongoingEl.textContent = ongoing;
+        completedEl.textContent = completed;
+        updateChart(completed, ongoing, pending);
+        if (window.miniMap) addReportMarkers();
+        loadReportImages();
+    }
+
+    let chart;
+    function updateChart(completed, ongoing, pending) {
+        const ctx = document.getElementById("dashboardChart").getContext("2d");
+        if (chart) chart.destroy();
+        chart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: ["Completed", "Ongoing", "Pending"],
+                datasets: [{
+                    label: "Reports",
+                    data: [completed, ongoing, pending],
+                    backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e"]
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+    }
+
+    async function loadReportImages() {
+        const gallery = document.getElementById("reportImages");
+        gallery.innerHTML = "";
+        const snapshot = await getDocs(collection(db, "reports"));
+        let count = 0;
+        
+        for (const docSnap of snapshot.docs) {
+            if (count >= 6) break;
+            
+            const report = docSnap.data();
+            const imagePath = report.incidentImage || report.imageUrl || report.image;
+            
+            if (imagePath) {
+                const imageUrl = await getImageUrl(imagePath);
+                if (imageUrl) {
+                    const img = document.createElement("img");
+                    img.src = imageUrl;
+                    img.onerror = function() { this.style.display = "none"; };
+                    gallery.appendChild(img);
+                    count++;
                 }
             }
         }
+    }
 
-        // Profile dropdown
-        const profileToggle = document.getElementById("profileToggle");
-        const dropdownMenu = document.getElementById("dropdownMenu");
+    // Profile dropdown
+    const profileToggle = document.getElementById("profileToggle");
+    const dropdownMenu = document.getElementById("dropdownMenu");
 
-        profileToggle.addEventListener("click", (e) => {
-            e.stopPropagation();
-            dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
-            document.getElementById("notificationMenu").classList.remove("show");
-        });
+    profileToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+        document.getElementById("notificationMenu").classList.remove("show");
+    });
 
-        window.addEventListener("click", (e) => {
-            if (!e.target.closest(".profile-dropdown")) {
-                dropdownMenu.style.display = "none";
-            }
-        });
-    </script>
+    window.addEventListener("click", (e) => {
+        if (!e.target.closest(".profile-dropdown")) {
+            dropdownMenu.style.display = "none";
+        }
+    });
+</script>
 </body>
 </html>

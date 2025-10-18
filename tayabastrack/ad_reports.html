@@ -39,7 +39,7 @@
     .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.2rem}
     .notification-empty{padding:2rem;text-align:center;color:#999}
     .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-    .avatar{width:35px;height:35px;border-radius:50%}
+    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
     .username{font-weight:500}
     .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
     .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
@@ -148,7 +148,7 @@
         </div>
       </div>
       <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
-        <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar">
+        <img src="image.png" alt="Profile" class="avatar" id="navAvatar">
         <span class="username" id="navUsername">Loading...</span>
         <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
           <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
@@ -480,7 +480,7 @@
     const dropdownMenu = document.getElementById("dropdownMenu");
     const profileToggle = document.getElementById("profileToggle");
     const navUsername = document.getElementById("navUsername");
-    const navbarAvatar = document.getElementById("navbarAvatar");
+    const navAvatar = document.getElementById("navAvatar");
     const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
     const navLogoutBtn = document.getElementById("navLogoutBtn");
     const notificationBell = document.getElementById("notificationBell");
@@ -1160,6 +1160,7 @@
       handleLogout();
     });
 
+    // ===== REAL-TIME PROFILE PICTURE SYNC - THE KEY PART =====
     onAuthStateChanged(auth, async(user)=>{
       if(!user) {
         window.location.href="logout.html";
@@ -1167,28 +1168,34 @@
       }
       
       try {
-        const uDoc=await getDoc(doc(db,"users",user.uid));
-        if(!uDoc.exists()) {
-          window.location.href="logout.html";
-          return;
-        }
+        const userDocRef = doc(db,"users",user.uid);
         
-        const d=uDoc.data();
-        if(d.position!=="Admin") {
-          alert("Unauthorized. Only Admins can access this page.");
-          window.location.href="logout.html";
-          return;
-        }
-        
-        navUsername.textContent=d.name||d.firstName||"Admin";
-        if (d.photoURL || d.profilePic) {
-          navbarAvatar.src = d.photoURL || d.profilePic;
-        }
+        // USE onSnapshot FOR REAL-TIME PROFILE UPDATES!
+        onSnapshot(userDocRef, async(docSnap)=>{
+          if(!docSnap.exists()) {
+            window.location.href="logout.html";
+            return;
+          }
+          
+          const d = docSnap.data();
+          
+          if(d.position!=="Admin") {
+            alert("Unauthorized. Only Admins can access this page.");
+            window.location.href="logout.html";
+            return;
+          }
+          
+          // Update username and profile picture - UPDATES IN REAL-TIME!
+          navUsername.textContent = d.name || d.firstName || "Admin";
+          const photoURL = d.photoURL || d.profilePic || "image.png";
+          navAvatar.src = photoURL;
+        });
 
-        const q=query(collection(db,"reports"),orderBy("createdAt","desc"));
+        // Load reports data (only set up once)
+        const q = query(collection(db,"reports"), orderBy("createdAt","desc"));
         if(reportsUnsub) reportsUnsub();
         
-        reportsUnsub=onSnapshot(q,async (snap)=>{
+        reportsUnsub = onSnapshot(q, async (snap)=>{
           pendingBody.innerHTML="";
           ongoingBody.innerHTML="";
           completedBody.innerHTML="";
@@ -1217,6 +1224,7 @@
           }
         });
 
+        // Notification tracking
         const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
         onSnapshot(qNewUsers, (snapshot) => {
           snapshot.docChanges().forEach(change => {
@@ -1247,31 +1255,6 @@
         window.location.href="logout.html";
       }
     });
-
-    onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = "logout.html";
-      return;
-    }
-
-    const userRef = doc(db, 'users', user.uid);
-    
-    // Listen for real-time updates
-    onSnapshot(userRef, (docSnap) => {
-      if (!docSnap.exists()) return;
-      
-      const data = docSnap.data();
-      const photoURL = data.photoURL || "image.png";
-      
-      // Update navbar avatar (this updates automatically when profile changes!)
-      const navAvatar = document.getElementById("navAvatar");
-      if (navAvatar) navAvatar.src = photoURL;
-      
-      // Update username
-      const navUsername = document.getElementById("navUsername");
-      if (navUsername) navUsername.textContent = data.name || "User";
-    });
-  });
   </script>
 </body>
 </html>

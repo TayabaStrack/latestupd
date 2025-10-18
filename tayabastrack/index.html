@@ -211,10 +211,19 @@
       border-radius: 50%;
       border: 2px solid white;
       box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      flex-shrink: 0;
     }
 
     .legend-marker.completed {
       background: #28a745;
+    }
+
+    .legend-marker.ongoing {
+      background: #ffc107;
+    }
+
+    .legend-marker.reported {
+      background: #17a2b8;
     }
 
     .filter-group {
@@ -948,7 +957,15 @@
               <div class="legend-title">Alamat:</div>
               <div class="legend-item">
                 <div class="legend-marker completed"></div>
-                <span>Natapos na Proyekto</span>
+                <span>Natapos na</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-marker ongoing"></div>
+                <span>Kasalukuyang Ginagawa</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-marker reported"></div>
+                <span>Naiulat</span>
               </div>
             </div>
           </div>
@@ -1141,36 +1158,83 @@
       markers.forEach(marker => map.removeLayer(marker));
       markers = [];
 
+      console.log('Total bulletins:', bulletins.length);
+
       // Filter completed projects with coordinates
       const completedProjects = bulletins.filter(b => {
         const status = (b.status || '').toLowerCase();
-        return (status.includes('completed') || status.includes('resolved')) && 
-               b.latitude && b.longitude;
+        const hasCoords = b.latitude && b.longitude;
+        const isCompleted = status.includes('completed') || status.includes('resolved') || status.includes('natapos');
+        
+        console.log('Project:', b.projectName || b.issue, {
+          status: b.status,
+          isCompleted,
+          lat: b.latitude,
+          lng: b.longitude,
+          hasCoords
+        });
+        
+        return hasCoords; // Show ALL projects with coordinates, not just completed
       });
 
-      // Add markers for completed projects
+      console.log('Projects with coordinates:', completedProjects.length);
+
+      // Add markers for all projects with coordinates
       completedProjects.forEach(project => {
         const lat = parseFloat(project.latitude);
         const lng = parseFloat(project.longitude);
         
+        console.log('Processing marker:', {
+          name: project.projectName || project.issue,
+          lat,
+          lng,
+          isValid: !isNaN(lat) && !isNaN(lng)
+        });
+        
         if (!isNaN(lat) && !isNaN(lng)) {
+          // Determine marker color based on status
+          const status = (project.status || '').toLowerCase();
+          let markerColor = '#2164f3'; // Default blue
+          
+          if (status.includes('completed') || status.includes('resolved') || status.includes('natapos')) {
+            markerColor = '#28a745'; // Green for completed
+          } else if (status.includes('ongoing') || status.includes('ginagawa')) {
+            markerColor = '#ffc107'; // Yellow for ongoing
+          } else {
+            markerColor = '#17a2b8'; // Cyan for reported
+          }
+
           const marker = L.marker([lat, lng], {
             icon: L.divIcon({
               className: 'custom-marker',
-              html: '<div style="background: #28a745; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-              iconSize: [24, 24],
-              iconAnchor: [12, 12]
+              html: `<div style="background: ${markerColor}; width: 26px; height: 26px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">📍</div>`,
+              iconSize: [26, 26],
+              iconAnchor: [13, 13]
             })
           }).addTo(map);
 
           const projectName = project.projectName || project.issue || 'Unnamed Project';
           const barangay = project.barangay || 'N/A';
+          const progress = project.progress || 0;
           
           marker.bindPopup(`
-            <div style="font-family: Arial, sans-serif;">
-              <strong style="color: #28a745; font-size: 14px;">${projectName}</strong><br>
-              <span style="font-size: 12px;">Barangay: ${barangay}</span><br>
-              <span style="font-size: 11px; color: #666;">Status: ${project.status || 'Completed'}</span>
+            <div style="font-family: Arial, sans-serif; min-width: 200px;">
+              <strong style="color: ${markerColor}; font-size: 14px; display: block; margin-bottom: 5px;">${projectName}</strong>
+              <div style="font-size: 12px; margin-bottom: 3px;">
+                <strong>Barangay:</strong> ${barangay}
+              </div>
+              <div style="font-size: 12px; margin-bottom: 3px;">
+                <strong>Status:</strong> ${project.status || 'N/A'}
+              </div>
+              <div style="font-size: 12px; margin-bottom: 5px;">
+                <strong>Progress:</strong> ${progress}%
+              </div>
+              <div style="width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden; margin-bottom: 5px;">
+                <div style="width: ${progress}%; height: 100%; background: ${markerColor};"></div>
+              </div>
+              <div style="font-size: 11px; color: #666; text-align: center; margin-top: 5px; cursor: pointer; padding: 4px; background: #f8f9fa; border-radius: 4px;">
+                Click to view details
+              </div>
             </div>
           `);
 
@@ -1179,13 +1243,19 @@
           });
 
           markers.push(marker);
+          
+          console.log('Marker added at:', lat, lng);
         }
       });
+
+      console.log('Total markers added:', markers.length);
 
       // Fit bounds if there are markers
       if (markers.length > 0) {
         const group = L.featureGroup(markers);
         map.fitBounds(group.getBounds().pad(0.1));
+      } else {
+        console.warn('No markers to display on map');
       }
     }
 

@@ -37,21 +37,179 @@
         .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         .username { font-weight: 500; }
         
-        .notification-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 320px; max-height: 400px; overflow-y: auto; z-index: 1000; }
-        .notification-menu.show { display: block; }
-        .notification-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .notification-header h3 { font-size: 1rem; color: #333; margin: 0; }
-        .clear-btn { background: none; border: none; color: #004aad; cursor: pointer; font-size: 0.85rem; }
-        .notification-list { max-height: 300px; overflow-y: auto; }
-        .notification-item { padding: 0.8rem 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; transition: background 0.2s; }
-        .notification-item:hover { background: #f9f9f9; }
-        .notification-icon { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .notification-icon.user { background: #e3f2fd; color: #1976d2; }
-        .notification-icon.report { background: #fff3e0; color: #f57c00; }
-        .notification-content { flex: 1; }
-        .notification-content p { margin: 0; font-size: 0.85rem; }
-        .notification-content .time { color: #999; font-size: 0.75rem; margin-top: 0.2rem; }
-        .notification-empty { padding: 2rem; text-align: center; color: #999; }
+      /* ✅ Notification Dropdown Container */
+.notification-menu {
+  display: none;
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  width: 340px;
+  max-height: 420px;
+  overflow: hidden;
+  z-index: 1000;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.notification-menu.show {
+  display: block;
+}
+
+/* ✅ Header Section */
+.notification-header {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9f9f9;
+}
+
+.notification-header h3 {
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+  font-weight: 600;
+}
+
+.clear-btn {
+  background: none;
+  border: none;
+  color: #004aad;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+}
+
+.clear-btn:hover {
+  color: #003380;
+  text-decoration: underline;
+}
+
+/* ✅ Filter Buttons Section */
+.notification-filters {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #eee;
+  background: #fafafa;
+}
+
+.filter-btn {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  background: #f2f2f2;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: #333;
+}
+
+.filter-btn:hover {
+  background: #004aad;
+  color: #fff;
+}
+
+.filter-btn.active {
+  background: #004aad;
+  color: #fff;
+  border-color: #004aad;
+}
+
+/* ✅ Notification List */
+.notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+.notification-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ✅ Notification Item */
+.notification-item {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  transition: background 0.2s;
+}
+
+.notification-item:hover {
+  background: #f5f7ff;
+}
+
+.notification-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.notification-icon.user {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.notification-icon.report {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-content p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #333;
+  line-height: 1.3;
+}
+
+.notification-content .time {
+  color: #999;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* ✅ Empty State */
+.notification-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* ✨ Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 
         .dropdown-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); min-width: 160px; z-index: 1000; }
         .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.85rem; }
@@ -83,10 +241,10 @@
                 <img src="logu.png" alt="Logo" class="logo" />
                 <h2>TayabaStrack</h2>
             </div>
-            <ul class="sidebar-menu">
-                <li class="active"><a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
-                <li><a href="usermanagement.html"><i class="fa fa-tasks"></i> User Management</a></li>
-                <li><a href="reports.html"><i class="fa fa-map-marker-alt"></i> Manage Reports</a></li>
+           <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
+                <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
+                <li class="active"><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
             </ul>
         </div>
 
@@ -98,35 +256,45 @@
     </aside>
 
     <!-- Main -->
-    <main class="main">
-        <nav class="navbar">
-            <h1>Dashboard</h1>
-            <div class="profile">
-                <div style="position: relative;">
-                    <i class="fa fa-bell" id="notificationBell"></i>
-                    <span class="badge" id="notificationBadge">0</span>
-                    
-                    <!-- Notification Menu -->
-                    <div class="notification-menu" id="notificationMenu">
-                        <div class="notification-header">
-                            <h3>Notifications</h3>
-                            <button class="clear-btn" id="clearNotificationsBtn">Clear all</button>
-                        </div>
-                        <div class="notification-list" id="notificationList">
-                            <div class="notification-empty">No new notifications</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="profile-dropdown" id="profileToggle">
-                    <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar" />
-                    <span class="username" id="navbarName">---</span>
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
-                    </div>
-                </div>
-            </div>
-        </nav>
+<main class="main">
+  <nav class="navbar">
+    <h1>Dashboard</h1>
+    <div class="profile">
+      <div style="position: relative;">
+        <i class="fa fa-bell" id="notificationBell"></i>
+        <span class="badge" id="notificationBadge">0</span>
+
+        <!-- Notification Menu -->
+        <div class="notification-menu" id="notificationMenu">
+          <div class="notification-header">
+            <h3>Notifications</h3>
+            <button class="clear-btn" id="clearNotificationsBtn">Clear all</button>
+          </div>
+
+          <!-- ✅ Filter buttons -->
+          <div class="notification-filters">
+            <button class="filter-btn" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="report">Reports</button>
+            <button class="filter-btn" data-filter="user">Users</button>
+            <button class="filter-btn" data-filter="24h">Last 24h</button>
+          </div>
+
+          <div class="notification-list" id="notificationList">
+            <div class="notification-empty">No new notifications</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-dropdown" id="profileToggle">
+        <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar" />
+        <span class="username" id="navbarName">---</span>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
 
         <!-- Stats Cards -->
         <section class="stats">
