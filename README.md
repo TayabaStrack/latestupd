@@ -1,5 +1,5 @@
 # latestupd
 problems for another day  
-not as urgent
-- profile picture changes  (done pero not tested yet)
-- img edit/upload (PROFILE done pero not tested yet)
+admin
+- notifications (all except profile)
+- new code for updating profile picture on other pages (all except profile)
