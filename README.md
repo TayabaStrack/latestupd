@@ -1,10 +1,7 @@
 # latestupd
 problems for another day  
 
-admi 
-- fix notifications(REPORTS, USERS, PROFILE)
-
-s-admin
+s-admin/admin
 - notifs na lang (all pages)
 
 not as urgent
