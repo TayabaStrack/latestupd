@@ -26,28 +26,39 @@
     .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none}
     .badge.show{display:flex;align-items:center;justify-content:center}
     .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-    .avatar{width:35px;height:35px;border-radius:50%}
+    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
     .username{font-weight:500}
     .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
     .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
     .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
-    .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);width:320px;max-height:400px;overflow-y:auto;z-index:1000}
+    .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.15);width:340px;max-height:420px;overflow:hidden;z-index:1000;font-family:"Segoe UI",Tahoma,sans-serif;animation:fadeIn 0.2s ease-in-out}
     .notification-menu.show{display:block}
-    .notification-header{padding:1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
-    .notification-header h3{font-size:1rem;color:#333;margin:0}
-    .clear-btn{background:none;border:none;color:#004aad;cursor:pointer;font-size:0.85rem;font-weight:500}
-    .notification-list{max-height:300px;overflow-y:auto}
-    .notification-item{padding:0.8rem 1rem;border-bottom:1px solid #f0f0f0;display:flex;gap:0.8rem;transition:background 0.2s;cursor:pointer}
-    .notification-item:hover{background:#f9f9f9}
-    .notification-item.read{background:#f9f9f9;opacity:0.7}
-    .notification-icon{width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .notification-header{padding:0.9rem 1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f9f9f9}
+    .notification-header h3{font-size:1rem;color:#333;margin:0;font-weight:600}
+    .notification-actions{display:flex;gap:0.5rem;align-items:center}
+    .action-icon-btn{background:none;border:none;color:#666;cursor:pointer;font-size:1rem;padding:0.3rem;transition:color 0.2s ease;display:flex;align-items:center;justify-content:center}
+    .action-icon-btn:hover{color:#004aad}
+    .action-icon-btn i{font-size:0.95rem}
+    .notification-filters{display:flex;justify-content:space-between;gap:0.5rem;padding:0.5rem 1rem;border-bottom:1px solid #eee;background:#fafafa}
+    .filter-btn{flex:1;padding:0.4rem 0.6rem;font-size:0.8rem;background:#f2f2f2;border:1px solid #ddd;border-radius:6px;cursor:pointer;transition:all 0.25s ease;color:#333}
+    .filter-btn:hover{background:#004aad;color:#fff}
+    .filter-btn.active{background:#004aad;color:#fff;border-color:#004aad}
+    .notification-list{max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#ccc transparent}
+    .notification-list::-webkit-scrollbar{width:6px}
+    .notification-list::-webkit-scrollbar-thumb{background:#ccc;border-radius:10px}
+    .notification-list::-webkit-scrollbar-track{background:transparent}
+    .notification-item{padding:0.8rem 1rem;border-bottom:1px solid #f0f0f0;display:flex;gap:0.8rem;align-items:flex-start;transition:background 0.2s;position:relative}
+    .notification-item:hover{background:#f5f7ff}
+    .notification-item.unread{background:#f0f7ff}
+    .notification-item.unread::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:60%;background:#004aad;border-radius:0 4px 4px 0}
+    .notification-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
     .notification-icon.user{background:#e3f2fd;color:#1976d2}
     .notification-icon.report{background:#fff3e0;color:#f57c00}
     .notification-content{flex:1}
-    .notification-content p{margin:0;font-size:0.85rem}
-    .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.2rem}
-    .notification-empty{padding:2rem;text-align:center;color:#999}
-    .unread-indicator{width:8px;height:8px;background:#004aad;border-radius:50%}
+    .notification-content p{margin:0;font-size:0.86rem;color:#333;line-height:1.3}
+    .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.25rem}
+    .notification-empty{padding:2rem;text-align:center;color:#999;font-size:0.9rem}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
     .main{margin-left:250px;margin-top:74px;flex:1;display:block;min-width:0;height:calc(100vh - 74px);overflow-y:auto;overflow-x:hidden}
     .content{flex:1;padding:1.5rem;overflow-y:auto;height:100%}
     .page{padding:28px;display:flex;justify-content:center;width:100%}
@@ -93,24 +104,34 @@
     .event-tooltip-label{font-weight:600;color:#666;display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
     .event-tooltip-value{color:#222;font-size:14px;display:block}
     .event-tooltip-image{width:100%;max-height:180px;object-fit:cover;border-radius:6px;margin-top:12px;border:2px solid #e0e0e0}
-    .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:50}
-    .modal .content{background:white;padding:20px;border-radius:10px;width:420px;max-width:95%;box-shadow:0 14px 40px rgba(2,6,23,0.15);max-height:90vh;overflow-y:auto}
-    .modal .content h2{color:#004aad;margin-bottom:16px;text-align:center}
-    .modal input[type="text"],.modal input[type="email"],.modal input[type="tel"],.modal textarea{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #d7dce6;font-size:14px}
-    .modal label{display:block;font-weight:600;margin-top:12px;font-size:13px;color:#333}
-    .photo-upload-section{text-align:center;margin-bottom:16px;padding:16px;background:#f9fafb;border-radius:8px}
-    .photo-upload-section .preview{display:block;margin:12px auto;border-radius:50%;width:120px;height:120px;object-fit:cover;border:3px solid #004aad}
-    .upload-btn-wrapper{position:relative;display:inline-block;margin-top:10px}
+    .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;padding:20px}
+    .modal-content{background:white;border-radius:12px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;animation:modalSlideIn 0.3s ease-out}
+    @keyframes modalSlideIn{from{opacity:0;transform:translateY(-30px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .modal-header{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:20px 24px;border-radius:12px 12px 0 0;position:relative}
+    .modal-header h2{color:#fff;margin:0;font-size:1.3rem;font-weight:600}
+    .modal-close{position:absolute;top:20px;right:24px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+    .modal-close:hover{background:rgba(255,255,255,0.3)}
+    .modal-body{padding:24px}
+    .photo-upload-section{text-align:center;margin-bottom:24px;padding:20px;background:linear-gradient(135deg,#f0f7ff 0%,#e3f2fd 100%);border-radius:10px;border:2px dashed #004aad}
+    .photo-upload-section .preview{display:block;margin:0 auto 16px;border-radius:50%;width:100px;height:100px;object-fit:cover;border:4px solid #004aad;box-shadow:0 4px 12px rgba(0,74,173,0.2)}
+    .upload-btn-wrapper{position:relative;display:inline-block}
     .upload-btn-wrapper input[type=file]{display:none}
-    .upload-btn{background:#004aad;color:white;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;display:inline-block}
-    .upload-btn:hover{opacity:0.9}
-    .btn-group{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
-    .btn-cancel{background:#6c757d}
-    .btn-cancel:hover{background:#5a6268}
-    #notificationModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center}
-    #notificationModal>div{background:#fff;border-radius:12px;width:90%;max-width:600px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
-    .modal-filter-btn{padding:0.5rem 1rem;border:1px solid #ddd;background:#fff;color:#333;border-radius:20px;cursor:pointer;font-size:0.85rem;transition:all 0.2s}
-    .modal-filter-btn.active{background:#004aad;color:#fff;border-color:#004aad}
+    .upload-btn{background:#004aad;color:white;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:all 0.3s;border:none}
+    .upload-btn:hover{background:#00327a;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,74,173,0.3)}
+    .upload-hint{font-size:12px;color:#666;margin-top:10px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .form-field{display:flex;flex-direction:column}
+    .form-field.full-width{grid-column:1 / -1}
+    .form-field label{font-weight:600;margin-bottom:6px;font-size:13px;color:#333;display:flex;align-items:center;gap:6px}
+    .form-field label i{color:#004aad;font-size:14px}
+    .form-field input{padding:10px 12px;border-radius:8px;border:1px solid #d7dce6;font-size:14px;transition:all 0.2s;background:#fff}
+    .form-field input:focus{outline:none;border-color:#004aad;box-shadow:0 0 0 3px rgba(0,74,173,0.1)}
+    .modal-footer{padding:20px 24px;background:#f9fafb;border-radius:0 0 12px 12px;display:flex;gap:12px;justify-content:flex-end;border-top:1px solid #e0e0e0}
+    .modal-footer .btn{margin:0;min-width:100px;padding:10px 20px;font-weight:600;font-size:14px;transition:all 0.3s}
+    .btn-cancel{background:#6c757d;color:#fff}
+    .btn-cancel:hover{background:#5a6268;transform:translateY(-2px)}
+    .btn-save{background:#004aad;color:#fff}
+    .btn-save:hover{background:#00327a;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,74,173,0.3)}
     @media (max-width:980px){
       .profile-section{grid-template-columns:1fr;padding-bottom:40px}
       .sidebar{left:-250px;transition:left 0.3s}
@@ -120,6 +141,8 @@
       .mobile-menu-btn{display:block !important}
       .calendar-day{min-height:45px}
       .event-dot{width:6px;height:6px}
+      .form-grid{grid-template-columns:1fr}
+      .modal-content{max-width:95%}
     }
     .mobile-menu-btn{display:none;background:none;border:none;color:#004aad;font-size:1.5rem;cursor:pointer;padding:0.5rem}
   </style>
@@ -149,23 +172,39 @@
     </div>
     <div class="profile">
       <div style="position:relative">
-        <i class="fa fa-bell" id="notificationBell"></i>
+        <i class="fa fa-bell" id="notificationBell" aria-hidden="true"></i>
         <span class="badge" id="notificationBadge">0</span>
         <div class="notification-menu" id="notificationMenu">
           <div class="notification-header">
             <h3>Notifications</h3>
-            <button class="clear-btn" id="clearNotificationsBtn">Mark all as read</button>
+            <div class="notification-actions">
+              <button class="action-icon-btn" id="markAllReadBtn" title="Mark all as read">
+                <i class="fa fa-check-double"></i>
+              </button>
+              <button class="action-icon-btn" id="clearNotificationsBtn" title="Clear all">
+                <i class="fa fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+          <div class="notification-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="report">Reports</button>
+            <button class="filter-btn" data-filter="user">Users</button>
+            <button class="filter-btn" data-filter="24h">Last 24h</button>
           </div>
           <div class="notification-list" id="notificationList">
             <div class="notification-empty">No new notifications</div>
           </div>
         </div>
       </div>
-      <img src="image.png" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
-      <div class="dropdown-menu" id="dropdownMenu">
-        <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+      <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
+        <img src="image.png" alt="avatar" class="avatar" id="navAvatar">
+        <span class="username" id="navUsername">Loading...</span>
+        <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
+          <a href="profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+          <a href="#" id="navLogoutBtn"><i class="fa fa-sign-out-alt"></i>&nbsp; Logout</a>
+        </div>
       </div>
-      <div id="navUsername" style="font-weight:600"></div>
     </div>
   </nav>
 
@@ -253,53 +292,65 @@
   </div>
 
   <div class="modal" id="editModal">
-    <div class="content">
-      <h2>Edit Profile</h2>
-      <div class="photo-upload-section">
-        <img id="previewImg" class="preview" src="image.png" alt="Profile Preview">
-        <div class="upload-btn-wrapper">
-          <label class="upload-btn">
-            <i class="fa fa-camera"></i> Choose Photo
-            <input type="file" id="editPhoto" accept="image/*">
-          </label>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fa fa-user-edit"></i> Edit Profile</h2>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="photo-upload-section">
+          <img id="previewImg" class="preview" src="image.png" alt="Profile Preview">
+          <div class="upload-btn-wrapper">
+            <label class="upload-btn">
+              <i class="fa fa-camera"></i>
+              <span>Choose Photo</span>
+              <input type="file" id="editPhoto" accept="image/*">
+            </label>
+          </div>
+          <div class="upload-hint">JPG, PNG • Max 5MB</div>
         </div>
-        <div style="font-size:12px;color:#666;margin-top:8px">Upload a profile picture (JPG, PNG)</div>
-      </div>
-      <label>Full Name</label>
-      <input type="text" id="editName" placeholder="Full name">
-      <label>ID</label>
-      <input type="text" id="editID" placeholder="ID">
-      <label>Email</label>
-      <input type="email" id="editEmail" placeholder="Email">
-      <label>Phone</label>
-      <input type="tel" id="editPhone" placeholder="Phone">
-      <label>Address</label>
-      <input type="text" id="editAddress" placeholder="Address">
-      <label>Gender</label>
-      <input type="text" id="editGender" placeholder="Gender">
-      <div class="btn-group">
-        <button class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
-        <button class="btn" onclick="saveEdit()" id="saveBtn"><i class="fa fa-save"></i> Save Changes</button>
-      </div>
-    </div>
-  </div>
 
-  <div id="notificationModal">
-    <div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;">
-        <h2 style="margin:0;color:#004aad;font-size:1.3rem;">Notification History</h2>
-        <button onclick="window.closeNotificationModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">×</button>
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label><i class="fa fa-user"></i> Full Name</label>
+            <input type="text" id="editName" placeholder="Enter full name">
+          </div>
+
+          <div class="form-field">
+            <label><i class="fa fa-id-card"></i> ID Number</label>
+            <input type="text" id="editID" placeholder="Enter ID">
+          </div>
+
+          <div class="form-field">
+            <label><i class="fa fa-venus-mars"></i> Gender</label>
+            <input type="text" id="editGender" placeholder="Enter gender">
+          </div>
+
+          <div class="form-field full-width">
+            <label><i class="fa fa-envelope"></i> Email Address</label>
+            <input type="email" id="editEmail" placeholder="Enter email">
+          </div>
+
+          <div class="form-field full-width">
+            <label><i class="fa fa-phone"></i> Phone Number</label>
+            <input type="tel" id="editPhone" placeholder="Enter phone number">
+          </div>
+
+          <div class="form-field full-width">
+            <label><i class="fa fa-map-marker-alt"></i> Address</label>
+            <input type="text" id="editAddress" placeholder="Enter address">
+          </div>
+        </div>
       </div>
-      <div style="display:flex;gap:0.5rem;padding:1rem;border-bottom:1px solid #eee;flex-wrap:wrap;">
-        <button class="modal-filter-btn active" onclick="window.filterNotifications('all')">All</button>
-        <button class="modal-filter-btn" onclick="window.filterNotifications('report')">Reports</button>
-        <button class="modal-filter-btn" onclick="window.filterNotifications('user')">Users</button>
-        <button class="modal-filter-btn" onclick="window.filterNotifications('24h')">Last 24h</button>
-      </div>
-      <div id="notificationModalList" style="flex:1;overflow-y:auto;padding:0;"></div>
-      <div style="padding:1rem;border-top:1px solid #eee;display:flex;gap:0.5rem;">
-        <button onclick="window.markAllNotificationsAsRead()" style="flex:1;padding:0.7rem;background:#004aad;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">Mark all as read</button>
-        <button onclick="window.clearAllNotifications()" style="flex:1;padding:0.7rem;background:#f0f0f0;color:#333;border:none;border-radius:6px;cursor:pointer;font-weight:500;">Clear all</button>
+
+      <div class="modal-footer">
+        <button class="btn btn-cancel" onclick="closeEditModal()">
+          <i class="fa fa-times"></i> Cancel
+        </button>
+        <button class="btn btn-save" onclick="saveEdit()" id="saveBtn">
+          <i class="fa fa-save"></i> Save Changes
+        </button>
       </div>
     </div>
   </div>
@@ -308,29 +359,192 @@
     function toggleMobileMenu(){document.querySelector('.sidebar').classList.toggle('mobile-open')}
     document.addEventListener('click',function(e){const sidebar=document.querySelector('.sidebar');const menuBtn=document.querySelector('.mobile-menu-btn');if(window.innerWidth<=980&&!sidebar.contains(e.target)&&!menuBtn.contains(e.target)){sidebar.classList.remove('mobile-open')}});
 
-    function initNotificationSound(){const audioContext=new(window.AudioContext||window.webkitAudioContext)();return function playChime(){try{const now=audioContext.currentTime;const osc=audioContext.createOscillator();const gain=audioContext.createGain();osc.connect(gain);gain.connect(audioContext.destination);osc.frequency.setValueAtTime(1046.50,now);osc.frequency.setValueAtTime(783.99,now+0.1);gain.gain.setValueAtTime(0.3,now);gain.gain.exponentialRampToValueAtTime(0.01,now+0.6);osc.start(now);osc.stop(now+0.6)}catch(error){console.log("Chime sound error:",error)}}}
-
-    let allNotifications=[];
-    const playChime=initNotificationSound();
-
-    function updateNotificationUI(){const badge=document.getElementById('notificationBadge');const list=document.getElementById('notificationList');const unreadCount=allNotifications.filter(n=>!n.read).length;if(unreadCount>0){badge.textContent=unreadCount;badge.classList.add("show")}else{badge.textContent="";badge.classList.remove("show")}const recentNotifications=allNotifications.slice(0,5);if(allNotifications.length===0){list.innerHTML=`<div class="notification-empty">No notifications</div>`}else{list.innerHTML=recentNotifications.map(n=>`<div class="notification-item ${n.read?'read':'unread'}" onclick="window.markNotificationAsRead('${n.id}')"><div class="notification-icon ${n.type}">${n.type==="user"?'<i class="fa fa-user"></i>':'<i class="fa fa-flag"></i>'}</div><div class="notification-content"><p><strong>${n.message}</strong></p><p>${n.detail}</p><span class="time">${new Date(n.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div>${!n.read?'<div class="unread-indicator"></div>':''}</div>`).join('');if(allNotifications.length>5){list.innerHTML+=`<div style="padding:0.8rem 1rem;border-top:1px solid #eee;text-align:center;"><button onclick="window.openNotificationModal()" style="background:none;border:none;color:#004aad;cursor:pointer;font-weight:500;font-size:0.85rem;">View all (${allNotifications.length}) →</button></div>`}}}
-
-    window.openNotificationModal=function(){document.getElementById('notificationModal').style.display='flex';window.filterNotifications('all')};
-    window.closeNotificationModal=function(){document.getElementById('notificationModal').style.display='none'};
-
-    window.filterNotifications=function(filter){let notifications=[];if(filter==='all'){notifications=allNotifications}else if(filter==='report'){notifications=allNotifications.filter(n=>n.type==='report')}else if(filter==='user'){notifications=allNotifications.filter(n=>n.type==='user')}else if(filter==='24h'){const twentyFourHoursAgo=Date.now()-24*60*60*1000;notifications=allNotifications.filter(n=>n.timestamp>twentyFourHoursAgo)}const list=document.getElementById('notificationModalList');if(notifications.length===0){list.innerHTML='<div style="padding:2rem;text-align:center;color:#999;">No notifications</div>'}else{list.innerHTML=notifications.map(n=>`<div style="padding:1rem;border-bottom:1px solid #f0f0f0;display:flex;gap:0.8rem;${n.read?'background:#f9f9f9;':'background:#f0f6ff;'}"><div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;${n.type==='user'?'background:#e3f2fd;color:#1976d2;':'background:#fff3e0;color:#f57c00;'}">${n.type==="user"?'<i class="fa fa-user"></i>':'<i class="fa fa-flag"></i>'}</div><div style="flex:1;"><p style="margin:0 0 0.3rem 0;font-weight:500;color:#333;"><strong>${n.message}</strong></p><p style="margin:0 0 0.3rem 0;font-size:0.9rem;color:#666;">${n.detail}</p><span style="font-size:0.75rem;color:#999;">${new Date(n.timestamp).toLocaleString()}</span></div><div style="display:flex;align-items:center;"><span style="font-size:0.75rem;color:#999;padding:0.2rem 0.5rem;background:#eee;border-radius:4px;">${n.read?'Read':'New'}</span></div></div>`).join('')}document.querySelectorAll('.modal-filter-btn').forEach(btn=>{btn.classList.toggle('active',btn.textContent.toLowerCase().includes(filter.toLowerCase()))})};
-
-    window.markNotificationAsRead=async function(notifId){try{const{updateDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");await updateDoc(doc(window.db,"admin_notifications",notifId),{read:true})}catch(err){console.error("Error marking notification as read:",err)}};
-
-    window.markAllNotificationsAsRead=async function(){try{const{updateDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");const unread=allNotifications.filter(n=>!n.read);for(const notif of unread){await updateDoc(doc(window.db,"admin_notifications",notif.id),{read:true})}}catch(err){console.error("Error marking all as read:",err)}};
-
-    window.clearAllNotifications=async function(){if(confirm('Are you sure you want to clear all notifications?')){try{const{deleteDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");for(const notif of allNotifications){await deleteDoc(doc(window.db,"admin_notifications",notif.id))}}catch(err){console.error("Error clearing notifications:",err)}}};
-
     let currentUser=null;
     let ongoingReports=[];
     let currentDate=new Date();
     let selectedMonth=currentDate.getMonth();
     let selectedYear=currentDate.getFullYear();
+
+    let notificationsList = [];
+    let seenNotificationIds = new Set();
+    let trackedUserStatuses = {};
+    let trackedReportIds = new Set();
+    let currentFilter = "all";
+
+    function normalizeStatus(status) {
+      return (status || "").toLowerCase().trim();
+    }
+
+    function isBarangayPosition(position) {
+      if (!position) return false;
+      const pos = position.toLowerCase().trim();
+      return pos.includes("barangay captain") || pos.includes("brgy captain") || pos.includes("brgy. captain") || pos.includes("barangay official") || pos.includes("brgy official") || pos.includes("brgy. official");
+    }
+
+    function addNotification(type, message, detail) {
+      const cleanMsg = (message || "").trim();
+      const cleanDetail = (detail || "").trim();
+      const timestamp = new Date();
+      const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
+      
+      if (seenNotificationIds.has(id)) return;
+      seenNotificationIds.add(id);
+      
+      notificationsList.unshift({
+        id,
+        type,
+        message: cleanMsg,
+        detail: cleanDetail,
+        timestamp: timestamp,
+        read: false
+      });
+      updateNotificationUI();
+    }
+
+    function updateNotificationUI() {
+      let filtered = [...notificationsList];
+      
+      if (currentFilter === "report") {
+        filtered = filtered.filter((n) => n.type === "report");
+      } else if (currentFilter === "user") {
+        filtered = filtered.filter((n) => n.type === "user");
+      } else if (currentFilter === "24h") {
+        const ago = Date.now() - 24 * 60 * 60 * 1000;
+        filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+      }
+
+      filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+      const unreadCount = notificationsList.filter(n => !n.read).length;
+      const notificationBadge = document.getElementById("notificationBadge");
+      if (unreadCount > 0) {
+        notificationBadge.textContent = unreadCount;
+        notificationBadge.classList.add("show");
+      } else {
+        notificationBadge.textContent = "";
+        notificationBadge.classList.remove("show");
+      }
+
+      const notificationList = document.getElementById("notificationList");
+      if (filtered.length === 0) {
+        notificationList.innerHTML = `<div class="notification-empty">No notifications</div>`;
+      } else {
+        notificationList.innerHTML = filtered
+          .map(
+            (n) => `
+          <div class="notification-item ${n.read ? '' : 'unread'}">
+            <div class="notification-icon ${n.type}">
+              ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+            </div>
+            <div class="notification-content">
+              <p><strong>${n.message}</strong></p>
+              <p>${n.detail}</p>
+              <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            </div>
+          </div>`
+          )
+          .join("");
+      }
+    }
+
+    const notificationBell = document.getElementById("notificationBell");
+    const notificationMenu = document.getElementById("notificationMenu");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+    const markAllReadBtn = document.getElementById("markAllReadBtn");
+
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notificationMenu.classList.toggle("show");
+      document.getElementById("dropdownMenu").style.display = "none";
+    });
+
+    clearNotificationsBtn.addEventListener("click", () => {
+      notificationsList = [];
+      seenNotificationIds.clear();
+      updateNotificationUI();
+    });
+
+    markAllReadBtn.addEventListener("click", () => {
+      notificationsList.forEach(n => n.read = true);
+      updateNotificationUI();
+    });
+
+    document.querySelectorAll(".filter-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+        e.target.classList.add("active");
+        currentFilter = e.target.dataset.filter;
+        updateNotificationUI();
+      });
+    });
+
+    async function setupRealtimeNotifications(db) {
+      const { collection, getDocs, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      
+      const userSnap = await getDocs(collection(db, "users"));
+      userSnap.forEach((docSnap) => {
+        const userId = docSnap.id;
+        const data = docSnap.data();
+        const status = normalizeStatus(data.status);
+        trackedUserStatuses[userId] = status;
+        if (status === "active") {
+          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+          const position = data.position || "User";
+          addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
+        }
+      });
+
+      onSnapshot(collection(db, "users"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const userId = change.doc.id;
+          const data = change.doc.data();
+          const currentStatus = normalizeStatus(data.status);
+          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+          const position = data.position || "User";
+
+          if (change.type === "added") {
+            trackedUserStatuses[userId] = currentStatus;
+            if (currentStatus === "active") {
+              addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+            }
+          }
+
+          if (change.type === "modified") {
+            const oldStatus = trackedUserStatuses[userId];
+            if (oldStatus !== "active" && currentStatus === "active") {
+              addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+            }
+            trackedUserStatuses[userId] = currentStatus;
+          }
+        });
+      });
+
+      const reportSnap = await getDocs(collection(db, "reports"));
+      reportSnap.forEach((docSnap) => {
+        const id = docSnap.id;
+        trackedReportIds.add(id);
+        const data = docSnap.data();
+        const barangay = data.barangay || data.location || "Unknown location";
+        const type = data.reportType || data.type || data.projectName || "Report";
+        addNotification("report", "Report submitted", `${type} in ${barangay}`);
+      });
+
+      onSnapshot(collection(db, "reports"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const id = change.doc.id;
+          const data = change.doc.data();
+          if (change.type === "added" && !trackedReportIds.has(id)) {
+            trackedReportIds.add(id);
+            const barangay = data.barangay || data.location || "Unknown location";
+            const type = data.reportType || data.type || data.projectName || "Report";
+            addNotification("report", "New report submitted", `${type} in ${barangay}`);
+          }
+        });
+      });
+
+      updateNotificationUI();
+      console.log("✅ Notifications active — existing + new");
+    }
 
     function previousMonth(){selectedMonth--;if(selectedMonth<0){selectedMonth=11;selectedYear--}renderCalendar()}
     function nextMonth(){selectedMonth++;if(selectedMonth>11){selectedMonth=0;selectedYear++}renderCalendar()}
@@ -339,7 +553,7 @@
 
     function formatDateForComparison(date){if(!date)return'';const d=date instanceof Date?date:(date.toDate?date.toDate():new Date(date));return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
-    async function loadOngoingReports(){try{const{collection,query,where,onSnapshot}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");const{getStorage,ref,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");const storage=getStorage();const reportsRef=collection(window.db,'reports');const q=query(reportsRef,where('status','==','Ongoing'));onSnapshot(q,async(snapshot)=>{ongoingReports=[];let eventCount=0;for(const doc of snapshot.docs){const data=doc.data();if(data.startDate&&data.endDate){const startDate=data.startDate.toDate?data.startDate.toDate():new Date(data.startDate);const endDate=data.endDate.toDate?data.endDate.toDate():new Date(data.endDate);let imageUrl='';if(data.incidentImage||data.imageUrl||data.image){const imagePath=data.incidentImage||data.imageUrl||data.image;if(imagePath.startsWith('http')){imageUrl=imagePath}else{try{imageUrl=await getDownloadURL(ref(storage,imagePath))}catch(err){console.error("Error loading image:",err)}}}ongoingReports.push({id:doc.id,startDate:startDate,endDate:endDate,projectName:data.projectName||'Unnamed Project',barangay:data.barangay||'N/A',contractor:data.contractor||'N/A',supplier:data.supplier||'N/A',allocatedBudget:data.allocatedBudget||'N/A',imageUrl:imageUrl});eventCount++}}renderCalendar();const syncStatus=document.getElementById('syncStatus');syncStatus.innerHTML=`<i class="fa fa-check-circle" style="color:#1cc88a"></i> Auto-synced ${eventCount} ongoing inspection${eventCount!==1?'s':''} - Last updated: ${new Date().toLocaleTimeString()}`})}catch(err){console.error("Error loading ongoing reports:",err);document.getElementById('syncStatus').innerHTML=`<i class="fa fa-exclamation-circle" style="color:#d9534f"></i> Error syncing calendar`}}
+    async function loadOngoingReports(db){try{const{collection,query,where,onSnapshot}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");const{getStorage,ref,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");const storage=getStorage();const reportsRef=collection(db,'reports');const q=query(reportsRef,where('status','==','Ongoing'));onSnapshot(q,async(snapshot)=>{ongoingReports=[];let eventCount=0;for(const doc of snapshot.docs){const data=doc.data();if(data.startDate&&data.endDate){const startDate=data.startDate.toDate?data.startDate.toDate():new Date(data.startDate);const endDate=data.endDate.toDate?data.endDate.toDate():new Date(data.endDate);let imageUrl='';if(data.incidentImage||data.imageUrl||data.image){const imagePath=data.incidentImage||data.imageUrl||data.image;if(imagePath.startsWith('http')){imageUrl=imagePath}else{try{imageUrl=await getDownloadURL(ref(storage,imagePath))}catch(err){console.error("Error loading image:",err)}}}ongoingReports.push({id:doc.id,startDate:startDate,endDate:endDate,projectName:data.projectName||'Unnamed Project',barangay:data.barangay||'N/A',contractor:data.contractor||'N/A',supplier:data.supplier||'N/A',allocatedBudget:data.allocatedBudget||'N/A',imageUrl:imageUrl});eventCount++}}renderCalendar();const syncStatus=document.getElementById('syncStatus');syncStatus.innerHTML=`<i class="fa fa-check-circle" style="color:#1cc88a"></i> Auto-synced ${eventCount} ongoing inspection${eventCount!==1?'s':''} - Last updated: ${new Date().toLocaleTimeString()}`})}catch(err){console.error("Error loading ongoing reports:",err);document.getElementById('syncStatus').innerHTML=`<i class="fa fa-exclamation-circle" style="color:#d9534f"></i> Error syncing calendar`}}
 
     window.showEventTooltip=function(event,reportId){event.stopPropagation();const report=ongoingReports.find(r=>r.id===reportId);if(!report)return;const tooltip=document.getElementById('eventTooltip');document.getElementById('tooltipTitle').textContent=`Inspection Details`;document.getElementById('tooltipProjectName').textContent=report.projectName;document.getElementById('tooltipBarangay').textContent=report.barangay;document.getElementById('tooltipContractorSupplier').textContent=`${report.contractor} & ${report.supplier}`;document.getElementById('tooltipBudget').textContent=report.allocatedBudget;const tooltipImage=document.getElementById('tooltipImage');if(report.imageUrl){tooltipImage.src=report.imageUrl;tooltipImage.style.display='block'}else{tooltipImage.style.display='none'}const x=event.clientX;const y=event.clientY;tooltip.style.left=x+15+'px';tooltip.style.top=y+15+'px';setTimeout(()=>{const rect=tooltip.getBoundingClientRect();if(rect.right>window.innerWidth){tooltip.style.left=(x-rect.width-15)+'px'}if(rect.bottom>window.innerHeight){tooltip.style.top=(y-rect.height-15)+'px'}},0);tooltip.classList.add('show');document.addEventListener('click',hideEventTooltipOnClick)};
 
@@ -348,9 +562,16 @@
     window.hideEventTooltip=function(){document.getElementById('eventTooltip').classList.remove('show')};
 
     const dropdownMenu=document.getElementById('dropdownMenu');
-    window.toggleDropdown=function(){dropdownMenu.style.display=dropdownMenu.style.display==='block'?'none':'block'};
+    const profileToggle=document.getElementById('profileToggle');
+    const navLogoutBtn=document.getElementById('navLogoutBtn');
 
-    window.addEventListener('click',(e)=>{if(!e.target.closest('.avatar')&&!e.target.closest('#dropdownMenu')&&!e.target.closest('.notification-menu')){dropdownMenu.style.display='none';document.getElementById("notificationMenu").classList.remove("show")}});
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+      notificationMenu.classList.remove("show");
+    });
+
+    window.addEventListener('click',(e)=>{if(!e.target.closest('.profile-dropdown')){dropdownMenu.style.display='none'}if(!e.target.closest('.notification-menu')&&e.target!==notificationBell){notificationMenu.classList.remove("show")}});
 
     const editModal=document.getElementById("editModal");
     const editPhoto=document.getElementById("editPhoto");
@@ -378,25 +599,75 @@
     const db=getFirestore(app);
     window.db=db;
 
-    const trackedUsers=new Set();
-    const trackedReports=new Set();
+    async function handleLogout() {
+      try {
+        await signOut(auth);
+        window.location.href = "login.html";
+      } catch(err) {
+        alert("Error logging out: " + err.message);
+      }
+    }
 
-    function isBarangayPosition(position){if(!position)return false;const pos=position.toLowerCase().trim();return pos.includes("barangay captain")||pos.includes("brgy captain")||pos.includes("brgy. captain")||pos.includes("barangay official")||pos.includes("brgy official")||pos.includes("brgy. official")}
+    document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
+    navLogoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      handleLogout();
+    });
 
-    function setupNotificationListener(){const q=query(collection(db,"admin_notifications"),orderBy("timestamp","desc"));onSnapshot(q,(snapshot)=>{const previousUnreadCount=allNotifications.filter(n=>!n.read).length;allNotifications=snapshot.docs.map(doc=>({id:doc.id,...doc.data(),timestamp:doc.data().timestamp?.toMillis()||Date.now()}));const newUnreadCount=allNotifications.filter(n=>!n.read).length;if(newUnreadCount>previousUnreadCount){playChime()}updateNotificationUI()})}
+    onAuthStateChanged(auth, async(user)=>{
+      if(!user) {
+        console.warn("No user logged in.");
+        window.location.href="login.html";
+        return;
+      }
+      
+      currentUser=user;
+      window.currentUser=user;
+      
+      try{
+        const userRef=doc(db,'users',user.uid);
+        await updateDoc(userRef,{lastLogin:serverTimestamp()});
+      }catch(err){
+        console.error("Error updating last login:",err);
+      }
+      
+      const ref=doc(db,'users',user.uid);
+      onSnapshot(ref,docSnap=>{
+        if(!docSnap.exists())return;
+        const data=docSnap.data();
+        document.getElementById("navUsername").textContent=data.name||"User";
+        const photoURL=data.photoURL||"image.png";
+        document.getElementById("profilePic").src=photoURL;
+        document.getElementById("navAvatar").src=photoURL;
+        document.getElementById("previewImg").src=photoURL;
+        document.getElementById("displayName").textContent=data.name||"—";
+        document.getElementById("displayRole").textContent=data.position||data.role||"Administrator";
+        document.getElementById("cardName").value=data.name||"";
+        document.getElementById("cardID").value=data.id||"";
+        document.getElementById("cardEmail").value=data.email||user.email;
+        document.getElementById("cardPhone").value=data.phone||"";
+        document.getElementById("cardAddress").value=data.address||"";
+        document.getElementById("cardGender").value=data.gender||"";
+        document.getElementById("editName").value=data.name||"";
+        document.getElementById("editID").value=data.id||"";
+        document.getElementById("editEmail").value=data.email||user.email;
+        document.getElementById("editPhone").value=data.phone||"";
+        document.getElementById("editAddress").value=data.address||"";
+        document.getElementById("editGender").value=data.gender||"";
+        document.getElementById("accountType").textContent=data.position||data.role||"Administrator";
+        if(data.createdAt){
+          const date=data.createdAt.toDate?data.createdAt.toDate():new Date(data.createdAt);
+          document.getElementById("registeredAt").textContent=date.toLocaleDateString();
+        }
+        if(data.lastLogin){
+          const date=data.lastLogin.toDate?data.lastLogin.toDate():new Date(data.lastLogin);
+          document.getElementById("lastLogin").textContent=date.toLocaleString();
+        }
+      });
 
-    function setupRealtimeTracking(){const qNewUsers=query(collection(db,"users"),where("status","==","pending"));onSnapshot(qNewUsers,async(snapshot)=>{for(const change of snapshot.docChanges()){if(change.type==="added"&&!trackedUsers.has(change.doc.id)){trackedUsers.add(change.doc.id);const u=change.doc.data();if(isBarangayPosition(u.position)){await addDoc(collection(db,"admin_notifications"),{type:"user",message:`New User: ${u.firstName||""} ${u.surname||""}`,detail:u.email||"",timestamp:serverTimestamp(),read:false})}}}});const qReports=query(collection(db,"reports"));onSnapshot(qReports,async(snapshot)=>{for(const change of snapshot.docChanges()){if(change.type==="added"&&!trackedReports.has(change.doc.id)){trackedReports.add(change.doc.id);const r=change.doc.data();await addDoc(collection(db,"admin_notifications"),{type:"report",message:`New Report in ${r.barangay||"a barangay"}`,detail:r.reportType||r.type||"Unknown type",timestamp:serverTimestamp(),read:false})}}})}
-
-    const notificationBell=document.getElementById("notificationBell");
-    const clearNotificationsBtn=document.getElementById("clearNotificationsBtn");
-
-    notificationBell.addEventListener("click",(e)=>{e.stopPropagation();document.getElementById("notificationMenu").classList.toggle("show")});
-
-    clearNotificationsBtn.addEventListener("click",()=>{window.markAllNotificationsAsRead()});
-
-    onAuthStateChanged(auth,async(user)=>{if(!user){console.warn("No user logged in.");window.location.href="login.html";return}currentUser=user;window.currentUser=user;try{const userRef=doc(db,'users',user.uid);await updateDoc(userRef,{lastLogin:serverTimestamp()})}catch(err){console.error("Error updating last login:",err)}const ref=doc(db,'users',user.uid);onSnapshot(ref,docSnap=>{if(!docSnap.exists())return;const data=docSnap.data();document.getElementById("navUsername").textContent=data.name||"User";const photoURL=data.photoURL||"image.png";document.getElementById("profilePic").src=photoURL;document.getElementById("navAvatar").src=photoURL;document.getElementById("previewImg").src=photoURL;document.getElementById("displayName").textContent=data.name||"—";document.getElementById("displayRole").textContent=data.position||data.role||"Administrator";document.getElementById("cardName").value=data.name||"";document.getElementById("cardID").value=data.id||"";document.getElementById("cardEmail").value=data.email||user.email;document.getElementById("cardPhone").value=data.phone||"";document.getElementById("cardAddress").value=data.address||"";document.getElementById("cardGender").value=data.gender||"";document.getElementById("editName").value=data.name||"";document.getElementById("editID").value=data.id||"";document.getElementById("editEmail").value=data.email||user.email;document.getElementById("editPhone").value=data.phone||"";document.getElementById("editAddress").value=data.address||"";document.getElementById("editGender").value=data.gender||"";document.getElementById("accountType").textContent=data.position||data.role||"Administrator";if(data.createdAt){const date=data.createdAt.toDate?data.createdAt.toDate():new Date(data.createdAt);document.getElementById("registeredAt").textContent=date.toLocaleDateString()}if(data.lastLogin){const date=data.lastLogin.toDate?data.lastLogin.toDate():new Date(data.lastLogin);document.getElementById("lastLogin").textContent=date.toLocaleString()}});setupNotificationListener();setupRealtimeTracking();loadOngoingReports()});
-
-    document.getElementById("sidebarLogoutBtn").addEventListener("click",async()=>{try{await signOut(auth);console.log("User signed out.");window.location.href="login.html"}catch(err){console.error("Logout error:",err)}});
+      await setupRealtimeNotifications(db);
+      loadOngoingReports(db);
+    });
   </script>
 </body>
 </html>

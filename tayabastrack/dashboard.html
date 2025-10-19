@@ -37,179 +37,39 @@
         .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         .username { font-weight: 500; }
         
-      /* ✅ Notification Dropdown Container */
-.notification-menu {
-  display: none;
-  position: absolute;
-  top: 120%;
-  right: 0;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  width: 340px;
-  max-height: 420px;
-  overflow: hidden;
-  z-index: 1000;
-  font-family: "Segoe UI", Tahoma, sans-serif;
-  animation: fadeIn 0.2s ease-in-out;
-}
+        .notification-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); width: 340px; max-height: 420px; overflow: hidden; z-index: 1000; font-family: "Segoe UI", Tahoma, sans-serif; animation: fadeIn 0.2s ease-in-out; }
+        .notification-menu.show { display: block; }
 
-.notification-menu.show {
-  display: block;
-}
+        .notification-header { padding: 0.9rem 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; }
+        .notification-header h3 { font-size: 1rem; color: #333; margin: 0; font-weight: 600; }
+        .notification-actions { display: flex; gap: 0.5rem; align-items: center; }
+        .action-icon-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1rem; padding: 0.3rem; transition: color 0.2s ease; display: flex; align-items: center; justify-content: center; }
+        .action-icon-btn:hover { color: #004aad; }
+        .action-icon-btn i { font-size: 0.95rem; }
 
-/* ✅ Header Section */
-.notification-header {
-  padding: 0.9rem 1rem;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f9f9f9;
-}
+        .notification-filters { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid #eee; background: #fafafa; }
+        .filter-btn { flex: 1; padding: 0.4rem 0.6rem; font-size: 0.8rem; background: #f2f2f2; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.25s ease; color: #333; }
+        .filter-btn:hover { background: #004aad; color: #fff; }
+        .filter-btn.active { background: #004aad; color: #fff; border-color: #004aad; }
 
-.notification-header h3 {
-  font-size: 1rem;
-  color: #333;
-  margin: 0;
-  font-weight: 600;
-}
+        .notification-list { max-height: 300px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #ccc transparent; }
+        .notification-list::-webkit-scrollbar { width: 6px; }
+        .notification-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        .notification-list::-webkit-scrollbar-track { background: transparent; }
 
-.clear-btn {
-  background: none;
-  border: none;
-  color: #004aad;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: color 0.2s ease;
-}
+        .notification-item { padding: 0.8rem 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; align-items: flex-start; transition: background 0.2s; position: relative; }
+        .notification-item:hover { background: #f5f7ff; }
+        .notification-item.unread { background: #f0f7ff; }
+        .notification-item.unread::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 60%; background: #004aad; border-radius: 0 4px 4px 0; }
+        .notification-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+        .notification-icon.user { background: #e3f2fd; color: #1976d2; }
+        .notification-icon.report { background: #fff3e0; color: #f57c00; }
+        .notification-content { flex: 1; }
+        .notification-content p { margin: 0; font-size: 0.86rem; color: #333; line-height: 1.3; }
+        .notification-content .time { color: #999; font-size: 0.75rem; margin-top: 0.25rem; }
+        .notification-empty { padding: 2rem; text-align: center; color: #999; font-size: 0.9rem; }
 
-.clear-btn:hover {
-  color: #003380;
-  text-decoration: underline;
-}
-
-/* ✅ Filter Buttons Section */
-.notification-filters {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #eee;
-  background: #fafafa;
-}
-
-.filter-btn {
-  flex: 1;
-  padding: 0.4rem 0.6rem;
-  font-size: 0.8rem;
-  background: #f2f2f2;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  color: #333;
-}
-
-.filter-btn:hover {
-  background: #004aad;
-  color: #fff;
-}
-
-.filter-btn.active {
-  background: #004aad;
-  color: #fff;
-  border-color: #004aad;
-}
-
-/* ✅ Notification List */
-.notification-list {
-  max-height: 300px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #ccc transparent;
-}
-
-.notification-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.notification-list::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 10px;
-}
-
-.notification-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* ✅ Notification Item */
-.notification-item {
-  padding: 0.8rem 1rem;
-  border-bottom: 1px solid #f0f0f0;
-  display: flex;
-  gap: 0.8rem;
-  align-items: flex-start;
-  transition: background 0.2s;
-}
-
-.notification-item:hover {
-  background: #f5f7ff;
-}
-
-.notification-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 1rem;
-}
-
-.notification-icon.user {
-  background: #e3f2fd;
-  color: #1976d2;
-}
-
-.notification-icon.report {
-  background: #fff3e0;
-  color: #f57c00;
-}
-
-.notification-content {
-  flex: 1;
-}
-
-.notification-content p {
-  margin: 0;
-  font-size: 0.86rem;
-  color: #333;
-  line-height: 1.3;
-}
-
-.notification-content .time {
-  color: #999;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-}
-
-/* ✅ Empty State */
-.notification-empty {
-  padding: 2rem;
-  text-align: center;
-  color: #999;
-  font-size: 0.9rem;
-}
-
-/* ✨ Animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
         .dropdown-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); min-width: 160px; z-index: 1000; }
         .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.85rem; }
@@ -234,7 +94,6 @@
 </head>
 
 <body>
-    <!-- Sidebar -->
     <aside class="sidebar">
         <div>
             <div class="sidebar-header">
@@ -242,9 +101,9 @@
                 <h2>TayabaStrack</h2>
             </div>
            <ul class="sidebar-menu">
-                <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
+                <li class="active"><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
                 <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
-                <li class="active"><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
+                <li><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
             </ul>
         </div>
 
@@ -255,48 +114,50 @@
         </div>
     </aside>
 
-    <!-- Main -->
-<main class="main">
-  <nav class="navbar">
-    <h1>Dashboard</h1>
-    <div class="profile">
-      <div style="position: relative;">
-        <i class="fa fa-bell" id="notificationBell"></i>
-        <span class="badge" id="notificationBadge">0</span>
+    <main class="main">
+        <nav class="navbar">
+            <h1>Dashboard</h1>
+            <div class="profile">
+                <div style="position: relative;">
+                    <i class="fa fa-bell" id="notificationBell"></i>
+                    <span class="badge" id="notificationBadge">0</span>
 
-        <!-- Notification Menu -->
-        <div class="notification-menu" id="notificationMenu">
-          <div class="notification-header">
-            <h3>Notifications</h3>
-            <button class="clear-btn" id="clearNotificationsBtn">Clear all</button>
-          </div>
+                    <div class="notification-menu" id="notificationMenu">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                            <div class="notification-actions">
+                                <button class="action-icon-btn" id="markAllReadBtn" title="Mark all as read">
+                                    <i class="fa fa-check-double"></i>
+                                </button>
+                                <button class="action-icon-btn" id="clearNotificationsBtn" title="Clear all">
+                                    <i class="fa fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
 
-          <!-- ✅ Filter buttons -->
-          <div class="notification-filters">
-            <button class="filter-btn" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="report">Reports</button>
-            <button class="filter-btn" data-filter="user">Users</button>
-            <button class="filter-btn" data-filter="24h">Last 24h</button>
-          </div>
+                        <div class="notification-filters">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="report">Reports</button>
+                            <button class="filter-btn" data-filter="user">Users</button>
+                            <button class="filter-btn" data-filter="24h">Last 24h</button>
+                        </div>
 
-          <div class="notification-list" id="notificationList">
-            <div class="notification-empty">No new notifications</div>
-          </div>
-        </div>
-      </div>
+                        <div class="notification-list" id="notificationList">
+                            <div class="notification-empty">No new notifications</div>
+                        </div>
+                    </div>
+                </div>
 
-      <div class="profile-dropdown" id="profileToggle">
-        <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar" />
-        <span class="username" id="navbarName">---</span>
-        <div class="dropdown-menu" id="dropdownMenu">
-          <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
-        </div>
-      </div>
-    </div>
-  </nav>
+                <div class="profile-dropdown" id="profileToggle">
+                    <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar" />
+                    <span class="username" id="navbarName">---</span>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
 
-
-        <!-- Stats Cards -->
         <section class="stats">
             <div class="card"><i class="fa fa-chart-bar"></i><div><p>Total Reports</p><h2 id="totalReports">0</h2></div></div>
             <div class="card"><i class="fa fa-clock"></i><div><p>Pending</p><h2 id="pendingReports">0</h2></div></div>
@@ -304,7 +165,6 @@
             <div class="card"><i class="fa fa-check-circle"></i><div><p>Completed</p><h2 id="completedReports">0</h2></div></div>
         </section>
 
-        <!-- Reports & Map -->
         <section class="bottom">
             <div class="reports">
                 <h3>Total Reports</h3>
@@ -323,7 +183,6 @@
         </section>
     </main>
 
-    <!-- Google Maps -->
     <script>
         let miniMap;
         window.reportLocations = [];
@@ -364,259 +223,362 @@
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJkfi59FibsnD-dxAdyYUohj36N_bOtfE&callback=initMiniMap"></script>
 
-    <!-- Firebase + Chart -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { 
+    getFirestore, doc, getDoc, collection, getDocs, onSnapshot 
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
-            authDomain: "tayabastrack-23b95.firebaseapp.com",
-            projectId: "tayabastrack-23b95",
-            storageBucket: "tayabastrack-23b95.firebasestorage.app",
-            messagingSenderId: "674055915366",
-            appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
-        };
+  // ===============================
+  // 🔥 FIREBASE CONFIG
+  // ===============================
+  const firebaseConfig = {
+    apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+    authDomain: "tayabastrack-23b95.firebaseapp.com",
+    projectId: "tayabastrack-23b95",
+    storageBucket: "tayabastrack-23b95.firebasestorage.app",
+    messagingSenderId: "674055915366",
+    appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+  };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
 
-        const navbarName = document.getElementById("navbarName");
-        const navbarAvatar = document.getElementById("navbarAvatar");
-        const logoutBtn = document.getElementById("logoutBtn");
+  // ===============================
+  // 🧭 DOM ELEMENTS
+  // ===============================
+  const navbarName = document.getElementById("navbarName");
+  const navbarAvatar = document.getElementById("navbarAvatar");
+  const logoutBtn = document.getElementById("logoutBtn");
 
-        const totalReportsEl = document.getElementById("totalReports");
-        const pendingEl = document.getElementById("pendingReports");
-        const ongoingEl = document.getElementById("ongoingReports");
-        const completedEl = document.getElementById("completedReports");
+  const totalReportsEl = document.getElementById("totalReports");
+  const pendingEl = document.getElementById("pendingReports");
+  const ongoingEl = document.getElementById("ongoingReports");
+  const completedEl = document.getElementById("completedReports");
 
-        let notificationsList = [];
-        let trackedUsers = new Set();
-        let trackedReports = new Set();
+  const notificationBell = document.getElementById("notificationBell");
+  const notificationBadge = document.getElementById("notificationBadge");
+  const notificationMenu = document.getElementById("notificationMenu");
+  const notificationList = document.getElementById("notificationList");
+  const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+  const markAllReadBtn = document.getElementById("markAllReadBtn");
+  const profileToggle = document.getElementById("profileToggle");
+  const dropdownMenu = document.getElementById("dropdownMenu");
 
-        const notificationBell = document.getElementById("notificationBell");
-        const notificationBadge = document.getElementById("notificationBadge");
-        const notificationMenu = document.getElementById("notificationMenu");
-        const notificationList = document.getElementById("notificationList");
-        const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
-        const profileToggle = document.getElementById("profileToggle");
-        const dropdownMenu = document.getElementById("dropdownMenu");
+  // ===============================
+  // 📌 STATE
+  // ===============================
+  let notificationsList = [];
+  let seenNotificationIds = new Set();
+  let trackedUserStatuses = {};
+  let trackedReportIds = new Set();
+  let currentFilter = "all";
 
-        function isBarangayPosition(position) {
-            if (!position) return false;
-            const pos = position.toLowerCase().trim();
-            return pos.includes("barangay captain") || pos.includes("brgy captain") || pos.includes("brgy. captain") || pos.includes("barangay official") || pos.includes("brgy official") || pos.includes("brgy. official");
+  function normalizeStatus(status) {
+    return (status || "").toLowerCase().trim();
+  }
+
+  // ===============================
+  // 🔔 NOTIFICATION UI HANDLERS
+  // ===============================
+  notificationBell.addEventListener("click", (e) => {
+    e.stopPropagation();
+    notificationMenu.classList.toggle("show");
+    dropdownMenu.style.display = "none";
+  });
+
+  clearNotificationsBtn.addEventListener("click", () => {
+    notificationsList = [];
+    seenNotificationIds.clear();
+    updateNotificationUI();
+  });
+
+  markAllReadBtn.addEventListener("click", () => {
+    notificationsList.forEach(n => n.read = true);
+    updateNotificationUI();
+  });
+
+  profileToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdownMenu.style.display =
+      dropdownMenu.style.display === "block" ? "none" : "block";
+    notificationMenu.classList.remove("show");
+  });
+
+  window.addEventListener("click", (e) => {
+    if (!e.target.closest(".profile")) {
+      notificationMenu.classList.remove("show");
+      dropdownMenu.style.display = "none";
+    }
+  });
+
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+      e.target.classList.add("active");
+      currentFilter = e.target.dataset.filter;
+      updateNotificationUI();
+    });
+  });
+
+  function addNotification(type, message, detail) {
+    const cleanMsg = (message || "").trim();
+    const cleanDetail = (detail || "").trim();
+    const timestamp = new Date();
+    const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
+    
+    if (seenNotificationIds.has(id)) return;
+    seenNotificationIds.add(id);
+    
+    notificationsList.unshift({
+      id,
+      type,
+      message: cleanMsg,
+      detail: cleanDetail,
+      timestamp: timestamp,
+      read: false
+    });
+    updateNotificationUI();
+  }
+
+  function updateNotificationUI() {
+    let filtered = [...notificationsList];
+    
+    // Apply filter
+    if (currentFilter === "report") {
+      filtered = filtered.filter((n) => n.type === "report");
+    } else if (currentFilter === "user") {
+      filtered = filtered.filter((n) => n.type === "user");
+    } else if (currentFilter === "24h") {
+      const ago = Date.now() - 24 * 60 * 60 * 1000;
+      filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+    }
+
+    // Sort by timestamp (newest first) - this ensures real-time sorting
+    filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+    // Count unread notifications
+    const unreadCount = notificationsList.filter(n => !n.read).length;
+    if (unreadCount > 0) {
+      notificationBadge.textContent = unreadCount;
+      notificationBadge.classList.add("show");
+    } else {
+      notificationBadge.textContent = "";
+      notificationBadge.classList.remove("show");
+    }
+
+    if (filtered.length === 0) {
+      notificationList.innerHTML = `<div class="notification-empty">No notifications</div>`;
+    } else {
+      notificationList.innerHTML = filtered
+        .map(
+          (n) => `
+        <div class="notification-item ${n.read ? '' : 'unread'}">
+          <div class="notification-icon ${n.type}">
+            ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+          </div>
+          <div class="notification-content">
+            <p><strong>${n.message}</strong></p>
+            <p>${n.detail}</p>
+            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+          </div>
+        </div>`
+        )
+        .join("");
+    }
+  }
+
+  // ===============================
+  // 🧭 NOTIFICATION FETCH & REAL-TIME
+  // ===============================
+  async function setupRealtimeNotifications() {
+    // 📌 Initial fetch: existing approved users
+    const userSnap = await getDocs(collection(db, "users"));
+    userSnap.forEach((docSnap) => {
+      const userId = docSnap.id;
+      const data = docSnap.data();
+      const status = normalizeStatus(data.status);
+      trackedUserStatuses[userId] = status;
+      if (status === "active") {
+        const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+        const position = data.position || "User";
+        addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
+      }
+    });
+
+    // 📌 Real-time: user approval changes
+    onSnapshot(collection(db, "users"), (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        const userId = change.doc.id;
+        const data = change.doc.data();
+        const currentStatus = normalizeStatus(data.status);
+        const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+        const position = data.position || "User";
+
+        if (change.type === "added") {
+          trackedUserStatuses[userId] = currentStatus;
+          if (currentStatus === "active") {
+            addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+          } 
         }
 
-        notificationBell.addEventListener("click", (e) => {
-            e.stopPropagation();
-            notificationMenu.classList.toggle("show");
-            dropdownMenu.style.display = "none";
+        if (change.type === "modified") {
+          const oldStatus = trackedUserStatuses[userId];
+          if (oldStatus !== "active" && currentStatus === "active") {
+            addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+          }
+          trackedUserStatuses[userId] = currentStatus;
+        }
+      });
+    });
+
+    // 📌 Initial fetch: existing reports
+    const reportSnap = await getDocs(collection(db, "reports"));
+    reportSnap.forEach((docSnap) => {
+      const id = docSnap.id;
+      trackedReportIds.add(id);
+      const data = docSnap.data();
+      const barangay = data.barangay || data.location || "Unknown location";
+      const type = data.reportType || data.type || data.projectName || "Report";
+      addNotification("report", "Report submitted", `${type} in ${barangay}`);
+    });
+
+    // 📌 Real-time: new reports
+    onSnapshot(collection(db, "reports"), (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        const id = change.doc.id;
+        const data = change.doc.data();
+        if (change.type === "added" && !trackedReportIds.has(id)) {
+          trackedReportIds.add(id);
+          const barangay = data.barangay || data.location || "Unknown location";
+          const type = data.reportType || data.type || data.projectName || "Report";
+          addNotification("report", "New report submitted", `${type} in ${barangay}`);
+        }
+      });
+    });
+
+    updateNotificationUI();
+    console.log("✅ Notifications active — existing + new");
+  }
+
+  // ===============================
+  // 🖼️ IMAGE FETCH
+  // ===============================
+  async function getImageUrl(imagePath) {
+    try {
+      if (!imagePath) return null;
+      if (imagePath.startsWith("http")) return imagePath;
+      return await getDownloadURL(ref(storage, imagePath));
+    } catch (error) {
+      console.error("Error getting image URL:", error);
+      return null;
+    }
+  }
+
+  // ===============================
+  // 🔐 AUTH & DASHBOARD
+  // ===============================
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return (window.location.href = "logout.html");
+
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (!userDoc.exists() || userDoc.data().position !== "Super Admin") {
+      alert("Unauthorized access! Redirecting...");
+      return (window.location.href = "logout.html");
+    }
+
+    const data = userDoc.data();
+    navbarName.textContent = data.name || data.firstName || "Super Admin";
+    if (data.photoURL || data.profilePic) {
+      navbarAvatar.src = data.photoURL || data.profilePic;
+    }
+
+    await loadDashboardData();
+    await setupRealtimeNotifications();
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "logout.html";
+  });
+
+  // ===============================
+  // 📊 REPORTS DASHBOARD
+  // ===============================
+  async function loadDashboardData() {
+    const snapshot = await getDocs(collection(db, "reports"));
+    let total = 0, pending = 0, ongoing = 0, completed = 0;
+    window.reportLocations = [];
+
+    snapshot.forEach((docSnap) => {
+      const report = docSnap.data();
+      total++;
+      const status = normalizeStatus(report.status);
+      if (status === "pending") pending++;
+      else if (status === "ongoing" || status === "in-progress") ongoing++;
+      else if (["resolved", "completed", "repaired", "posted"].includes(status)) completed++;
+
+      const lat = report.latitude || report.lat || report.location?.latitude;
+      const lng = report.longitude || report.lng || report.location?.longitude;
+      if (lat && lng) {
+        window.reportLocations.push({
+          lat: parseFloat(lat),
+          lng: parseFloat(lng),
+          type: report.reportType || report.type || "Unknown",
+          status: status || "pending"
         });
+      }
+    });
 
-        clearNotificationsBtn.addEventListener("click", () => {
-            notificationsList = [];
-            updateNotificationUI();
-        });
+    totalReportsEl.textContent = total;
+    pendingEl.textContent = pending;
+    ongoingEl.textContent = ongoing;
+    completedEl.textContent = completed;
+    updateChart(completed, ongoing, pending);
+    if (window.miniMap) addReportMarkers();
+    loadReportImages();
+  }
 
-        profileToggle.addEventListener("click", (e) => {
-            e.stopPropagation();
-            dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
-            notificationMenu.classList.remove("show");
-        });
+  let chart;
+  function updateChart(completed, ongoing, pending) {
+    const ctx = document.getElementById("dashboardChart").getContext("2d");
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Completed", "Ongoing", "Pending"],
+        datasets: [{ label: "Reports", data: [completed, ongoing, pending], backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e"] }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  }
 
-        window.addEventListener("click", (e) => {
-            if (!e.target.closest(".profile")) {
-                notificationMenu.classList.remove("show");
-                dropdownMenu.style.display = "none";
-            }
-        });
-
-        function addNotification(type, message, detail) {
-            const notification = {
-                id: Date.now(),
-                type,
-                message,
-                detail,
-                timestamp: new Date()
-            };
-            notificationsList.unshift(notification);
-            updateNotificationUI();
+  async function loadReportImages() {
+    const gallery = document.getElementById("reportImages");
+    gallery.innerHTML = "";
+    const snapshot = await getDocs(collection(db, "reports"));
+    let count = 0;
+    for (const docSnap of snapshot.docs) {
+      if (count >= 6) break;
+      const report = docSnap.data();
+      const imagePath = report.incidentImage || report.imageUrl || report.image;
+      if (imagePath) {
+        const url = await getImageUrl(imagePath);
+        if (url) {
+          const img = document.createElement("img");
+          img.src = url;
+          img.onerror = () => (img.style.display = "none");
+          gallery.appendChild(img);
+          count++;
         }
+      }
+    }
+  }
+</script>
 
-        function updateNotificationUI() {
-            const count = notificationsList.length;
-            if (count > 0) {
-                notificationBadge.textContent = count;
-                notificationBadge.classList.add("show");
-            } else {
-                notificationBadge.textContent = "";
-                notificationBadge.classList.remove("show");
-            }
-
-            if (notificationsList.length === 0) {
-                notificationList.innerHTML = '<div class="notification-empty">No new notifications</div>';
-            } else {
-                notificationList.innerHTML = notificationsList.map(n => `
-                    <div class="notification-item">
-                        <div class="notification-icon ${n.type}">
-                            ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
-                        </div>
-                        <div class="notification-content">
-                            <p><strong>${n.message}</strong></p>
-                            <p>${n.detail}</p>
-                            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function setupRealtimeNotifications() {
-            const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
-            onSnapshot(qNewUsers, (snapshot) => {
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
-                        trackedUsers.add(change.doc.id);
-                        const u = change.doc.data();
-                        if (isBarangayPosition(u.position)) {
-                            addNotification("user", `New registration: ${u.firstName || ""} ${u.surname || ""}`, u.email || "");
-                        }
-                    }
-                });
-            });
-
-            const qReports = query(collection(db, "reports"));
-            onSnapshot(qReports, (snapshot) => {
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === "added" && !trackedReports.has(change.doc.id)) {
-                        trackedReports.add(change.doc.id);
-                        const r = change.doc.data();
-                        addNotification("report", `New report submitted in ${r.barangay || "a barangay"}`, r.reportType || r.type || "");
-                    }
-                });
-            });
-        }
-
-        async function getImageUrl(imagePath) {
-            try {
-                if (!imagePath) return null;
-                if (imagePath.startsWith('http')) return imagePath;
-                
-                const url = await getDownloadURL(ref(storage, imagePath));
-                return url;
-            } catch (error) {
-                console.error("Error getting image URL:", error);
-                return null;
-            }
-        }
-
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) return (window.location.href = "logout.html");
-
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (!userDoc.exists() || userDoc.data().position !== "Super Admin") {
-                alert("Unauthorized access! Redirecting...");
-                return (window.location.href = "logout.html");
-            }
-
-            const data = userDoc.data();
-            navbarName.textContent = data.name || data.firstName || "Super Admin";
-            
-            if (data.photoURL || data.profilePic) {
-                navbarAvatar.src = data.photoURL || data.profilePic;
-            }
-            
-            await loadDashboardData();
-            setupRealtimeNotifications();
-        });
-
-        logoutBtn.addEventListener("click", async () => {
-            await signOut(auth);
-            window.location.href = "logout.html";
-        });
-
-        async function loadDashboardData() {
-            const snapshot = await getDocs(collection(db, "reports"));
-            let total = 0, pending = 0, ongoing = 0, completed = 0;
-            window.reportLocations = [];
-
-            snapshot.forEach(docSnap => {
-                const report = docSnap.data();
-                total++;
-                const status = report.status?.toLowerCase();
-                if (status === "pending") pending++;
-                else if (status === "ongoing" || status === "in-progress") ongoing++;
-                else if (status === "resolved" || status === "completed" || status === "repaired" || status === "posted") completed++;
-
-                const lat = report.latitude || report.lat || report.location?.latitude;
-                const lng = report.longitude || report.lng || report.location?.longitude;
-
-                if (lat && lng) {
-                    window.reportLocations.push({
-                        lat: parseFloat(lat),
-                        lng: parseFloat(lng),
-                        type: report.reportType || report.type || "Unknown",
-                        status: status || "pending"
-                    });
-                }
-            });
-
-            totalReportsEl.textContent = total;
-            pendingEl.textContent = pending;
-            ongoingEl.textContent = ongoing;
-            completedEl.textContent = completed;
-            updateChart(completed, ongoing, pending);
-            if (window.miniMap) addReportMarkers();
-            loadReportImages();
-        }
-
-        let chart;
-        function updateChart(completed, ongoing, pending) {
-            const ctx = document.getElementById("dashboardChart").getContext("2d");
-            if (chart) chart.destroy();
-            chart = new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: ["Completed", "Ongoing", "Pending"],
-                    datasets: [{
-                        label: "Reports",
-                        data: [completed, ongoing, pending],
-                        backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e"]
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } } }
-            });
-        }
-
-        async function loadReportImages() {
-            const gallery = document.getElementById("reportImages");
-            gallery.innerHTML = "";
-            const snapshot = await getDocs(collection(db, "reports"));
-            let count = 0;
-            
-            for (const docSnap of snapshot.docs) {
-                if (count >= 6) break;
-                
-                const report = docSnap.data();
-                const imagePath = report.incidentImage || report.imageUrl || report.image;
-                
-                if (imagePath) {
-                    const imageUrl = await getImageUrl(imagePath);
-                    if (imageUrl) {
-                        const img = document.createElement("img");
-                        img.src = imageUrl;
-                        img.onerror = function() { this.style.display = "none"; };
-                        gallery.appendChild(img);
-                        count++;
-                    }
-                }
-            }
-        }
-    </script>
 </body>
 </html>

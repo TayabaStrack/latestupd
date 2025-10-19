@@ -24,20 +24,36 @@
     .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
     .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none}
     .badge.show{display:flex;align-items:center;justify-content:center}
-    .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);width:320px;max-height:400px;overflow-y:auto;z-index:1000}
+    
+    .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.15);width:340px;max-height:420px;overflow:hidden;z-index:1000;font-family:"Segoe UI",Tahoma,sans-serif;animation:fadeIn 0.2s ease-in-out}
     .notification-menu.show{display:block}
-    .notification-header{padding:1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
-    .notification-header h3{font-size:1rem;color:#333;margin:0}
-    .clear-btn{background:none;border:none;color:#004aad;cursor:pointer;font-size:0.85rem}
-    .notification-item{padding:0.8rem 1rem;border-bottom:1px solid #f0f0f0;display:flex;gap:0.8rem;transition:background 0.2s}
-    .notification-item:hover{background:#f9f9f9}
-    .notification-icon{width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .notification-header{padding:0.9rem 1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f9f9f9}
+    .notification-header h3{font-size:1rem;color:#333;margin:0;font-weight:600}
+    .notification-actions{display:flex;gap:0.5rem;align-items:center}
+    .action-icon-btn{background:none;border:none;color:#666;cursor:pointer;font-size:1rem;padding:0.3rem;transition:color 0.2s ease;display:flex;align-items:center;justify-content:center}
+    .action-icon-btn:hover{color:#004aad}
+    .action-icon-btn i{font-size:0.95rem}
+    .notification-filters{display:flex;justify-content:space-between;gap:0.5rem;padding:0.5rem 1rem;border-bottom:1px solid #eee;background:#fafafa}
+    .filter-btn{flex:1;padding:0.4rem 0.6rem;font-size:0.8rem;background:#f2f2f2;border:1px solid #ddd;border-radius:6px;cursor:pointer;transition:all 0.25s ease;color:#333}
+    .filter-btn:hover{background:#004aad;color:#fff}
+    .filter-btn.active{background:#004aad;color:#fff;border-color:#004aad}
+    .notification-list{max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#ccc transparent}
+    .notification-list::-webkit-scrollbar{width:6px}
+    .notification-list::-webkit-scrollbar-thumb{background:#ccc;border-radius:10px}
+    .notification-list::-webkit-scrollbar-track{background:transparent}
+    .notification-item{padding:0.8rem 1rem;border-bottom:1px solid #f0f0f0;display:flex;gap:0.8rem;align-items:flex-start;transition:background 0.2s;position:relative}
+    .notification-item:hover{background:#f5f7ff}
+    .notification-item.unread{background:#f0f7ff}
+    .notification-item.unread::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:60%;background:#004aad;border-radius:0 4px 4px 0}
+    .notification-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
     .notification-icon.user{background:#e3f2fd;color:#1976d2}
     .notification-icon.report{background:#fff3e0;color:#f57c00}
     .notification-content{flex:1}
-    .notification-content p{margin:0;font-size:0.85rem}
-    .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.2rem}
-    .notification-empty{padding:2rem;text-align:center;color:#999}
+    .notification-content p{margin:0;font-size:0.86rem;color:#333;line-height:1.3}
+    .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.25rem}
+    .notification-empty{padding:2rem;text-align:center;color:#999;font-size:0.9rem}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+    
     .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
     .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
     .username{font-weight:500}
@@ -125,7 +141,20 @@
         <div class="notification-menu" id="notificationMenu">
           <div class="notification-header">
             <h3>Notifications</h3>
-            <button class="clear-btn" id="clearNotificationsBtn">Clear all</button>
+            <div class="notification-actions">
+              <button class="action-icon-btn" id="markAllReadBtn" title="Mark all as read">
+                <i class="fa fa-check-double"></i>
+              </button>
+              <button class="action-icon-btn" id="clearNotificationsBtn" title="Clear all">
+                <i class="fa fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+          <div class="notification-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="report">Reports</button>
+            <button class="filter-btn" data-filter="user">Users</button>
+            <button class="filter-btn" data-filter="24h">Last 24h</button>
           </div>
           <div class="notification-list" id="notificationList">
             <div class="notification-empty">No new notifications</div>
@@ -261,7 +290,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, query, where, orderBy, onSnapshot, getDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, query, where, orderBy, onSnapshot, getDoc, doc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -303,54 +332,188 @@
     const notificationMenu = document.getElementById("notificationMenu");
     const notificationList = document.getElementById("notificationList");
     const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+    const markAllReadBtn = document.getElementById("markAllReadBtn");
     const loadingOverlay = document.getElementById("loadingOverlay");
 
     let reportsUnsub = null;
     let notificationsList = [];
-    let trackedUsers = new Set();
-    let trackedReports = new Set();
+    let seenNotificationIds = new Set();
+    let trackedUserStatuses = {};
+    let trackedReportIds = new Set();
+    let currentFilter = "all";
+
+    function normalizeStatus(status) {
+      return (status || "").toLowerCase().trim();
+    }
+
+    // ===============================
+    // 🔔 NOTIFICATION UI HANDLERS
+    // ===============================
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notificationMenu.classList.toggle("show");
+      dropdownMenu.style.display = "none";
+    });
+
+    clearNotificationsBtn.addEventListener("click", () => {
+      notificationsList = [];
+      seenNotificationIds.clear();
+      updateNotificationUI();
+    });
+
+    markAllReadBtn.addEventListener("click", () => {
+      notificationsList.forEach(n => n.read = true);
+      updateNotificationUI();
+    });
+
+    document.querySelectorAll(".filter-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+        e.target.classList.add("active");
+        currentFilter = e.target.dataset.filter;
+        updateNotificationUI();
+      });
+    });
 
     function addNotification(type, message, detail) {
-      const notification = {id: Date.now(), type, message, detail, timestamp: new Date()};
-      notificationsList.unshift(notification);
+      const cleanMsg = (message || "").trim();
+      const cleanDetail = (detail || "").trim();
+      const timestamp = new Date();
+      const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
+      
+      if (seenNotificationIds.has(id)) return;
+      seenNotificationIds.add(id);
+      
+      notificationsList.unshift({
+        id,
+        type,
+        message: cleanMsg,
+        detail: cleanDetail,
+        timestamp: timestamp,
+        read: false
+      });
       updateNotificationUI();
     }
 
     function updateNotificationUI() {
-      const count = notificationsList.length;
-      if (count > 0) {
-        notificationBadge.textContent = count;
+      let filtered = [...notificationsList];
+      
+      // Apply filter
+      if (currentFilter === "report") {
+        filtered = filtered.filter((n) => n.type === "report");
+      } else if (currentFilter === "user") {
+        filtered = filtered.filter((n) => n.type === "user");
+      } else if (currentFilter === "24h") {
+        const ago = Date.now() - 24 * 60 * 60 * 1000;
+        filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+      }
+
+      // Sort by timestamp (newest first)
+      filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+      // Count unread notifications
+      const unreadCount = notificationsList.filter(n => !n.read).length;
+      if (unreadCount > 0) {
+        notificationBadge.textContent = unreadCount;
         notificationBadge.classList.add("show");
       } else {
         notificationBadge.textContent = "";
         notificationBadge.classList.remove("show");
       }
-      if (notificationsList.length === 0) {
-        notificationList.innerHTML = `<div class="notification-empty">No new notifications</div>`;
-        return;
+
+      if (filtered.length === 0) {
+        notificationList.innerHTML = `<div class="notification-empty">No notifications</div>`;
+      } else {
+        notificationList.innerHTML = filtered
+          .map(
+            (n) => `
+          <div class="notification-item ${n.read ? '' : 'unread'}">
+            <div class="notification-icon ${n.type}">
+              ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+            </div>
+            <div class="notification-content">
+              <p><strong>${n.message}</strong></p>
+              <p>${n.detail}</p>
+              <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            </div>
+          </div>`
+          )
+          .join("");
       }
-      notificationList.innerHTML = notificationsList.map(n => `
-        <div class="notification-item">
-          <div class="notification-icon ${n.type}">
-            ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
-          </div>
-          <div class="notification-content">
-            <p><strong>${n.message}</strong></p>
-            <p>${n.detail}</p>
-            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-          </div>
-        </div>
-      `).join("");
     }
 
-    notificationBell.addEventListener("click", (e) => {
-      e.stopPropagation();
-      notificationMenu.classList.toggle("show");
-    });
-    clearNotificationsBtn.addEventListener("click", () => {
-      notificationsList = [];
+    // ===============================
+    // 🧭 NOTIFICATION FETCH & REAL-TIME
+    // ===============================
+    async function setupRealtimeNotifications() {
+      // 📌 Initial fetch: existing approved users
+      const userSnap = await getDocs(collection(db, "users"));
+      userSnap.forEach((docSnap) => {
+        const userId = docSnap.id;
+        const data = docSnap.data();
+        const status = normalizeStatus(data.status);
+        trackedUserStatuses[userId] = status;
+        if (status === "active") {
+          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+          const position = data.position || "User";
+          addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
+        }
+      });
+
+      // 📌 Real-time: user approval changes
+      onSnapshot(collection(db, "users"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const userId = change.doc.id;
+          const data = change.doc.data();
+          const currentStatus = normalizeStatus(data.status);
+          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+          const position = data.position || "User";
+
+          if (change.type === "added") {
+            trackedUserStatuses[userId] = currentStatus;
+            if (currentStatus === "active") {
+              addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+            }
+          }
+
+          if (change.type === "modified") {
+            const oldStatus = trackedUserStatuses[userId];
+            if (oldStatus !== "active" && currentStatus === "active") {
+              addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+            }
+            trackedUserStatuses[userId] = currentStatus;
+          }
+        });
+      });
+
+      // 📌 Initial fetch: existing reports
+      const reportSnap = await getDocs(collection(db, "reports"));
+      reportSnap.forEach((docSnap) => {
+        const id = docSnap.id;
+        trackedReportIds.add(id);
+        const data = docSnap.data();
+        const barangay = data.barangay || data.location || "Unknown location";
+        const type = data.reportType || data.type || data.projectName || "Report";
+        addNotification("report", "Report submitted", `${type} in ${barangay}`);
+      });
+
+      // 📌 Real-time: new reports
+      onSnapshot(collection(db, "reports"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const id = change.doc.id;
+          const data = change.doc.data();
+          if (change.type === "added" && !trackedReportIds.has(id)) {
+            trackedReportIds.add(id);
+            const barangay = data.barangay || data.location || "Unknown location";
+            const type = data.reportType || data.type || data.projectName || "Report";
+            addNotification("report", "New report submitted", `${type} in ${barangay}`);
+          }
+        });
+      });
+
       updateNotificationUI();
-    });
+      console.log("✅ Notifications active — existing + new");
+    }
 
     function isBarangayPosition(position) {
       if (!position) return false;
@@ -687,13 +850,14 @@
     profileToggle.addEventListener("click", (e) => {
       e.stopPropagation();
       dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+      notificationMenu.classList.remove("show");
     });
 
     window.addEventListener("click", (e) => {
       if (!e.target.closest(".profile-dropdown")) {
         dropdownMenu.style.display = "none";
       }
-      if (!notificationMenu.contains(e.target) && e.target !== notificationBell) {
+      if (!e.target.closest(".notification-menu") && e.target !== notificationBell) {
         notificationMenu.classList.remove("show");
       }
     });
@@ -738,6 +902,9 @@
           navbarAvatar.src = d.photoURL || d.profilePic;
         }
 
+        // ✅ Setup notifications after auth check
+        await setupRealtimeNotifications();
+
         const q=query(collection(db,"reports"),orderBy("createdAt","desc"));
         if(reportsUnsub) reportsUnsub();
         
@@ -768,30 +935,6 @@
               declinedBody.appendChild(row);
             }
           }
-        });
-
-        const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
-        onSnapshot(qNewUsers, (snapshot) => {
-          snapshot.docChanges().forEach(change => {
-            if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
-              trackedUsers.add(change.doc.id);
-              const u = change.doc.data();
-              if (isBarangayPosition(u.position)) {
-                addNotification("user", `New registration: ${u.firstName || ""} ${u.surname || ""}`, u.email);
-              }
-            }
-          });
-        });
-
-        const qReports = query(collection(db, "reports"));
-        onSnapshot(qReports, (snapshot) => {
-          snapshot.docChanges().forEach(change => {
-            if (change.type === "added" && !trackedReports.has(change.doc.id)) {
-              trackedReports.add(change.doc.id);
-              const r = change.doc.data();
-              addNotification("report", `New report submitted in ${r.barangay || "a barangay"}`, r.type || "");
-            }
-          });
         });
 
       } catch(err) {

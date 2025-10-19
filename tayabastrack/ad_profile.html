@@ -4,40 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin Profile | TayabaStrack</title>
-
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
   <style>
-    /* ---------- RESET & BASE ---------- */
     *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:'Segoe UI', Tahoma, sans-serif;
-      display:flex;
-      min-height:100vh;
-      background:#f5f7fb;
-      color:#333;
-      overflow:hidden;
-    }
-
-    /* ---------- SIDEBAR (fixed) ---------- */
-    .sidebar{
-      width:250px;
-      min-width:250px;
-      background:#004aad;
-      color:#fff;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      padding:1rem 0;
-      position:fixed;
-      top:0;
-      left:0;
-      bottom:0;
-      z-index:50;
-      height:100vh;
-      overflow-y:auto;
-    }
+    body{font-family:'Segoe UI', Tahoma, sans-serif;display:flex;min-height:100vh;background:#f5f7fb;color:#333;overflow:hidden}
+    .sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;height:100vh;overflow-y:auto}
     .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
     .sidebar-header img{width:40px}
     .sidebar-header h2{font-size:1.2rem;margin:0}
@@ -45,297 +16,174 @@
     .sidebar-menu li{margin:0.5rem 0}
     .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
     .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
-    .sidebar-footer{
-      text-align:center;
-      padding:1rem;
-      border-top:1px solid rgba(255,255,255,0.2);
-    }
-    .logout-btn {
-      background-color: #d9534f;
-      color: #fff;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background 0.3s;
-      width: 100%;
-    }
-    .logout-btn:hover {
-      background-color: #c9302c;
-    }
-
-    /* ---------- NAVBAR (fixed) ---------- */
-    .navbar{
-      position:fixed;
-      top:0;
-      left:250px;
-      right:0;
-      height:64px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:0 24px;
-      background:#fff;
-      box-shadow:0 2px 6px rgba(0,0,0,.05);
-      z-index:40;
-    }
+    .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2)}
+    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%}
+    .logout-btn:hover{background-color:#c9302c}
+    .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40}
     .navbar h1{font-size:1.4rem;color:#004aad}
     .profile{display:flex;align-items:center;gap:1rem}
-
-     /* Notification Bell */
-    .notification-bell-wrapper { position: relative; cursor: pointer; }
-    .fa-bell { font-size: 1.2rem; position: relative; cursor: pointer; transition: color 0.3s; }
-    .fa-bell:hover { color: #004aad; }
-    .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; min-width: 20px; text-align: center; }
-    .badge.show { display: flex; align-items: center; justify-content: center; }
-
-    /* Notification Menu */
-    .notification-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.15); width: 380px; max-height: 500px; overflow: hidden; z-index: 1000; }
-    .notification-menu.show { display: flex; flex-direction: column; }
-    .notification-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; }
-    .notification-header h3 { font-size: 1rem; color: #333; margin: 0; }
-    .notification-actions { display: flex; gap: 8px; }
-    .action-btn { background: none; border: none; color: #004aad; cursor: pointer; font-size: 0.85rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
-    .action-btn:hover { background: #e3f2fd; }
-    
-    /* Notification Filters */
-    .notification-filters { display: flex; gap: 4px; padding: 8px 12px; border-bottom: 1px solid #eee; background: #fff; }
-    .filter-btn { padding: 4px 12px; border: 1px solid #e0e0e0; background: #fff; color: #666; border-radius: 16px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
-    .filter-btn:hover { background: #f5f5f5; }
-    .filter-btn.active { background: #004aad; color: #fff; border-color: #004aad; }
-    
-    .notification-list { max-height: 360px; overflow-y: auto; }
-    .notification-item { padding: 0.9rem 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; transition: background 0.2s; cursor: pointer; position: relative; }
-    .notification-item:hover { background: #f9f9f9; }
-    .notification-item.unread { background: #e3f2fd; }
-    .notification-item.unread::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #004aad; }
-    .notification-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .notification-icon.user { background: #e3f2fd; color: #1976d2; }
-    .notification-icon.report { background: #fff3e0; color: #f57c00; }
-    .notification-content { flex: 1; }
-    .notification-content p { margin: 0; font-size: 0.85rem; }
-    .notification-content .time { color: #999; font-size: 0.75rem; margin-top: 0.3rem; }
-    .notification-empty { padding: 3rem; text-align: center; color: #999; }
-    .notification-empty i { font-size: 3rem; color: #ddd; margin-bottom: 1rem; }
-
+    .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
+    .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none}
+    .badge.show{display:flex;align-items:center;justify-content:center}
     .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
     .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
     .username{font-weight:500}
-    .dropdown-menu{
-      display:none;
-      position:absolute;
-      top:120%;
-      right:0;
-      background:#fff;
-      border:1px solid #ddd;
-      border-radius:6px;
-      box-shadow:0 4px 8px rgba(0,0,0,.15);
-      min-width:200px;
-      z-index:1000;
-    }
+    .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
     .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
     .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
-
-    .main {
-      margin-left:250px;
-      margin-top:74px;
-      flex:1;
-      display:block;
-      min-width:0;
-      height:calc(100vh - 74px);
-      overflow:hidden;
-    }
-    .content { 
-      flex: 1; 
-      padding: 1.5rem; 
-      overflow-y: auto;
-      height:100%;
-    }
-
-    /* Page grid */
-    .page { padding:28px; display:flex; justify-content:center; width:100% }
-    .profile-section{max-width:1100px; width:100%; display:grid; grid-template-columns: 1fr 420px; gap:20px; align-items:start}
-
-    /* Cards */
+    .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.15);width:340px;max-height:420px;overflow:hidden;z-index:1000;font-family:"Segoe UI",Tahoma,sans-serif;animation:fadeIn 0.2s ease-in-out}
+    .notification-menu.show{display:block}
+    .notification-header{padding:0.9rem 1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f9f9f9}
+    .notification-header h3{font-size:1rem;color:#333;margin:0;font-weight:600}
+    .notification-actions{display:flex;gap:0.5rem;align-items:center}
+    .action-icon-btn{background:none;border:none;color:#666;cursor:pointer;font-size:1rem;padding:0.3rem;transition:color 0.2s ease;display:flex;align-items:center;justify-content:center}
+    .action-icon-btn:hover{color:#004aad}
+    .action-icon-btn i{font-size:0.95rem}
+    .notification-filters{display:flex;justify-content:space-between;gap:0.5rem;padding:0.5rem 1rem;border-bottom:1px solid #eee;background:#fafafa}
+    .filter-btn{flex:1;padding:0.4rem 0.6rem;font-size:0.8rem;background:#f2f2f2;border:1px solid #ddd;border-radius:6px;cursor:pointer;transition:all 0.25s ease;color:#333}
+    .filter-btn:hover{background:#004aad;color:#fff}
+    .filter-btn.active{background:#004aad;color:#fff;border-color:#004aad}
+    .notification-list{max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#ccc transparent}
+    .notification-list::-webkit-scrollbar{width:6px}
+    .notification-list::-webkit-scrollbar-thumb{background:#ccc;border-radius:10px}
+    .notification-list::-webkit-scrollbar-track{background:transparent}
+    .notification-item{padding:0.8rem 1rem;border-bottom:1px solid #f0f0f0;display:flex;gap:0.8rem;align-items:flex-start;transition:background 0.2s;position:relative}
+    .notification-item:hover{background:#f5f7ff}
+    .notification-item.unread{background:#f0f7ff}
+    .notification-item.unread::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:60%;background:#004aad;border-radius:0 4px 4px 0}
+    .notification-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
+    .notification-icon.user{background:#e3f2fd;color:#1976d2}
+    .notification-icon.report{background:#fff3e0;color:#f57c00}
+    .notification-content{flex:1}
+    .notification-content p{margin:0;font-size:0.86rem;color:#333;line-height:1.3}
+    .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.25rem}
+    .notification-empty{padding:2rem;text-align:center;color:#999;font-size:0.9rem}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+    .main{margin-left:250px;margin-top:74px;flex:1;display:block;min-width:0;height:calc(100vh - 74px);overflow-y:auto;overflow-x:hidden}
+    .content{flex:1;padding:1.5rem;overflow-y:auto;height:100%}
+    .page{padding:28px;display:flex;justify-content:center;width:100%}
+    .profile-section{max-width:1100px;width:100%;display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start}
     .card{background:white;border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(13,34,85,0.06)}
     .profile-card .top{display:flex;gap:18px;align-items:center}
     .profile-card img.profile-main{width:120px;height:120px;border-radius:50%;object-fit:cover}
     .profile-info{margin-top:12px}
     .profile-info label{display:block;font-weight:700;font-size:13px;margin-top:10px}
     .profile-info input{width:100%;padding:8px;border-radius:8px;border:1px solid #d7dce6;margin-top:6px;font-size:14px;background:#fbfdff}
-
     .btn{background:#004aad;color:white;padding:8px 12px;border-radius:8px;border:0;cursor:pointer;margin-top:12px}
     .btn:hover{opacity:0.95}
-
-    /* Account card */
     .account-card h2{color:#0b3e89;margin-bottom:8px}
     .account-meta p{margin:6px 0;font-size:14px}
-
-    /* Google Calendar Container */
-    .calendar-container {
-      margin-top: 20px;
-      border-radius: 10px;
-      overflow: auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .calendar-container iframe {
-      width: 100%;
-      height: 300px;
-      border: 0;
-      border-radius: 10px;
-    }
-
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .calendar-header h3 {
-      color: #0b3e89;
-      font-size: 1.1rem;
-      margin: 0;
-    }
-
-    .sync-btn {
-      background: #34a853;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.3s;
-    }
-
-    .sync-btn:hover {
-      background: #2d8e47;
-    }
-
-    .sync-btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-
-    .sync-status {
-      font-size: 0.75rem;
-      color: #666;
-      margin-top: 8px;
-      text-align: center;
-    }
-
-    /* Modal */
-    .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:50}
-    .modal .content{background:white;padding:20px;border-radius:10px;width:420px;max-width:95%;box-shadow:0 14px 40px rgba(2,6,23,0.15);max-height:90vh;overflow-y:auto}
-    .modal .content h2{color:#004aad;margin-bottom:16px;text-align:center}
-    .modal input[type="text"], .modal input[type="email"], .modal input[type="tel"], .modal textarea{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #d7dce6;font-size:14px}
-    .modal label{display:block;font-weight:600;margin-top:12px;font-size:13px;color:#333}
-    
-    .photo-upload-section{text-align:center;margin-bottom:16px;padding:16px;background:#f9fafb;border-radius:8px}
-    .photo-upload-section .preview{display:block;margin:12px auto;border-radius:50%;width:120px;height:120px;object-fit:cover;border:3px solid #004aad}
-    .upload-btn-wrapper{position:relative;display:inline-block;margin-top:10px}
+    .calendar-container{margin-top:20px;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);background:#fff;position:relative;max-width:100%}
+    .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .calendar-header h3{color:#0b3e89;font-size:1.1rem;margin:0}
+    .sync-status{font-size:0.75rem;color:#666;margin-top:8px;text-align:center;padding:8px;background:#f0f8ff;border-radius:6px}
+    .calendar-view{background:#fff;border-radius:8px;overflow:hidden;width:100%}
+    .calendar-nav{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#004aad;color:#fff}
+    .calendar-nav button{background:rgba(255,255,255,0.2);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:13px}
+    .calendar-nav button:hover{background:rgba(255,255,255,0.3)}
+    .calendar-nav h3{margin:0;font-size:1rem}
+    .calendar-weekdays{display:grid;grid-template-columns:repeat(7,1fr);background:#f5f7fb;border-bottom:2px solid #e0e0e0}
+    .calendar-weekdays div{padding:6px;text-align:center;font-weight:600;font-size:11px;color:#666}
+    .calendar-days{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#e0e0e0}
+    .calendar-day{background:#fff;min-height:55px;padding:4px;position:relative;cursor:pointer;transition:background 0.2s;display:flex;flex-direction:column}
+    .calendar-day:hover{background:#f9f9f9}
+    .calendar-day.other-month{background:#fafafa;color:#999}
+    .calendar-day.today{background:#e3f2fd;font-weight:700}
+    .calendar-day-number{font-size:11px;font-weight:600;color:#333;margin-bottom:2px}
+    .calendar-day.other-month .calendar-day-number{color:#999}
+    .event-indicators{display:flex;gap:2px;flex-wrap:wrap;margin-top:auto;padding-top:2px}
+    .event-dot{width:7px;height:7px;border-radius:50%;cursor:pointer;transition:transform 0.2s}
+    .event-dot:hover{transform:scale(1.4)}
+    .event-dot.start{background:#1cc88a}
+    .event-dot.end{background:#f6c23e}
+    .event-dot.ongoing{background:#004aad}
+    .event-tooltip{position:fixed;background:white;border:2px solid #004aad;border-radius:8px;padding:16px;box-shadow:0 6px 20px rgba(0,0,0,0.3);z-index:10000;min-width:320px;max-width:400px;font-size:13px;display:none;pointer-events:none}
+    .event-tooltip.show{display:block}
+    .event-tooltip-title{font-weight:700;color:#004aad;margin-bottom:12px;font-size:16px;border-bottom:2px solid #004aad;padding-bottom:8px}
+    .event-tooltip-section{margin:10px 0;line-height:1.6}
+    .event-tooltip-label{font-weight:600;color:#666;display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+    .event-tooltip-value{color:#222;font-size:14px;display:block}
+    .event-tooltip-image{width:100%;max-height:180px;object-fit:cover;border-radius:6px;margin-top:12px;border:2px solid #e0e0e0}
+    .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;padding:20px}
+    .modal-content{background:white;border-radius:12px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;animation:modalSlideIn 0.3s ease-out}
+    @keyframes modalSlideIn{from{opacity:0;transform:translateY(-30px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .modal-header{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:20px 24px;border-radius:12px 12px 0 0;position:relative}
+    .modal-header h2{color:#fff;margin:0;font-size:1.3rem;font-weight:600}
+    .modal-close{position:absolute;top:20px;right:24px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+    .modal-close:hover{background:rgba(255,255,255,0.3)}
+    .modal-body{padding:24px}
+    .photo-upload-section{text-align:center;margin-bottom:24px;padding:20px;background:linear-gradient(135deg,#f0f7ff 0%,#e3f2fd 100%);border-radius:10px;border:2px dashed #004aad}
+    .photo-upload-section .preview{display:block;margin:0 auto 16px;border-radius:50%;width:100px;height:100px;object-fit:cover;border:4px solid #004aad;box-shadow:0 4px 12px rgba(0,74,173,0.2)}
+    .upload-btn-wrapper{position:relative;display:inline-block}
     .upload-btn-wrapper input[type=file]{display:none}
-    .upload-btn{background:#004aad;color:white;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;display:inline-block}
-    .upload-btn:hover{opacity:0.9}
-
-    .btn-group{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
-    .btn-cancel{background:#6c757d}
-    .btn-cancel:hover{background:#5a6268}
-
-    /* Notification Modal */
-    #notificationModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
-    #notificationModal > div { background: #fff; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-    .modal-filter-btn { padding: 0.5rem 1rem; border: 1px solid #ddd; background: #fff; color: #333; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
-    .modal-filter-btn.active { background: #004aad; color: #fff; border-color: #004aad; }
-
-    /* small screens */
+    .upload-btn{background:#004aad;color:white;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:all 0.3s;border:none}
+    .upload-btn:hover{background:#00327a;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,74,173,0.3)}
+    .upload-hint{font-size:12px;color:#666;margin-top:10px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .form-field{display:flex;flex-direction:column}
+    .form-field.full-width{grid-column:1 / -1}
+    .form-field label{font-weight:600;margin-bottom:6px;font-size:13px;color:#333;display:flex;align-items:center;gap:6px}
+    .form-field label i{color:#004aad;font-size:14px}
+    .form-field input{padding:10px 12px;border-radius:8px;border:1px solid #d7dce6;font-size:14px;transition:all 0.2s;background:#fff}
+    .form-field input:focus{outline:none;border-color:#004aad;box-shadow:0 0 0 3px rgba(0,74,173,0.1)}
+    .modal-footer{padding:20px 24px;background:#f9fafb;border-radius:0 0 12px 12px;display:flex;gap:12px;justify-content:flex-end;border-top:1px solid #e0e0e0}
+    .modal-footer .btn{margin:0;min-width:100px;padding:10px 20px;font-weight:600;font-size:14px;transition:all 0.3s}
+    .btn-cancel{background:#6c757d;color:#fff}
+    .btn-cancel:hover{background:#5a6268;transform:translateY(-2px)}
+    .btn-save{background:#004aad;color:#fff}
+    .btn-save:hover{background:#00327a;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,74,173,0.3)}
     @media (max-width:980px){
-      .profile-section{grid-template-columns:1fr; padding-bottom:40px}
-      .sidebar{
-        left:-250px;
-        transition:left 0.3s;
-      }
-      .sidebar.mobile-open{
-        left:0;
-      }
-      .navbar{
-        left:0;
-      }
-      .main{
-        margin-left:0;
-      }
-      .mobile-menu-btn{
-        display:block !important;
-      }
+      .profile-section{grid-template-columns:1fr;padding-bottom:40px}
+      .sidebar{left:-250px;transition:left 0.3s}
+      .sidebar.mobile-open{left:0}
+      .navbar{left:0}
+      .main{margin-left:0}
+      .mobile-menu-btn{display:block !important}
+      .calendar-day{min-height:45px}
+      .event-dot{width:6px;height:6px}
+      .form-grid{grid-template-columns:1fr}
+      .modal-content{max-width:95%}
     }
-    
-    .mobile-menu-btn{
-      display:none;
-      background:none;
-      border:none;
-      color:#004aad;
-      font-size:1.5rem;
-      cursor:pointer;
-      padding:0.5rem;
-    }
+    .mobile-menu-btn{display:none;background:none;border:none;color:#004aad;font-size:1.5rem;cursor:pointer;padding:0.5rem}
   </style>
 </head>
 <body>
-
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div>
-      <div class="sidebar-header">
-        <img src="logu.png" alt="Logo">
-        <h2>TayabaStrack</h2>
-      </div>
-      <ul class="sidebar-menu">
-        <li><a href="ad_dashboard.html"><i class="fa fa-home"></i>&nbsp;Dashboard</a></li>
-        <li><a href="ad_reports.html"><i class="fa fa-tasks"></i>&nbsp;Manage Reports</a></li>
-        <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i>&nbsp;Map</a></li>
-        <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i>&nbsp;User Management</a></li>
-        <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i>&nbsp;Report Bulletin</a></li>
-      </ul>
-    </div>
-    <div class="sidebar-footer">
-      <button class="logout-btn" id="logoutBtn">
-        <i class="fa fa-sign-out-alt"></i> Logout
-      </button>
-    </div>
-  </aside>
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="logu.png" alt="Logo" class="logo" />
+                <h2>TayabaStrack</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="ad_dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
+                <li><a href="ad_reports.html"><i class="fa fa-tasks"></i> Manage Reports</a></li>
+                <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
+                <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
+                <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fa fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </aside>
 
   <nav class="navbar">
     <div style="display:flex;align-items:center;gap:1rem;">
-      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-        <i class="fa fa-bars"></i>
-      </button>
-      <h1>User Profile</h1>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fa fa-bars"></i></button>
+      <h1>My Profile</h1>
     </div>
     <div class="profile">
       <div style="position:relative">
         <i class="fa fa-bell" id="notificationBell"></i>
         <span class="badge" id="notificationBadge">0</span>
-        
-        <!-- Notification Menu -->
         <div class="notification-menu" id="notificationMenu">
           <div class="notification-header">
             <h3>Notifications</h3>
             <div class="notification-actions">
-              <button class="action-btn" id="markAllReadBtn" title="Mark all as read">
-                <i class="fa fa-check-double"></i>
-              </button>
-              <button class="action-btn" id="clearAllBtn" title="Clear all">
-                <i class="fa fa-trash"></i>
-              </button>
-              <button class="action-btn" id="viewHistoryBtn" title="View history">
-                <i class="fa fa-history"></i>
-              </button>
+              <button class="action-icon-btn" id="markAllReadBtn" title="Mark all as read"><i class="fa fa-check-double"></i></button>
+              <button class="action-icon-btn" id="clearNotificationsBtn" title="Clear all"><i class="fa fa-trash-alt"></i></button>
             </div>
           </div>
           <div class="notification-filters">
@@ -345,62 +193,48 @@
             <button class="filter-btn" data-filter="24h">Last 24h</button>
           </div>
           <div class="notification-list" id="notificationList">
-            <div class="notification-empty">
-              <i class="fa fa-bell-slash"></i>
-              <p>No new notifications</p>
-            </div>
+            <div class="notification-empty">No new notifications</div>
           </div>
         </div>
       </div>
-
-      
-      <img src="image.png" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
-      <div class="dropdown-menu" id="dropdownMenu">
-        <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
+      <div class="profile-dropdown" id="profileToggle">
+        <img src="image.png" alt="avatar" class="avatar" id="navAvatar">
+        <span class="username" id="navUsername">Loading...</span>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+        </div>
       </div>
-      <div id="navUsername" style="font-weight:600"></div>
     </div>
   </nav>
 
-  <!-- Main -->
   <main class="main">
     <div class="page">
       <div class="profile-section">
-
-        <!-- Left: Profile Card -->
         <section class="card profile-card">
           <div class="top">
             <img src="image.png" id="profilePic" alt="profile" class="profile-main">
             <div>
               <div style="font-size:18px;font-weight:700;color:#0b3e89" id="displayName">Loading...</div>
-              <div style="margin-top:6px;color:#6b7380" id="displayRole">Administrator</div>
+              <div style="margin-top:6px;color:#6b7380" id="displayRole">Admin</div>
             </div>
           </div>
-
           <div class="profile-info">
             <label>Full Name</label>
             <input id="cardName" readonly>
-
             <label>ID</label>
             <input id="cardID" readonly>
-
             <label>Email</label>
             <input id="cardEmail" readonly>
-
             <label>Phone</label>
             <input id="cardPhone" readonly>
-
             <label>Address</label>
             <input id="cardAddress" readonly>
-
             <label>Gender</label>
             <input id="cardGender" readonly>
           </div>
-
           <button class="btn" onclick="openEditModal()">Edit Profile</button>
         </section>
 
-        <!-- Right: Account Info + Google Calendar -->
         <aside class="card account-card">
           <h2>Account Info</h2>
           <div class="account-meta">
@@ -408,27 +242,25 @@
             <p><strong>Registered:</strong> <span id="registeredAt">—</span></p>
             <p><strong>Last Login:</strong> <span id="lastLogin">—</span></p>
           </div>
-
-          <div style="margin-top: 24px;">
+          <div style="margin-top:24px;">
             <div class="calendar-header">
-              <h3><i class="fa fa-calendar"></i> My Calendar</h3>
-              <button class="sync-btn" id="syncCalendarBtn" onclick="syncCalendarEvents()">
-                <i class="fa fa-sync"></i>
-                Sync with Firebase
-              </button>
+              <h3><i class="fa fa-calendar"></i> Inspection Calendar</h3>
             </div>
-            
             <div class="calendar-container">
-              <iframe 
-                id="googleCalendar"
-                src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=Asia%2FManila&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&mode=MONTH"
-                frameborder="0" 
-                scrolling="no">
-              </iframe>
+              <div class="calendar-view">
+                <div class="calendar-nav">
+                  <button onclick="previousMonth()"><i class="fa fa-chevron-left"></i></button>
+                  <h3 id="currentMonthYear"></h3>
+                  <button onclick="nextMonth()"><i class="fa fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-weekdays">
+                  <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                </div>
+                <div class="calendar-days" id="calendarDays"></div>
+              </div>
             </div>
-            
             <div class="sync-status" id="syncStatus">
-              Last synced: Never
+              <i class="fa fa-check-circle" style="color:#1cc88a"></i> Auto-syncing ongoing reports...
             </div>
           </div>
         </aside>
@@ -436,671 +268,271 @@
     </div>
   </main>
 
-  <!-- Edit Profile Modal -->
+  <div class="event-tooltip" id="eventTooltip">
+    <div class="event-tooltip-title" id="tooltipTitle"></div>
+    <div class="event-tooltip-section">
+      <span class="event-tooltip-label">Project Name</span>
+      <span class="event-tooltip-value" id="tooltipProjectName"></span>
+    </div>
+    <div class="event-tooltip-section">
+      <span class="event-tooltip-label">Barangay</span>
+      <span class="event-tooltip-value" id="tooltipBarangay"></span>
+    </div>
+    <div class="event-tooltip-section">
+      <span class="event-tooltip-label">Contractor & Supplier</span>
+      <span class="event-tooltip-value" id="tooltipContractorSupplier"></span>
+    </div>
+    <div class="event-tooltip-section">
+      <span class="event-tooltip-label">Allocated Budget</span>
+      <span class="event-tooltip-value" id="tooltipBudget"></span>
+    </div>
+    <img id="tooltipImage" class="event-tooltip-image" style="display:none;" alt="Project">
+  </div>
+
   <div class="modal" id="editModal">
-    <div class="content">
-      <h2>Edit Profile</h2>
-
-      <div class="photo-upload-section">
-        <img id="previewImg" class="preview" src="image.png" alt="Profile Preview">
-        <div class="upload-btn-wrapper">
-          <label class="upload-btn">
-            <i class="fa fa-camera"></i> Choose Photo
-            <input type="file" id="editPhoto" accept="image/*">
-          </label>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fa fa-user-edit"></i> Edit Profile</h2>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="photo-upload-section">
+          <img id="previewImg" class="preview" src="image.png" alt="Profile Preview">
+          <div class="upload-btn-wrapper">
+            <label class="upload-btn">
+              <i class="fa fa-camera"></i>
+              <span>Choose Photo</span>
+              <input type="file" id="editPhoto" accept="image/*">
+            </label>
+          </div>
+          <div class="upload-hint">JPG, PNG • Max 5MB</div>
         </div>
-        <div style="font-size:12px;color:#666;margin-top:8px">Upload a profile picture (JPG, PNG)</div>
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label><i class="fa fa-user"></i> Full Name</label>
+            <input type="text" id="editName" placeholder="Enter full name">
+          </div>
+          <div class="form-field">
+            <label><i class="fa fa-id-card"></i> ID Number</label>
+            <input type="text" id="editID" placeholder="Enter ID">
+          </div>
+          <div class="form-field">
+            <label><i class="fa fa-venus-mars"></i> Gender</label>
+            <input type="text" id="editGender" placeholder="Enter gender">
+          </div>
+          <div class="form-field full-width">
+            <label><i class="fa fa-envelope"></i> Email Address</label>
+            <input type="email" id="editEmail" placeholder="Enter email">
+          </div>
+          <div class="form-field full-width">
+            <label><i class="fa fa-phone"></i> Phone Number</label>
+            <input type="tel" id="editPhone" placeholder="Enter phone number">
+          </div>
+          <div class="form-field full-width">
+            <label><i class="fa fa-map-marker-alt"></i> Address</label>
+            <input type="text" id="editAddress" placeholder="Enter address">
+          </div>
+        </div>
       </div>
-
-      <label>Full Name</label>
-      <input type="text" id="editName" placeholder="Full name">
-      
-      <label>ID</label>
-      <input type="text" id="editID" placeholder="ID">
-      
-      <label>Email</label>
-      <input type="email" id="editEmail" placeholder="Email">
-      
-      <label>Phone</label>
-      <input type="tel" id="editPhone" placeholder="Phone">
-      
-      <label>Address</label>
-      <input type="text" id="editAddress" placeholder="Address">
-      
-      <label>Gender</label>
-      <input type="text" id="editGender" placeholder="Gender">
-
-      <div class="btn-group">
-        <button class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
-        <button class="btn" onclick="saveEdit()" id="saveBtn">
-          <i class="fa fa-save"></i> Save Changes
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Notification Modal -->
-  <div id="notificationModal">
-    <div>
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #eee;">
-        <h2 style="margin: 0; color: #004aad; font-size: 1.3rem;">Notification History</h2>
-        <button onclick="window.closeNotificationModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">×</button>
-      </div>
-
-      <div style="display: flex; gap: 0.5rem; padding: 1rem; border-bottom: 1px solid #eee; flex-wrap: wrap;">
-        <button class="modal-filter-btn active" onclick="window.filterNotifications('all')">All</button>
-        <button class="modal-filter-btn" onclick="window.filterNotifications('report')">Reports</button>
-        <button class="modal-filter-btn" onclick="window.filterNotifications('user')">Users</button>
-        <button class="modal-filter-btn" onclick="window.filterNotifications('24h')">Last 24h</button>
-      </div>
-
-      <div id="notificationModalList" style="flex: 1; overflow-y: auto; padding: 0;"></div>
-
-      <div style="padding: 1rem; border-top: 1px solid #eee; display: flex; gap: 0.5rem;">
-        <button onclick="window.markAllNotificationsAsRead()" style="flex: 1; padding: 0.7rem; background: #004aad; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Mark all as read</button>
-        <button onclick="window.clearAllNotifications()" style="flex: 1; padding: 0.7rem; background: #f0f0f0; color: #333; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Clear all</button>
+      <div class="modal-footer">
+        <button class="btn btn-cancel" onclick="closeEditModal()"><i class="fa fa-times"></i> Cancel</button>
+        <button class="btn btn-save" onclick="saveEdit()" id="saveBtn"><i class="fa fa-save"></i> Save Changes</button>
       </div>
     </div>
   </div>
 
-  <!-- Notification System -->
   <script>
-    function toggleMobileMenu() {
-      document.getElementById('sidebar').classList.toggle('mobile-open');
-    }
+    function toggleMobileMenu(){document.querySelector('.sidebar').classList.toggle('mobile-open')}
+    document.addEventListener('click',function(e){const sidebar=document.querySelector('.sidebar');const menuBtn=document.querySelector('.mobile-menu-btn');if(window.innerWidth<=980&&!sidebar.contains(e.target)&&!menuBtn.contains(e.target)){sidebar.classList.remove('mobile-open')}});
 
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', function(e) {
-      const sidebar = document.getElementById('sidebar');
-      const menuBtn = document.querySelector('.mobile-menu-btn');
-      if (window.innerWidth <= 980 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-        sidebar.classList.remove('mobile-open');
-      }
-    });
+    let currentUser=null;
+    let ongoingReports=[];
+    let currentDate=new Date();
+    let selectedMonth=currentDate.getMonth();
+    let selectedYear=currentDate.getFullYear();
+    let notificationsList=[];
+    let seenNotificationIds=new Set();
+    let trackedUserStatuses={};
+    let trackedReportIds=new Set();
+    let currentFilter="all";
 
-    function initNotificationSound() {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      return function playChime() {
-        try {
-          const now = audioContext.currentTime;
-          const osc = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          osc.connect(gain);
-          gain.connect(audioContext.destination);
-          osc.frequency.setValueAtTime(1046.50, now);
-          osc.frequency.setValueAtTime(783.99, now + 0.1);
-          gain.gain.setValueAtTime(0.3, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-          osc.start(now);
-          osc.stop(now + 0.6);
-        } catch (error) {
-          console.log("Chime sound error:", error);
-        }
-      };
-    }
+    function normalizeStatus(status){return(status||"").toLowerCase().trim()}
 
-    let allNotifications = [];
-    const playChime = initNotificationSound();
+    function addNotification(type,message,detail){const cleanMsg=(message||"").trim();const cleanDetail=(detail||"").trim();const timestamp=new Date();const id=`${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;if(seenNotificationIds.has(id))return;seenNotificationIds.add(id);notificationsList.unshift({id,type,message:cleanMsg,detail:cleanDetail,timestamp:timestamp,read:false});updateNotificationUI()}
 
-    function updateNotificationUI() {
-      const badge = document.getElementById('notificationBadge');
-      const list = document.getElementById('notificationList');
-      
-      const unreadCount = allNotifications.filter(n => !n.read).length;
-      
-      if (unreadCount > 0) {
-        badge.textContent = unreadCount;
-        badge.classList.add("show");
-      } else {
-        badge.textContent = "";
-        badge.classList.remove("show");
-      }
+    function updateNotificationUI(){let filtered=[...notificationsList];if(currentFilter==="report"){filtered=filtered.filter((n)=>n.type==="report")}else if(currentFilter==="user"){filtered=filtered.filter((n)=>n.type==="user")}else if(currentFilter==="24h"){const ago=Date.now()-24*60*60*1000;filtered=filtered.filter((n)=>n.timestamp.getTime()>ago)}filtered.sort((a,b)=>b.timestamp.getTime()-a.timestamp.getTime());const unreadCount=notificationsList.filter(n=>!n.read).length;const notificationBadge=document.getElementById("notificationBadge");if(unreadCount>0){notificationBadge.textContent=unreadCount;notificationBadge.classList.add("show")}else{notificationBadge.textContent="";notificationBadge.classList.remove("show")}const notificationList=document.getElementById("notificationList");if(filtered.length===0){notificationList.innerHTML='<div class="notification-empty">No notifications</div>'}else{notificationList.innerHTML=filtered.map((n)=>`<div class="notification-item ${n.read?'':'unread'}"><div class="notification-icon ${n.type}">${n.type==="user"?'<i class="fa fa-user"></i>':'<i class="fa fa-flag"></i>'}</div><div class="notification-content"><p><strong>${n.message}</strong></p><p>${n.detail}</p><span class="time">${n.timestamp.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span></div></div>`).join("")}}
 
-      const recentNotifications = allNotifications.slice(0, 5);
-      if (allNotifications.length === 0) {
-        list.innerHTML = `<div class="notification-empty">No notifications</div>`;
-      } else {
-        list.innerHTML = recentNotifications.map(n => `
-          <div class="notification-item ${n.read ? 'read' : 'unread'}" onclick="window.markNotificationAsRead('${n.id}')">
-            <div class="notification-icon ${n.type}">
-              ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
-            </div>
-            <div class="notification-content">
-              <p><strong>${n.message}</strong></p>
-              <p>${n.detail}</p>
-              <span class="time">${new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-            </div>
-            ${!n.read ? '<div class="unread-indicator"></div>' : ''}
-          </div>
-        `).join('');
+    const notificationBell=document.getElementById("notificationBell");
+    const notificationMenu=document.getElementById("notificationMenu");
+    const clearNotificationsBtn=document.getElementById("clearNotificationsBtn");
+    const markAllReadBtn=document.getElementById("markAllReadBtn");
 
-        if (allNotifications.length > 5) {
-          list.innerHTML += `
-            <div style="padding: 0.8rem 1rem; border-top: 1px solid #eee; text-align: center;">
-              <button onclick="window.openNotificationModal()" style="background: none; border: none; color: #004aad; cursor: pointer; font-weight: 500; font-size: 0.85rem;">
-                View all (${allNotifications.length}) →
-              </button>
-            </div>
-          `;
-        }
-      }
-    }
+    notificationBell.addEventListener("click",(e)=>{e.stopPropagation();notificationMenu.classList.toggle("show");document.getElementById("dropdownMenu").style.display="none"});
+    clearNotificationsBtn.addEventListener("click",()=>{notificationsList=[];seenNotificationIds.clear();updateNotificationUI()});
+    markAllReadBtn.addEventListener("click",()=>{notificationsList.forEach(n=>n.read=true);updateNotificationUI()});
 
-    window.openNotificationModal = function() {
-      document.getElementById('notificationModal').style.display = 'flex';
-      window.filterNotifications('all');
-    };
+    document.querySelectorAll(".filter-btn").forEach((btn)=>{btn.addEventListener("click",(e)=>{document.querySelectorAll(".filter-btn").forEach((b)=>b.classList.remove("active"));e.target.classList.add("active");currentFilter=e.target.dataset.filter;updateNotificationUI()})});
 
-    window.closeNotificationModal = function() {
-      document.getElementById('notificationModal').style.display = 'none';
-    };
+    async function setupRealtimeNotifications(db){const{collection,getDocs,onSnapshot}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");const userSnap=await getDocs(collection(db,"users"));userSnap.forEach((docSnap)=>{const userId=docSnap.id;const data=docSnap.data();const status=normalizeStatus(data.status);trackedUserStatuses[userId]=status});onSnapshot(collection(db,"users"),(snapshot)=>{snapshot.docChanges().forEach((change)=>{const userId=change.doc.id;const data=change.doc.data();const currentStatus=normalizeStatus(data.status);const fullName=data.name||`${data.firstName||""} ${data.lastName||""}`.trim()||"Unknown User";const position=data.position||"User";if(change.type==="added"){trackedUserStatuses[userId]=currentStatus;if(currentStatus==="active"){addNotification("user",`New user approved: ${fullName}`,`Position: ${position}`)}}if(change.type==="modified"){const oldStatus=trackedUserStatuses[userId];if(oldStatus!=="active"&&currentStatus==="active"){addNotification("user",`User approved: ${fullName}`,`Position: ${position}`)}trackedUserStatuses[userId]=currentStatus}})});const reportSnap=await getDocs(collection(db,"reports"));reportSnap.forEach((docSnap)=>{trackedReportIds.add(docSnap.id)});onSnapshot(collection(db,"reports"),(snapshot)=>{snapshot.docChanges().forEach((change)=>{const id=change.doc.id;const data=change.doc.data();if(change.type==="added"&&!trackedReportIds.has(id)){trackedReportIds.add(id);const barangay=data.barangay||data.location||"Unknown location";const type=data.reportType||data.type||data.projectName||"Report";addNotification("report","New report submitted",`${type} in ${barangay}`)}})});updateNotificationUI()}
 
-    window.filterNotifications = function(filter) {
-      let notifications = [];
-      if (filter === 'all') {
-        notifications = allNotifications;
-      } else if (filter === 'report') {
-        notifications = allNotifications.filter(n => n.type === 'report');
-      } else if (filter === 'user') {
-        notifications = allNotifications.filter(n => n.type === 'user');
-      } else if (filter === '24h') {
-        const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
-        notifications = allNotifications.filter(n => n.timestamp > twentyFourHoursAgo);
-      }
+    function previousMonth(){selectedMonth--;if(selectedMonth<0){selectedMonth=11;selectedYear--}renderCalendar()}
+    function nextMonth(){selectedMonth++;if(selectedMonth>11){selectedMonth=0;selectedYear++}renderCalendar()}
 
-      const list = document.getElementById('notificationModalList');
-      if (notifications.length === 0) {
-        list.innerHTML = '<div style="padding: 2rem; text-align: center; color: #999;">No notifications</div>';
-      } else {
-        list.innerHTML = notifications.map(n => `
-          <div style="padding: 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; ${n.read ? 'background: #f9f9f9;' : 'background: #f0f6ff;'}">
-            <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; ${n.type === 'user' ? 'background: #e3f2fd; color: #1976d2;' : 'background: #fff3e0; color: #f57c00;'}">
-              ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
-            </div>
-            <div style="flex: 1;">
-              <p style="margin: 0 0 0.3rem 0; font-weight: 500; color: #333;"><strong>${n.message}</strong></p>
-              <p style="margin: 0 0 0.3rem 0; font-size: 0.9rem; color: #666;">${n.detail}</p>
-              <span style="font-size: 0.75rem; color: #999;">${new Date(n.timestamp).toLocaleString()}</span>
-            </div>
-            <div style="display: flex; align-items: center;">
-              <span style="font-size: 0.75rem; color: #999; padding: 0.2rem 0.5rem; background: #eee; border-radius: 4px;">${n.read ? 'Read' : 'New'}</span>
-            </div>
-          </div>
-        `).join('');
-      }
+    function renderCalendar(){const firstDay=new Date(selectedYear,selectedMonth,1);const lastDay=new Date(selectedYear,selectedMonth+1,0);const prevLastDay=new Date(selectedYear,selectedMonth,0);const firstDayIndex=firstDay.getDay();const lastDayIndex=lastDay.getDay();const nextDays=7-lastDayIndex-1;const months=['January','February','March','April','May','June','July','August','September','October','November','December'];document.getElementById('currentMonthYear').textContent=`${months[selectedMonth]} ${selectedYear}`;let days='';for(let x=firstDayIndex;x>0;x--){days+=`<div class="calendar-day other-month"><div class="calendar-day-number">${prevLastDay.getDate()-x+1}</div></div>`}for(let i=1;i<=lastDay.getDate();i++){const isToday=i===currentDate.getDate()&&selectedMonth===currentDate.getMonth()&&selectedYear===currentDate.getFullYear();const currentDateStr=`${selectedYear}-${String(selectedMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;const eventsForDay=ongoingReports.filter(report=>{const start=formatDateForComparison(report.startDate);const end=formatDateForComparison(report.endDate);return currentDateStr>=start&&currentDateStr<=end});let eventHTML='';if(eventsForDay.length>0){eventHTML='<div class="event-indicators">';eventsForDay.forEach(report=>{const start=formatDateForComparison(report.startDate);const end=formatDateForComparison(report.endDate);let dotClass='event-dot';if(currentDateStr===start){dotClass+=' start'}else if(currentDateStr===end){dotClass+=' end'}else{dotClass+=' ongoing'}eventHTML+=`<div class="${dotClass}" onclick="showEventTooltip(event,'${report.id}')" title="${report.projectName}"></div>`});eventHTML+='</div>'}days+=`<div class="calendar-day ${isToday?'today':''}"><div class="calendar-day-number">${i}</div>${eventHTML}</div>`}for(let j=1;j<=nextDays;j++){days+=`<div class="calendar-day other-month"><div class="calendar-day-number">${j}</div></div>`}document.getElementById('calendarDays').innerHTML=days}
 
-      document.querySelectorAll('.modal-filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(filter.toLowerCase()));
-      });
-    };
+    function formatDateForComparison(date){if(!date)return'';const d=date instanceof Date?date:(date.toDate?date.toDate():new Date(date));return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
-    window.markNotificationAsRead = async function(notifId) {
-      try {
-        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-        await updateDoc(doc(window.db, "admin_notifications", notifId), {
-          read: true
-        });
-      } catch (err) {
-        console.error("Error marking notification as read:", err);
-      }
-    };
+    async function loadOngoingReports(db){try{const{collection,query,where,onSnapshot}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");const{getStorage,ref,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");const storage=getStorage();const reportsRef=collection(db,'reports');const q=query(reportsRef,where('status','==','Ongoing'));onSnapshot(q,async(snapshot)=>{ongoingReports=[];let eventCount=0;for(const doc of snapshot.docs){const data=doc.data();if(data.startDate&&data.endDate){const startDate=data.startDate.toDate?data.startDate.toDate():new Date(data.startDate);const endDate=data.endDate.toDate?data.endDate.toDate():new Date(data.endDate);let imageUrl='';if(data.incidentImage||data.imageUrl||data.image){const imagePath=data.incidentImage||data.imageUrl||data.image;if(imagePath.startsWith('http')){imageUrl=imagePath}else{try{imageUrl=await getDownloadURL(ref(storage,imagePath))}catch(err){console.error("Error loading image:",err)}}}ongoingReports.push({id:doc.id,startDate:startDate,endDate:endDate,projectName:data.projectName||'Unnamed Project',barangay:data.barangay||'N/A',contractor:data.contractor||'N/A',supplier:data.supplier||'N/A',allocatedBudget:data.allocatedBudget||'N/A',imageUrl:imageUrl});eventCount++}}renderCalendar();const syncStatus=document.getElementById('syncStatus');syncStatus.innerHTML=`<i class="fa fa-check-circle" style="color:#1cc88a"></i> Auto-synced ${eventCount} ongoing inspection${eventCount!==1?'s':''} - Last updated: ${new Date().toLocaleTimeString()}`})}catch(err){console.error("Error loading ongoing reports:",err);document.getElementById('syncStatus').innerHTML='<i class="fa fa-exclamation-circle" style="color:#d9534f"></i> Error syncing calendar'}}
 
-    window.markAllNotificationsAsRead = async function() {
-      try {
-        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-        const unread = allNotifications.filter(n => !n.read);
-        for (const notif of unread) {
-          await updateDoc(doc(window.db, "admin_notifications", notif.id), {
-            read: true
-          });
-        }
-      } catch (err) {
-        console.error("Error marking all as read:", err);
-      }
-    };
+    window.showEventTooltip=function(event,reportId){event.stopPropagation();const report=ongoingReports.find(r=>r.id===reportId);if(!report)return;const tooltip=document.getElementById('eventTooltip');document.getElementById('tooltipTitle').textContent='Inspection Details';document.getElementById('tooltipProjectName').textContent=report.projectName;document.getElementById('tooltipBarangay').textContent=report.barangay;document.getElementById('tooltipContractorSupplier').textContent=`${report.contractor} & ${report.supplier}`;document.getElementById('tooltipBudget').textContent=report.allocatedBudget;const tooltipImage=document.getElementById('tooltipImage');if(report.imageUrl){tooltipImage.src=report.imageUrl;tooltipImage.style.display='block'}else{tooltipImage.style.display='none'}const x=event.clientX;const y=event.clientY;tooltip.style.left=x+15+'px';tooltip.style.top=y+15+'px';setTimeout(()=>{const rect=tooltip.getBoundingClientRect();if(rect.right>window.innerWidth){tooltip.style.left=(x-rect.width-15)+'px'}if(rect.bottom>window.innerHeight){tooltip.style.top=(y-rect.height-15)+'px'}},0);tooltip.classList.add('show');document.addEventListener('click',hideEventTooltipOnClick)};
 
-    window.clearAllNotifications = async function() {
-      if (confirm('Are you sure you want to clear all notifications?')) {
-        try {
-          const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-          for (const notif of allNotifications) {
-            await deleteDoc(doc(window.db, "admin_notifications", notif.id));
-          }
-        } catch (err) {
-          console.error("Error clearing notifications:", err);
-        }
-      }
-    };
+    function hideEventTooltipOnClick(e){if(!e.target.closest('.event-dot')&&!e.target.closest('.event-tooltip')){hideEventTooltip();document.removeEventListener('click',hideEventTooltipOnClick)}}
 
-    // Calendar sync function
-    let currentUser = null;
-    
-    window.syncCalendarEvents = async function() {
-      if (!currentUser) {
-        alert("Please log in first");
-        return;
-      }
+    window.hideEventTooltip=function(){document.getElementById('eventTooltip').classList.remove('show')};
 
-      const syncBtn = document.getElementById('syncCalendarBtn');
-      const syncStatus = document.getElementById('syncStatus');
-      
-      syncBtn.disabled = true;
-      syncBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Syncing...';
-      
-      try {
-        const { collection, addDoc, serverTimestamp, getDocs, query, where, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-        
-        // Get reports from the current user
-        const reportsRef = collection(window.db, 'reports');
-        const q = query(reportsRef, where('userId', '==', currentUser.uid));
-        const snapshot = await getDocs(q);
-        
-        const events = [];
-        const calendarEventsRef = collection(window.db, 'users', currentUser.uid, 'calendar_events');
-        
-        // Clear existing calendar events first
-        const existingEvents = await getDocs(calendarEventsRef);
-        for (const eventDoc of existingEvents.docs) {
-          await deleteDoc(eventDoc.ref);
-        }
-        
-        // Process each report and create calendar events
-        for (const reportDoc of snapshot.docs) {
-          const report = reportDoc.data();
-          
-          // Check if report has a date field
-          if (report.date) {
-            const eventData = {
-              title: `${report.reportType || report.type || 'Report'} - ${report.barangay || 'Unknown'}`,
-              date: report.date,
-              description: report.description || '',
-              reportId: reportDoc.id,
-              createdAt: serverTimestamp()
-            };
-            
-            // Add to calendar_events subcollection
-            await addDoc(calendarEventsRef, eventData);
-            events.push(eventData);
-          }
-        }
-        
-        // Update sync status
-        const now = new Date().toLocaleString();
-        syncStatus.textContent = `Last synced: ${now} (${events.length} events)`;
-        
-        // Save sync timestamp to Firebase
-        const userEventsMetaRef = collection(window.db, 'users', currentUser.uid, 'calendar_meta');
-        await addDoc(userEventsMetaRef, {
-          lastSync: serverTimestamp(),
-          eventCount: events.length
-        });
-        
-        alert(`Calendar synced successfully! Found ${events.length} events from your reports.`);
-        
-      } catch (err) {
-        console.error("Error syncing calendar:", err);
-        alert("Error syncing calendar: " + err.message);
-        syncStatus.textContent = "Sync failed";
-      } finally {
-        syncBtn.disabled = false;
-        syncBtn.innerHTML = '<i class="fa fa-sync"></i> Sync with Firebase';
-      }
-    };
+    const dropdownMenu=document.getElementById('dropdownMenu');
+    const profileToggle=document.getElementById('profileToggle');
 
-    // Dropdown
-    const dropdownMenu = document.getElementById('dropdownMenu');
-    window.toggleDropdown = function() {
-      dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-    };
+    profileToggle.addEventListener("click",(e)=>{e.stopPropagation();dropdownMenu.style.display=dropdownMenu.style.display==="block"?"none":"block";notificationMenu.classList.remove("show")});
 
-    window.addEventListener('click', (e) => {
-      if (!e.target.closest('.avatar') && !e.target.closest('#dropdownMenu') && !e.target.closest('.notification-menu')) {
-        dropdownMenu.style.display = 'none';
-        document.getElementById("notificationMenu").classList.remove("show");
-      }
-    });
+    window.addEventListener('click',(e)=>{if(!e.target.closest('.profile-dropdown')){dropdownMenu.style.display='none'}if(!e.target.closest('.notification-menu')&&e.target!==notificationBell){notificationMenu.classList.remove("show")}});
 
-    // ---------- Edit Profile Modal ----------
-    const editModal = document.getElementById("editModal");
-    const editPhoto = document.getElementById("editPhoto");
-    const previewImg = document.getElementById("previewImg");
+    const editModal=document.getElementById("editModal");
+    const editPhoto=document.getElementById("editPhoto");
+    const previewImg=document.getElementById("previewImg");
 
-    window.openEditModal = function() { 
-      editModal.style.display="flex";
-    };
-    
-    window.closeEditModal = function() { 
-      editModal.style.display="none";
-    };
+    window.openEditModal=function(){editModal.style.display="flex"};
+    window.closeEditModal=function(){editModal.style.display="none"};
 
-    editPhoto.addEventListener("change", e => {
-      const file = e.target.files[0];
-      if(!file) return;
-      
-      if(!file.type.startsWith('image/')) {
-        alert('Please select an image file');
-        editPhoto.value = '';
-        return;
-      }
-      
-      if(file.size > 5 * 1024 * 1024) {
-        alert('Image size should be less than 5MB');
-        editPhoto.value = '';
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = ev => {
-        previewImg.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
+    editPhoto.addEventListener("change",e=>{const file=e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){alert('Please select an image file');editPhoto.value='';return}if(file.size>5*1024*1024){alert('Image size should be less than 5MB');editPhoto.value='';return}const reader=new FileReader();reader.onload=ev=>{previewImg.src=ev.target.result};reader.readAsDataURL(file)});
 
-    window.saveEdit = async function() {
-      if(!currentUser) {
-        alert("No user logged in");
-        return;
-      }
-      
-      const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      const { ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
-      const { getStorage } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
-      
-      const uid = currentUser.uid;
-      const userRef = doc(window.db, "users", uid);
-      const saveBtn = document.getElementById("saveBtn");
+    window.saveEdit=async function(){if(!currentUser){alert("No user logged in");return}const{updateDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");const{ref,uploadBytes,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");const{getStorage}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");const uid=currentUser.uid;const userRef=doc(window.db,"users",uid);const saveBtn=document.getElementById("saveBtn");const updated={name:document.getElementById("editName").value.trim(),ID:document.getElementById("editID").value.trim(),email:document.getElementById("editEmail").value.trim(),phone:document.getElementById("editPhone").value.trim(),address:document.getElementById("editAddress").value.trim(),gender:document.getElementById("editGender").value.trim()};if(!updated.name){alert("Name is required");return}const file=editPhoto.files[0];try{saveBtn.disabled=true;saveBtn.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving...';if(file){const storage=getStorage();const timestamp=Date.now();const fileExt=file.name.split('.').pop();const fileName=`profile_${timestamp}.${fileExt}`;const storageRef=ref(storage,`user_images/${uid}/${fileName}`);await uploadBytes(storageRef,file);const url=await getDownloadURL(storageRef);updated.photoURL=url;console.log("Photo uploaded successfully:",url)}await updateDoc(userRef,updated);alert("Profile updated successfully!");closeEditModal();editPhoto.value=''}catch(err){console.error("Error details:",err);alert("Error updating profile: "+err.message)}finally{saveBtn.disabled=false;saveBtn.innerHTML='<i class="fa fa-save"></i> Save Changes'}};
 
-      const updated = {
-        name: document.getElementById("editName").value.trim(),
-        id: document.getElementById("editID").value.trim(),
-        email: document.getElementById("editEmail").value.trim(),
-        phone: document.getElementById("editPhone").value.trim(),
-        address: document.getElementById("editAddress").value.trim(),
-        gender: document.getElementById("editGender").value.trim()
-      };
-
-      if(!updated.name) {
-        alert("Name is required");
-        return;
-      }
-
-      const file = editPhoto.files[0];
-      
-      try {
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
-
-        if(file) {
-          const storage = getStorage();
-          const storageRef = ref(storage, `profilePics/${uid}/avatar.jpg`);
-          await uploadBytes(storageRef, file);
-          const url = await getDownloadURL(storageRef);
-          updated.photoURL = url;
-        }
-        
-        await updateDoc(userRef, updated);
-        
-        alert("Profile updated successfully!");
-        closeEditModal();
-        
-        editPhoto.value = '';
-        
-      } catch(err) {
-        console.error(err);
-        alert("Error updating profile: " + err.message);
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
-      }
-    };
-
-    window.addEventListener("click", (e) => {
-      if (e.target === editModal) closeEditModal();
-    });
+    window.addEventListener("click",(e)=>{if(e.target===editModal)closeEditModal()});
   </script>
 
-  <!-- Firebase + Main Script -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, onSnapshot, query, where, addDoc, orderBy, serverTimestamp, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import{getFirestore,doc,onSnapshot,serverTimestamp,updateDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
-      authDomain: "tayabastrack-23b95.firebaseapp.com",
-      projectId: "tayabastrack-23b95",
-      storageBucket: "tayabastrack-23b95.appspot.com",
-      messagingSenderId: "674055915366",
-      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
-    };
+    const firebaseConfig={apiKey:"AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",authDomain:"tayabastrack-23b95.firebaseapp.com",projectId:"tayabastrack-23b95",storageBucket:"tayabastrack-23b95.appspot.com",messagingSenderId:"674055915366",appId:"1:674055915366:web:aa560336c1f8b504eeaaa7"};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    window.db = db;
+    const app=initializeApp(firebaseConfig);
+    const auth=getAuth(app);
+    const db=getFirestore(app);
+    window.db=db;
 
-    const trackedUsers = new Set();
-    const trackedReports = new Set();
+    async function handleLogout(){try{await signOut(auth);window.location.href="logout.html"}catch(err){alert("Error logging out: "+err.message)}}
 
-    function isBarangayPosition(position) {
-      if (!position) return false;
-      const pos = position.toLowerCase().trim();
-      return pos.includes("barangay captain") || pos.includes("brgy captain") || 
-             pos.includes("brgy. captain") || pos.includes("barangay official") || 
-             pos.includes("brgy official") || pos.includes("brgy. official");
-    }
+    document.getElementById("logoutBtn").addEventListener("click",handleLogout);
 
-    // Listen to Firestore notifications
-    function setupNotificationListener() {
-      const q = query(collection(db, "admin_notifications"), orderBy("timestamp", "desc"));
-      onSnapshot(q, (snapshot) => {
-        const previousUnreadCount = allNotifications.filter(n => !n.read).length;
-        
-        allNotifications = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          timestamp: doc.data().timestamp?.toMillis() || Date.now()
-        }));
-
-        const newUnreadCount = allNotifications.filter(n => !n.read).length;
-        
-        if (newUnreadCount > previousUnreadCount) {
-          playChime();
-        }
-        
-        updateNotificationUI();
-      });
-    }
-
-    // Setup realtime tracking
-    function setupRealtimeTracking() {
-      const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
-      onSnapshot(qNewUsers, async (snapshot) => {
-        for (const change of snapshot.docChanges()) {
-          if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
-            trackedUsers.add(change.doc.id);
-            const u = change.doc.data();
-            if (isBarangayPosition(u.position)) {
-              await addDoc(collection(db, "admin_notifications"), {
-                type: "user",
-                message: `New User: ${u.firstName || ""} ${u.surname || ""}`,
-                detail: u.email || "",
-                timestamp: serverTimestamp(),
-                read: false
-              });
-            }
-          }
-        }
-      });
-
-      const qReports = query(collection(db, "reports"));
-      onSnapshot(qReports, async (snapshot) => {
-        for (const change of snapshot.docChanges()) {
-          if (change.type === "added" && !trackedReports.has(change.doc.id)) {
-            trackedReports.add(change.doc.id);
-            const r = change.doc.data();
-            await addDoc(collection(db, "admin_notifications"), {
-              type: "report",
-              message: `New Report in ${r.barangay || "a barangay"}`,
-              detail: r.reportType || r.type || "Unknown type",
-              timestamp: serverTimestamp(),
-              read: false
-            });
-          }
-        }
-      });
-    }
-
-    // Load calendar sync status
-    async function loadCalendarSyncStatus() {
-      if (!currentUser) return;
-      
-      try {
-        const metaRef = collection(db, 'users', currentUser.uid, 'calendar_meta');
-        const q = query(metaRef, orderBy('lastSync', 'desc'));
-        const metaSnapshot = await getDocs(q);
-        
-        if (!metaSnapshot.empty) {
-          const lastMeta = metaSnapshot.docs[0].data();
-          if (lastMeta.lastSync) {
-            const lastSyncDate = lastMeta.lastSync.toDate();
-            document.getElementById('syncStatus').textContent = 
-              `Last synced: ${lastSyncDate.toLocaleString()} (${lastMeta.eventCount || 0} events)`;
-          }
-        }
-      } catch (err) {
-        console.error("Error loading sync status:", err);
-        document.getElementById('syncStatus').textContent = "Last synced: Never";
-      }
-    }
-
-    const notificationBell = document.getElementById("notificationBell");
-    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
-
-    notificationBell.addEventListener("click", (e) => {
-      e.stopPropagation();
-      document.getElementById("notificationMenu").classList.toggle("show");
-    });
-
-    // THIS IS THE KEY PART - Real-time profile picture sync
-    onAuthStateChanged(auth, async (user) => {
-      if(!user) {
+    onAuthStateChanged(auth,async(user)=>{
+      if(!user){
         console.warn("No user logged in.");
-        window.location.href = "logout.html";
-        return;
+        window.location.href="logout.html";
+        return
       }
-      currentUser = user;
-      window.currentUser = user;
-
-      // Update last login timestamp
-      try {
-        const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, {
-          lastLogin: serverTimestamp()
-        });
-      } catch (err) {
-        console.error("Error updating last login:", err);
-      }
-
-      const ref = doc(db, 'users', user.uid);
       
-      // USE onSnapshot FOR REAL-TIME UPDATES - This is the magic!
-      onSnapshot(ref, docSnap => {
-        if(!docSnap.exists()) return;
-        const data = docSnap.data();
-        
-        // Update username
-        document.getElementById("navUsername").textContent = data.name || "User";
-        
-        // Update ALL profile pictures in real-time
-        const photoURL = data.photoURL || "image.png";
-        
-        // Navbar avatar (appears on ALL pages)
-        const navAvatar = document.getElementById("navAvatar");
-        if(navAvatar) navAvatar.src = photoURL;
-        
-        // Profile page main picture
-        const profilePic = document.getElementById("profilePic");
-        if(profilePic) profilePic.src = photoURL;
-        
-        // Edit modal preview
-        const previewImg = document.getElementById("previewImg");
-        if(previewImg) previewImg.src = photoURL;
-
-        // Update display info
-        const displayName = document.getElementById("displayName");
-        if(displayName) displayName.textContent = data.name || "—";
-        
-        const displayRole = document.getElementById("displayRole");
-        if(displayRole) displayRole.textContent = data.position || data.role || "Administrator";
-
-        // Update form fields if they exist
-        const cardName = document.getElementById("cardName");
-        if(cardName) cardName.value = data.name || "";
-        
-        const cardID = document.getElementById("cardID");
-        if(cardID) cardID.value = data.id || "";
-        
-        const cardEmail = document.getElementById("cardEmail");
-        if(cardEmail) cardEmail.value = data.email || user.email;
-        
-        const cardPhone = document.getElementById("cardPhone");
-        if(cardPhone) cardPhone.value = data.phone || "";
-        
-        const cardAddress = document.getElementById("cardAddress");
-        if(cardAddress) cardAddress.value = data.address || "";
-        
-        const cardGender = document.getElementById("cardGender");
-        if(cardGender) cardGender.value = data.gender || "";
-
-        // Update edit modal fields
-        const editName = document.getElementById("editName");
-        if(editName) editName.value = data.name || "";
-        
-        const editID = document.getElementById("editID");
-        if(editID) editID.value = data.id || "";
-        
-        const editEmail = document.getElementById("editEmail");
-        if(editEmail) editEmail.value = data.email || user.email;
-        
-        const editPhone = document.getElementById("editPhone");
-        if(editPhone) editPhone.value = data.phone || "";
-        
-        const editAddress = document.getElementById("editAddress");
-        if(editAddress) editAddress.value = data.address || "";
-        
-        const editGender = document.getElementById("editGender");
-        if(editGender) editGender.value = data.gender || "";
-
-        // Update account info
-        const accountType = document.getElementById("accountType");
-        if(accountType) accountType.textContent = data.position || data.role || "Administrator";
-        
-        if(data.createdAt) {
-          const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-          const registeredAt = document.getElementById("registeredAt");
-          if(registeredAt) registeredAt.textContent = date.toLocaleDateString();
+      console.log("User authenticated:",user.uid);
+      currentUser=user;
+      window.currentUser=user;
+      
+      try{
+        const userRef=doc(db,'users',user.uid);
+        await updateDoc(userRef,{lastLogin:serverTimestamp()});
+        console.log("Last login updated");
+      }catch(err){
+        console.error("Error updating last login:",err);
+      }
+      
+      const ref=doc(db,'users',user.uid);
+      onSnapshot(ref,docSnap=>{
+        if(!docSnap.exists()){
+          console.error("User document not found!");
+          return;
         }
         
-        if(data.lastLogin) {
-          const date = data.lastLogin.toDate ? data.lastLogin.toDate() : new Date(data.lastLogin);
-          const lastLogin = document.getElementById("lastLogin");
-          if(lastLogin) lastLogin.textContent = date.toLocaleString();
+        const data=docSnap.data();
+        console.log("User data loaded:",data);
+        
+        let fullName="User";
+        if(data.firstName&&data.lastName){
+          fullName=`${data.firstName} ${data.lastName}`;
+        }else if(data.name){
+          fullName=data.name;
+        }else if(data.firstName){
+          fullName=data.firstName;
         }
+        
+        const elements={
+          navUsername:fullName,
+          displayName:fullName,
+          displayRole:data.position||data.role||"Admin",
+          accountType:data.position||data.role||"Admin"
+        };
+        
+        Object.keys(elements).forEach(id=>{
+          const el=document.getElementById(id);
+          if(el)el.textContent=elements[id];
+        });
+        
+        const photoURL=data.photoURL||"image.png";
+        const photoElements=["profilePic","navAvatar","previewImg"];
+        photoElements.forEach(id=>{
+          const el=document.getElementById(id);
+          if(el)el.src=photoURL;
+        });
+        
+        const fields={
+          cardName:fullName,
+          cardID:data.ID||"",
+          cardEmail:data.email||user.email,
+          cardPhone:data.phone||"",
+          cardAddress:data.barangay||data.address||"",
+          cardGender:data.gender||"",
+          editName:fullName,
+          editID:data.ID||"",
+          editEmail:data.email||user.email,
+          editPhone:data.phone||"",
+          editAddress:data.barangay||data.address||"",
+          editGender:data.gender||""
+        };
+        
+        Object.keys(fields).forEach(id=>{
+          const el=document.getElementById(id);
+          if(el)el.value=fields[id];
+        });
+        
+        if(data.createdAt){
+          const date=data.createdAt.toDate?data.createdAt.toDate():new Date(data.createdAt);
+          const el=document.getElementById("registeredAt");
+          if(el)el.textContent=date.toLocaleDateString();
+        }
+        
+        if(data.lastLogin){
+          const date=data.lastLogin.toDate?data.lastLogin.toDate():new Date(data.lastLogin);
+          const el=document.getElementById("lastLogin");
+          if(el)el.textContent=date.toLocaleString();
+        }
+        
+        console.log("UI updated successfully");
+      },error=>{
+        console.error("Error in user snapshot:",error);
       });
-
-      loadCalendarSyncStatus();
-      setupNotificationListener();
-      setupRealtimeTracking();
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        console.log("Admin signed out.");
-        window.location.href = "logout.html";
-      } catch (err) {
-        console.error("Logout error:", err);
+      
+      try{
+        await setupRealtimeNotifications(db);
+        console.log("Notifications setup complete");
+      }catch(err){
+        console.error("Error setting up notifications:",err);
+      }
+      
+      try{
+        await loadOngoingReports(db);
+        console.log("Calendar loaded");
+      }catch(err){
+        console.error("Error loading calendar:",err);
       }
     });
   </script>
