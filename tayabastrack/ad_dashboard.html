@@ -10,32 +10,98 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: hidden; }
 
-        .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; }
-        .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; }
-        .sidebar-header img { width: 40px; }
-        .sidebar-header h2 { font-size: 1.2rem; }
-        .sidebar-menu { list-style: none; }
+        /* SIDEBAR - IMPROVED VERSION */
+        .sidebar {
+            width: 250px;
+            min-width: 250px;
+            background: #004aad;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 50;
+            height: 100vh;
+            overflow-y: auto;
+            transition: left 0.3s ease;
+        }
+        .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; padding: 0 1rem; }
+        .sidebar-header img { width: 40px; height: 40px; object-fit: contain; }
+        .sidebar-header h2 { font-size: 1.2rem; margin: 0; font-weight: 600; }
+        .sidebar-menu { list-style: none; padding-left: 0; margin: 0; }
         .sidebar-menu li { margin: 0.5rem 0; }
-        .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; }
-        .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
-
-        .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
-        .logout-btn { background-color: #d9534f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; width: 100%; }
+        .sidebar-menu a { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            padding: 0.8rem 1.5rem; 
+            text-decoration: none; 
+            color: #fff; 
+            transition: background 0.2s;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-menu a:hover,
+        .sidebar-menu li.active a { background: #0756cc; border-left: 4px solid #042f68; }
+        .sidebar-menu a i { width: 20px; text-align: center; font-size: 1rem; }
+        .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); margin-top: auto; }
+        .logout-btn { 
+            background-color: #d9534f; 
+            color: #fff; 
+            border: none; 
+            padding: 0.6rem 1.2rem; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 500; 
+            transition: background 0.3s; 
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
         .logout-btn:hover { background-color: #c9302c; }
 
-        .main { flex: 1; display: flex; flex-direction: column; }
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 10; }
-        .navbar h1 { font-size: 1.4rem; color: #004aad; }
+        /* NAVBAR - IMPROVED VERSION */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 250px;
+            right: 0;
+            height: 64px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,.05);
+            z-index: 40;
+            transition: left 0.3s ease;
+        }
+        .navbar h1 { font-size: 1.4rem; color: #004aad; margin: 0; }
+        .navbar-left { display: flex; align-items: center; gap: 1rem; }
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #004aad;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
         .profile { display: flex; align-items: center; gap: 1rem; }
         
         /* Notification Bell */
-        .fa-bell { font-size: 1.2rem; position: relative; cursor: pointer; }
-        .badge { background: red; color: #fff; font-size: .7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; }
+        .fa-bell { font-size: 1.2rem; position: relative; cursor: pointer; color: #333; }
+        .badge { background: red; color: #fff; font-size: .7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; min-width: 18px; text-align: center; }
         .badge.show { display: flex; align-items: center; justify-content: center; }
 
-        /* Notification Menu - EXACT MATCH TO PROFILE */
+        /* Notification Menu */
         .notification-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); width: 340px; max-height: 420px; overflow: hidden; z-index: 1000; font-family: "Segoe UI", Tahoma, sans-serif; animation: fadeIn 0.2s ease-in-out; }
         .notification-menu.show { display: block; }
         .notification-header { padding: 0.9rem 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; }
@@ -67,13 +133,57 @@
         .notification-empty { padding: 2rem; text-align: center; color: #999; font-size: 0.9rem; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .profile-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
-        .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        .username { font-weight: 500; }
+        .profile-dropdown { 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .profile-dropdown:hover { background: #f5f7fb; }
+        .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid #004aad; }
+        .username { font-weight: 500; color: #333; }
         
-        .dropdown-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); min-width: 160px; z-index: 1000; }
-        .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.85rem; }
+        .dropdown-menu { 
+            display: none; 
+            position: absolute; 
+            top: 120%; 
+            right: 0; 
+            background: #fff; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15); 
+            min-width: 200px; 
+            z-index: 1000; 
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a { 
+            display: block; 
+            padding: 0.6rem 1rem; 
+            text-decoration: none; 
+            color: #333; 
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
         .dropdown-menu a:hover { background: #f0f0f0; color: #004aad; }
+        .dropdown-menu a i { margin-right: 8px; width: 20px; text-align: center; }
+
+        /* MAIN CONTENT */
+        .main { 
+            margin-left: 250px; 
+            margin-top: 64px;
+            flex: 1; 
+            display: flex; 
+            flex-direction: column;
+            min-width: 0;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: margin-left 0.3s ease;
+        }
 
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1.5rem; }
         .card { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #fff; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
@@ -87,15 +197,26 @@
         canvas { width: 100% !important; height: 250px !important; }
         #miniMap { height: 250px !important; border-radius: 10px; width: 100%; }
 
+        .images { padding: 1.5rem; }
         .images h3 { color: #004aad; margin-bottom: 1rem; }
         .image-gallery { display: flex; gap: 1rem; flex-wrap: wrap; }
         .image-gallery img { width: 120px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 980px) {
+            .sidebar { left: -250px; }
+            .sidebar.mobile-open { left: 0; }
+            .navbar { left: 0; }
+            .main { margin-left: 0; }
+            .mobile-menu-btn { display: block !important; }
+            .username { display: none; }
+        }
     </style>
 </head>
 
 <body>
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div>
             <div class="sidebar-header">
                 <img src="logu.png" alt="Logo" class="logo" />
@@ -112,7 +233,8 @@
 
         <div class="sidebar-footer">
             <button class="logout-btn" id="logoutBtn">
-                <i class="fa fa-sign-out-alt"></i> Logout
+                <i class="fa fa-sign-out-alt"></i>
+                <span>Logout</span>
             </button>
         </div>
     </aside>
@@ -120,7 +242,12 @@
     <!-- Main -->
     <main class="main">
         <nav class="navbar">
-            <h1>Dashboard</h1>
+            <div class="navbar-left">
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <h1>Dashboard</h1>
+            </div>
             <div class="profile">
                 <div style="position:relative">
                     <i class="fa fa-bell" id="notificationBell"></i>
@@ -174,7 +301,7 @@
             </div>
         </section>
 
-        <section class="images" style="padding:1.5rem;">
+        <section class="images">
             <h3>Recent Report Images</h3>
             <div class="image-gallery" id="reportImages"></div>
         </section>
@@ -218,10 +345,27 @@
                 });
             });
         }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            
+            if (window.innerWidth <= 980 && 
+                !sidebar.contains(e.target) && 
+                !menuBtn.contains(e.target)) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJkfi59FibsnD-dxAdyYUohj36N_bOtfE&callback=initMiniMap"></script>
 
-    <!-- Notification System - EXACT MATCH TO PROFILE -->
+    <!-- Notification System -->
     <script>
         let notificationsList = [];
         let seenNotificationIds = new Set();
@@ -284,7 +428,7 @@
         notificationBell.addEventListener("click", (e) => {
             e.stopPropagation();
             notificationMenu.classList.toggle("show");
-            document.getElementById("dropdownMenu").style.display = "none";
+            document.getElementById("dropdownMenu").classList.remove("show");
         });
         clearNotificationsBtn.addEventListener("click", () => {
             notificationsList = [];
@@ -360,13 +504,13 @@
 
         profileToggle.addEventListener("click", (e) => {
             e.stopPropagation();
-            dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+            dropdownMenu.classList.toggle("show");
             notificationMenu.classList.remove("show");
         });
 
         window.addEventListener('click', (e) => {
             if (!e.target.closest('.profile-dropdown')) {
-                dropdownMenu.style.display = 'none';
+                dropdownMenu.classList.remove("show");
             }
             if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
                 notificationMenu.classList.remove("show");
@@ -413,11 +557,9 @@
             }
         }
 
-        // ===== REAL-TIME PROFILE PICTURE SYNC =====
         onAuthStateChanged(auth, async (user) => {
             if (!user) return (window.location.href = "logout.html");
 
-            // USE onSnapshot FOR REAL-TIME UPDATES!
             const { onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
             const userDocRef = doc(db, "users", user.uid);
             onSnapshot(userDocRef, async (userDoc) => {
@@ -433,15 +575,11 @@
                     return (window.location.href = "logout.html");
                 }
 
-                // Update username - updates automatically when changed!
                 document.getElementById("navUsername").textContent = data.name || data.firstName || "Admin";
-                
-                // Update profile picture - THIS UPDATES IN REAL-TIME!
                 const photoURL = data.photoURL || "image.png";
                 document.getElementById("navAvatar").src = photoURL;
             });
 
-            // Load dashboard data (only once)
             await loadDashboardData();
             await setupRealtimeNotifications(db);
         });
