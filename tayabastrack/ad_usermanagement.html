@@ -3,25 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TayabaStrack | User Management (Improved)</title>
+  <title>TayabaStrack | User Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI',Tahoma,sans-serif;display:flex;min-height:100vh;background:#f5f7fb;color:#333;overflow:hidden}
-    .sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;height:100vh;overflow-y:auto}
-    .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
-    .sidebar-header img{width:40px}
-    .sidebar-header h2{font-size:1.2rem;margin:0}
-    .sidebar-menu{list-style:none;padding-left:0}
+    
+    /* SIDEBAR - IMPROVED VERSION */
+    .sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;height:100vh;overflow-y:auto;transition:left 0.3s ease}
+    .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem;padding:0 1rem}
+    .sidebar-header img{width:40px;height:40px;object-fit:contain}
+    .sidebar-header h2{font-size:1.2rem;margin:0;font-weight:600}
+    .sidebar-menu{list-style:none;padding-left:0;margin:0}
     .sidebar-menu li{margin:0.5rem 0}
-    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s;border-left:4px solid transparent}
     .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
-    .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2)}
-    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%}
+    .sidebar-menu a i{width:20px;text-align:center;font-size:1rem}
+    .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2);margin-top:auto}
+    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
     .logout-btn:hover{background-color:#c9302c}
-    .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40}
-    .navbar h1{font-size:1.4rem;color:#004aad}
-    .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
+    
+    /* NAVBAR - IMPROVED VERSION */
+    .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40;transition:left 0.3s ease}
+    .navbar h1{font-size:1.4rem;color:#004aad;margin:0}
+    .navbar-left{display:flex;align-items:center;gap:1rem}
+    .mobile-menu-btn{display:none;background:none;border:none;color:#004aad;font-size:1.5rem;cursor:pointer;padding:0.5rem}
+    .fa-bell{font-size:1.2rem;position:relative;cursor:pointer;color:#333}
     .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none}
     .badge.show{display:flex;align-items:center;justify-content:center}
     .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.15);width:340px;max-height:420px;overflow:hidden;z-index:1000;animation:fadeIn 0.2s}
@@ -48,13 +55,18 @@
     .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.25rem}
     .notification-empty{padding:2rem;text-align:center;color:#999;font-size:0.9rem}
     @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
-    .username{font-weight:500}
+    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:0.5rem;border-radius:8px;transition:background 0.2s}
+    .profile-dropdown:hover{background:#f5f7fb}
+    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid #004aad}
+    .username{font-weight:500;color:#333}
     .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
-    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
+    .dropdown-menu.show{display:block}
+    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem;transition:background 0.2s}
     .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
-    .main{margin-left:250px;margin-top:74px;flex:1;display:block;min-width:0;height:calc(100vh - 74px);overflow:hidden}
+    .dropdown-menu a i{margin-right:8px;width:20px;text-align:center}
+    
+    /* MAIN CONTENT */
+    .main{margin-left:250px;margin-top:64px;flex:1;display:block;min-width:0;height:calc(100vh - 64px);overflow:hidden;transition:margin-left 0.3s ease}
     .content{flex:1;padding:1.5rem;overflow-y:auto;height:100%}
     .table-section{margin-bottom:2rem}
     .table-section h2{color:#004aad;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;font-size:1.1rem}
@@ -107,10 +119,20 @@
     button.save:hover{background:#218838}
     button.cancel{background:#6c757d}
     button.cancel:hover{background:#5a6268}
+    
+    /* MOBILE RESPONSIVE */
+    @media (max-width:980px){
+      .sidebar{left:-250px}
+      .sidebar.mobile-open{left:0}
+      .navbar{left:0}
+      .main{margin-left:0}
+      .mobile-menu-btn{display:block !important}
+      .username{display:none}
+    }
   </style>
 </head>
 <body>
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div>
       <div class="sidebar-header">
         <img src="logu.png" alt="Logo" class="logo">
@@ -125,12 +147,20 @@
       </ul>
     </div>
     <div class="sidebar-footer">
-      <button class="logout-btn" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</button>
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
     </div>
   </aside>
 
   <nav class="navbar">
-    <h1>User Management</h1>
+    <div class="navbar-left">
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa fa-bars"></i>
+      </button>
+      <h1>User Management</h1>
+    </div>
     <div style="display:flex;align-items:center;gap:14px">
       <div style="position:relative">
         <i class="fa fa-bell" id="notificationBell"></i>
@@ -158,7 +188,7 @@
         <img src="image.png" alt="Profile" class="avatar" id="navAvatar">
         <span class="username" id="navUsername">Loading...</span>
         <div class="dropdown-menu" id="dropdownMenu">
-          <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+          <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
         </div>
       </div>
     </div>
@@ -275,13 +305,32 @@
   </div>
 
   <script>
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.querySelector('.mobile-menu-btn');
+      
+      if (window.innerWidth <= 980 && 
+          !sidebar.contains(e.target) && 
+          !menuBtn.contains(e.target)) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+  </script>
+
+  <script>
     let notificationsList=[];let seenNotificationIds=new Set();let trackedUserStatuses={};let trackedReportIds=new Set();let currentFilter="all";
     function normalizeStatus(s){return(s||"").toLowerCase().trim()}
     function isBarangayPosition(p){if(!p)return false;const pos=p.toLowerCase();return pos.includes("barangay")||pos.includes("brgy")||pos.includes("brgy.")}
     function addNotification(t,m,d){const cleanMsg=(m||"").trim();const cleanDetail=(d||"").trim();const timestamp=new Date();const id=`${t}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;if(seenNotificationIds.has(id))return;seenNotificationIds.add(id);notificationsList.unshift({id,type:t,message:cleanMsg,detail:cleanDetail,timestamp:timestamp,read:false});updateNotificationUI()}
     function updateNotificationUI(){let filtered=[...notificationsList];if(currentFilter==="report"){filtered=filtered.filter((n)=>n.type==="report")}else if(currentFilter==="user"){filtered=filtered.filter((n)=>n.type==="user")}else if(currentFilter==="24h"){const ago=Date.now()-24*60*60*1000;filtered=filtered.filter((n)=>n.timestamp.getTime()>ago)}filtered.sort((a,b)=>b.timestamp.getTime()-a.timestamp.getTime());const unreadCount=notificationsList.filter(n=>!n.read).length;const notificationBadge=document.getElementById("notificationBadge");if(unreadCount>0){notificationBadge.textContent=unreadCount;notificationBadge.classList.add("show")}else{notificationBadge.textContent="";notificationBadge.classList.remove("show")}const notificationList=document.getElementById("notificationList");if(filtered.length===0){notificationList.innerHTML='<div class="notification-empty">No notifications</div>'}else{notificationList.innerHTML=filtered.map((n)=>`<div class="notification-item ${n.read?'':'unread'}"><div class="notification-icon ${n.type}">${n.type==="user"?'<i class="fa fa-user"></i>':'<i class="fa fa-flag"></i>'}</div><div class="notification-content"><p><strong>${n.message}</strong></p><p>${n.detail}</p><span class="time">${n.timestamp.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span></div></div>`).join("")}}
     const notificationBell=document.getElementById("notificationBell");const notificationMenu=document.getElementById("notificationMenu");const clearNotificationsBtn=document.getElementById("clearNotificationsBtn");const markAllReadBtn=document.getElementById("markAllReadBtn");
-    notificationBell.addEventListener("click",(e)=>{e.stopPropagation();notificationMenu.classList.toggle("show");document.getElementById("dropdownMenu").style.display="none"});
+    notificationBell.addEventListener("click",(e)=>{e.stopPropagation();notificationMenu.classList.toggle("show");document.getElementById("dropdownMenu").classList.remove("show")});
     clearNotificationsBtn.addEventListener("click",()=>{notificationsList=[];seenNotificationIds.clear();updateNotificationUI()});
     markAllReadBtn.addEventListener("click",()=>{notificationsList.forEach(n=>n.read=true);updateNotificationUI()});
     document.querySelectorAll(".filter-btn").forEach((btn)=>{btn.addEventListener("click",(e)=>{document.querySelectorAll(".filter-btn").forEach((b)=>b.classList.remove("active"));e.target.classList.add("active");currentFilter=e.target.dataset.filter;updateNotificationUI()})});
@@ -291,7 +340,7 @@
   <script type="module">
     import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import{getFirestore,collection,query,where,onSnapshot,doc,getDoc,updateDoc,deleteDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import{getFirestore,collection,query,where,onSnapshot,doc,updateDoc,deleteDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     const firebaseConfig={apiKey:"AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",authDomain:"tayabastrack-23b95.firebaseapp.com",projectId:"tayabastrack-23b95",storageBucket:"tayabastrack-23b95.firebasestorage.app",messagingSenderId:"674055915366",appId:"1:674055915366:web:aa560336c1f8b504eeaaa7"};
     const app=initializeApp(firebaseConfig);const auth=getAuth(app);const db=getFirestore(app);window.db=db;
     const pendingTable=document.getElementById("pendingTable");const activeTable=document.getElementById("activeTable");const inactiveTable=document.getElementById("inactiveTable");const declinedTable=document.getElementById("declinedTable");const pendingTableCard=document.getElementById("pendingTableCard");const activeTableCard=document.getElementById("activeTableCard");const inactiveTableCard=document.getElementById("inactiveTableCard");const declinedTableCard=document.getElementById("declinedTableCard");const searchPending=document.getElementById("searchPending");const searchActive=document.getElementById("searchActive");const searchInactive=document.getElementById("searchInactive");const searchDeclined=document.getElementById("searchDeclined");const editModal=document.getElementById("editModal");const closeModal=document.getElementById("closeModal");const cancelEdit=document.getElementById("cancelEdit");const editForm=document.getElementById("editForm");
@@ -311,10 +360,10 @@
     closeModal.addEventListener('click',()=>editModal.classList.remove('show'));cancelEdit.addEventListener('click',()=>editModal.classList.remove('show'));
     editForm.addEventListener('submit',async(e)=>{e.preventDefault();const userId=document.getElementById('editUserId').value;try{await updateDoc(doc(db,"users",userId),{firstName:document.getElementById('editFirstName').value,surname:document.getElementById('editLastName').value,email:document.getElementById('editEmail').value,barangay:document.getElementById('editBarangay').value,position:document.getElementById('editPosition').value,phoneNumber:document.getElementById('editContact').value});alert("User updated successfully!");editModal.classList.remove('show')}catch(err){console.error("Error updating user:",err);alert("Error updating user.")}});
     const profileToggle=document.getElementById("profileToggle");const dropdownMenu=document.getElementById("dropdownMenu");
-    profileToggle.addEventListener("click",(e)=>{e.stopPropagation();dropdownMenu.style.display=dropdownMenu.style.display==="block"?"none":"block";document.getElementById("notificationMenu").classList.remove("show")});
-    window.addEventListener("click",(e)=>{if(!profileToggle.contains(e.target))dropdownMenu.style.display="none";if(!e.target.closest('.notification-menu')&&e.target!==document.getElementById('notificationBell')){document.getElementById("notificationMenu").classList.remove("show")}});
+    profileToggle.addEventListener("click",(e)=>{e.stopPropagation();dropdownMenu.classList.toggle("show");notificationMenu.classList.remove("show")});
+    window.addEventListener("click",(e)=>{if(!profileToggle.contains(e.target))dropdownMenu.classList.remove("show");if(!e.target.closest('.notification-menu')&&e.target!==document.getElementById('notificationBell')){document.getElementById("notificationMenu").classList.remove("show")}});
     onAuthStateChanged(auth,async(user)=>{if(!user){console.warn("No user detected. Redirecting to login...");window.location.href="logout.html";return}try{const userDocRef=doc(db,"users",user.uid);onSnapshot(userDocRef,async(userDocSnap)=>{if(!userDocSnap.exists()){console.error("User document not found.");window.location.href="logout.html";return}const data=userDocSnap.data();if(data.position!=="Admin"){alert("Unauthorized access!");window.location.href="logout.html";return}document.getElementById("navUsername").textContent=data.name||data.firstName||"Admin";const photoURL=data.profilePic||data.photoURL||"image.png";document.getElementById("navAvatar").src=photoURL});const qPending=query(collection(db,"users"),where("status","==","pending"));onSnapshot(qPending,(snapshot)=>{allPendingUsers=[];snapshot.forEach((docSnap)=>{const u=docSnap.data();if(isBarangayPosition(u.position)){allPendingUsers.push({id:docSnap.id,data:u})}});document.getElementById('pendingCount').textContent=`(${allPendingUsers.length})`;renderTable(pendingTable,allPendingUsers,'pending')});searchPending.addEventListener('input',(e)=>{const filtered=filterUsers(e.target.value.toLowerCase(),allPendingUsers);renderTable(pendingTable,filtered,'pending')});const qActive=query(collection(db,"users"),where("status","==","active"));onSnapshot(qActive,(snapshot)=>{allActiveUsers=[];snapshot.forEach((docSnap)=>{const u=docSnap.data();if(isBarangayPosition(u.position)){allActiveUsers.push({id:docSnap.id,data:u})}});document.getElementById('activeCount').textContent=`(${allActiveUsers.length})`;renderTable(activeTable,allActiveUsers,'active')});searchActive.addEventListener('input',(e)=>{const filtered=filterUsers(e.target.value.toLowerCase(),allActiveUsers);renderTable(activeTable,filtered,'active')});const qInactive=query(collection(db,"users"),where("status","==","inactive"));onSnapshot(qInactive,(snapshot)=>{allInactiveUsers=[];snapshot.forEach((docSnap)=>{const u=docSnap.data();if(isBarangayPosition(u.position)){allInactiveUsers.push({id:docSnap.id,data:u})}});document.getElementById('inactiveCount').textContent=`(${allInactiveUsers.length})`;renderTable(inactiveTable,allInactiveUsers,'inactive')});searchInactive.addEventListener('input',(e)=>{const filtered=filterUsers(e.target.value.toLowerCase(),allInactiveUsers);renderTable(inactiveTable,filtered,'inactive')});const qDeclined=query(collection(db,"users"),where("status","==","declined"));onSnapshot(qDeclined,(snapshot)=>{allDeclinedUsers=[];snapshot.forEach((docSnap)=>{const u=docSnap.data();if(isBarangayPosition(u.position)){allDeclinedUsers.push({id:docSnap.id,data:u})}});document.getElementById('declinedCount').textContent=`(${allDeclinedUsers.length})`;renderTable(declinedTable,allDeclinedUsers,'declined')});searchDeclined.addEventListener('input',(e)=>{const filtered=filterUsers(e.target.value.toLowerCase(),allDeclinedUsers);renderTable(declinedTable,filtered,'declined')});await setupRealtimeNotifications(db)}catch(err){console.error("Error loading admin or users:",err);window.location.href="logout.html"}});
     document.getElementById("logoutBtn").addEventListener("click",async()=>{if(confirm("Are you sure you want to logout?")){try{await signOut(auth);console.log("Admin signed out.");window.location.href="logout.html"}catch(err){console.error("Logout error:",err)}}});
   </script>
 </body>
-</html>
+</html><

@@ -14,23 +14,17 @@
     .sidebar-header h2{font-size:1.2rem;margin:0}
     .sidebar-menu{list-style:none;padding-left:0}
     .sidebar-menu li{margin:0.5rem 0}
-    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s;border-left:4px solid transparent}
     .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
     .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2)}
-    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%}
+    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
     .logout-btn:hover{background-color:#c9302c}
     .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40}
     .navbar h1{font-size:1.4rem;color:#004aad}
     .profile{display:flex;align-items:center;gap:1rem}
-    .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
-    .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none}
+    .fa-bell{font-size:1.2rem;position:relative;cursor:pointer;color:#333}
+    .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none;min-width:18px;text-align:center}
     .badge.show{display:flex;align-items:center;justify-content:center}
-    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
-    .username{font-weight:500}
-    .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
-    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
-    .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
     .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.15);width:340px;max-height:420px;overflow:hidden;z-index:1000;font-family:"Segoe UI",Tahoma,sans-serif;animation:fadeIn 0.2s ease-in-out}
     .notification-menu.show{display:block}
     .notification-header{padding:0.9rem 1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f9f9f9}
@@ -59,13 +53,22 @@
     .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.25rem}
     .notification-empty{padding:2rem;text-align:center;color:#999;font-size:0.9rem}
     @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:0.5rem;border-radius:8px;transition:background 0.2s}
+    .profile-dropdown:hover{background:#f5f7fb}
+    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid #004aad}
+    .username{font-weight:500;color:#333}
+    .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
+    .dropdown-menu.show{display:block}
+    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem;transition:background 0.2s}
+    .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
+    .dropdown-menu a i{margin-right:8px;width:20px;text-align:center}
     .main{margin-left:250px;margin-top:74px;flex:1;display:block;min-width:0;height:calc(100vh - 74px);overflow-y:auto;overflow-x:hidden}
     .content{flex:1;padding:1.5rem;overflow-y:auto;height:100%}
     .page{padding:28px;display:flex;justify-content:center;width:100%}
     .profile-section{max-width:1100px;width:100%;display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start}
     .card{background:white;border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(13,34,85,0.06)}
     .profile-card .top{display:flex;gap:18px;align-items:center}
-    .profile-card img.profile-main{width:120px;height:120px;border-radius:50%;object-fit:cover}
+    .profile-card img.profile-main{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #004aad}
     .profile-info{margin-top:12px}
     .profile-info label{display:block;font-weight:700;font-size:13px;margin-top:10px}
     .profile-info input{width:100%;padding:8px;border-radius:8px;border:1px solid #d7dce6;margin-top:6px;font-size:14px;background:#fbfdff}
@@ -164,7 +167,8 @@
         </div>
         <div class="sidebar-footer">
             <button class="logout-btn" id="logoutBtn">
-                <i class="fa fa-sign-out-alt"></i> Logout
+                <i class="fa fa-sign-out-alt"></i>
+                <span>Logout</span>
             </button>
         </div>
     </aside>
@@ -201,7 +205,7 @@
         <img src="image.png" alt="avatar" class="avatar" id="navAvatar">
         <span class="username" id="navUsername">Loading...</span>
         <div class="dropdown-menu" id="dropdownMenu">
-          <a href="profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+          <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
         </div>
       </div>
     </div>
@@ -373,7 +377,7 @@
     const clearNotificationsBtn=document.getElementById("clearNotificationsBtn");
     const markAllReadBtn=document.getElementById("markAllReadBtn");
 
-    notificationBell.addEventListener("click",(e)=>{e.stopPropagation();notificationMenu.classList.toggle("show");document.getElementById("dropdownMenu").style.display="none"});
+    notificationBell.addEventListener("click",(e)=>{e.stopPropagation();notificationMenu.classList.toggle("show");document.getElementById("dropdownMenu").classList.remove("show")});
     clearNotificationsBtn.addEventListener("click",()=>{notificationsList=[];seenNotificationIds.clear();updateNotificationUI()});
     markAllReadBtn.addEventListener("click",()=>{notificationsList.forEach(n=>n.read=true);updateNotificationUI()});
 
@@ -399,9 +403,9 @@
     const dropdownMenu=document.getElementById('dropdownMenu');
     const profileToggle=document.getElementById('profileToggle');
 
-    profileToggle.addEventListener("click",(e)=>{e.stopPropagation();dropdownMenu.style.display=dropdownMenu.style.display==="block"?"none":"block";notificationMenu.classList.remove("show")});
+    profileToggle.addEventListener("click",(e)=>{e.stopPropagation();dropdownMenu.classList.toggle("show");notificationMenu.classList.remove("show")});
 
-    window.addEventListener('click',(e)=>{if(!e.target.closest('.profile-dropdown')){dropdownMenu.style.display='none'}if(!e.target.closest('.notification-menu')&&e.target!==notificationBell){notificationMenu.classList.remove("show")}});
+    window.addEventListener('click',(e)=>{if(!e.target.closest('.profile-dropdown')){dropdownMenu.classList.remove("show")}if(!e.target.closest('.notification-menu')&&e.target!==notificationBell){notificationMenu.classList.remove("show")}});
 
     const editModal=document.getElementById("editModal");
     const editPhoto=document.getElementById("editPhoto");
