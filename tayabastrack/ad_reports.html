@@ -7,26 +7,33 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI', Tahoma, sans-serif;display:flex;min-height:100vh;background:#f5f7fb;color:#333;overflow:auto}
-    .sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50}
-    .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
-    .sidebar-header img{width:40px}
-    .sidebar-header h2{font-size:1.2rem;margin:0}
-    .sidebar-menu{list-style:none;padding-left:0}
+    body{font-family:'Segoe UI', Tahoma, sans-serif;display:flex;min-height:100vh;background:#f5f7fb;color:#333;overflow:hidden}
+    
+    /* SIDEBAR - IMPROVED VERSION */
+    .sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;height:100vh;overflow-y:auto;transition:left 0.3s ease}
+    .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem;padding:0 1rem}
+    .sidebar-header img{width:40px;height:40px;object-fit:contain}
+    .sidebar-header h2{font-size:1.2rem;margin:0;font-weight:600}
+    .sidebar-menu{list-style:none;padding-left:0;margin:0}
     .sidebar-menu li{margin:0.5rem 0}
     .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s;border-left:4px solid transparent}
     .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
-    .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2)}
+    .sidebar-menu a i{width:20px;text-align:center;font-size:1rem}
+    .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2);margin-top:auto}
     .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
     .logout-btn:hover{background-color:#c9302c}
-    .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40}
-    .navbar h1{font-size:1.4rem;color:#004aad}
+    
+    /* NAVBAR - IMPROVED VERSION */
+    .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40;transition:left 0.3s ease}
+    .navbar h1{font-size:1.4rem;color:#004aad;margin:0}
+    .navbar-left{display:flex;align-items:center;gap:1rem}
+    .mobile-menu-btn{display:none;background:none;border:none;color:#004aad;font-size:1.5rem;cursor:pointer;padding:0.5rem}
     .profile{display:flex;align-items:center;gap:1rem}
     .fa-bell{font-size:1.2rem;position:relative;cursor:pointer;color:#333}
     .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none;min-width:18px;text-align:center}
     .badge.show{display:flex;align-items:center;justify-content:center}
     
-    /* Enhanced Notification Menu */
+    /* Notification Menu */
     .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.15);width:340px;max-height:420px;overflow:hidden;z-index:1000;font-family:"Segoe UI", Tahoma, sans-serif;animation:fadeIn 0.2s ease-in-out}
     .notification-menu.show{display:block}
     .notification-header{padding:0.9rem 1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f9f9f9}
@@ -67,7 +74,9 @@
     .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem;transition:background 0.2s}
     .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
     .dropdown-menu a i{margin-right:8px;width:20px;text-align:center}
-    .main{margin-left:250px;margin-top:74px;flex:1;display:block;padding:20px 28px;height:calc(100vh - 74px);overflow-y:auto;overflow-x:hidden}
+    
+    /* MAIN CONTENT */
+    .main{margin-left:250px;margin-top:64px;flex:1;display:block;padding:20px 28px;height:calc(100vh - 64px);overflow-y:auto;overflow-x:hidden;transition:margin-left 0.3s ease}
     .reports-section{padding-bottom:40px;max-width:100%}
     .report-box{background:#fff;border-radius:10px;padding:16px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.04);overflow:visible}
     .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -131,22 +140,33 @@
     .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
     .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    @media (max-width:900px){.modal-grid{grid-template-columns:1fr}.report-actions input{width:100%}}
+    
+    /* MOBILE RESPONSIVE */
+    @media (max-width:980px){
+      .sidebar{left:-250px}
+      .sidebar.mobile-open{left:0}
+      .navbar{left:0}
+      .main{margin-left:0}
+      .mobile-menu-btn{display:block !important}
+      .username{display:none}
+      .modal-grid{grid-template-columns:1fr}
+      .report-actions input{width:100%}
+    }
   </style>
 </head>
 <body>
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div>
       <div class="sidebar-header">
         <img src="logu.png" alt="Logo">
         <h2>TayabaStrack</h2>
       </div>
       <ul class="sidebar-menu">
-        <li><a href="ad_dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
-        <li class="active"><a href="ad_reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
-        <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i>&nbsp; Map</a></li>
-        <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
-        <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i>&nbsp; Report Bulletin</a></li>
+        <li><a href="ad_dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
+        <li class="active"><a href="ad_reports.html"><i class="fa fa-tasks"></i> Manage Reports</a></li>
+        <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
+        <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
+        <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
       </ul>
     </div>
     <div class="sidebar-footer">
@@ -157,11 +177,16 @@
     </div>
   </aside>
 
-  <nav class="navbar" role="navigation" aria-label="Main navigation">
-    <h1>Manage Reports</h1>
+  <nav class="navbar">
+    <div class="navbar-left">
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa fa-bars"></i>
+      </button>
+      <h1>Manage Reports</h1>
+    </div>
     <div class="profile">
       <div style="position:relative">
-        <i class="fa fa-bell" id="notificationBell" aria-hidden="true"></i>
+        <i class="fa fa-bell" id="notificationBell"></i>
         <span class="badge" id="notificationBadge">0</span>
         <div class="notification-menu" id="notificationMenu">
           <div class="notification-header">
@@ -183,34 +208,34 @@
         </div>
       </div>
       
-      <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
+      <div class="profile-dropdown" id="profileToggle">
         <img src="image.png" alt="Profile" class="avatar" id="navAvatar">
         <span class="username" id="navUsername">---</span>
-        <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
-          <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
         </div>
       </div>
     </div>
   </nav>
 
-  <main class="main" role="main">
+  <main class="main">
     <section class="reports-section">
-      <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
-        <div class="spinner" role="status" aria-label="Loading"></div>
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
       </div>
 
       <div class="report-box">
         <div class="report-box-header">
           <h2>Pending Reports</h2>
           <div class="report-actions">
-            <input id="searchPending" placeholder="Search pending..." aria-label="Search pending reports">
+            <input id="searchPending" placeholder="Search pending...">
           </div>
         </div>
         <div class="scroll-hint">
           <i class="fas fa-arrows-alt-h"></i>
           <span>Scroll horizontally to view all columns</span>
         </div>
-        <div class="table-card" aria-live="polite">
+        <div class="table-card">
           <table>
             <thead>
               <tr>
@@ -226,14 +251,14 @@
         <div class="report-box-header">
           <h2>Ongoing Reports</h2>
           <div class="report-actions">
-            <input id="searchOngoing" placeholder="Search ongoing..." aria-label="Search ongoing reports">
+            <input id="searchOngoing" placeholder="Search ongoing...">
           </div>
         </div>
         <div class="scroll-hint">
           <i class="fas fa-arrows-alt-h"></i>
           <span>Scroll horizontally to view all columns</span>
         </div>
-        <div class="table-card" aria-live="polite">
+        <div class="table-card">
           <table>
             <thead>
               <tr>
@@ -249,14 +274,14 @@
         <div class="report-box-header">
           <h2>Completed Reports (Repaired)</h2>
           <div class="report-actions">
-            <input id="searchCompleted" placeholder="Search completed..." aria-label="Search completed reports">
+            <input id="searchCompleted" placeholder="Search completed...">
           </div>
         </div>
         <div class="scroll-hint">
           <i class="fas fa-arrows-alt-h"></i>
           <span>Scroll horizontally to view all columns</span>
         </div>
-        <div class="table-card" aria-live="polite">
+        <div class="table-card">
           <table>
             <thead>
               <tr>
@@ -272,14 +297,14 @@
         <div class="report-box-header">
           <h2>Declined Reports</h2>
           <div class="report-actions">
-            <input id="searchDeclined" placeholder="Search declined..." aria-label="Search declined reports">
+            <input id="searchDeclined" placeholder="Search declined...">
           </div>
         </div>
         <div class="scroll-hint">
           <i class="fas fa-arrows-alt-h"></i>
           <span>Scroll horizontally to view all columns</span>
         </div>
-        <div class="table-card" aria-live="polite">
+        <div class="table-card">
           <table>
             <thead>
               <tr>
@@ -464,7 +489,25 @@
     </div>
   </div>
 
-  <!-- Notification System Script -->
+  <script>
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.querySelector('.mobile-menu-btn');
+      
+      if (window.innerWidth <= 980 && 
+          !sidebar.contains(e.target) && 
+          !menuBtn.contains(e.target)) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+  </script>
+    <!-- Notification System Script -->
   <script>
     let notificationsList = [];
     let seenNotificationIds = new Set();
@@ -1321,5 +1364,5 @@
       }
     });
   </script>
-</body>
+  </body>
 </html>

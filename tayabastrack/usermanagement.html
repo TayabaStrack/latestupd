@@ -7,9 +7,25 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: auto; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: hidden; }
     
-    .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; flex-shrink: 0; height: 100vh; position: fixed; left: 0; top: 0; }
+    /* ========== SIDEBAR WITH MOBILE SUPPORT ========== */
+    .sidebar { 
+      width: 240px; 
+      background: #004aad; 
+      color: #fff; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      padding: 1rem 0; 
+      flex-shrink: 0; 
+      height: 100vh; 
+      position: fixed; 
+      left: 0; 
+      top: 0;
+      z-index: 50;
+      transition: left 0.3s ease;
+    }
     .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; }
     .sidebar-header img { width: 40px; }
     .sidebar-header h2 { font-size: 1.2rem; margin: 0; }
@@ -18,20 +34,51 @@
     .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; }
     .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
     .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
-    .logout-btn { background-color: #d9534f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; width: 100%; }
+    .logout-btn { background-color: #d9534f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .logout-btn:hover { background-color: #c9302c; }
     
-    .dashboard-main { flex: 1; display: flex; flex-direction: column; min-width: 0; margin-left: 240px; height: 100vh; overflow: hidden; }
-    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); flex-shrink: 0; z-index: 100; }
+    .dashboard-main { 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      min-width: 0; 
+      margin-left: 240px; 
+      height: 100vh; 
+      overflow: hidden;
+      transition: margin-left 0.3s ease;
+    }
+    
+    .navbar { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 1rem 2rem; 
+      background: #fff; 
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
+      flex-shrink: 0; 
+      z-index: 40; 
+    }
+    .navbar-left { display: flex; align-items: center; gap: 1rem; }
     .navbar h1 { font-size: 1.4rem; color: #004aad; white-space: nowrap; }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #004aad;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
 
     .profile { display: flex; align-items: center; gap: 1rem; position: relative; flex-shrink: 0; }
     .profile .fa-bell { font-size: 1.2rem; cursor: pointer; position: relative; }
     .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; }
     .badge.show { display: flex; align-items: center; justify-content: center; }
-    .avatar { width: 35px; height: 35px; border-radius: 50%; flex-shrink: 0; }
+    .avatar { width: 35px; height: 35px; border-radius: 50%; flex-shrink: 0; border: 2px solid #004aad; }
     .username { font-weight: 500; white-space: nowrap; }
-    .profile-dropdown { position: relative; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
+    .profile-dropdown { position: relative; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; transition: background 0.2s; }
+    .profile-dropdown:hover { background: #f5f7fb; }
     
     .notification-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); width: 340px; max-height: 420px; overflow: hidden; z-index: 1000; font-family: "Segoe UI", Tahoma, sans-serif; animation: fadeIn 0.2s ease-in-out; }
     .notification-menu.show { display: block; }
@@ -70,6 +117,7 @@
     .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 10000; }
     .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.9rem; }
     .dropdown-menu a:hover { background: #f0f0f0; color: #004aad; }
+    .dropdown-menu a i { margin-right: 8px; width: 20px; text-align: center; }
     
     .user-section { padding: 1.5rem; flex: 1; overflow-y: auto; overflow-x: hidden; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px; }
@@ -132,10 +180,19 @@
 
     .user-section .header, .user-section h3 { display: flex; justify-content: space-between; align-items: center; }
     .user-section h3 { margin: 1rem 0 0.5rem 0; }
+
+    /* ========== MOBILE RESPONSIVE ========== */
+    @media (max-width: 980px) {
+      .sidebar { left: -240px; }
+      .sidebar.mobile-open { left: 0; }
+      .dashboard-main { margin-left: 0; }
+      .mobile-menu-btn { display: block !important; }
+      .username { display: none; }
+    }
   </style>
 </head>
 <body>
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div>
       <div class="sidebar-header">
         <img src="logu.png" alt="Logo" class="logo">
@@ -148,13 +205,21 @@
       </ul>
     </div>  
     <div class="sidebar-footer">
-      <button class="logout-btn" id="sidebarLogoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</button>
+      <button class="logout-btn" id="sidebarLogoutBtn">
+        <i class="fa fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
     </div>
   </aside>
 
   <div class="dashboard-main">
     <nav class="navbar">
-      <h1>User Management</h1>
+      <div class="navbar-left">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+          <i class="fa fa-bars"></i>
+        </button>
+        <h1>User Management</h1>
+      </div>
       <div class="profile">
         <div style="position: relative;">
           <i class="fa fa-bell" id="notificationBell"></i>
@@ -326,6 +391,25 @@
       </form>
     </div>
   </div>
+
+<script>
+  // Mobile menu toggle
+  function toggleMobileMenu() {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+  }
+
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('sidebar');
+    const menuBtn = document.querySelector('.mobile-menu-btn');
+    
+    if (window.innerWidth <= 980 && 
+        !sidebar.contains(e.target) && 
+        !menuBtn.contains(e.target)) {
+      sidebar.classList.remove('mobile-open');
+    }
+  });
+</script>
 
 <script type="module">
   import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -750,8 +834,10 @@
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    await signOut(auth);
-    window.location.href = "logout.html";
+    if (confirm("Are you sure you want to logout?")) {
+      await signOut(auth);
+      window.location.href = "logout.html";
+    }
   };
 
   document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
@@ -766,6 +852,10 @@
       if (userDoc.exists()) {
         const data = userDoc.data();
         document.getElementById("navUsername").textContent = data.name || "Unknown";
+        
+        if (data.photoURL || data.profilePic) {
+          document.getElementById("navbarAvatar").src = data.photoURL || data.profilePic;
+        }
 
         superAdminData = {
           uid: user.uid,

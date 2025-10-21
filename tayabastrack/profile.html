@@ -8,29 +8,79 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI', Tahoma, sans-serif;display:flex;min-height:100vh;background:#f5f7fb;color:#333;overflow:hidden}
-    .sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;height:100vh;overflow-y:auto}
+    
+    /* ========== SIDEBAR WITH MOBILE SUPPORT ========== */
+    .sidebar{
+      width:250px;
+      min-width:250px;
+      background:#004aad;
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      padding:1rem 0;
+      position:fixed;
+      top:0;
+      left:0;
+      bottom:0;
+      z-index:50;
+      height:100vh;
+      overflow-y:auto;
+      transition:left 0.3s ease;
+    }
     .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
     .sidebar-header img{width:40px}
     .sidebar-header h2{font-size:1.2rem;margin:0}
     .sidebar-menu{list-style:none;padding-left:0}
     .sidebar-menu li{margin:0.5rem 0}
-    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s;border-left:4px solid transparent}
     .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
+    .sidebar-menu a i{width:20px;text-align:center}
     .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2)}
-    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%}
+    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
     .logout-btn:hover{background-color:#c9302c}
-    .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40}
+    
+    .navbar{
+      position:fixed;
+      top:0;
+      left:250px;
+      right:0;
+      height:64px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:0 24px;
+      background:#fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.05);
+      z-index:40;
+      transition:left 0.3s ease;
+    }
+    .navbar-left{display:flex;align-items:center;gap:1rem}
     .navbar h1{font-size:1.4rem;color:#004aad}
+    
+    .mobile-menu-btn{
+      display:none;
+      background:none;
+      border:none;
+      color:#004aad;
+      font-size:1.5rem;
+      cursor:pointer;
+      padding:0.5rem;
+    }
+    
     .profile{display:flex;align-items:center;gap:1rem}
     .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
     .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none}
     .badge.show{display:flex;align-items:center;justify-content:center}
-    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
+    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:0.5rem;border-radius:8px;transition:background 0.2s}
+    .profile-dropdown:hover{background:#f5f7fb}
+    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid #004aad}
     .username{font-weight:500}
     .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
     .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
     .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
+    .dropdown-menu a i{margin-right:8px;width:20px;text-align:center}
+    
     .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.15);width:340px;max-height:420px;overflow:hidden;z-index:1000;font-family:"Segoe UI",Tahoma,sans-serif;animation:fadeIn 0.2s ease-in-out}
     .notification-menu.show{display:block}
     .notification-header{padding:0.9rem 1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f9f9f9}
@@ -59,7 +109,19 @@
     .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.25rem}
     .notification-empty{padding:2rem;text-align:center;color:#999;font-size:0.9rem}
     @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-    .main{margin-left:250px;margin-top:74px;flex:1;display:block;min-width:0;height:calc(100vh - 74px);overflow-y:auto;overflow-x:hidden}
+    
+    .main{
+      margin-left:250px;
+      margin-top:64px;
+      flex:1;
+      display:block;
+      min-width:0;
+      height:calc(100vh - 64px);
+      overflow-y:auto;
+      overflow-x:hidden;
+      transition:margin-left 0.3s ease;
+    }
+    
     .content{flex:1;padding:1.5rem;overflow-y:auto;height:100%}
     .page{padding:28px;display:flex;justify-content:center;width:100%}
     .profile-section{max-width:1100px;width:100%;display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start}
@@ -132,23 +194,25 @@
     .btn-cancel:hover{background:#5a6268;transform:translateY(-2px)}
     .btn-save{background:#004aad;color:#fff}
     .btn-save:hover{background:#00327a;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,74,173,0.3)}
+    
+    /* ========== MOBILE RESPONSIVE ========== */
     @media (max-width:980px){
-      .profile-section{grid-template-columns:1fr;padding-bottom:40px}
-      .sidebar{left:-250px;transition:left 0.3s}
+      .sidebar{left:-250px}
       .sidebar.mobile-open{left:0}
       .navbar{left:0}
       .main{margin-left:0}
       .mobile-menu-btn{display:block !important}
+      .username{display:none}
+      .profile-section{grid-template-columns:1fr;padding-bottom:40px}
       .calendar-day{min-height:45px}
       .event-dot{width:6px;height:6px}
       .form-grid{grid-template-columns:1fr}
       .modal-content{max-width:95%}
     }
-    .mobile-menu-btn{display:none;background:none;border:none;color:#004aad;font-size:1.5rem;cursor:pointer;padding:0.5rem}
   </style>
 </head>
 <body>
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div>
       <div class="sidebar-header">
         <img src="logu.png" alt="Logo">
@@ -157,22 +221,27 @@
       <ul class="sidebar-menu">
         <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
         <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
-        <li class="active"><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
+        <li><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
       </ul>
     </div>
     <div class="sidebar-footer">
-      <button class="logout-btn" id="sidebarLogoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</button>
+      <button class="logout-btn" id="sidebarLogoutBtn">
+        <i class="fa fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
     </div>
   </aside>
 
   <nav class="navbar">
-    <div style="display:flex;align-items:center;gap:1rem;">
-      <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fa fa-bars"></i></button>
+    <div class="navbar-left">
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa fa-bars"></i>
+      </button>
       <h1>User Profile</h1>
     </div>
     <div class="profile">
       <div style="position:relative">
-        <i class="fa fa-bell" id="notificationBell" aria-hidden="true"></i>
+        <i class="fa fa-bell" id="notificationBell"></i>
         <span class="badge" id="notificationBadge">0</span>
         <div class="notification-menu" id="notificationMenu">
           <div class="notification-header">
@@ -197,10 +266,10 @@
           </div>
         </div>
       </div>
-      <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
+      <div class="profile-dropdown" id="profileToggle">
         <img src="image.png" alt="avatar" class="avatar" id="navAvatar">
         <span class="username" id="navUsername">Loading...</span>
-        <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
+        <div class="dropdown-menu" id="dropdownMenu">
           <a href="profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
           <a href="#" id="navLogoutBtn"><i class="fa fa-sign-out-alt"></i>&nbsp; Logout</a>
         </div>
@@ -356,7 +425,7 @@
   </div>
 
   <script>
-    function toggleMobileMenu(){document.querySelector('.sidebar').classList.toggle('mobile-open')}
+    function toggleMobileMenu(){document.getElementById('sidebar').classList.toggle('mobile-open')}
     document.addEventListener('click',function(e){const sidebar=document.querySelector('.sidebar');const menuBtn=document.querySelector('.mobile-menu-btn');if(window.innerWidth<=980&&!sidebar.contains(e.target)&&!menuBtn.contains(e.target)){sidebar.classList.remove('mobile-open')}});
 
     let currentUser=null;
