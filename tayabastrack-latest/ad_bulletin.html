@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Bulletin | Admin</title>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  /* ---------- RESET & BASE ---------- */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Segoe UI', Tahoma, sans-serif;
+    display:flex;
+    min-height:100vh;
+    background:#f5f7fb;
+    color:#333;
+    overflow:hidden;
+  }
+
+  /* ---------- SIDEBAR (fixed) ---------- */
+  .sidebar{
+    width:250px;
+    min-width:250px;
+    background:#004aad;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:1rem 0;
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+    z-index:50;
+    height:100vh;
+    overflow-y:auto;
+  }
+  .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
+  .sidebar-header img{width:40px}
+  .sidebar-header h2{font-size:1.2rem;margin:0}
+  .sidebar-menu{list-style:none;padding-left:0}
+  .sidebar-menu li{margin:0.5rem 0}
+  .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
+  .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
+  .sidebar-footer{
+    text-align:center;
+    padding:1rem;
+    border-top:1px solid rgba(255,255,255,0.2);
+  }
+  .logout-btn {
+    background-color: #d9534f;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+    width: 100%;
+  }
+  .logout-btn:hover {
+    background-color: #c9302c;
+  }
+
+  /* ---------- NAVBAR (fixed) ---------- */
+  .navbar{
+    position:fixed;
+    top:0;
+    left:250px;
+    right:0;
+    height:64px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 24px;
+    background:#fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.05);
+    z-index:40;
+  }
+  .navbar h1{font-size:1.4rem;color:#004aad}
+  .profile{display:flex;align-items:center;gap:1rem}
+  
+  /* Notification Bell */
+  .notification-bell-wrapper {
+    position: relative;
+    cursor: pointer;
+  }
+  .fa-bell{font-size:1.2rem;position:relative;cursor:pointer;transition:color 0.3s}
+  .fa-bell:hover{color:#004aad}
+  .badge{
+    background:red;
+    color:#fff;
+    font-size:.7rem;
+    border-radius:50%;
+    padding:3px 6px;
+    position:absolute;
+    top:-8px;
+    right:-8px;
+    display:none;
+    min-width:20px;
+    text-align:center;
+  }
+  .badge.show{display:flex;align-items:center;justify-content:center}
+
+  /* Notification Menu */
+  .notification-menu {
+    display: none;
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.15);
+    width: 380px;
+    max-height: 500px;
+    overflow: hidden;
+    z-index: 1000;
+  }
+  .notification-menu.show {
+    display: flex;
+    flex-direction: column;
+  }
+  .notification-header {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+  }
+  .notification-header h3 {
+    font-size: 1rem;
+    color: #333;
+    margin: 0;
+  }
+  .notification-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .action-btn {
+    background: none;
+    border: none;
+    color: #004aad;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+  .action-btn:hover {
+    background: #e3f2fd;
+  }
+  
+  /* Notification Filters */
+  .notification-filters {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+  }
+  .filter-btn {
+    padding: 4px 12px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    color: #666;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover {
+    background: #f5f5f5;
+  }
+  .filter-btn.active {
+    background: #004aad;
+    color: #fff;
+    border-color: #004aad;
+  }
+  
+  .notification-list {
+    max-height: 360px;
+    overflow-y: auto;
+  }
+  .notification-item {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    gap: 0.8rem;
+    transition: background 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .notification-item:hover {
+    background: #f9f9f9;
+  }
+  .notification-item.unread {
+    background: #e3f2fd;
+  }
+  .notification-item.unread::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #004aad;
+  }
+  .notification-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .notification-icon.user {
+    background: #e3f2fd;
+    color: #1976d2;
+  }
+  .notification-icon.report {
+    background: #fff3e0;
+    color: #f57c00;
+  }
+  .notification-content {
+    flex: 1;
+  }
+  .notification-content p {
+    margin: 0;
+    font-size: 0.85rem;
+  }
+  .notification-content .time {
+    color: #999;
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+  }
+  .notification-empty {
+    padding: 3rem;
+    text-align: center;
+    color: #999;
+  }
+  .notification-empty i {
+    font-size: 3rem;
+    color: #ddd;
+    margin-bottom: 1rem;
+  }
+
+  .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
+  .avatar{width:35px;height:35px;border-radius:50%}
+  .username{font-weight:500}
+  .dropdown-menu{
+    display:none;
+    position:absolute;
+    top:120%;
+    right:0;
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:6px;
+    box-shadow:0 4px 8px rgba(0,0,0,.15);
+    min-width:200px;
+    z-index:1000;
+  }
+  .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
+  .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
+
+  /* ---------- MAIN CONTENT ---------- */
+  .main {
+    margin-left:250px;
+    margin-top:74px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    height:calc(100vh - 74px);
+    overflow:hidden;
+  }
+
+  .reports-section{
+    padding:1.5rem;
+    flex:1;
+    overflow-y:auto;
+    overflow-x:hidden;
+  }
+
+  /* ---------- REPORT BOX ---------- */
+  .report-box{
+    background:#fff;
+    border-radius:10px;
+    padding:16px;
+    margin-bottom:1rem;
+    box-shadow:0 6px 18px rgba(0,0,0,0.04);
+  }
+  .report-box-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .report-box-header h2{
+    color:#004aad;
+    font-size:1.05rem;
+  }
+  .report-actions input{
+    padding:.4rem .75rem;
+    border:1px solid #e0e0e0;
+    border-radius:18px;
+    font-size:.9rem;
+    width:260px;
+  }
+
+  /* ---------- SCROLL HINT ---------- */
+  .scroll-hint {
+    background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 74, 173, 0.2);
+  }
+  .scroll-hint i {
+    animation: slideHint 2s ease-in-out infinite;
+  }
+  @keyframes slideHint {
+    0%, 100% { transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+  }
+
+  /* ---------- TABLE ---------- */
+  .table-wrapper {
+    position: relative;
+  }
+  
+  .table-card {
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 8px;
+    background: #fff;
+    padding: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    scroll-behavior: smooth;
+    position: relative;
+  }
+
+  .table-card::-webkit-scrollbar {
+    height: 10px;
+  }
+  .table-card::-webkit-scrollbar-track {
+    background: #e9eef5;
+    border-radius: 5px;
+  }
+  .table-card::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+    border-radius: 5px;
+    border: 2px solid #e9eef5;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1400px;
+  }
+  thead th{
+    background:#f5f8fb;
+    color:#333;
+    font-weight:700;
+    padding:.7rem .75rem;
+    text-align:left;
+    white-space:nowrap;
+    border-bottom:2px solid #e0e0e0;
+  }
+  th,td{
+    padding:.5rem .75rem;
+    font-size:.85rem;
+    vertical-align:top;
+    border-bottom:1px solid #f0f2f5;
+  }
+  tbody tr:nth-child(even){background:#fbfdff}
+  tbody tr:hover{background:#f1f8ff}
+  
+  .col-id{width:160px;color:#444;font-weight:600}
+  .col-small{width:110px}
+  .col-coords{width:140px}
+  .truncate{
+    max-width:300px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    display:inline-block;
+    vertical-align:middle;
+  }
+  .status{
+    display:inline-block;
+    padding:.25rem .5rem;
+    border-radius:6px;
+    color:#fff;
+    font-weight:700;
+    font-size:.75rem;
+    min-width:80px;
+    text-align:center;
+  }
+  .pending{background:#f6c23e;color:#2b2b2b}
+  .ongoing{background:#36b9cc;color:#fff}
+  .completed{background:#1cc88a;color:#fff}
+  .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
+
+  /* Coordinates vertical display */
+  .coords-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+  }
+  .coords-vertical div {
+    white-space: nowrap;
+  }
+
+  /* ---------- MODAL ---------- */
+  .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
+  .modal-content{background:#fff;width:100%;max-width:980px;border-radius:12px;padding:18px;max-height:92vh;overflow:auto}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .modal-header h2{color:#004aad;font-size:1.1rem;margin:0}
+  .close-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#444}
+  .modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .modal-row{display:flex;flex-direction:column}
+  .modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
+  .modal-row input[type="text"],.modal-row textarea,.modal-row input[type="date"],.modal-row input[type="number"]{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
+  .modal-row textarea{min-height:80px;resize:vertical}
+  .img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px}
+  .modal-footer{text-align:right;margin-top:12px}
+  .btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;margin-left:8px}
+  .btn-save{background:#004aad;color:#fff}
+  .btn-cancel{background:#9e9e9e;color:#fff}
+
+  /* ---------- LOADING ---------- */
+  .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
+  .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  @media (max-width:900px) {
+    .modal-grid{grid-template-columns:1fr}
+    .report-actions input{width:100%}
+  }
+</style>
+</head>
+
+<body>
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div>
+    <div class="sidebar-header">
+      <img src="logu.png" alt="Logo">
+      <h2>TayabaStrack</h2>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="ad_dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
+      <li><a href="ad_reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
+      <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i>&nbsp; Map</a></li>
+      <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
+      <li class="active"><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i>&nbsp; Report Bulletin</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-footer">
+    <button class="logout-btn" id="logoutBtn">
+      <i class="fa fa-sign-out-alt"></i> Logout
+    </button>
+  </div>
+</aside>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <h1>Report Bulletin</h1>
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="notification-bell-wrapper">
+      <i class="fa fa-bell" id="notificationBell"></i>
+      <span class="badge" id="notificationBadge">0</span>
+      
+      <!-- Notification Menu -->
+      <div class="notification-menu" id="notificationMenu">
+        <div class="notification-header">
+          <h3>Notifications</h3>
+          <div class="notification-actions">
+            <button class="action-btn" id="markAllReadBtn" title="Mark all as read">
+              <i class="fa fa-check-double"></i>
+            </button>
+            <button class="action-btn" id="clearAllBtn" title="Clear all">
+              <i class="fa fa-trash"></i>
+            </button>
+            <button class="action-btn" id="viewHistoryBtn" title="View history">
+              <i class="fa fa-history"></i>
+            </button>
+          </div>
+        </div>
+        <div class="notification-filters">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="report">Reports</button>
+          <button class="filter-btn" data-filter="user">Users</button>
+          <button class="filter-btn" data-filter="24h">Last 24h</button>
+        </div>
+        <div class="notification-list" id="notificationList">
+          <div class="notification-empty">
+            <i class="fa fa-bell-slash"></i>
+            <p>No new notifications</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-dropdown" id="profileToggle">
+      <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar">
+      <span class="username" id="navUsername">Loading...</span>
+      <div class="dropdown-menu" id="dropdownMenu">
+        <a href="ad_profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main -->
+<main class="main">
+  <section class="reports-section">
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="report-box">
+      <div class="report-box-header">
+        <h2>Completed Reports</h2>
+        <div class="report-actions">
+          <input id="searchCompleted" placeholder="Search completed...">
+        </div>
+      </div>
+      <div class="scroll-hint">
+        <i class="fas fa-arrows-alt-h"></i>
+        <span>Scroll horizontally to view all columns</span>
+      </div>
+      <div class="table-wrapper">
+        <div class="table-card" id="completedTableCard">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-id">Report ID</th>
+                <th>Barangay</th>
+                <th style="min-width:250px">Description</th>
+                <th class="col-small">Dimensions (W×H)</th>
+                <th>Image</th>
+                <th>After Image</th>
+                <th class="col-coords">Coordinates</th>
+                <th class="col-small">Status</th><th style="min-width:200px">Start Date & Deadline</th>
+                <th style="min-width:180px">Contractor & Supplier</th>
+                <th style="min-width:180px">Timestamp</th>
+                <th>Reporter Position</th>
+                <th>Inspection Date</th>
+                <th>Completion Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="completedBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Edit Report Details</h2>
+      <button class="close-btn" id="closeModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid" id="modalGrid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" id="cancelBtn">Close</button>
+      <button class="btn btn-save" id="saveChangesBtn">Save Changes</button>
+      <button class="btn btn-save" id="postToBulletinBtn">Post to Bulletin</button>
+    </div>
+  </div>
+</div>
+
+<!-- Audio for notification sound -->
+<audio id="notificationSound" preload="auto">
+  <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADhAC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAA4Smq7XnAAAAAAAAAAAAAAAAAAD/+xBkAAP8AAAaQAAAAgAAA0gAAABAAABpAAAAACAAADSAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/w==" type="audio/mpeg">
+</audio>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, where, orderBy, onSnapshot, getDoc, doc, updateDoc, setDoc, addDoc, serverTimestamp, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+  authDomain: "tayabastrack-23b95.firebaseapp.com",
+  projectId: "tayabastrack-23b95",
+  storageBucket: "tayabastrack-23b95.firebasestorage.app",
+  messagingSenderId: "674055915366",
+  appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// DOM references
+const completedBody = document.getElementById("completedBody");
+const completedTableCard = document.getElementById("completedTableCard");
+const searchCompleted = document.getElementById("searchCompleted");
+const editModal = document.getElementById("editModal");
+const modalGrid = document.getElementById("modalGrid");
+const closeModal = document.getElementById("closeModal");
+const cancelBtn = document.getElementById("cancelBtn");
+const dropdownMenu = document.getElementById("dropdownMenu");
+const profileToggle = document.getElementById("profileToggle");
+const navUsername = document.getElementById("navUsername");
+const navbarAvatar = document.getElementById("navbarAvatar");
+const logoutBtn = document.getElementById("logoutBtn");
+const loadingOverlay = document.getElementById("loadingOverlay");
+const notificationBell = document.getElementById("notificationBell");
+const notificationBadge = document.getElementById("notificationBadge");
+const notificationMenu = document.getElementById("notificationMenu");
+const notificationList = document.getElementById("notificationList");
+const markAllReadBtn = document.getElementById("markAllReadBtn");
+const clearAllBtn = document.getElementById("clearAllBtn");
+const viewHistoryBtn = document.getElementById("viewHistoryBtn");
+const postToBulletinBtn = document.getElementById("postToBulletinBtn");
+const saveChangesBtn = document.getElementById("saveChangesBtn");
+const notificationSound = document.getElementById("notificationSound");
+
+let currentDocId = null;
+let currentDocData = null;
+let currentFilter = "all";
+let previousUnreadCount = 0;
+
+// ============================================
+// NOTIFICATION SYSTEM WITH FIRESTORE
+// ============================================
+
+async function createNotification(type, message, detail) {
+  try {
+    await addDoc(collection(db, "admin_notifications"), {
+      type,
+      message,
+      detail,
+      timestamp: serverTimestamp(),
+      read: false
+    });
+  } catch (err) {
+    console.error("Error creating notification:", err);
+  }
+}
+
+async function markNotificationRead(notificationId) {
+  try {
+    await updateDoc(doc(db, "admin_notifications", notificationId), {
+      read: true
+    });
+  } catch (err) {
+    console.error("Error marking notification as read:", err);
+  }
+}
+
+async function markAllNotificationsRead() {
+  try {
+    const q = query(collection(db, "admin_notifications"), where("read", "==", false));
+    const snapshot = await getDocs(q);
+    const updates = snapshot.docs.map(doc => 
+      updateDoc(doc.ref, { read: true })
+    );
+    await Promise.all(updates);
+  } catch (err) {
+    console.error("Error marking all as read:", err);
+  }
+}
+
+async function clearAllNotifications() {
+  if (!confirm("Are you sure you want to clear all notifications?")) return;
+  try {
+    const snapshot = await getDocs(collection(db, "admin_notifications"));
+    const deletes = snapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletes);
+  } catch (err) {
+    console.error("Error clearing notifications:", err);
+  }
+}
+
+function playNotificationSound() {
+  notificationSound.play().catch(err => {
+    console.log("Could not play notification sound:", err);
+  });
+}
+
+function getTimeAgo(timestamp) {
+  if (!timestamp) return "";
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const seconds = Math.floor((new Date() - date) / 1000);
+  
+  if (seconds < 60) return "Just now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+  return date.toLocaleDateString();
+}
+
+function filterNotifications(notifications) {
+  const now = new Date();
+  const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+  
+  return notifications.filter(n => {
+    if (currentFilter === "all") return true;
+    if (currentFilter === "report") return n.type === "report";
+    if (currentFilter === "user") return n.type === "user";
+    if (currentFilter === "24h") {
+      const nDate = n.timestamp.toDate ? n.timestamp.toDate() : new Date(n.timestamp);
+      return nDate >= oneDayAgo;
+    }
+    return true;
+  });
+}
+
+function updateNotificationUI(notifications) {
+  const unreadCount = notifications.filter(n => !n.read).length;
+  
+  if (unreadCount > 0) {
+    notificationBadge.textContent = unreadCount > 99 ? "99+" : unreadCount;
+    notificationBadge.classList.add("show");
+    
+    if (unreadCount > previousUnreadCount && previousUnreadCount > 0) {
+      playNotificationSound();
+    }
+  } else {
+    notificationBadge.classList.remove("show");
+  }
+  
+  previousUnreadCount = unreadCount;
+
+  const filtered = filterNotifications(notifications);
+
+  if (filtered.length === 0) {
+    notificationList.innerHTML = `
+      <div class="notification-empty">
+        <i class="fa fa-bell-slash"></i>
+        <p>No notifications</p>
+      </div>
+    `;
+    return;
+  }
+
+  notificationList.innerHTML = filtered.map(n => `
+    <div class="notification-item ${!n.read ? 'unread' : ''}" data-id="${n.id}">
+      <div class="notification-icon ${n.type}">
+        ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+      </div>
+      <div class="notification-content">
+        <p><strong>${n.message}</strong></p>
+        <p>${n.detail}</p>
+        <span class="time">${getTimeAgo(n.timestamp)}</span>
+      </div>
+    </div>
+  `).join("");
+
+  document.querySelectorAll('.notification-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const id = item.dataset.id;
+      if (item.classList.contains('unread')) {
+        markNotificationRead(id);
+      }
+    });
+  });
+}
+
+function listenToNotifications() {
+  const q = query(
+    collection(db, "admin_notifications"), 
+    orderBy("timestamp", "desc")
+  );
+  
+  onSnapshot(q, (snapshot) => {
+    const notifications = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    updateNotificationUI(notifications);
+  });
+}
+
+notificationBell.addEventListener("click", (e) => {
+  e.stopPropagation();
+  notificationMenu.classList.toggle("show");
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    
+    const q = query(collection(db, "admin_notifications"), orderBy("timestamp", "desc"));
+    getDocs(q).then(snapshot => {
+      const notifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      updateNotificationUI(notifications);
+    });
+  });
+});
+
+markAllReadBtn.addEventListener("click", async (e) => {
+  e.stopPropagation();
+  await markAllNotificationsRead();
+});
+
+clearAllBtn.addEventListener("click", async (e) => {
+  e.stopPropagation();
+  await clearAllNotifications();
+});
+
+viewHistoryBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  alert("Notification history modal - implement as needed");
+});
+
+document.addEventListener("click", (e) => {
+  if (!notificationMenu.contains(e.target) && e.target !== notificationBell) {
+    notificationMenu.classList.remove("show");
+  }
+});
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+function isBarangayPosition(position) {
+  if (!position) return false;
+  const pos = position.toLowerCase().trim();
+  return pos.includes("barangay captain") || 
+         pos.includes("brgy captain") || 
+         pos.includes("brgy. captain") ||
+         pos.includes("barangay official") || 
+         pos.includes("brgy official") || 
+         pos.includes("brgy. official");
+}
+
+function showLoading(show = true) {
+  loadingOverlay.style.display = show ? "flex" : "none";
+}
+
+function formatTimestamp(timestamp) {
+  if (!timestamp) return "";
+  let date;
+  if (timestamp.toDate) {
+    date = timestamp.toDate();
+  } else if (typeof timestamp === 'string') {
+    date = new Date(timestamp);
+  } else {
+    return timestamp;
+  }
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const month = months[date.getMonth()];
+  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getFullYear();
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${month}/${day}/${year} | ${hours}:${minutes} ${ampm}`;
+}
+
+function formatDate(timestamp) {
+  if (!timestamp) return "Not Set";
+  let date;
+  if (timestamp.toDate) date = timestamp.toDate();
+  else if (typeof timestamp === 'string') date = new Date(timestamp);
+  else return "Not Set";
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const m = months[date.getMonth()];
+  const d = String(date.getDate()).padStart(2,'0');
+  const y = date.getFullYear();
+  return `${m} ${d}, ${y}`;
+}
+
+async function getReporterPosition(userId) {
+  if (!userId) return "Unknown";
+  try {
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      return userData.position || "Unknown";
+    }
+  } catch (err) {
+    console.error("Error getting user position:", err);
+  }
+  return "Unknown";
+}
+
+function createEditableField(key, value, type = "text") {
+  const wrapper = document.createElement("div");
+  wrapper.className = "modal-row";
+  const label = document.createElement("label");
+  label.textContent = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+  wrapper.appendChild(label);
+
+  if (key === "incidentImage" || key === "imageUrl" || key === "afterImage") {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = `field-${key}`;
+    input.value = value || "";
+    input.readOnly = true;
+    wrapper.appendChild(input);
+
+    if (value) {
+      const img = document.createElement("img");
+      img.src = value;
+      img.alt = "image preview";
+      img.className = "img-preview";
+      wrapper.appendChild(img);
+    } else {
+      const ph = document.createElement("div");
+      ph.style.marginTop = "6px";
+      ph.style.color = "#666";
+      ph.style.fontSize = ".9rem";
+      ph.textContent = "No image available";
+      wrapper.appendChild(ph);
+    }
+    return wrapper;
+  }
+
+  const input = document.createElement("input");
+  input.type = type;
+  input.id = `field-${key}`;
+  
+  if (type === "date" && value) {
+    if (value.toDate) {
+      const date = value.toDate();
+      input.value = date.toISOString().split('T')[0];
+    } else if (typeof value === 'string') {
+      input.value = value.split('T')[0];
+    }
+  } else {
+    input.value = value === undefined ? "" : String(value);
+  }
+  
+  wrapper.appendChild(input);
+  return wrapper;
+}
+
+async function handleAfterImageUpload(file) {
+  if (!currentDocId) {
+    alert("No report selected");
+    return false;
+  }
+  
+  if (!file) {
+    alert("Please select a file");
+    return false;
+  }
+  
+  try {
+    const fileName = `afterImages/${currentDocId}_${Date.now()}_${file.name}`;
+    const storageRef = ref(storage, fileName);
+    const snapshot = await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(snapshot.ref);
+    
+    currentDocData.afterImage = url;
+    
+    const afterImageField = document.getElementById("field-afterImage");
+    if (afterImageField) {
+      afterImageField.value = url;
+      const parent = afterImageField.parentElement;
+      let img = parent.querySelector(".img-preview");
+      if (!img) {
+        img = document.createElement("img");
+        img.className = "img-preview";
+        parent.appendChild(img);
+      }
+      img.src = url;
+    }
+    
+    return true;
+  } catch (err) {
+    console.error("Error uploading image:", err);
+    alert("Error uploading image: " + err.message);
+    return false;
+  }
+}
+
+// ============================================
+// TABLE BUILDING
+// ============================================
+
+async function buildTableRow(docSnap) {
+  const r = docSnap.data();
+  const tr = document.createElement("tr");
+
+  function addCell(text, classes = "") {
+    const td = document.createElement("td");
+    if (classes) td.className = classes;
+    if (classes.includes("truncate")) {
+      const span = document.createElement("span");
+      span.className = "truncate";
+      span.textContent = (text === undefined || text === null) ? "" : String(text);
+      span.title = (text === undefined || text === null) ? "" : String(text);
+      td.appendChild(span);
+    } else {
+      td.textContent = (text === undefined || text === null) ? "" : String(text);
+    }
+    tr.appendChild(td);
+  }
+
+  // Report ID
+  addCell(r.reportId || "", "col-id");
+  
+  // Barangay
+  addCell(r.barangay || "");
+  
+  // Description
+  addCell(r.description || "", "truncate");
+
+  // Dimensions
+  const width = r.width || "";
+  const height = r.height || "";
+  const dimensions = width && height ? `${width}×${height}` : (width || height || "");
+  addCell(dimensions, "col-small");
+
+  // Image
+  const imgTd = document.createElement("td");
+  const imageData = r.incidentImage || r.imageUrl || r.image;
+  
+  if (imageData) {
+    const link = document.createElement("a");
+    link.href = "#";
+    link.textContent = "View";
+    link.style.cursor = "pointer";
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const imgModal = document.createElement("div");
+      imgModal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
+      
+      const img = document.createElement("img");
+      img.src = imageData;
+      img.style.cssText = "max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
+      
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "×";
+      closeBtn.style.cssText = "position:absolute;top:20px;right:20px;background:white;border:none;font-size:30px;cursor:pointer;width:40px;height:40px;border-radius:50%;";
+      
+      imgModal.appendChild(img);
+      imgModal.appendChild(closeBtn);
+      document.body.appendChild(imgModal);
+      
+      imgModal.addEventListener("click", () => imgModal.remove());
+      closeBtn.addEventListener("click", () => imgModal.remove());
+    });
+    imgTd.appendChild(link);
+  } else {
+    imgTd.textContent = "No";
+  }
+  tr.appendChild(imgTd);
+
+  // After Image
+  const afterImgTd = document.createElement("td");
+  const afterImageData = r.afterImage || r.completionImage || "";
+  
+  if (afterImageData) {
+    const link = document.createElement("a");
+    link.href = "#";
+    link.textContent = "View";
+    link.style.cursor = "pointer";
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const imgModal = document.createElement("div");
+      imgModal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
+      
+      const img = document.createElement("img");
+      img.src = afterImageData;
+      img.style.cssText = "max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
+      
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "×";
+      closeBtn.style.cssText = "position:absolute;top:20px;right:20px;background:white;border:none;font-size:30px;cursor:pointer;width:40px;height:40px;border-radius:50%;";
+      
+      imgModal.appendChild(img);
+      imgModal.appendChild(closeBtn);
+      document.body.appendChild(imgModal);
+      
+      imgModal.addEventListener("click", () => imgModal.remove());
+      closeBtn.addEventListener("click", () => imgModal.remove());
+    });
+    afterImgTd.appendChild(link);
+  } else {
+    afterImgTd.textContent = "No";
+  }
+  tr.appendChild(afterImgTd);
+
+  // Coordinates (Vertical)
+  const coordsTd = document.createElement("td");
+  coordsTd.className = "col-coords";
+  const lat = r.latitude || "";
+  const lng = r.longitude || "";
+  
+  if (lat && lng) {
+    const coordsDiv = document.createElement("div");
+    coordsDiv.className = "coords-vertical";
+    
+    const latDiv = document.createElement("div");
+    latDiv.textContent = `Lat: ${lat}`;
+    
+    const lngDiv = document.createElement("div");
+    lngDiv.textContent = `Lng: ${lng}`;
+    
+    coordsDiv.appendChild(latDiv);
+    coordsDiv.appendChild(lngDiv);
+    coordsTd.appendChild(coordsDiv);
+  } else {
+    coordsTd.textContent = lat || lng || "—";
+  }
+  tr.appendChild(coordsTd);
+
+  // Status
+  const statusSpan = document.createElement("span");
+  const st = (r.status || "pending").toString().toLowerCase();
+  statusSpan.className = `status ${st==='pending'?'pending':st==='ongoing'?'ongoing':'completed'}`;
+  statusSpan.textContent = r.status || "Pending";
+  const statusTd = document.createElement("td");
+  statusTd.className = "col-small";
+  statusTd.appendChild(statusSpan);
+  tr.appendChild(statusTd);
+
+  // Proposed Budget
+  let proposedBudget = "Not Set";
+  if(r.proposedBudget) {
+    proposedBudget = `₱${parseFloat(r.proposedBudget).toLocaleString()}`;
+  } else if(r.budgetMin && r.budgetMax) {
+    proposedBudget = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
+  }
+  addCell(proposedBudget);
+
+  // Start Date & Deadline
+  const datesTd = document.createElement("td");
+  const startDate = r.startDate ? formatDate(r.startDate) : "Not Set";
+  const deadline = r.endDate || r.deadline ? formatDate(r.endDate || r.deadline) : "Not Set";
+  datesTd.textContent = `${startDate} - ${deadline}`;
+  tr.appendChild(datesTd);
+
+  // Allocated Budget
+  const allocatedBudget = r.allocatedBudget ? `₱${parseFloat(r.allocatedBudget).toLocaleString()}` : "Not Set";
+  addCell(allocatedBudget);
+
+  // Contractor & Supplier
+  const contractorSupplier = `${r.contractor || "—"} / ${r.supplier || "—"}`;
+  addCell(contractorSupplier);
+
+  // Timestamp
+  addCell(formatTimestamp(r.timestamp || r.createdAt));
+  
+  // Reporter Position (instead of name)
+  const reporterPosition = await getReporterPosition(r.userId);
+  addCell(reporterPosition);
+
+  // Inspection Date
+  addCell(formatDate(r.inspectionDate));
+  
+  // Completion Date
+  addCell(formatDate(r.completionDate));
+
+  // Action
+  const edit = document.createElement("a");
+  edit.href = "#";
+  edit.textContent = "Edit";
+  edit.dataset.id = docSnap.id;
+  edit.className = "edit-link";
+
+  const actionTd = document.createElement("td");
+  actionTd.className = "action";
+  actionTd.appendChild(edit);
+  tr.appendChild(actionTd);
+
+  return tr;
+}
+
+function attachSearch(inputElem, tableBody) {
+  if (!inputElem) return;
+  inputElem.addEventListener("keyup", () => {
+    const filter = inputElem.value.toLowerCase();
+    const rows = tableBody.getElementsByTagName("tr");
+    for (let i=0;i<rows.length;i++){
+      const cells = rows[i].getElementsByTagName("td");
+      let show = false;
+      for (let j=0;j<cells.length;j++){
+        if (cells[j].innerText.toLowerCase().includes(filter)) { show = true; break; }
+      }
+      rows[i].style.display = show ? "" : "none";
+    }
+  });
+}
+
+attachSearch(searchCompleted, completedBody);
+
+async function openEditFromRow(e) {
+  e.preventDefault();
+  const id = e.currentTarget.dataset.id;
+  await openModalForDoc(id);
+}
+
+async function openModalForDoc(id) {
+  currentDocId = id;
+  try {
+    const snap = await getDoc(doc(db,"reports",id));
+    if (!snap.exists()) { alert("Report not found"); return; }
+    currentDocData = snap.data();
+    modalGrid.innerHTML = "";
+
+    // Core fields with editable types
+    const fields = [
+      { key: "reportId", type: "text", editable: false },
+      { key: "barangay", type: "text", editable: true },
+      { key: "description", type: "text", editable: true },
+      { key: "width", type: "number", editable: true },
+      { key: "height", type: "number", editable: true },
+      { key: "incidentImage", type: "image", editable: false },
+      { key: "afterImage", type: "image", editable: false },
+      { key: "latitude", type: "text", editable: true },
+      { key: "longitude", type: "text", editable: true },
+      { key: "status", type: "text", editable: true },
+      { key: "proposedBudget", type: "number", editable: true },
+      { key: "startDate", type: "date", editable: true },
+      { key: "endDate", type: "date", editable: true },
+      { key: "deadline", type: "date", editable: true },
+      { key: "allocatedBudget", type: "number", editable: true },
+      { key: "contractor", type: "text", editable: true },
+      { key: "supplier", type: "text", editable: true },
+      { key: "inspectionDate", type: "date", editable: true },
+      { key: "completionDate", type: "date", editable: true }
+    ];
+
+    fields.forEach(field => {
+      if (field.key in currentDocData) {
+        const row = createEditableField(field.key, currentDocData[field.key], field.type);
+        if (!field.editable) {
+          const input = row.querySelector('input');
+          if (input && field.type !== "image") input.readOnly = true;
+        }
+        modalGrid.appendChild(row);
+      }
+    });
+
+    // Upload section for after image
+    const uploadSection = document.createElement("div");
+    uploadSection.style.cssText = "grid-column: 1 / -1; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;";
+    
+    const uploadTitle = document.createElement("h3");
+    uploadTitle.textContent = "Upload After Image";
+    uploadTitle.style.cssText = "color: #004aad; font-size: 1rem; margin-bottom: 12px;";
+    uploadSection.appendChild(uploadTitle);
+
+    const fileInputContainer = document.createElement("div");
+    fileInputContainer.className = "modal-row";
+    
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.id = "afterImageFile";
+    fileInput.accept = "image/*";
+    fileInput.style.cssText = "padding: 8px; border: 1px solid #e0e0e0; border-radius: 8px;";
+    
+    fileInputContainer.appendChild(fileInput);
+    uploadSection.appendChild(fileInputContainer);
+
+    const uploadBtn = document.createElement("button");
+    uploadBtn.textContent = "Upload Image";
+    uploadBtn.className = "btn btn-save";
+    uploadBtn.style.marginTop = "12px";
+    uploadBtn.addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = "Uploading...";
+      
+      const success = await handleAfterImageUpload(file);
+      
+      if (success) {
+        try {
+          await updateDoc(doc(db, "reports", currentDocId), {
+            afterImage: currentDocData.afterImage
+          });
+          alert("Image uploaded and saved successfully!");
+          fileInput.value = "";
+        } catch (err) {
+          console.error("Error saving to Firestore:", err);
+          alert("Image uploaded but couldn't save to database: " + err.message);
+        }
+      }
+      
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = "Upload Image";
+    });
+    uploadSection.appendChild(uploadBtn);
+
+    modalGrid.appendChild(uploadSection);
+
+    editModal.style.display = "flex";
+    editModal.querySelector(".modal-content").scrollTop = 0;
+  } catch (err) {
+    console.error(err);
+    alert("Failed to open report. See console.");
+  }
+}
+
+function closeEditModal() {
+  currentDocId = null;
+  currentDocData = null;
+  editModal.style.display = "none";
+}
+
+cancelBtn.addEventListener("click", closeEditModal);
+closeModal.addEventListener("click", closeEditModal);
+
+saveChangesBtn.addEventListener("click", async () => {
+  if (!currentDocId) return;
+  const inputs = modalGrid.querySelectorAll("[id^='field-']");
+  const updates = {};
+  
+  inputs.forEach(inp => {
+    const key = inp.id.replace("field-","");
+    if (key === "afterImageFile" || inp.readOnly) return;
+    
+    if (inp.type === "number") {
+      updates[key] = inp.value === "" ? null : Number(inp.value);
+    } else if (inp.type === "date") {
+      updates[key] = inp.value === "" ? null : inp.value;
+    } else {
+      updates[key] = inp.value;
+    }
+  });
+
+  try {
+    await updateDoc(doc(db,"reports",currentDocId), updates);
+    alert("Changes saved successfully!");
+    closeEditModal();
+  } catch (err) {
+    console.error(err);
+    alert("Save failed. See console.");
+  }
+});
+
+postToBulletinBtn.addEventListener("click", async () => {
+  if (!currentDocId) return;
+  try {
+    let dateValue = new Date();
+    
+    if (currentDocData.createdAt && currentDocData.createdAt.toDate) {
+      dateValue = currentDocData.createdAt.toDate();
+    } else if (currentDocData.timestamp) {
+      dateValue = new Date(currentDocData.timestamp);
+    }
+
+    const bulletinData = {
+      barangay: currentDocData.barangay || "",
+      issue: currentDocData.description || "",
+      date: dateValue,
+      completionDate: currentDocData.completionDate || "",
+      imageURL: currentDocData.imageUrl || currentDocData.incidentImage || "",
+      afterImage: currentDocData.afterImage || "",
+      description: currentDocData.description || "",
+      latitude: currentDocData.latitude || "",
+      longitude: currentDocData.longitude || "",
+      status: currentDocData.status || "Completed",
+      proposedBudget: currentDocData.proposedBudget || "",
+      allocatedBudget: currentDocData.allocatedBudget || "",
+      startDate: currentDocData.startDate || "",
+      endDate: currentDocData.endDate || "",
+      contractor: currentDocData.contractor || "",
+      supplier: currentDocData.supplier || ""
+    };
+
+    await setDoc(doc(db, "ad_bulletin", currentDocId), bulletinData);
+    alert("Report posted to bulletin!");
+    closeEditModal();
+  } catch (err) {
+    console.error(err);
+    alert("Error posting to bulletin.");
+  }
+});
+
+window.addEventListener("click", (ev) => {
+  if (ev.target === editModal) closeEditModal();
+  if (!ev.target.closest(".profile")) {
+    dropdownMenu.style.display = "none";
+  }
+});
+
+profileToggle.addEventListener("click", (e) => {
+  e.stopPropagation();
+  dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+});
+
+logoutBtn.addEventListener("click", async () => {
+  if (confirm("Are you sure you want to logout?")) {
+    await signOut(auth);
+    window.location.href = "logout.html";
+  }
+});
+
+// ============================================
+// AUTH & MAIN LISTENERS
+// ============================================
+
+let trackedUsers = new Set();
+let trackedReports = new Set();
+let isFirstLoad = true;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = "logout.html"; return; }
+  try {
+    const uDoc = await getDoc(doc(db,"users",user.uid));
+    if (!uDoc.exists()) { window.location.href = "logout.html"; return; }
+    const d = uDoc.data();
+    if (d.position !== "Admin") { alert("Unauthorized access!"); window.location.href = "logout.html"; return; }
+
+    navUsername.textContent = d.name || d.firstName || "Admin";
+    if (d.photoURL || d.profilePic) {
+      navbarAvatar.src = d.photoURL || d.profilePic;
+    }
+
+    listenToNotifications();
+
+    const reportsQuery = query(collection(db,"reports"), orderBy("createdAt","desc"));
+    onSnapshot(reportsQuery, async snapshot => {
+      completedBody.innerHTML = "";
+
+      for (const docSnap of snapshot.docs) {
+        const r = docSnap.data();
+        const status = (r.status || "").toString().toLowerCase().trim();
+        
+        if (status === "completed" || status === "repaired" || status === "posted") {
+          const row = await buildTableRow(docSnap);
+          completedBody.appendChild(row);
+        }
+      }
+
+      document.querySelectorAll(".edit-link").forEach(a => a.removeEventListener("click", openEditFromRow));
+      document.querySelectorAll(".edit-link").forEach(a => a.addEventListener("click", openEditFromRow));
+    });
+
+    const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
+    onSnapshot(qNewUsers, (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === "added") {
+          if (!trackedUsers.has(change.doc.id)) {
+            trackedUsers.add(change.doc.id);
+            
+            if (isFirstLoad) return;
+            
+            const u = change.doc.data();
+            if (isBarangayPosition(u.position)) {
+              createNotification(
+                "user", 
+                `New registration: ${u.firstName || ""} ${u.surname || ""}`, 
+                u.email || "No email provided"
+              );
+            }
+          }
+        }
+      });
+    });
+
+    const qReports = query(collection(db, "reports"));
+    onSnapshot(qReports, (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === "added") {
+          if (!trackedReports.has(change.doc.id)) {
+            trackedReports.add(change.doc.id);
+            
+            if (isFirstLoad) return;
+            
+            const r = change.doc.data();
+            createNotification(
+              "report", 
+              `New report in ${r.barangay || "a barangay"}`, 
+              r.description || r.type || "No description"
+            );
+          }
+        }
+      });
+    });
+
+    setTimeout(() => {
+      isFirstLoad = false;
+    }, 2000);
+
+  } catch (err) {
+    console.error(err);
+    window.location.href = "logout.html";
+  }
+});
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "logout.html";
+    return;
+  }
+
+  const userRef = doc(db, 'users', user.uid);
+  
+  onSnapshot(userRef, (docSnap) => {
+    if (!docSnap.exists()) return;
+    
+    const data = docSnap.data();
+    const photoURL = data.photoURL || "image.png";
+    
+    const navAvatar = document.getElementById("navbarAvatar");
+    if (navAvatar) navAvatar.src = photoURL;
+    
+    const navUsername = document.getElementById("navUsername");
+    if (navUsername) navUsername.textContent = data.name || "User";
+  });
+});
+
+</script>
+</body>
+</html>

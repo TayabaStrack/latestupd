@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Profile | TayabaStrack</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    /* ---------- RESET & BASE ---------- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI', Tahoma, sans-serif;
+      display:flex;
+      min-height:100vh;
+      background:#f5f7fb;
+      color:#333;
+      overflow:hidden;
+    }
+
+    /* ---------- SIDEBAR (fixed) ---------- */
+    .sidebar{
+      width:250px;
+      min-width:250px;
+      background:#004aad;
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      padding:1rem 0;
+      position:fixed;
+      top:0;
+      left:0;
+      bottom:0;
+      z-index:50;
+      height:100vh;
+      overflow-y:auto;
+    }
+    .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
+    .sidebar-header img{width:40px}
+    .sidebar-header h2{font-size:1.2rem;margin:0}
+    .sidebar-menu{list-style:none;padding-left:0}
+    .sidebar-menu li{margin:0.5rem 0}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
+    .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
+    .sidebar-footer{
+      text-align:center;
+      padding:1rem;
+      border-top:1px solid rgba(255,255,255,0.2);
+    }
+    .logout-btn {
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    .logout-btn:hover {
+      background-color: #c9302c;
+    }
+
+    /* ---------- NAVBAR (fixed) ---------- */
+    .navbar{
+      position:fixed;
+      top:0;
+      left:250px;
+      right:0;
+      height:64px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:0 24px;
+      background:#fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.05);
+      z-index:40;
+    }
+    .navbar h1{font-size:1.4rem;color:#004aad}
+    .profile{display:flex;align-items:center;gap:1rem}
+
+     /* Notification Bell */
+    .notification-bell-wrapper { position: relative; cursor: pointer; }
+    .fa-bell { font-size: 1.2rem; position: relative; cursor: pointer; transition: color 0.3s; }
+    .fa-bell:hover { color: #004aad; }
+    .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; min-width: 20px; text-align: center; }
+    .badge.show { display: flex; align-items: center; justify-content: center; }
+
+    /* Notification Menu */
+    .notification-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.15); width: 380px; max-height: 500px; overflow: hidden; z-index: 1000; }
+    .notification-menu.show { display: flex; flex-direction: column; }
+    .notification-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; }
+    .notification-header h3 { font-size: 1rem; color: #333; margin: 0; }
+    .notification-actions { display: flex; gap: 8px; }
+    .action-btn { background: none; border: none; color: #004aad; cursor: pointer; font-size: 0.85rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
+    .action-btn:hover { background: #e3f2fd; }
+    
+    /* Notification Filters */
+    .notification-filters { display: flex; gap: 4px; padding: 8px 12px; border-bottom: 1px solid #eee; background: #fff; }
+    .filter-btn { padding: 4px 12px; border: 1px solid #e0e0e0; background: #fff; color: #666; border-radius: 16px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { background: #f5f5f5; }
+    .filter-btn.active { background: #004aad; color: #fff; border-color: #004aad; }
+    
+    .notification-list { max-height: 360px; overflow-y: auto; }
+    .notification-item { padding: 0.9rem 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; transition: background 0.2s; cursor: pointer; position: relative; }
+    .notification-item:hover { background: #f9f9f9; }
+    .notification-item.unread { background: #e3f2fd; }
+    .notification-item.unread::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #004aad; }
+    .notification-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .notification-icon.user { background: #e3f2fd; color: #1976d2; }
+    .notification-icon.report { background: #fff3e0; color: #f57c00; }
+    .notification-content { flex: 1; }
+    .notification-content p { margin: 0; font-size: 0.85rem; }
+    .notification-content .time { color: #999; font-size: 0.75rem; margin-top: 0.3rem; }
+    .notification-empty { padding: 3rem; text-align: center; color: #999; }
+    .notification-empty i { font-size: 3rem; color: #ddd; margin-bottom: 1rem; }
+
+    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
+    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
+    .username{font-weight:500}
+    .dropdown-menu{
+      display:none;
+      position:absolute;
+      top:120%;
+      right:0;
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:6px;
+      box-shadow:0 4px 8px rgba(0,0,0,.15);
+      min-width:200px;
+      z-index:1000;
+    }
+    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
+    .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
+
+    .main {
+      margin-left:250px;
+      margin-top:74px;
+      flex:1;
+      display:block;
+      min-width:0;
+      height:calc(100vh - 74px);
+      overflow:hidden;
+    }
+    .content { 
+      flex: 1; 
+      padding: 1.5rem; 
+      overflow-y: auto;
+      height:100%;
+    }
+
+    /* Page grid */
+    .page { padding:28px; display:flex; justify-content:center; width:100% }
+    .profile-section{max-width:1100px; width:100%; display:grid; grid-template-columns: 1fr 420px; gap:20px; align-items:start}
+
+    /* Cards */
+    .card{background:white;border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(13,34,85,0.06)}
+    .profile-card .top{display:flex;gap:18px;align-items:center}
+    .profile-card img.profile-main{width:120px;height:120px;border-radius:50%;object-fit:cover}
+    .profile-info{margin-top:12px}
+    .profile-info label{display:block;font-weight:700;font-size:13px;margin-top:10px}
+    .profile-info input{width:100%;padding:8px;border-radius:8px;border:1px solid #d7dce6;margin-top:6px;font-size:14px;background:#fbfdff}
+
+    .btn{background:#004aad;color:white;padding:8px 12px;border-radius:8px;border:0;cursor:pointer;margin-top:12px}
+    .btn:hover{opacity:0.95}
+
+    /* Account card */
+    .account-card h2{color:#0b3e89;margin-bottom:8px}
+    .account-meta p{margin:6px 0;font-size:14px}
+
+    /* Google Calendar Container */
+    .calendar-container {
+      margin-top: 20px;
+      border-radius: 10px;
+      overflow: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .calendar-container iframe {
+      width: 100%;
+      height: 300px;
+      border: 0;
+      border-radius: 10px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .calendar-header h3 {
+      color: #0b3e89;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .sync-btn {
+      background: #34a853;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.3s;
+    }
+
+    .sync-btn:hover {
+      background: #2d8e47;
+    }
+
+    .sync-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .sync-status {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    /* Modal */
+    .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:50}
+    .modal .content{background:white;padding:20px;border-radius:10px;width:420px;max-width:95%;box-shadow:0 14px 40px rgba(2,6,23,0.15);max-height:90vh;overflow-y:auto}
+    .modal .content h2{color:#004aad;margin-bottom:16px;text-align:center}
+    .modal input[type="text"], .modal input[type="email"], .modal input[type="tel"], .modal textarea{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #d7dce6;font-size:14px}
+    .modal label{display:block;font-weight:600;margin-top:12px;font-size:13px;color:#333}
+    
+    .photo-upload-section{text-align:center;margin-bottom:16px;padding:16px;background:#f9fafb;border-radius:8px}
+    .photo-upload-section .preview{display:block;margin:12px auto;border-radius:50%;width:120px;height:120px;object-fit:cover;border:3px solid #004aad}
+    .upload-btn-wrapper{position:relative;display:inline-block;margin-top:10px}
+    .upload-btn-wrapper input[type=file]{display:none}
+    .upload-btn{background:#004aad;color:white;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;display:inline-block}
+    .upload-btn:hover{opacity:0.9}
+
+    .btn-group{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+    .btn-cancel{background:#6c757d}
+    .btn-cancel:hover{background:#5a6268}
+
+    /* Notification Modal */
+    #notificationModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+    #notificationModal > div { background: #fff; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    .modal-filter-btn { padding: 0.5rem 1rem; border: 1px solid #ddd; background: #fff; color: #333; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .modal-filter-btn.active { background: #004aad; color: #fff; border-color: #004aad; }
+
+    /* small screens */
+    @media (max-width:980px){
+      .profile-section{grid-template-columns:1fr; padding-bottom:40px}
+      .sidebar{
+        left:-250px;
+        transition:left 0.3s;
+      }
+      .sidebar.mobile-open{
+        left:0;
+      }
+      .navbar{
+        left:0;
+      }
+      .main{
+        margin-left:0;
+      }
+      .mobile-menu-btn{
+        display:block !important;
+      }
+    }
+    
+    .mobile-menu-btn{
+      display:none;
+      background:none;
+      border:none;
+      color:#004aad;
+      font-size:1.5rem;
+      cursor:pointer;
+      padding:0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <img src="logu.png" alt="Logo">
+        <h2>TayabaStrack</h2>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="ad_dashboard.html"><i class="fa fa-home"></i>&nbsp;Dashboard</a></li>
+        <li><a href="ad_reports.html"><i class="fa fa-tasks"></i>&nbsp;Manage Reports</a></li>
+        <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i>&nbsp;Map</a></li>
+        <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i>&nbsp;User Management</a></li>
+        <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i>&nbsp;Report Bulletin</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <nav class="navbar">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa fa-bars"></i>
+      </button>
+      <h1>User Profile</h1>
+    </div>
+    <div class="profile">
+      <div style="position:relative">
+        <i class="fa fa-bell" id="notificationBell"></i>
+        <span class="badge" id="notificationBadge">0</span>
+        
+        <!-- Notification Menu -->
+        <div class="notification-menu" id="notificationMenu">
+          <div class="notification-header">
+            <h3>Notifications</h3>
+            <div class="notification-actions">
+              <button class="action-btn" id="markAllReadBtn" title="Mark all as read">
+                <i class="fa fa-check-double"></i>
+              </button>
+              <button class="action-btn" id="clearAllBtn" title="Clear all">
+                <i class="fa fa-trash"></i>
+              </button>
+              <button class="action-btn" id="viewHistoryBtn" title="View history">
+                <i class="fa fa-history"></i>
+              </button>
+            </div>
+          </div>
+          <div class="notification-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="report">Reports</button>
+            <button class="filter-btn" data-filter="user">Users</button>
+            <button class="filter-btn" data-filter="24h">Last 24h</button>
+          </div>
+          <div class="notification-list" id="notificationList">
+            <div class="notification-empty">
+              <i class="fa fa-bell-slash"></i>
+              <p>No new notifications</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <img src="image.png" alt="avatar" class="avatar" id="navAvatar" onclick="toggleDropdown()">
+      <div class="dropdown-menu" id="dropdownMenu">
+        <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
+      </div>
+      <div id="navUsername" style="font-weight:600"></div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="page">
+      <div class="profile-section">
+
+        <!-- Left: Profile Card -->
+        <section class="card profile-card">
+          <div class="top">
+            <img src="image.png" id="profilePic" alt="profile" class="profile-main">
+            <div>
+              <div style="font-size:18px;font-weight:700;color:#0b3e89" id="displayName">Loading...</div>
+              <div style="margin-top:6px;color:#6b7380" id="displayRole">Administrator</div>
+            </div>
+          </div>
+
+          <div class="profile-info">
+            <label>Full Name</label>
+            <input id="cardName" readonly>
+
+            <label>ID</label>
+            <input id="cardID" readonly>
+
+            <label>Email</label>
+            <input id="cardEmail" readonly>
+
+            <label>Phone</label>
+            <input id="cardPhone" readonly>
+
+            <label>Address</label>
+            <input id="cardAddress" readonly>
+
+            <label>Gender</label>
+            <input id="cardGender" readonly>
+          </div>
+
+          <button class="btn" onclick="openEditModal()">Edit Profile</button>
+        </section>
+
+        <!-- Right: Account Info + Google Calendar -->
+        <aside class="card account-card">
+          <h2>Account Info</h2>
+          <div class="account-meta">
+            <p><strong>Type:</strong> <span id="accountType">Loading...</span></p>
+            <p><strong>Registered:</strong> <span id="registeredAt">—</span></p>
+            <p><strong>Last Login:</strong> <span id="lastLogin">—</span></p>
+          </div>
+
+          <div style="margin-top: 24px;">
+            <div class="calendar-header">
+              <h3><i class="fa fa-calendar"></i> My Calendar</h3>
+              <button class="sync-btn" id="syncCalendarBtn" onclick="syncCalendarEvents()">
+                <i class="fa fa-sync"></i>
+                Sync with Firebase
+              </button>
+            </div>
+            
+            <div class="calendar-container">
+              <iframe 
+                id="googleCalendar"
+                src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=Asia%2FManila&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&mode=MONTH"
+                frameborder="0" 
+                scrolling="no">
+              </iframe>
+            </div>
+            
+            <div class="sync-status" id="syncStatus">
+              Last synced: Never
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Profile Modal -->
+  <div class="modal" id="editModal">
+    <div class="content">
+      <h2>Edit Profile</h2>
+
+      <div class="photo-upload-section">
+        <img id="previewImg" class="preview" src="image.png" alt="Profile Preview">
+        <div class="upload-btn-wrapper">
+          <label class="upload-btn">
+            <i class="fa fa-camera"></i> Choose Photo
+            <input type="file" id="editPhoto" accept="image/*">
+          </label>
+        </div>
+        <div style="font-size:12px;color:#666;margin-top:8px">Upload a profile picture (JPG, PNG)</div>
+      </div>
+
+      <label>Full Name</label>
+      <input type="text" id="editName" placeholder="Full name">
+      
+      <label>ID</label>
+      <input type="text" id="editID" placeholder="ID">
+      
+      <label>Email</label>
+      <input type="email" id="editEmail" placeholder="Email">
+      
+      <label>Phone</label>
+      <input type="tel" id="editPhone" placeholder="Phone">
+      
+      <label>Address</label>
+      <input type="text" id="editAddress" placeholder="Address">
+      
+      <label>Gender</label>
+      <input type="text" id="editGender" placeholder="Gender">
+
+      <div class="btn-group">
+        <button class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+        <button class="btn" onclick="saveEdit()" id="saveBtn">
+          <i class="fa fa-save"></i> Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Modal -->
+  <div id="notificationModal">
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #eee;">
+        <h2 style="margin: 0; color: #004aad; font-size: 1.3rem;">Notification History</h2>
+        <button onclick="window.closeNotificationModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">×</button>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; padding: 1rem; border-bottom: 1px solid #eee; flex-wrap: wrap;">
+        <button class="modal-filter-btn active" onclick="window.filterNotifications('all')">All</button>
+        <button class="modal-filter-btn" onclick="window.filterNotifications('report')">Reports</button>
+        <button class="modal-filter-btn" onclick="window.filterNotifications('user')">Users</button>
+        <button class="modal-filter-btn" onclick="window.filterNotifications('24h')">Last 24h</button>
+      </div>
+
+      <div id="notificationModalList" style="flex: 1; overflow-y: auto; padding: 0;"></div>
+
+      <div style="padding: 1rem; border-top: 1px solid #eee; display: flex; gap: 0.5rem;">
+        <button onclick="window.markAllNotificationsAsRead()" style="flex: 1; padding: 0.7rem; background: #004aad; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Mark all as read</button>
+        <button onclick="window.clearAllNotifications()" style="flex: 1; padding: 0.7rem; background: #f0f0f0; color: #333; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Clear all</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification System -->
+  <script>
+    function toggleMobileMenu() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.querySelector('.mobile-menu-btn');
+      if (window.innerWidth <= 980 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+
+    function initNotificationSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      return function playChime() {
+        try {
+          const now = audioContext.currentTime;
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          osc.frequency.setValueAtTime(1046.50, now);
+          osc.frequency.setValueAtTime(783.99, now + 0.1);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+          osc.start(now);
+          osc.stop(now + 0.6);
+        } catch (error) {
+          console.log("Chime sound error:", error);
+        }
+      };
+    }
+
+    let allNotifications = [];
+    const playChime = initNotificationSound();
+
+    function updateNotificationUI() {
+      const badge = document.getElementById('notificationBadge');
+      const list = document.getElementById('notificationList');
+      
+      const unreadCount = allNotifications.filter(n => !n.read).length;
+      
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.classList.add("show");
+      } else {
+        badge.textContent = "";
+        badge.classList.remove("show");
+      }
+
+      const recentNotifications = allNotifications.slice(0, 5);
+      if (allNotifications.length === 0) {
+        list.innerHTML = `<div class="notification-empty">No notifications</div>`;
+      } else {
+        list.innerHTML = recentNotifications.map(n => `
+          <div class="notification-item ${n.read ? 'read' : 'unread'}" onclick="window.markNotificationAsRead('${n.id}')">
+            <div class="notification-icon ${n.type}">
+              ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
+            </div>
+            <div class="notification-content">
+              <p><strong>${n.message}</strong></p>
+              <p>${n.detail}</p>
+              <span class="time">${new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            ${!n.read ? '<div class="unread-indicator"></div>' : ''}
+          </div>
+        `).join('');
+
+        if (allNotifications.length > 5) {
+          list.innerHTML += `
+            <div style="padding: 0.8rem 1rem; border-top: 1px solid #eee; text-align: center;">
+              <button onclick="window.openNotificationModal()" style="background: none; border: none; color: #004aad; cursor: pointer; font-weight: 500; font-size: 0.85rem;">
+                View all (${allNotifications.length}) →
+              </button>
+            </div>
+          `;
+        }
+      }
+    }
+
+    window.openNotificationModal = function() {
+      document.getElementById('notificationModal').style.display = 'flex';
+      window.filterNotifications('all');
+    };
+
+    window.closeNotificationModal = function() {
+      document.getElementById('notificationModal').style.display = 'none';
+    };
+
+    window.filterNotifications = function(filter) {
+      let notifications = [];
+      if (filter === 'all') {
+        notifications = allNotifications;
+      } else if (filter === 'report') {
+        notifications = allNotifications.filter(n => n.type === 'report');
+      } else if (filter === 'user') {
+        notifications = allNotifications.filter(n => n.type === 'user');
+      } else if (filter === '24h') {
+        const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+        notifications = allNotifications.filter(n => n.timestamp > twentyFourHoursAgo);
+      }
+
+      const list = document.getElementById('notificationModalList');
+      if (notifications.length === 0) {
+        list.innerHTML = '<div style="padding: 2rem; text-align: center; color: #999;">No notifications</div>';
+      } else {
+        list.innerHTML = notifications.map(n => `
+          <div style="padding: 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; ${n.read ? 'background: #f9f9f9;' : 'background: #f0f6ff;'}">
+            <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; ${n.type === 'user' ? 'background: #e3f2fd; color: #1976d2;' : 'background: #fff3e0; color: #f57c00;'}">
+              ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
+            </div>
+            <div style="flex: 1;">
+              <p style="margin: 0 0 0.3rem 0; font-weight: 500; color: #333;"><strong>${n.message}</strong></p>
+              <p style="margin: 0 0 0.3rem 0; font-size: 0.9rem; color: #666;">${n.detail}</p>
+              <span style="font-size: 0.75rem; color: #999;">${new Date(n.timestamp).toLocaleString()}</span>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <span style="font-size: 0.75rem; color: #999; padding: 0.2rem 0.5rem; background: #eee; border-radius: 4px;">${n.read ? 'Read' : 'New'}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.querySelectorAll('.modal-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(filter.toLowerCase()));
+      });
+    };
+
+    window.markNotificationAsRead = async function(notifId) {
+      try {
+        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        await updateDoc(doc(window.db, "admin_notifications", notifId), {
+          read: true
+        });
+      } catch (err) {
+        console.error("Error marking notification as read:", err);
+      }
+    };
+
+    window.markAllNotificationsAsRead = async function() {
+      try {
+        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const unread = allNotifications.filter(n => !n.read);
+        for (const notif of unread) {
+          await updateDoc(doc(window.db, "admin_notifications", notif.id), {
+            read: true
+          });
+        }
+      } catch (err) {
+        console.error("Error marking all as read:", err);
+      }
+    };
+
+    window.clearAllNotifications = async function() {
+      if (confirm('Are you sure you want to clear all notifications?')) {
+        try {
+          const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          for (const notif of allNotifications) {
+            await deleteDoc(doc(window.db, "admin_notifications", notif.id));
+          }
+        } catch (err) {
+          console.error("Error clearing notifications:", err);
+        }
+      }
+    };
+
+    // Calendar sync function
+    let currentUser = null;
+    
+    window.syncCalendarEvents = async function() {
+      if (!currentUser) {
+        alert("Please log in first");
+        return;
+      }
+
+      const syncBtn = document.getElementById('syncCalendarBtn');
+      const syncStatus = document.getElementById('syncStatus');
+      
+      syncBtn.disabled = true;
+      syncBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Syncing...';
+      
+      try {
+        const { collection, addDoc, serverTimestamp, getDocs, query, where, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        
+        // Get reports from the current user
+        const reportsRef = collection(window.db, 'reports');
+        const q = query(reportsRef, where('userId', '==', currentUser.uid));
+        const snapshot = await getDocs(q);
+        
+        const events = [];
+        const calendarEventsRef = collection(window.db, 'users', currentUser.uid, 'calendar_events');
+        
+        // Clear existing calendar events first
+        const existingEvents = await getDocs(calendarEventsRef);
+        for (const eventDoc of existingEvents.docs) {
+          await deleteDoc(eventDoc.ref);
+        }
+        
+        // Process each report and create calendar events
+        for (const reportDoc of snapshot.docs) {
+          const report = reportDoc.data();
+          
+          // Check if report has a date field
+          if (report.date) {
+            const eventData = {
+              title: `${report.reportType || report.type || 'Report'} - ${report.barangay || 'Unknown'}`,
+              date: report.date,
+              description: report.description || '',
+              reportId: reportDoc.id,
+              createdAt: serverTimestamp()
+            };
+            
+            // Add to calendar_events subcollection
+            await addDoc(calendarEventsRef, eventData);
+            events.push(eventData);
+          }
+        }
+        
+        // Update sync status
+        const now = new Date().toLocaleString();
+        syncStatus.textContent = `Last synced: ${now} (${events.length} events)`;
+        
+        // Save sync timestamp to Firebase
+        const userEventsMetaRef = collection(window.db, 'users', currentUser.uid, 'calendar_meta');
+        await addDoc(userEventsMetaRef, {
+          lastSync: serverTimestamp(),
+          eventCount: events.length
+        });
+        
+        alert(`Calendar synced successfully! Found ${events.length} events from your reports.`);
+        
+      } catch (err) {
+        console.error("Error syncing calendar:", err);
+        alert("Error syncing calendar: " + err.message);
+        syncStatus.textContent = "Sync failed";
+      } finally {
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = '<i class="fa fa-sync"></i> Sync with Firebase';
+      }
+    };
+
+    // Dropdown
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    window.toggleDropdown = function() {
+      dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    };
+
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('.avatar') && !e.target.closest('#dropdownMenu') && !e.target.closest('.notification-menu')) {
+        dropdownMenu.style.display = 'none';
+        document.getElementById("notificationMenu").classList.remove("show");
+      }
+    });
+
+    // ---------- Edit Profile Modal ----------
+    const editModal = document.getElementById("editModal");
+    const editPhoto = document.getElementById("editPhoto");
+    const previewImg = document.getElementById("previewImg");
+
+    window.openEditModal = function() { 
+      editModal.style.display="flex";
+    };
+    
+    window.closeEditModal = function() { 
+      editModal.style.display="none";
+    };
+
+    editPhoto.addEventListener("change", e => {
+      const file = e.target.files[0];
+      if(!file) return;
+      
+      if(!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        editPhoto.value = '';
+        return;
+      }
+      
+      if(file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        editPhoto.value = '';
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = ev => {
+        previewImg.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    window.saveEdit = async function() {
+      if(!currentUser) {
+        alert("No user logged in");
+        return;
+      }
+      
+      const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const { ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+      const { getStorage } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+      
+      const uid = currentUser.uid;
+      const userRef = doc(window.db, "users", uid);
+      const saveBtn = document.getElementById("saveBtn");
+
+      const updated = {
+        name: document.getElementById("editName").value.trim(),
+        id: document.getElementById("editID").value.trim(),
+        email: document.getElementById("editEmail").value.trim(),
+        phone: document.getElementById("editPhone").value.trim(),
+        address: document.getElementById("editAddress").value.trim(),
+        gender: document.getElementById("editGender").value.trim()
+      };
+
+      if(!updated.name) {
+        alert("Name is required");
+        return;
+      }
+
+      const file = editPhoto.files[0];
+      
+      try {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+
+        if(file) {
+          const storage = getStorage();
+          const storageRef = ref(storage, `profilePics/${uid}/avatar.jpg`);
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+          updated.photoURL = url;
+        }
+        
+        await updateDoc(userRef, updated);
+        
+        alert("Profile updated successfully!");
+        closeEditModal();
+        
+        editPhoto.value = '';
+        
+      } catch(err) {
+        console.error(err);
+        alert("Error updating profile: " + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
+      }
+    };
+
+    window.addEventListener("click", (e) => {
+      if (e.target === editModal) closeEditModal();
+    });
+  </script>
+
+  <!-- Firebase + Main Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, onSnapshot, query, where, addDoc, orderBy, serverTimestamp, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.appspot.com",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.db = db;
+
+    const trackedUsers = new Set();
+    const trackedReports = new Set();
+
+    function isBarangayPosition(position) {
+      if (!position) return false;
+      const pos = position.toLowerCase().trim();
+      return pos.includes("barangay captain") || pos.includes("brgy captain") || 
+             pos.includes("brgy. captain") || pos.includes("barangay official") || 
+             pos.includes("brgy official") || pos.includes("brgy. official");
+    }
+
+    // Listen to Firestore notifications
+    function setupNotificationListener() {
+      const q = query(collection(db, "admin_notifications"), orderBy("timestamp", "desc"));
+      onSnapshot(q, (snapshot) => {
+        const previousUnreadCount = allNotifications.filter(n => !n.read).length;
+        
+        allNotifications = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          timestamp: doc.data().timestamp?.toMillis() || Date.now()
+        }));
+
+        const newUnreadCount = allNotifications.filter(n => !n.read).length;
+        
+        if (newUnreadCount > previousUnreadCount) {
+          playChime();
+        }
+        
+        updateNotificationUI();
+      });
+    }
+
+    // Setup realtime tracking
+    function setupRealtimeTracking() {
+      const qNewUsers = query(collection(db, "users"), where("status", "==", "pending"));
+      onSnapshot(qNewUsers, async (snapshot) => {
+        for (const change of snapshot.docChanges()) {
+          if (change.type === "added" && !trackedUsers.has(change.doc.id)) {
+            trackedUsers.add(change.doc.id);
+            const u = change.doc.data();
+            if (isBarangayPosition(u.position)) {
+              await addDoc(collection(db, "admin_notifications"), {
+                type: "user",
+                message: `New User: ${u.firstName || ""} ${u.surname || ""}`,
+                detail: u.email || "",
+                timestamp: serverTimestamp(),
+                read: false
+              });
+            }
+          }
+        }
+      });
+
+      const qReports = query(collection(db, "reports"));
+      onSnapshot(qReports, async (snapshot) => {
+        for (const change of snapshot.docChanges()) {
+          if (change.type === "added" && !trackedReports.has(change.doc.id)) {
+            trackedReports.add(change.doc.id);
+            const r = change.doc.data();
+            await addDoc(collection(db, "admin_notifications"), {
+              type: "report",
+              message: `New Report in ${r.barangay || "a barangay"}`,
+              detail: r.reportType || r.type || "Unknown type",
+              timestamp: serverTimestamp(),
+              read: false
+            });
+          }
+        }
+      });
+    }
+
+    // Load calendar sync status
+    async function loadCalendarSyncStatus() {
+      if (!currentUser) return;
+      
+      try {
+        const metaRef = collection(db, 'users', currentUser.uid, 'calendar_meta');
+        const q = query(metaRef, orderBy('lastSync', 'desc'));
+        const metaSnapshot = await getDocs(q);
+        
+        if (!metaSnapshot.empty) {
+          const lastMeta = metaSnapshot.docs[0].data();
+          if (lastMeta.lastSync) {
+            const lastSyncDate = lastMeta.lastSync.toDate();
+            document.getElementById('syncStatus').textContent = 
+              `Last synced: ${lastSyncDate.toLocaleString()} (${lastMeta.eventCount || 0} events)`;
+          }
+        }
+      } catch (err) {
+        console.error("Error loading sync status:", err);
+        document.getElementById('syncStatus').textContent = "Last synced: Never";
+      }
+    }
+
+    const notificationBell = document.getElementById("notificationBell");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.getElementById("notificationMenu").classList.toggle("show");
+    });
+
+    // THIS IS THE KEY PART - Real-time profile picture sync
+    onAuthStateChanged(auth, async (user) => {
+      if(!user) {
+        console.warn("No user logged in.");
+        window.location.href = "logout.html";
+        return;
+      }
+      currentUser = user;
+      window.currentUser = user;
+
+      // Update last login timestamp
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          lastLogin: serverTimestamp()
+        });
+      } catch (err) {
+        console.error("Error updating last login:", err);
+      }
+
+      const ref = doc(db, 'users', user.uid);
+      
+      // USE onSnapshot FOR REAL-TIME UPDATES - This is the magic!
+      onSnapshot(ref, docSnap => {
+        if(!docSnap.exists()) return;
+        const data = docSnap.data();
+        
+        // Update username
+        document.getElementById("navUsername").textContent = data.name || "User";
+        
+        // Update ALL profile pictures in real-time
+        const photoURL = data.photoURL || "image.png";
+        
+        // Navbar avatar (appears on ALL pages)
+        const navAvatar = document.getElementById("navAvatar");
+        if(navAvatar) navAvatar.src = photoURL;
+        
+        // Profile page main picture
+        const profilePic = document.getElementById("profilePic");
+        if(profilePic) profilePic.src = photoURL;
+        
+        // Edit modal preview
+        const previewImg = document.getElementById("previewImg");
+        if(previewImg) previewImg.src = photoURL;
+
+        // Update display info
+        const displayName = document.getElementById("displayName");
+        if(displayName) displayName.textContent = data.name || "—";
+        
+        const displayRole = document.getElementById("displayRole");
+        if(displayRole) displayRole.textContent = data.position || data.role || "Administrator";
+
+        // Update form fields if they exist
+        const cardName = document.getElementById("cardName");
+        if(cardName) cardName.value = data.name || "";
+        
+        const cardID = document.getElementById("cardID");
+        if(cardID) cardID.value = data.id || "";
+        
+        const cardEmail = document.getElementById("cardEmail");
+        if(cardEmail) cardEmail.value = data.email || user.email;
+        
+        const cardPhone = document.getElementById("cardPhone");
+        if(cardPhone) cardPhone.value = data.phone || "";
+        
+        const cardAddress = document.getElementById("cardAddress");
+        if(cardAddress) cardAddress.value = data.address || "";
+        
+        const cardGender = document.getElementById("cardGender");
+        if(cardGender) cardGender.value = data.gender || "";
+
+        // Update edit modal fields
+        const editName = document.getElementById("editName");
+        if(editName) editName.value = data.name || "";
+        
+        const editID = document.getElementById("editID");
+        if(editID) editID.value = data.id || "";
+        
+        const editEmail = document.getElementById("editEmail");
+        if(editEmail) editEmail.value = data.email || user.email;
+        
+        const editPhone = document.getElementById("editPhone");
+        if(editPhone) editPhone.value = data.phone || "";
+        
+        const editAddress = document.getElementById("editAddress");
+        if(editAddress) editAddress.value = data.address || "";
+        
+        const editGender = document.getElementById("editGender");
+        if(editGender) editGender.value = data.gender || "";
+
+        // Update account info
+        const accountType = document.getElementById("accountType");
+        if(accountType) accountType.textContent = data.position || data.role || "Administrator";
+        
+        if(data.createdAt) {
+          const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+          const registeredAt = document.getElementById("registeredAt");
+          if(registeredAt) registeredAt.textContent = date.toLocaleDateString();
+        }
+        
+        if(data.lastLogin) {
+          const date = data.lastLogin.toDate ? data.lastLogin.toDate() : new Date(data.lastLogin);
+          const lastLogin = document.getElementById("lastLogin");
+          if(lastLogin) lastLogin.textContent = date.toLocaleString();
+        }
+      });
+
+      loadCalendarSyncStatus();
+      setupNotificationListener();
+      setupRealtimeTracking();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        console.log("Admin signed out.");
+        window.location.href = "logout.html";
+      } catch (err) {
+        console.error("Logout error:", err);
+      }
+    });
+  </script>
+</body>
+</html>

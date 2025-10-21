@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TayabaStrack - Public Dashboard</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+    }
+
+    header {
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 25px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      color: #2164f3;
+      font-size: 1.3rem;
+    }
+
+    .login-btn {
+      background: #2164f3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 15px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s;
+    }
+
+    .login-btn:hover {
+      background: #1a52cc;
+    }
+
+    .container {
+      margin: 20px auto;
+      padding: 20px;
+      max-width: 1200px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 1.4rem;
+    }
+
+    .search-bar {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border 0.3s;
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: #2164f3;
+      box-shadow: 0 0 0 3px rgba(33, 100, 243, 0.1);
+    }
+
+    .carousel-section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .carousel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .carousel-title {
+      font-size: 1.2rem;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .carousel-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .carousel-btn {
+      background: #2164f3;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+
+    .carousel-btn:hover {
+      background: #1a52cc;
+    }
+
+    .carousel-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .carousel-wrapper {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .carousel-container {
+      display: flex;
+      gap: 20px;
+      transition: transform 0.5s ease;
+    }
+
+    .older-posts-section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    .older-posts-title {
+      font-size: 1.2rem;
+      color: #333;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #fafafa;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .carousel-container .card {
+      flex: 0 0 280px;
+    }
+
+    .card-image-wrapper {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      background: #e9ecef;
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .card:hover img {
+      transform: scale(1.1);
+    }
+
+    .new-label {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #28a745;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .card-content {
+      padding: 15px;
+    }
+
+    .card h3 {
+      color: #2164f3;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .card-info {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .card-info strong {
+      color: #333;
+      display: block;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+
+    .status-ongoing {
+      background: #ffc107;
+      color: #333;
+    }
+
+    .status-resolved {
+      background: #28a745;
+      color: white;
+    }
+
+    .status-reported {
+      background: #17a2b8;
+      color: white;
+    }
+
+    .status-completed {
+      background: #1cc88a;
+      color: white;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-size: 1rem;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      border: 1px solid #f5c6cb;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 40px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      animation: slideUp 0.3s;
+      margin: 0 auto;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .close-btn {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    .close-btn:hover {
+      color: #333;
+    }
+
+    .modal-title {
+      color: #2164f3;
+      font-size: 1.5rem;
+      margin: 20px 0;
+      clear: both;
+    }
+
+    .images-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .image-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-image {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 2px solid #e9ecef;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .modal-image:hover {
+      transform: scale(1.02);
+    }
+
+    .image-label {
+      font-size: 0.85rem;
+      color: #666;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .modal-section {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .modal-section:last-child {
+      border-bottom: none;
+    }
+
+    .modal-label {
+      font-weight: bold;
+      color: #333;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .modal-text {
+      color: #666;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .coordinates {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      word-break: break-all;
+    }
+
+    .image-preview-modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .image-preview-modal.active {
+      display: flex;
+    }
+
+    .image-preview-content {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .image-preview-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .image-preview-close:hover {
+      color: #ccc;
+    }
+
+    @media (max-width: 768px) {
+      .images-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        padding: 20px;
+        margin: 20px;
+      }
+
+      .card {
+        flex: 0 0 250px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+
+      .posts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .carousel-controls {
+        display: none;
+      }
+
+      .carousel-container {
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding-bottom: 10px;
+      }
+
+      .carousel-container::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      .carousel-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      .carousel-container::-webkit-scrollbar-thumb {
+        background: #2164f3;
+        border-radius: 4px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>TayabaStrack</h1>
+    <a href="login.html" class="login-btn">Login</a>
+  </header>
+
+  <div class="container">
+    <h2>NEWS / UPDATES</h2>
+    
+    <div class="search-bar">
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Search by barangay, issue, status, or date..." 
+      />
+    </div>
+
+    <div id="errorMessage" class="error" style="display:none;"></div>
+
+    <!-- Recent Posts Carousel -->
+    <div class="carousel-section" id="carouselSection">
+      <div class="carousel-header">
+        <div class="carousel-title">Latest Updates</div>
+        <div class="carousel-controls">
+          <button class="carousel-btn" id="prevBtn">‹</button>
+          <button class="carousel-btn" id="nextBtn">›</button>
+        </div>
+      </div>
+      <div id="loadingCarousel" class="loading">Loading latest bulletins...</div>
+      <div id="noDataCarousel" class="no-data" style="display:none;">No recent bulletins available.</div>
+      <div class="carousel-wrapper">
+        <div class="carousel-container" id="carouselContainer">
+          <!-- Recent posts appear here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Older Posts Grid -->
+    <div class="older-posts-section" id="olderPostsSection" style="display:none;">
+      <div class="older-posts-title">Previous Updates</div>
+      <div id="loadingOlder" class="loading">Loading previous bulletins...</div>
+      <div id="noDataOlder" class="no-data" style="display:none;">No previous bulletins available.</div>
+      <div id="noSearchMessage" class="no-data" style="display:none;">No bulletins match your search.</div>
+      <div class="posts-grid" id="olderPostsContainer">
+        <!-- Older posts appear here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Modal -->
+  <div id="bulletinModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2 class="modal-title">Barangay <span id="modalBarangay"></span></h2>
+
+      <div class="images-grid">
+        <div class="image-container">
+          <img id="modalBeforeImage" class="modal-image" src="" alt="Before" onclick="previewImage(this.src)">
+          <div class="image-label">Before Image</div>
+        </div>
+        <div class="image-container">
+          <img id="modalAfterImage" class="modal-image" src="" alt="After" onclick="previewImage(this.src)">
+          <div class="image-label">After Image</div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Description</div>
+        <p class="modal-text" id="modalDescription"></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Who Were Affected</div>
+        <p class="modal-text" id="modalAffected"></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Age Range</div>
+        <p class="modal-text" id="modalAgeRange"></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Status</div>
+        <p class="modal-text" id="modalStatus"></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Date Reported</div>
+        <p class="modal-text" id="modalDate"></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Repair Duration</div>
+        <div class="modal-text">
+          <div>Start Date: <span id="modalStartDate">TBD</span></div>
+          <div>End Date: <span id="modalEndDate">TBD</span></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Coordinates</div>
+        <div class="coordinates">
+          <div>Latitude: <span id="modalLatitude"></span></div>
+          <div>Longitude: <span id="modalLongitude"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Preview Modal -->
+  <div id="imagePreviewModal" class="image-preview-modal">
+    <span class="image-preview-close">&times;</span>
+    <img id="imagePreviewContent" class="image-preview-content" src="" alt="Preview">
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.appspot.com",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const carouselContainer = document.getElementById("carouselContainer");
+    const olderPostsContainer = document.getElementById("olderPostsContainer");
+    const loadingCarousel = document.getElementById("loadingCarousel");
+    const loadingOlder = document.getElementById("loadingOlder");
+    const errorMessage = document.getElementById("errorMessage");
+    const noDataCarousel = document.getElementById("noDataCarousel");
+    const noDataOlder = document.getElementById("noDataOlder");
+    const noSearchMessage = document.getElementById("noSearchMessage");
+    const searchInput = document.getElementById("searchInput");
+    const modal = document.getElementById("bulletinModal");
+    const closeBtn = document.querySelector(".close-btn");
+    const imagePreviewModal = document.getElementById("imagePreviewModal");
+    const imagePreviewContent = document.getElementById("imagePreviewContent");
+    const imagePreviewClose = document.querySelector(".image-preview-close");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const olderPostsSection = document.getElementById("olderPostsSection");
+
+    let allBulletins = [];
+    let currentCarouselIndex = 0;
+    const cardsPerView = 3;
+
+    window.previewImage = function(src) {
+      if (src && !src.includes('placeholder')) {
+        imagePreviewContent.src = src;
+        imagePreviewModal.classList.add("active");
+      }
+    };
+
+    async function getImageUrl(imagePath) {
+      try {
+        if (!imagePath) return null;
+        if (imagePath.startsWith('http')) return imagePath;
+        
+        const url = await getDownloadURL(ref(storage, imagePath));
+        return url;
+      } catch (error) {
+        console.error("Error getting image URL:", error);
+        return null;
+      }
+    }
+
+    function formatDate(date) {
+      if (!date) return 'N/A';
+      if (typeof date === 'object' && date.toDate) {
+        return date.toDate().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+      if (date instanceof Date) {
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+      try {
+        const parsedDate = new Date(date);
+        if (!isNaN(parsedDate.getTime())) {
+          return parsedDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+        }
+      } catch (e) {
+        console.error('Date parsing error:', e);
+      }
+      return date.toString();
+    }
+
+    function getStatusClass(status) {
+      if (!status) return 'status-reported';
+      const lower = status.toLowerCase();
+      if (lower.includes('ongoing') || lower.includes('in progress')) return 'status-ongoing';
+      if (lower.includes('resolved') || lower.includes('fixed')) return 'status-resolved';
+      if (lower.includes('completed')) return 'status-completed';
+      return 'status-reported';
+    }
+
+    function createCard(data, index, showNewLabel = false) {
+      const card = document.createElement("div");
+      card.classList.add("card");
+      
+      const imageUrl = data.imageURL || 'https://via.placeholder.com/300x200?text=No+Image';
+      
+      card.innerHTML = `
+        ${showNewLabel ? '<div class="new-label">NEW</div>' : ''}
+        <div class="card-image-wrapper">
+          <img src="${imageUrl}" 
+               alt="bulletin image"
+               onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Available'">
+        </div>
+        <div class="card-content">
+          <h3>Barangay ${data.barangay || 'N/A'}</h3>
+          <div class="card-info">
+            <strong class="status-badge ${getStatusClass(data.status)}">
+              ${data.status || 'Reported'}
+            </strong>
+          </div>
+          <div class="card-info">
+            <strong>Date:</strong> ${formatDate(data.date || data.createdAt)}
+          </div>
+          ${data.issue ? `<div class="card-info"><strong>Issue:</strong> ${data.issue.substring(0, 50)}${data.issue.length > 50 ? '...' : ''}</div>` : ''}
+        </div>
+      `;
+
+      card.addEventListener("click", () => openModal(data));
+      return card;
+    }
+
+    async function openModal(data) {
+      document.getElementById("modalBarangay").textContent = data.barangay || 'N/A';
+      
+      // Handle BEFORE image
+      const beforeImageUrl = data.imageURL || 'https://via.placeholder.com/400x300?text=No+Before+Image';
+      document.getElementById("modalBeforeImage").src = beforeImageUrl;
+      document.getElementById("modalBeforeImage").onerror = function() {
+        this.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
+      };
+      
+      // Handle AFTER image - FIXED: Check if afterImage exists first
+      const afterImageUrl = data.afterImage || data.completionImage;
+      if (afterImageUrl) {
+        document.getElementById("modalAfterImage").src = afterImageUrl;
+        document.getElementById("modalAfterImage").onerror = function() {
+          this.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
+        };
+      } else {
+        // Only show placeholder if there's no afterImage
+        document.getElementById("modalAfterImage").src = 'https://via.placeholder.com/400x300?text=No+After+Image';
+      }
+      
+      document.getElementById("modalDescription").textContent = data.description || data.issue || 'No description available';
+      document.getElementById("modalAffected").textContent = data.affected || data.peopleInvolved || 'Not specified';
+      document.getElementById("modalAgeRange").textContent = data.ageRange || data.affectedAgeGroups || 'Not specified';
+      document.getElementById("modalStatus").textContent = data.status || 'Not specified';
+      document.getElementById("modalDate").textContent = formatDate(data.date || data.createdAt);
+      document.getElementById("modalStartDate").textContent = data.repairStartDate ? formatDate(data.repairStartDate) : 'TBD';
+      document.getElementById("modalEndDate").textContent = data.repairEndDate ? formatDate(data.repairEndDate) : 'TBD';
+      document.getElementById("modalLatitude").textContent = data.latitude || 'N/A';
+      document.getElementById("modalLongitude").textContent = data.longitude || 'N/A';
+      
+      modal.classList.add("active");
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.remove("active");
+      document.body.style.overflow = 'auto';
+    }
+
+    function closeImagePreview() {
+      imagePreviewModal.classList.remove("active");
+    }
+
+    function updateCarousel() {
+      const cardWidth = 280;
+      const gap = 20;
+      const offset = -(currentCarouselIndex * (cardWidth + gap));
+      carouselContainer.style.transform = `translateX(${offset}px)`;
+
+      const recentBulletins = allBulletins.slice(0, 10);
+      const maxIndex = Math.max(0, recentBulletins.length - cardsPerView);
+      
+      prevBtn.disabled = currentCarouselIndex === 0;
+      nextBtn.disabled = currentCarouselIndex >= maxIndex;
+    }
+
+    function filterBulletins(searchTerm) {
+      loadingCarousel.style.display = "none";
+      loadingOlder.style.display = "none";
+      errorMessage.style.display = "none";
+      noDataCarousel.style.display = "none";
+      noDataOlder.style.display = "none";
+      noSearchMessage.style.display = "none";
+      carouselContainer.innerHTML = "";
+      olderPostsContainer.innerHTML = "";
+
+      const term = searchTerm.toLowerCase();
+      const filtered = allBulletins.filter(data => {
+        const barangay = (data.barangay || '').toLowerCase();
+        const issue = (data.issue || '').toLowerCase();
+        const status = (data.status || '').toLowerCase();
+        const date = formatDate(data.date || data.createdAt).toLowerCase();
+        const description = (data.description || '').toLowerCase();
+
+        return barangay.includes(term) || 
+               issue.includes(term) || 
+               status.includes(term) || 
+               date.includes(term) ||
+               description.includes(term);
+      });
+
+      if (filtered.length === 0) {
+        if (searchTerm) {
+          noSearchMessage.style.display = "block";
+        } else {
+          noDataCarousel.style.display = "block";
+        }
+        olderPostsSection.style.display = "none";
+        return;
+      }
+
+      const recentBulletins = filtered.slice(0, 10);
+      const olderBulletins = filtered.slice(10);
+
+      // Render carousel
+      recentBulletins.forEach((data, index) => {
+        carouselContainer.appendChild(createCard(data, index, index === 0 && !searchTerm));
+      });
+
+      // Render older posts
+      if (olderBulletins.length > 0) {
+        olderPostsSection.style.display = "block";
+        olderBulletins.forEach((data, index) => {
+          olderPostsContainer.appendChild(createCard(data, index + 10));
+        });
+      } else {
+        olderPostsSection.style.display = "none";
+      }
+
+      currentCarouselIndex = 0;
+      updateCarousel();
+    }
+
+    function renderBulletins(snapshot) {
+      loadingCarousel.style.display = "none";
+      loadingOlder.style.display = "none";
+
+      if (snapshot.empty) {
+        allBulletins = [];
+        noDataCarousel.style.display = "block";
+        olderPostsSection.style.display = "none";
+        return;
+      }
+
+      allBulletins = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      filterBulletins(searchInput.value);
+    }
+
+    function handleError(error) {
+      console.error("Error loading bulletins:", error);
+      loadingCarousel.style.display = "none";
+      loadingOlder.style.display = "none";
+      errorMessage.textContent = "Error loading bulletins. Please try refreshing the page.";
+      errorMessage.style.display = "block";
+    }
+
+    prevBtn.addEventListener("click", () => {
+      if (currentCarouselIndex > 0) {
+        currentCarouselIndex--;
+        updateCarousel();
+      }
+    });
+
+    nextBtn.addEventListener("click", () => {
+      const recentBulletins = allBulletins.slice(0, 10);
+      const maxIndex = Math.max(0, recentBulletins.length - cardsPerView);
+      if (currentCarouselIndex < maxIndex) {
+        currentCarouselIndex++;
+        updateCarousel();
+      }
+    });
+
+    closeBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    imagePreviewClose.addEventListener("click", closeImagePreview);
+    imagePreviewModal.addEventListener("click", (e) => {
+      if (e.target === imagePreviewModal) closeImagePreview();
+    });
+
+    searchInput.addEventListener("input", (e) => {
+      filterBulletins(e.target.value);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (imagePreviewModal.classList.contains("active")) {
+          closeImagePreview();
+        } else if (modal.classList.contains("active")) {
+          closeModal();
+        }
+      }
+    });
+
+    try {
+      const q = query(collection(db, "ad_bulletin"), orderBy("date", "desc"));
+      onSnapshot(q, renderBulletins, handleError);
+    } catch (error) {
+      handleError(error);
+    }
+  </script>
+</body>
+</html>
