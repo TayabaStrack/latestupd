@@ -7,76 +7,32 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: hidden; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: auto; }
     
-    /* ========== SIDEBAR WITH MOBILE SUPPORT ========== */
-    .sidebar { 
-      width: 240px; 
-      background: #004aad; 
-      color: #fff; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: space-between; 
-      padding: 1rem 0; 
-      flex-shrink: 0; 
-      height: 100vh; 
-      position: fixed; 
-      left: 0; 
-      top: 0;
-      z-index: 50;
-      transition: left 0.3s ease;
-    }
+    .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; flex-shrink: 0; height: 100vh; position: fixed; left: 0; top: 0; z-index: 50; transition: left 0.3s; }
     .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; }
     .sidebar-header img { width: 40px; }
     .sidebar-header h2 { font-size: 1.2rem; margin: 0; }
     .sidebar-menu { list-style: none; }
     .sidebar-menu li { margin: 0.5rem 0; }
-    .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; }
+    .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
     .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
     .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
     .logout-btn { background-color: #d9534f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .logout-btn:hover { background-color: #c9302c; }
     
-    .dashboard-main { 
-      flex: 1; 
-      display: flex; 
-      flex-direction: column; 
-      min-width: 0; 
-      margin-left: 240px; 
-      height: 100vh; 
-      overflow: hidden;
-      transition: margin-left 0.3s ease;
-    }
-    
-    .navbar { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      padding: 1rem 2rem; 
-      background: #fff; 
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
-      flex-shrink: 0; 
-      z-index: 40; 
-    }
+    .dashboard-main { flex: 1; display: flex; flex-direction: column; min-width: 0; margin-left: 240px; height: 100vh; overflow: hidden; transition: margin-left 0.3s; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); flex-shrink: 0; z-index: 100; }
     .navbar-left { display: flex; align-items: center; gap: 1rem; }
     .navbar h1 { font-size: 1.4rem; color: #004aad; white-space: nowrap; }
-
-    .mobile-menu-btn {
-      display: none;
-      background: none;
-      border: none;
-      color: #004aad;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0.5rem;
-    }
+    .mobile-menu-btn { display: none; background: none; border: none; color: #004aad; font-size: 1.5rem; cursor: pointer; padding: 0.5rem; }
 
     .profile { display: flex; align-items: center; gap: 1rem; position: relative; flex-shrink: 0; }
-    .profile .fa-bell { font-size: 1.2rem; cursor: pointer; position: relative; }
-    .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; }
+    .profile .fa-bell { font-size: 1.2rem; cursor: pointer; position: relative; color: #333; }
+    .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; min-width: 18px; text-align: center; }
     .badge.show { display: flex; align-items: center; justify-content: center; }
-    .avatar { width: 35px; height: 35px; border-radius: 50%; flex-shrink: 0; border: 2px solid #004aad; }
-    .username { font-weight: 500; white-space: nowrap; }
+    .avatar { width: 35px; height: 35px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid #004aad; }
+    .username { font-weight: 500; white-space: nowrap; color: #333; }
     .profile-dropdown { position: relative; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; transition: background 0.2s; }
     .profile-dropdown:hover { background: #f5f7fb; }
     
@@ -114,8 +70,9 @@
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
     
-    .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 10000; }
-    .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.9rem; }
+    .dropdown-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 10000; }
+    .dropdown-menu.show { display: block; }
+    .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.9rem; transition: background 0.2s; }
     .dropdown-menu a:hover { background: #f0f0f0; color: #004aad; }
     .dropdown-menu a i { margin-right: 8px; width: 20px; text-align: center; }
     
@@ -181,18 +138,19 @@
     .user-section .header, .user-section h3 { display: flex; justify-content: space-between; align-items: center; }
     .user-section h3 { margin: 1rem 0 0.5rem 0; }
 
-    /* ========== MOBILE RESPONSIVE ========== */
     @media (max-width: 980px) {
       .sidebar { left: -240px; }
       .sidebar.mobile-open { left: 0; }
       .dashboard-main { margin-left: 0; }
       .mobile-menu-btn { display: block !important; }
-      .username { display: none; }
+      .navbar h1 { font-size: 1.1rem; }
+      .actions { width: 100%; }
+      .actions input { flex: 1; }
     }
   </style>
 </head>
 <body>
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar">
     <div>
       <div class="sidebar-header">
         <img src="logu.png" alt="Logo" class="logo">
@@ -205,10 +163,7 @@
       </ul>
     </div>  
     <div class="sidebar-footer">
-      <button class="logout-btn" id="sidebarLogoutBtn">
-        <i class="fa fa-sign-out-alt"></i>
-        <span>Logout</span>
-      </button>
+      <button class="logout-btn" id="sidebarLogoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</button>
     </div>
   </aside>
 
@@ -393,22 +348,30 @@
   </div>
 
 <script>
-  // Mobile menu toggle
   function toggleMobileMenu() {
-    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.querySelector('.sidebar').classList.toggle('mobile-open');
   }
 
-  // Close mobile menu when clicking outside
   document.addEventListener('click', function(e) {
-    const sidebar = document.getElementById('sidebar');
+    const sidebar = document.querySelector('.sidebar');
     const menuBtn = document.querySelector('.mobile-menu-btn');
-    
-    if (window.innerWidth <= 980 && 
-        !sidebar.contains(e.target) && 
-        !menuBtn.contains(e.target)) {
+    if (window.innerWidth <= 980 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
       sidebar.classList.remove('mobile-open');
     }
   });
+
+  function updateAllProfilePhotos(photoURL) {
+    const photoElements = ["navbarAvatar"];
+    photoElements.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.src = photoURL;
+        el.onerror = function() {
+          this.src = "image.png";
+        };
+      }
+    });
+  }
 </script>
 
 <script type="module">
@@ -458,7 +421,7 @@
   notificationBell.addEventListener("click", (e) => {
     e.stopPropagation();
     notificationMenu.classList.toggle("show");
-    document.getElementById("dropdownMenu").style.display = "none";
+    document.getElementById("dropdownMenu").classList.remove("show");
   });
 
   clearNotificationsBtn.addEventListener("click", () => {
@@ -504,7 +467,6 @@
   function updateNotificationUI() {
     let filtered = [...notificationsList];
     
-    // Apply filter
     if (currentFilter === "report") {
       filtered = filtered.filter((n) => n.type === "report");
     } else if (currentFilter === "user") {
@@ -514,10 +476,8 @@
       filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
     }
 
-    // Sort by timestamp (newest first)
     filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
-    // Count unread notifications
     const unreadCount = notificationsList.filter(n => !n.read).length;
     if (unreadCount > 0) {
       notificationBadge.textContent = unreadCount;
@@ -552,7 +512,6 @@
   // 🧭 NOTIFICATION FETCH & REAL-TIME
   // ===============================
   async function setupRealtimeNotifications() {
-    // 📌 Initial fetch: existing approved users
     const userSnap = await getDocs(collection(db, "users"));
     userSnap.forEach((docSnap) => {
       const userId = docSnap.id;
@@ -566,7 +525,6 @@
       }
     });
 
-    // 📌 Real-time: user approval changes
     onSnapshot(collection(db, "users"), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         const userId = change.doc.id;
@@ -592,7 +550,6 @@
       });
     });
 
-    // 📌 Initial fetch: existing reports
     const reportSnap = await getDocs(collection(db, "reports"));
     reportSnap.forEach((docSnap) => {
       const id = docSnap.id;
@@ -603,7 +560,6 @@
       addNotification("report", "Report submitted", `${type} in ${barangay}`);
     });
 
-    // 📌 Real-time: new reports
     onSnapshot(collection(db, "reports"), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         const id = change.doc.id;
@@ -659,7 +615,6 @@
     }
 
     try {
-      // ✅ Save pending user info only in Firestore
       const userRef = doc(collection(db, "users"));
       await setDoc(userRef, {
         firstName,
@@ -753,20 +708,16 @@
       }
       const data = userDoc.data();
 
-      // ✅ Create secondary Firebase app to avoid logging out super admin
       const secondaryApp = initializeApp(firebaseConfig, "Secondary-" + id);
       const secondaryAuth = getAuth(secondaryApp);
 
-      // ✅ Create Auth account
       const cred = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
 
-      // ✅ Update Firestore record
       await updateDoc(doc(db, "users", id), {
         status: "Active",
         uid: cred.user.uid
       });
 
-      // ✅ Clean up secondary app
       await signOut(secondaryAuth);
       await deleteApp(secondaryApp);
 
@@ -821,23 +772,23 @@
 
   profileToggle.addEventListener("click", (e) => {
     e.stopPropagation();
-    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+    dropdownMenu.classList.toggle("show");
     notificationMenu.classList.remove("show");
   });
 
   window.addEventListener("click", (e) => {
-    if (!e.target.closest(".profile")) {
+    if (!e.target.closest(".profile-dropdown")) {
+      dropdownMenu.classList.remove("show");
+    }
+    if (!e.target.closest(".notification-menu") && e.target !== notificationBell) {
       notificationMenu.classList.remove("show");
-      dropdownMenu.style.display = "none";
     }
   });
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    if (confirm("Are you sure you want to logout?")) {
-      await signOut(auth);
-      window.location.href = "logout.html";
-    }
+    await signOut(auth);
+    window.location.href = "logout.html";
   };
 
   document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
@@ -848,14 +799,29 @@
   // ==========================
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        document.getElementById("navUsername").textContent = data.name || "Unknown";
-        
-        if (data.photoURL || data.profilePic) {
-          document.getElementById("navbarAvatar").src = data.photoURL || data.profilePic;
+      const userDocRef = doc(db, "users", user.uid);
+      
+      onSnapshot(userDocRef, (docSnap) => {
+        if (!docSnap.exists()) {
+          console.error("User document not found!");
+          return;
         }
+
+        const data = docSnap.data();
+
+        let fullName = "Unknown";
+        if (data.firstName && data.lastName) {
+          fullName = `${data.firstName} ${data.lastName}`;
+        } else if (data.name) {
+          fullName = data.name;
+        } else if (data.firstName) {
+          fullName = data.firstName;
+        }
+
+        document.getElementById("navUsername").textContent = fullName;
+
+        const photoURL = data.photoURL || data.profilePic || "image.png";
+        updateAllProfilePhotos(photoURL);
 
         superAdminData = {
           uid: user.uid,
@@ -866,11 +832,15 @@
         if (data.position !== "Super Admin") {
           alert("Access denied. Only Super Admins can manage users.");
           window.location.href = "dashboard.html";
+          return;
         }
 
-        // ✅ Setup notifications after auth check
-        await setupRealtimeNotifications();
-      }
+        console.log("User profile updated in real-time");
+      }, (error) => {
+        console.error("Error in user snapshot:", error);
+      });
+
+      await setupRealtimeNotifications();
     } else {
       window.location.href = "logout.html";
     }

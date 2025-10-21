@@ -262,7 +262,7 @@
           <table>
             <thead>
               <tr>
-                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Allocated Budget</th><th>Start Date & Deadline</th><th>Contractor & Supplier</th><th>Reporter Position</th><th>Status</th><th>Action</th>
+                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Allocated Budget</th><th>Start Date & Deadline</th><th>Inspection Date</th><th>Contractor & Supplier</th><th>Reporter Position</th><th>Status</th><th>Action</th>
               </tr>
             </thead>
             <tbody id="ongoingBody"></tbody>
@@ -418,6 +418,10 @@
           <div class="modal-row">
             <label for="editOngoingAllocatedBudget">Allocated Budget</label>
             <input type="text" id="editOngoingAllocatedBudget" placeholder="e.g., ₱75,000">
+          </div>
+          <div class="modal-row">
+            <label for="editOngoingInspectionDate">Inspection Date</label>
+            <input type="date" id="editOngoingInspectionDate">
           </div>
           <div class="modal-row">
             <label for="editOngoingContractor">Contractor</label>
@@ -907,6 +911,7 @@
         document.getElementById("editOngoingContractor").value = data.contractor || "";
         document.getElementById("editOngoingSupplier").value = data.supplier || "";
         document.getElementById("editOngoingProgressReport").value = data.progressReport || "";
+        document.getElementById("editOngoingInspectionDate").value = formatDateForInput(data.inspectionDate);
         
         editOngoingModal.style.display="flex";
       } catch(err) {
@@ -1023,6 +1028,10 @@
       startDeadlineDiv.appendChild(deadlineSpan);
       addCell(startDeadlineDiv);
       
+      if (tableType === "ongoing") {
+        addCell(formatDate(r.inspectionDate));
+      }
+      
       if (tableType === "ongoing" || tableType === "completed") {
         const contractorSupplierDiv = document.createElement("div");
         contractorSupplierDiv.style.cssText = "display:flex;flex-direction:column;gap:2px;font-size:0.8rem";
@@ -1064,6 +1073,7 @@
       
       if(tableType !== "declined") {
         const action=document.createElement("span");
+        action.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;";
         
         if (tableType === "pending") {
           const approveBtn=document.createElement("button");
@@ -1082,7 +1092,44 @@
           editBtn.className="btn-edit";
           editBtn.textContent="Edit";
           editBtn.dataset.id=docSnap.id;
+          editBtn.onclick=openEditPendingModal;
+          
+          action.appendChild(approveBtn);
+          action.appendChild(declineBtn);
+          action.appendChild(editBtn);
+        }
+        
+        if (tableType === "ongoing") {
+          const editBtn=document.createElement("button");
+          editBtn.className="btn-edit";
+          editBtn.textContent="Edit";
+          editBtn.dataset.id=docSnap.id;
+          editBtn.onclick=openEditOngoingModal;
+          
+          const completeBtn=document.createElement("button");
+          completeBtn.className="btn-approve";
+          completeBtn.textContent="Mark Complete";
+          completeBtn.dataset.id=docSnap.id;
+          completeBtn.onclick=markAsCompleted;
+          
+          action.appendChild(editBtn);
+          action.appendChild(completeBtn);
+        }
+        
+        if (tableType === "completed") {
+          const viewBtn=document.createElement("button");
+          viewBtn.className="btn-edit";
+          viewBtn.textContent="View Details";
+          viewBtn.dataset.id=docSnap.id;
+          viewBtn.onclick=openEditCompletedModal;
+          
+          const editBtn=document.createElement("button");
+          editBtn.className="btn-edit";
+          editBtn.textContent="Edit";
+          editBtn.dataset.id=docSnap.id;
           editBtn.onclick=openEditCompletedModal;
+          
+          action.appendChild(viewBtn);
           action.appendChild(editBtn);
         }
         
@@ -1209,15 +1256,20 @@
       const contractor = document.getElementById("editOngoingContractor").value.trim();
       const supplier = document.getElementById("editOngoingSupplier").value.trim();
       const progressReport = document.getElementById("editOngoingProgressReport").value.trim();
+      const inspectionDate = document.getElementById("editOngoingInspectionDate").value;
       
       try {
         const reportRef = doc(db,"reports",currentDocId);
-        await updateDoc(reportRef, {
+        const updateData = {
           allocatedBudget,
           contractor,
           supplier,
           progressReport
-        });
+        };
+        
+        if(inspectionDate) updateData.inspectionDate = new Date(inspectionDate);
+        
+        await updateDoc(reportRef, updateData);
         
         alert("Ongoing report updated successfully!");
         editOngoingModal.style.display="none";

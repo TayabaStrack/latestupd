@@ -10,78 +10,35 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: hidden; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow-x: hidden; }
 
-        /* ========== SIDEBAR WITH MOBILE SUPPORT ========== */
-        .sidebar { 
-            width: 240px; 
-            background: #004aad; 
-            color: #fff; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; 
-            padding: 1rem 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            z-index: 50;
-            height: 100vh;
-            overflow-y: auto;
-            transition: left 0.3s ease;
-        }
+        .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; height: 100vh; overflow-y: auto; transition: left 0.3s; }
         .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; }
         .sidebar-header img { width: 40px; }
         .sidebar-header h2 { font-size: 1.2rem; }
         .sidebar-menu { list-style: none; }
         .sidebar-menu li { margin: 0.5rem 0; }
-        .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
         .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
 
         .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
         .logout-btn { background-color: #d9534f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .logout-btn:hover { background-color: #c9302c; }
 
-        /* ========== NAVBAR WITH MOBILE MENU BUTTON ========== */
-        .main { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column;
-            margin-left: 240px;
-            transition: margin-left 0.3s ease;
-        }
-        .navbar { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 1rem 2rem; 
-            background: #fff; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
-            position: sticky; 
-            top: 0; 
-            z-index: 40;
-        }
-        .navbar-left { display: flex; align-items: center; gap: 1rem; }
+        .main { flex: 1; display: flex; flex-direction: column; margin-left: 240px; transition: margin-left 0.3s; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 10; }
         .navbar h1 { font-size: 1.4rem; color: #004aad; }
-        
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: #004aad;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-
+        .navbar-left { display: flex; align-items: center; gap: 1rem; }
+        .mobile-menu-btn { display: none; background: none; border: none; color: #004aad; font-size: 1.5rem; cursor: pointer; padding: 0.5rem; }
         .profile { display: flex; align-items: center; gap: 1rem; }
-        .fa-bell { font-size: 1.2rem; cursor: pointer; position: relative; }
-        .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; }
+        .fa-bell { font-size: 1.2rem; position: relative; cursor: pointer; color: #333; }
+        .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; min-width: 18px; text-align: center; }
         .badge.show { display: flex; align-items: center; justify-content: center; }
-        .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid #004aad; }
-        .username { font-weight: 500; }
-        .profile-dropdown { position: relative; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; transition: background 0.2s; }
+
+        .profile-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: background 0.2s; }
         .profile-dropdown:hover { background: #f5f7fb; }
+        .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid #004aad; }
+        .username { font-weight: 500; color: #333; }
         
         .notification-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); width: 340px; max-height: 420px; overflow: hidden; z-index: 1000; font-family: "Segoe UI", Tahoma, sans-serif; animation: fadeIn 0.2s ease-in-out; }
         .notification-menu.show { display: block; }
@@ -116,10 +73,12 @@
         .notification-empty { padding: 2rem; text-align: center; color: #999; font-size: 0.9rem; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-        
+
         .dropdown-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); min-width: 160px; z-index: 1000; }
-        .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.85rem; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.85rem; transition: background 0.2s; }
         .dropdown-menu a:hover { background: #f0f0f0; color: #004aad; }
+        .dropdown-menu a i { margin-right: 8px; width: 20px; text-align: center; }
 
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1.5rem; }
         .card { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #fff; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
@@ -133,24 +92,24 @@
         canvas { width: 100% !important; height: 250px !important; }
         #miniMap { height: 250px !important; border-radius: 10px; width: 100%; }
 
+        .images { padding: 1.5rem; }
         .images h3 { color: #004aad; margin-bottom: 1rem; }
         .image-gallery { display: flex; gap: 1rem; flex-wrap: wrap; }
         .image-gallery img { width: 120px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        /* ========== MOBILE RESPONSIVE ========== */
         @media (max-width: 980px) {
             .sidebar { left: -240px; }
             .sidebar.mobile-open { left: 0; }
             .main { margin-left: 0; }
             .mobile-menu-btn { display: block !important; }
-            .username { display: none; }
             .bottom { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
 
 <body>
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar">
         <div>
             <div class="sidebar-header">
                 <img src="logu.png" alt="Logo" class="logo" />
@@ -165,8 +124,7 @@
 
         <div class="sidebar-footer">
             <button class="logout-btn" id="logoutBtn">
-                <i class="fa fa-sign-out-alt"></i>
-                <span>Logout</span>
+                <i class="fa fa-sign-out-alt"></i> Logout
             </button>
         </div>
     </aside>
@@ -239,13 +197,25 @@
             </div>
         </section>
 
-        <section class="images" style="padding:1.5rem;">
+        <section class="images">
             <h3>Recent Report Images</h3>
             <div class="image-gallery" id="reportImages"></div>
         </section>
     </main>
 
     <script>
+        function toggleMobileMenu() {
+            document.querySelector('.sidebar').classList.toggle('mobile-open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const sidebar = document.querySelector('.sidebar');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            if (window.innerWidth <= 980 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
         let miniMap;
         window.reportLocations = [];
 
@@ -283,22 +253,18 @@
             });
         }
 
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            document.getElementById('sidebar').classList.toggle('mobile-open');
+        function updateAllProfilePhotos(photoURL) {
+            const photoElements = ["navbarAvatar"];
+            photoElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.src = photoURL;
+                    el.onerror = function() {
+                        this.src = "image.png";
+                    };
+                }
+            });
         }
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(e) {
-            const sidebar = document.getElementById('sidebar');
-            const menuBtn = document.querySelector('.mobile-menu-btn');
-            
-            if (window.innerWidth <= 980 && 
-                !sidebar.contains(e.target) && 
-                !menuBtn.contains(e.target)) {
-                sidebar.classList.remove('mobile-open');
-            }
-        });
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJkfi59FibsnD-dxAdyYUohj36N_bOtfE&callback=initMiniMap"></script>
 
@@ -310,6 +276,9 @@
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
+  // ===============================
+  // 🔥 FIREBASE CONFIG
+  // ===============================
   const firebaseConfig = {
     apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
     authDomain: "tayabastrack-23b95.firebaseapp.com",
@@ -324,6 +293,9 @@
   const db = getFirestore(app);
   const storage = getStorage(app);
 
+  // ===============================
+  // 🧭 DOM ELEMENTS
+  // ===============================
   const navbarName = document.getElementById("navbarName");
   const navbarAvatar = document.getElementById("navbarAvatar");
   const logoutBtn = document.getElementById("logoutBtn");
@@ -342,6 +314,9 @@
   const profileToggle = document.getElementById("profileToggle");
   const dropdownMenu = document.getElementById("dropdownMenu");
 
+  // ===============================
+  // 📌 STATE
+  // ===============================
   let notificationsList = [];
   let seenNotificationIds = new Set();
   let trackedUserStatuses = {};
@@ -352,10 +327,13 @@
     return (status || "").toLowerCase().trim();
   }
 
+  // ===============================
+  // 🔔 NOTIFICATION UI HANDLERS
+  // ===============================
   notificationBell.addEventListener("click", (e) => {
     e.stopPropagation();
     notificationMenu.classList.toggle("show");
-    dropdownMenu.style.display = "none";
+    dropdownMenu.classList.remove("show");
   });
 
   clearNotificationsBtn.addEventListener("click", () => {
@@ -371,15 +349,16 @@
 
   profileToggle.addEventListener("click", (e) => {
     e.stopPropagation();
-    dropdownMenu.style.display =
-      dropdownMenu.style.display === "block" ? "none" : "block";
+    dropdownMenu.classList.toggle("show");
     notificationMenu.classList.remove("show");
   });
 
   window.addEventListener("click", (e) => {
-    if (!e.target.closest(".profile")) {
+    if (!e.target.closest(".profile-dropdown")) {
+      dropdownMenu.classList.remove("show");
+    }
+    if (!e.target.closest(".notification-menu") && e.target !== notificationBell) {
       notificationMenu.classList.remove("show");
-      dropdownMenu.style.display = "none";
     }
   });
 
@@ -456,6 +435,9 @@
     }
   }
 
+  // ===============================
+  // 🧭 NOTIFICATION FETCH & REAL-TIME
+  // ===============================
   async function setupRealtimeNotifications() {
     const userSnap = await getDocs(collection(db, "users"));
     userSnap.forEach((docSnap) => {
@@ -522,6 +504,9 @@
     console.log("✅ Notifications active — existing + new");
   }
 
+  // ===============================
+  // 🖼️ IMAGE FETCH
+  // ===============================
   async function getImageUrl(imagePath) {
     try {
       if (!imagePath) return null;
@@ -533,32 +518,59 @@
     }
   }
 
+  // ===============================
+  // 🔐 AUTH & DASHBOARD
+  // ===============================
   onAuthStateChanged(auth, async (user) => {
     if (!user) return (window.location.href = "logout.html");
 
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (!userDoc.exists() || userDoc.data().position !== "Super Admin") {
-      alert("Unauthorized access! Redirecting...");
-      return (window.location.href = "logout.html");
-    }
+    const userDocRef = doc(db, "users", user.uid);
+    
+    onSnapshot(userDocRef, (docSnap) => {
+      if (!docSnap.exists()) {
+        console.error("User document not found!");
+        return;
+      }
 
-    const data = userDoc.data();
-    navbarName.textContent = data.name || data.firstName || "Super Admin";
-    if (data.photoURL || data.profilePic) {
-      navbarAvatar.src = data.photoURL || data.profilePic;
-    }
+      const data = docSnap.data();
+      
+      if (data.position !== "Super Admin") {
+        alert("Unauthorized access! Redirecting...");
+        window.location.href = "logout.html";
+        return;
+      }
+
+      let fullName = "Super Admin";
+      if (data.firstName && data.lastName) {
+        fullName = `${data.firstName} ${data.lastName}`;
+      } else if (data.name) {
+        fullName = data.name;
+      } else if (data.firstName) {
+        fullName = data.firstName;
+      }
+
+      navbarName.textContent = fullName;
+
+      const photoURL = data.photoURL || data.profilePic || "image.png";
+      updateAllProfilePhotos(photoURL);
+
+      console.log("User profile updated in real-time");
+    }, (error) => {
+      console.error("Error in user snapshot:", error);
+    });
 
     await loadDashboardData();
     await setupRealtimeNotifications();
   });
 
   logoutBtn.addEventListener("click", async () => {
-    if (confirm("Are you sure you want to logout?")) {
-      await signOut(auth);
-      window.location.href = "logout.html";
-    }
+    await signOut(auth);
+    window.location.href = "logout.html";
   });
 
+  // ===============================
+  // 📊 REPORTS DASHBOARD
+  // ===============================
   async function loadDashboardData() {
     const snapshot = await getDocs(collection(db, "reports"));
     let total = 0, pending = 0, ongoing = 0, completed = 0;
@@ -574,7 +586,6 @@
 
       const lat = report.latitude || report.lat || report.location?.latitude;
       const lng = report.longitude || report.lng || report.location?.longitude;
-
       if (lat && lng) {
         window.reportLocations.push({
           lat: parseFloat(lat),

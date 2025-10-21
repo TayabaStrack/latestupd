@@ -8,7 +8,7 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI', Tahoma, sans-serif;display:flex;min-height:100vh;background:#f5f7fb;color:#333;overflow:auto}
-    .sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50}
+    .sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:left 0.3s}
     .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem}
     .sidebar-header img{width:40px}
     .sidebar-header h2{font-size:1.2rem;margin:0}
@@ -17,12 +17,14 @@
     .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s}
     .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
     .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2)}
-    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%}
+    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
     .logout-btn:hover{background-color:#c9302c}
-    .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40}
-    .navbar h1{font-size:1.4rem;color:#004aad}
+    .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40;transition:left 0.3s}
+    .navbar-left{display:flex;align-items:center;gap:1rem}
+    .navbar h1{font-size:1.4rem;color:#004aad;white-space:nowrap}
+    .mobile-menu-btn{display:none;background:none;border:none;color:#004aad;font-size:1.5rem;cursor:pointer;padding:0.5rem}
     .fa-bell{font-size:1.2rem;position:relative;cursor:pointer}
-    .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none}
+    .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none;min-width:18px;text-align:center}
     .badge.show{display:flex;align-items:center;justify-content:center}
     
     .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.15);width:340px;max-height:420px;overflow:hidden;z-index:1000;font-family:"Segoe UI",Tahoma,sans-serif;animation:fadeIn 0.2s ease-in-out}
@@ -54,16 +56,19 @@
     .notification-empty{padding:2rem;text-align:center;color:#999;font-size:0.9rem}
     @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
     
-    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover}
-    .username{font-weight:500}
-    .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
-    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem}
+    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:0.5rem;border-radius:8px;transition:background 0.2s;flex-shrink:0}
+    .profile-dropdown:hover{background:#f5f7fb}
+    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid #004aad;flex-shrink:0}
+    .username{font-weight:500;white-space:nowrap;color:#333}
+    .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:200px;z-index:10000}
+    .dropdown-menu.show{display:block}
+    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem;transition:background 0.2s}
     .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
-    .main{margin-left:250px;margin-top:74px;flex:1;display:block;padding:20px 28px;height:calc(100vh - 74px);overflow-y:auto;overflow-x:hidden}
+    .dropdown-menu a i{margin-right:8px;width:20px;text-align:center}
+    .main{margin-left:250px;margin-top:74px;flex:1;display:block;padding:20px 28px;height:calc(100vh - 74px);overflow-y:auto;overflow-x:hidden;transition:margin-left 0.3s}
     .reports-section{padding-bottom:40px;max-width:100%}
     .report-box{background:#fff;border-radius:10px;padding:16px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.04);overflow:visible}
-    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:10px}
     .report-box-header h2{color:#004aad;font-size:1.05rem}
     .report-actions input{padding:.4rem .75rem;border:1px solid #e0e0e0;border-radius:18px;font-size:.9rem;width:260px}
     .scroll-hint{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:8px 12px;border-radius:6px;font-size:0.85rem;text-align:center;margin:10px 0 12px 0;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(0,74,173,0.2);flex-shrink:0}
@@ -112,6 +117,7 @@
     .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     @media (max-width:900px){.modal-grid{grid-template-columns:1fr}.report-actions input{width:100%}}
+    @media (max-width:980px){.sidebar{left:-250px}.sidebar.mobile-open{left:0}.main{margin-left:0}.navbar{left:0}.mobile-menu-btn{display:block !important}.navbar h1{font-size:1.1rem}.report-actions{width:100%}.report-actions input{flex:1}}
   </style>
 </head>
 <body>
@@ -133,7 +139,12 @@
   </aside>
 
   <nav class="navbar" role="navigation" aria-label="Main navigation">
-    <h1>Manage Reports</h1>
+    <div class="navbar-left">
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa fa-bars"></i>
+      </button>
+      <h1>Manage Reports</h1>
+    </div>
     <div style="display:flex;align-items:center;gap:14px">
       <div style="position:relative">
         <i class="fa fa-bell" id="notificationBell" aria-hidden="true"></i>
@@ -164,6 +175,7 @@
       <div class="profile-dropdown" id="profileToggle" aria-haspopup="true">
         <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar">
         <span class="username" id="navUsername">Loading...</span>
+        <i class="fas fa-chevron-down" style="font-size:0.7rem;color:#666;"></i>
         <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
           <a href="profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
           <a href="#" id="navLogoutBtn"><i class="fa fa-sign-out-alt"></i>&nbsp; Logout</a>
@@ -287,6 +299,33 @@
     </div>
   </div>
 
+  <script>
+    function toggleMobileMenu() {
+      document.querySelector('.sidebar').classList.toggle('mobile-open');
+    }
+
+    document.addEventListener('click', function(e) {
+      const sidebar = document.querySelector('.sidebar');
+      const menuBtn = document.querySelector('.mobile-menu-btn');
+      if (window.innerWidth <= 980 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+
+    function updateAllProfilePhotos(photoURL) {
+      const photoElements = ["navbarAvatar"];
+      photoElements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.src = photoURL;
+          el.onerror = function() {
+            this.src = "image.png";
+          };
+        }
+      });
+    }
+  </script>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -352,7 +391,7 @@
     notificationBell.addEventListener("click", (e) => {
       e.stopPropagation();
       notificationMenu.classList.toggle("show");
-      dropdownMenu.style.display = "none";
+      dropdownMenu.classList.remove("show");
     });
 
     clearNotificationsBtn.addEventListener("click", () => {
@@ -849,13 +888,13 @@
 
     profileToggle.addEventListener("click", (e) => {
       e.stopPropagation();
-      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+      dropdownMenu.classList.toggle("show");
       notificationMenu.classList.remove("show");
     });
 
     window.addEventListener("click", (e) => {
       if (!e.target.closest(".profile-dropdown")) {
-        dropdownMenu.style.display = "none";
+        dropdownMenu.classList.remove("show");
       }
       if (!e.target.closest(".notification-menu") && e.target !== notificationBell) {
         notificationMenu.classList.remove("show");
@@ -884,57 +923,75 @@
       }
       
       try {
-        const uDoc=await getDoc(doc(db,"users",user.uid));
-        if(!uDoc.exists()) {
-          window.location.href="logout.html";
-          return;
-        }
+        const userDocRef = doc(db,"users",user.uid);
         
-        const d=uDoc.data();
-        if(d.position!=="Super Admin") {
-          alert("Unauthorized. Only Super Admins can access this page.");
-          window.location.href="logout.html";
-          return;
-        }
-        
-        navUsername.textContent=d.name||d.firstName||"Super Admin";
-        if (d.photoURL || d.profilePic) {
-          navbarAvatar.src = d.photoURL || d.profilePic;
-        }
-
-        // ✅ Setup notifications after auth check
-        await setupRealtimeNotifications();
-
-        const q=query(collection(db,"reports"),orderBy("createdAt","desc"));
-        if(reportsUnsub) reportsUnsub();
-        
-        reportsUnsub=onSnapshot(q,async (snap)=>{
-          pendingBody.innerHTML="";
-          ongoingBody.innerHTML="";
-          completedBody.innerHTML="";
-          declinedBody.innerHTML="";
-          
-          for (const docSnap of snap.docs) {
-            const data=docSnap.data();
-            const status=(data.status||"pending").toLowerCase().trim();
-            
-            if(status==="pending") {
-              const row=await buildTableRow(docSnap, "pending");
-              pendingBody.appendChild(row);
-            }
-            else if(status==="ongoing") {
-              const row=await buildTableRow(docSnap, "ongoing");
-              ongoingBody.appendChild(row);
-            }
-            else if(status==="repaired" || status==="posted") {
-              const row=await buildTableRow(docSnap, "completed");
-              completedBody.appendChild(row);
-            }
-            else if(status==="declined") {
-              const row=await buildTableRow(docSnap, "declined");
-              declinedBody.appendChild(row);
-            }
+        onSnapshot(userDocRef, async (docSnap) => {
+          if(!docSnap.exists()) {
+            window.location.href="logout.html";
+            return;
           }
+          
+          const d=docSnap.data();
+          if(d.position!=="Super Admin") {
+            alert("Unauthorized. Only Super Admins can access this page.");
+            window.location.href="logout.html";
+            return;
+          }
+          
+          let fullName = "Unknown";
+          if (d.firstName && d.lastName) {
+            fullName = `${d.firstName} ${d.lastName}`;
+          } else if (d.name) {
+            fullName = d.name;
+          } else if (d.firstName) {
+            fullName = d.firstName;
+          }
+
+          navUsername.textContent = fullName;
+
+          const photoURL = d.photoURL || d.profilePic || "image.png";
+          updateAllProfilePhotos(photoURL);
+
+          console.log("User profile updated in real-time");
+
+          // ✅ Setup notifications after auth check
+          if (!reportsUnsub) {
+            await setupRealtimeNotifications();
+
+            const q=query(collection(db,"reports"),orderBy("createdAt","desc"));
+            
+            reportsUnsub=onSnapshot(q,async (snap)=>{
+              pendingBody.innerHTML="";
+              ongoingBody.innerHTML="";
+              completedBody.innerHTML="";
+              declinedBody.innerHTML="";
+              
+              for (const docSnap of snap.docs) {
+                const data=docSnap.data();
+                const status=(data.status||"pending").toLowerCase().trim();
+                
+                if(status==="pending") {
+                  const row=await buildTableRow(docSnap, "pending");
+                  pendingBody.appendChild(row);
+                }
+                else if(status==="ongoing") {
+                  const row=await buildTableRow(docSnap, "ongoing");
+                  ongoingBody.appendChild(row);
+                }
+                else if(status==="repaired" || status==="posted") {
+                  const row=await buildTableRow(docSnap, "completed");
+                  completedBody.appendChild(row);
+                }
+                else if(status==="declined") {
+                  const row=await buildTableRow(docSnap, "declined");
+                  declinedBody.appendChild(row);
+                }
+              }
+            });
+          }
+        }, (error) => {
+          console.error("Error in user snapshot:", error);
+          window.location.href="logout.html";
         });
 
       } catch(err) {
