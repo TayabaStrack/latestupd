@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TayabaStrack | User Management</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: hidden; }
+
+    /* SIDEBAR - DASHBOARD STYLE */
+    .sidebar {
+      width: 250px;
+      min-width: 250px;
+      background: #004aad;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1rem 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 50;
+      height: 100vh;
+      overflow-y: auto;
+      transition: left 0.3s ease;
+    }
+    .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; padding: 0 1rem; }
+    .sidebar-header img { width: 40px; height: 40px; object-fit: contain; }
+    .sidebar-header h2 { font-size: 1.2rem; margin: 0; font-weight: 600; }
+    .sidebar-menu { list-style: none; padding-left: 0; margin: 0; }
+    .sidebar-menu li { margin: 0.5rem 0; }
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.8rem 1.5rem;
+      text-decoration: none;
+      color: #fff;
+      transition: background 0.2s;
+      border-left: 4px solid transparent;
+    }
+    .sidebar-menu a:hover,
+    .sidebar-menu li.active a { background: #0756cc; border-left: 4px solid #042f68; }
+    .sidebar-menu a i { width: 20px; text-align: center; font-size: 1rem; }
+    .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); margin-top: auto; }
+    .logout-btn {
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .logout-btn:hover { background-color: #c9302c; }
+
+    /* NAVBAR - dashboard style */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 250px;
+      right: 0;
+      height: 64px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,.05);
+      z-index: 40;
+      transition: left 0.3s ease;
+    }
+    .navbar h1 { font-size: 1.4rem; color: #004aad; margin: 0; }
+    .navbar-left { display: flex; align-items: center; gap: 1rem; }
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #004aad;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+
+    /* Profile & Notification */
+    .fa-bell { font-size: 1.2rem; position: relative; cursor: pointer; color: #333; }
+    .badge { background: red; color: #fff; font-size: .7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; min-width: 18px; text-align: center; }
+    .badge.show { display: flex; align-items: center; justify-content: center; }
+
+    .notification-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); width: 340px; max-height: 420px; overflow: hidden; z-index: 1000; font-family: "Segoe UI", Tahoma, sans-serif; animation: fadeIn 0.2s ease-in-out; }
+    .notification-menu.show { display: block; }
+    .notification-header { padding: 0.9rem 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; }
+    .notification-header h3 { font-size: 1rem; color: #333; margin: 0; font-weight: 600; }
+    .notification-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .action-icon-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1rem; padding: 0.3rem; transition: color 0.2s ease; display: flex; align-items: center; justify-content: center; }
+    .action-icon-btn:hover { color: #004aad; }
+    .action-icon-btn i { font-size: 0.95rem; }
+
+    .notification-filters { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid #eee; background: #fafafa; }
+    .filter-btn { flex: 1; padding: 0.4rem 0.6rem; font-size: 0.8rem; background: #f2f2f2; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.25s ease; color: #333; }
+    .filter-btn:hover { background: #004aad; color: #fff; }
+    .filter-btn.active { background: #004aad; color: #fff; border-color: #004aad; }
+
+    .notification-list { max-height: 300px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #ccc transparent; }
+    .notification-list::-webkit-scrollbar { width: 6px; }
+    .notification-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+    .notification-list::-webkit-scrollbar-track { background: transparent; }
+    .notification-item { padding: 0.8rem 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; align-items: flex-start; transition: background 0.2s; position: relative; }
+    .notification-item:hover { background: #f5f7ff; }
+    .notification-item.unread { background: #f0f7ff; }
+    .notification-item.unread::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 60%; background: #004aad; border-radius: 0 4px 4px 0; }
+    .notification-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+    .notification-icon.user { background: #e3f2fd; color: #1976d2; }
+    .notification-icon.report { background: #fff3e0; color: #f57c00; }
+    .notification-content { flex: 1; }
+    .notification-content p { margin: 0; font-size: 0.86rem; color: #333; line-height: 1.3; }
+    .notification-content .time { color: #999; font-size: 0.75rem; margin-top: 0.25rem; }
+    .notification-empty { padding: 2rem; text-align: center; color: #999; font-size: 0.9rem; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .profile-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: background 0.2s; }
+    .profile-dropdown:hover { background: #f5f7fb; }
+    .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid #004aad; }
+    .username { font-weight: 500; color: #333; }
+
+    .dropdown-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); min-width: 200px; z-index: 1000; }
+    .dropdown-menu.show { display: block; }
+    .dropdown-menu a { display: block; padding: .6rem 1rem; text-decoration: none; color: #333; font-size: .9rem; transition: background 0.2s; }
+    .dropdown-menu a:hover { background: #f0f0f0; color: #004aad; }
+    .dropdown-menu a i { margin-right: 8px; width: 20px; text-align: center; }
+
+    /* MAIN CONTENT */
+    .main { margin-left: 250px; margin-top: 64px; flex: 1; display: block; min-width: 0; height: calc(100vh - 64px); overflow: hidden; transition: margin-left 0.3s ease; }
+    .content { flex: 1; padding: 1.5rem; overflow-y: auto; height: 100%; }
+    .table-section { margin-bottom: 2rem; }
+    .table-section h2 { color: #004aad; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; }
+    .table-section h2 span { font-size: 0.9rem; color: #666; font-weight: normal; }
+
+    .search-box { margin-bottom: 1rem; position: relative; max-width: 400px; }
+    .search-box input { width: 100%; padding: 0.6rem 2.5rem 0.6rem 1rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; }
+    .search-box i { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #999; }
+
+    .scroll-hint { background: linear-gradient(135deg,#004aad 0%,#0066cc 100%); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; text-align: center; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(0,74,173,0.2); }
+    .scroll-hint i { animation: slideHint 2s ease-in-out infinite; }
+    @keyframes slideHint { 0%,100% { transform: translateX(-4px); } 50% { transform: translateX(4px); } }
+
+    .table-wrapper { position: relative; }
+    .table-card { overflow-x: auto; overflow-y: hidden; border-radius: 8px; background: #fff; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); scroll-behavior: smooth; position: relative; }
+    .table-card::-webkit-scrollbar { height: 10px; }
+    .table-card::-webkit-scrollbar-track { background: #e9eef5; border-radius: 5px; }
+    .table-card::-webkit-scrollbar-thumb { background: linear-gradient(135deg,#004aad 0%,#0066cc 100%); border-radius: 5px; border: 2px solid #e9eef5; }
+    .table-card::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg,#003580 0%,#004aad 100%); }
+    .table-card { scrollbar-width: thin; scrollbar-color: #004aad #e9eef5; }
+    .table-card::before, .table-card::after { content: ''; position: absolute; top: 0; bottom: 12px; width: 30px; pointer-events: none; z-index: 2; transition: opacity 0.3s; }
+    .table-card::before { left: 8px; background: linear-gradient(to right, rgba(255,255,255,0.95), transparent); opacity: 0; }
+    .table-card::after { right: 8px; background: linear-gradient(to left, rgba(255,255,255,0.95), transparent); }
+    .table-card.scrolled-left::before { opacity: 1; }
+    .table-card.scrolled-right::after { opacity: 0; }
+
+    table { width: 100%; border-collapse: collapse; background: #fff; min-width: 900px; }
+    th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9rem; white-space: nowrap; }
+    th { background: #f5f8fb; color: #333; font-weight: 700; border-bottom: 2px solid #e0e0e0; }
+    tr:hover { background: #f1f8ff; }
+
+    button { border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: #fff; margin-right: 0.3rem; transition: background 0.2s; font-weight: 600; }
+    button.approve { background: #28a745; }
+    button.approve:hover { background: #218838; }
+    button.decline { background: #dc3545; }
+    button.decline:hover { background: #c82333; }
+    button.edit { background: #007bff; }
+    button.edit:hover { background: #0056b3; }
+    button.inactive { background: #ffc107; color: #333; }
+    button.inactive:hover { background: #e0a800; }
+    button.activate { background: #28a745; }
+    button.activate:hover { background: #218838; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: #fff; border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-header h3 { color: #004aad; margin: 0; }
+    .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; padding: 0; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333; }
+    .form-group input { width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; }
+    .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; }
+    button.save { background: #28a745; }
+    button.save:hover { background: #218838; }
+    button.cancel { background: #6c757d; }
+    button.cancel:hover { background: #5a6268; }
+
+    /* MOBILE */
+    @media (max-width: 980px) {
+      .sidebar { left: -250px; }
+      .sidebar.mobile-open { left: 0; }
+      .navbar { left: 0; }
+      .main { margin-left: 0; }
+      .mobile-menu-btn { display: block !important; }
+      .username { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar (from dashboard) -->
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <img src="logu.png" alt="Logo" class="logo" />
+        <h2>TayabaStrack</h2>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="ad_dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
+        <li><a href="ad_reports.html"><i class="fa fa-tasks"></i> Manage Reports</a></li>
+        <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
+        <li class="active"><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
+        <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Navbar (kept behavior) -->
+  <nav class="navbar">
+    <div class="navbar-left">
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fa fa-bars"></i></button>
+      <h1>User Management</h1>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="position:relative">
+        <i class="fa fa-bell" id="notificationBell" aria-hidden="true"></i>
+        <span class="badge" id="notificationBadge">0</span>
+
+        <!-- Notification dropdown -->
+        <div class="notification-menu" id="notificationMenu">
+          <div class="notification-header">
+            <h3>Notifications</h3>
+            <div class="notification-actions">
+              <button class="action-icon-btn" id="markAllReadBtn" title="Mark all as read"><i class="fa fa-check-double"></i></button>
+              <button class="action-icon-btn" id="clearNotificationsBtn" title="Clear all"><i class="fa fa-trash-alt"></i></button>
+            </div>
+          </div>
+
+          <div class="notification-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="report">Reports</button>
+            <button class="filter-btn" data-filter="user">Users</button>
+            <button class="filter-btn" data-filter="24h">Last 24h</button>
+          </div>
+
+          <div class="notification-list" id="notificationList">
+            <div class="notification-empty">No new notifications</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile -->
+      <div class="profile-dropdown" id="profileToggle">
+        <img src="image.png" alt="Profile" class="avatar" id="navAvatar">
+        <span class="username" id="navUsername">Loading...</span>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="content">
+      <!-- Pending Registration -->
+      <div class="table-section">
+        <h2>Pending Registration <span id="pendingCount">(0)</span></h2>
+        <div class="search-box">
+          <input type="text" id="searchPending" placeholder="Search pending users...">
+          <i class="fa fa-search"></i>
+        </div>
+        <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i><span>Scroll horizontally to view all columns</span></div>
+        <div class="table-wrapper">
+          <div class="table-card" id="pendingTableCard">
+            <table>
+              <thead>
+                <tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Barangay</th><th>Position</th><th>Contact</th><th>Action</th></tr>
+              </thead>
+              <tbody id="pendingTable">
+                <tr><td colspan="7" style="text-align:center;color:#777;padding:1rem">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Users -->
+      <div class="table-section">
+        <h2>Active Users <span id="activeCount">(0)</span></h2>
+        <div class="search-box">
+          <input type="text" id="searchActive" placeholder="Search active users...">
+          <i class="fa fa-search"></i>
+        </div>
+        <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i><span>Scroll horizontally to view all columns</span></div>
+        <div class="table-wrapper">
+          <div class="table-card" id="activeTableCard">
+            <table>
+              <thead>
+                <tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Barangay</th><th>Position</th><th>Contact</th><th>Action</th></tr>
+              </thead>
+              <tbody id="activeTable">
+                <tr><td colspan="7" style="text-align:center;color:#777;padding:1rem">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inactive Users -->
+      <div class="table-section">
+        <h2>Inactive Users <span id="inactiveCount">(0)</span></h2>
+        <div class="search-box">
+          <input type="text" id="searchInactive" placeholder="Search inactive users...">
+          <i class="fa fa-search"></i>
+        </div>
+        <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i><span>Scroll horizontally to view all columns</span></div>
+        <div class="table-wrapper">
+          <div class="table-card" id="inactiveTableCard">
+            <table>
+              <thead>
+                <tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Barangay</th><th>Position</th><th>Contact</th><th>Action</th></tr>
+              </thead>
+              <tbody id="inactiveTable">
+                <tr><td colspan="7" style="text-align:center;color:#777;padding:1rem">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Declined Registrations -->
+      <div class="table-section">
+        <h2>Declined Registrations <span id="declinedCount">(0)</span></h2>
+        <div class="search-box">
+          <input type="text" id="searchDeclined" placeholder="Search declined users...">
+          <i class="fa fa-search"></i>
+        </div>
+        <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i><span>Scroll horizontally to view all columns</span></div>
+        <div class="table-wrapper">
+          <div class="table-card" id="declinedTableCard">
+            <table>
+              <thead>
+                <tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Barangay</th><th>Position</th><th>Contact</th><th>Declined Date</th><th>Action</th></tr>
+              </thead>
+              <tbody id="declinedTable">
+                <tr><td colspan="8" style="text-align:center;color:#777;padding:1rem">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit modal -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit User Information</h3>
+        <button class="close-modal" id="closeModal">&times;</button>
+      </div>
+      <form id="editForm">
+        <input type="hidden" id="editUserId">
+        <div class="form-group"><label>First Name</label><input type="text" id="editFirstName" required></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="editLastName" required></div>
+        <div class="form-group"><label>Email</label><input type="email" id="editEmail" required></div>
+        <div class="form-group"><label>Barangay</label><input type="text" id="editBarangay" required></div>
+        <div class="form-group"><label>Position</label><input type="text" id="editPosition" required></div>
+        <div class="form-group"><label>Contact</label><input type="text" id="editContact" required></div>
+        <div class="modal-actions">
+          <button type="button" class="cancel" id="cancelEdit">Cancel</button>
+          <button type="submit" class="save">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Basic interactivity (mobile menu) -->
+  <script>
+    function toggleMobileMenu() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+    }
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.querySelector('.mobile-menu-btn');
+      if (window.innerWidth <= 980 &&
+          !sidebar.contains(e.target) &&
+          (!menuBtn || !menuBtn.contains(e.target))) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+  </script>
+
+  <!-- Notification UI (global functions used by Firebase module below) -->
+  <script>
+    // In-memory notification store and UI logic
+    let notificationsList = [];
+    let seenNotificationIds = new Set();
+    let trackedUserStatuses = {};
+    let trackedReportIds = new Set();
+    let currentFilter = "all";
+
+    function normalizeStatus(status) { return (status || "").toLowerCase().trim(); }
+    function isBarangayPosition(position) {
+      if (!position) return false;
+      const pos = position.toLowerCase();
+      return pos.includes("barangay") || pos.includes("brgy") || pos.includes("brgy.");
+    }
+
+    function addNotification(type, message, detail) {
+      const cleanMsg = (message || "").trim();
+      const cleanDetail = (detail || "").trim();
+      const timestamp = new Date();
+      const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
+      if (seenNotificationIds.has(id)) return;
+      seenNotificationIds.add(id);
+      notificationsList.unshift({ id, type, message: cleanMsg, detail: cleanDetail, timestamp: timestamp, read: false });
+      updateNotificationUI();
+    }
+
+    function updateNotificationUI() {
+      let filtered = [...notificationsList];
+      if (currentFilter === "report") {
+        filtered = filtered.filter((n) => n.type === "report");
+      } else if (currentFilter === "user") {
+        filtered = filtered.filter((n) => n.type === "user");
+      } else if (currentFilter === "24h") {
+        const ago = Date.now() - 24 * 60 * 60 * 1000;
+        filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+      }
+
+      filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      const unreadCount = notificationsList.filter(n => !n.read).length;
+      const notificationBadge = document.getElementById("notificationBadge");
+      if (notificationBadge) {
+        if (unreadCount > 0) {
+          notificationBadge.textContent = unreadCount;
+          notificationBadge.classList.add("show");
+        } else {
+          notificationBadge.textContent = "";
+          notificationBadge.classList.remove("show");
+        }
+      }
+
+      const notificationList = document.getElementById("notificationList");
+      if (!notificationList) return;
+      if (filtered.length === 0) {
+        notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
+      } else {
+        notificationList.innerHTML = filtered.map((n) => `
+          <div class="notification-item ${n.read ? '' : 'unread'}">
+            <div class="notification-icon ${n.type}">
+              ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
+            </div>
+            <div class="notification-content">
+              <p><strong>${n.message}</strong></p>
+              <p>${n.detail}</p>
+              <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            </div>
+          </div>`).join("");
+      }
+    }
+
+    // UI event bindings
+    const notificationBell = document.getElementById("notificationBell");
+    const notificationMenu = document.getElementById("notificationMenu");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+    const markAllReadBtn = document.getElementById("markAllReadBtn");
+
+    if (notificationBell) {
+      notificationBell.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (notificationMenu) notificationMenu.classList.toggle("show");
+        const dropdown = document.getElementById("dropdownMenu");
+        if (dropdown) dropdown.classList.remove("show");
+      });
+    }
+
+    if (clearNotificationsBtn) {
+      clearNotificationsBtn.addEventListener("click", () => {
+        notificationsList = [];
+        seenNotificationIds.clear();
+        updateNotificationUI();
+      });
+    }
+
+    if (markAllReadBtn) {
+      markAllReadBtn.addEventListener("click", () => {
+        notificationsList.forEach(n => n.read = true);
+        updateNotificationUI();
+      });
+    }
+
+    document.querySelectorAll(".filter-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+        e.target.classList.add("active");
+        currentFilter = e.target.dataset.filter;
+        updateNotificationUI();
+      });
+    });
+
+    // Profile dropdown toggle
+    const profileToggle = document.getElementById('profileToggle');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    if (profileToggle) {
+      profileToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (dropdownMenu) dropdownMenu.classList.toggle("show");
+        if (notificationMenu) notificationMenu.classList.remove("show");
+      });
+    }
+    window.addEventListener('click', (e) => {
+      if (profileToggle && !profileToggle.contains(e.target)) {
+        if (dropdownMenu) dropdownMenu.classList.remove("show");
+      }
+      if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
+        if (notificationMenu) notificationMenu.classList.remove("show");
+      }
+    });
+  </script>
+
+  <!-- Firebase module: auth, firestore, realtime listeners, and page logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, onSnapshot, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.firebasestorage.app",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.db = db; // debugging convenience
+
+    // DOM refs
+    const pendingTable = document.getElementById("pendingTable");
+    const activeTable = document.getElementById("activeTable");
+    const inactiveTable = document.getElementById("inactiveTable");
+    const declinedTable = document.getElementById("declinedTable");
+
+    const pendingTableCard = document.getElementById("pendingTableCard");
+    const activeTableCard = document.getElementById("activeTableCard");
+    const inactiveTableCard = document.getElementById("inactiveTableCard");
+    const declinedTableCard = document.getElementById("declinedTableCard");
+
+    const searchPending = document.getElementById("searchPending");
+    const searchActive = document.getElementById("searchActive");
+    const searchInactive = document.getElementById("searchInactive");
+    const searchDeclined = document.getElementById("searchDeclined");
+
+    const pendingCountEl = document.getElementById("pendingCount");
+    const activeCountEl = document.getElementById("activeCount");
+    const inactiveCountEl = document.getElementById("inactiveCount");
+    const declinedCountEl = document.getElementById("declinedCount");
+
+    const editModal = document.getElementById("editModal");
+    const closeModal = document.getElementById("closeModal");
+    const cancelEdit = document.getElementById("cancelEdit");
+    const editForm = document.getElementById("editForm");
+
+    const navUsername = document.getElementById("navUsername");
+    const navAvatar = document.getElementById("navAvatar");
+    const sidebarUsername = document.getElementById("sidebarUsername");
+
+    let allPendingUsers = [];
+    let allActiveUsers = [];
+    let allInactiveUsers = [];
+    let allDeclinedUsers = [];
+
+    function handleScrollShadows(el){
+      const isScrolledLeft = el.scrollLeft > 10;
+      const isScrolledRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 10);
+      el.classList.toggle('scrolled-left', isScrolledLeft);
+      el.classList.toggle('scrolled-right', isScrolledRight);
+    }
+    [pendingTableCard, activeTableCard, inactiveTableCard, declinedTableCard].forEach(card => {
+      if (card) card.addEventListener('scroll', () => handleScrollShadows(card));
+    });
+
+    function isBarangayPosition(p){
+      if(!p) return false;
+      const pos = p.toLowerCase().trim();
+      return pos.includes("barangay") || pos.includes("brgy") || pos.includes("brgy.") || pos.includes("sk kagawad");
+    }
+
+    function renderTable(tbody, users, actionType){
+      if(!tbody) return;
+      if(users.length === 0){
+        const colspan = actionType === 'declined' ? '8' : '7';
+        tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center;color:#777;padding:1rem">No users found.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = "";
+      users.forEach(({id, data: u}) => {
+        const tr = document.createElement('tr');
+        let declinedDate = '';
+        if(actionType === 'declined' && u.declinedAt){
+          const dt = new Date(u.declinedAt);
+          declinedDate = `<td>${dt.toLocaleDateString()} ${dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</td>`;
+        } else if(actionType === 'declined') {
+          declinedDate = '<td>—</td>';
+        }
+        const actions = actionType === 'pending'
+          ? `<button class="approve" onclick="window.approveUser('${id}')">Approve</button><button class="decline" onclick="window.declineUser('${id}')">Decline</button>`
+          : actionType === 'active'
+            ? `<button class="edit" onclick="window.openEditModal('${id}')">Edit</button><button class="inactive" onclick="window.makeInactive('${id}')">Inactive</button>`
+            : actionType === 'inactive'
+              ? `<button class="activate" onclick="window.activateUser('${id}')">Activate</button>`
+              : ` <button class="approve" onclick="window.reapproveUser('${id}')">Re-approve</button><button class="decline" style="background:#dc3545;" onclick="window.permanentlyDeleteUser('${id}')">Delete</button>`;
+        tr.innerHTML = `<td>${u.firstName||""}</td><td>${u.surname||""}</td><td>${u.email||""}</td><td>${u.barangay||""}</td><td>${u.position||""}</td><td>${u.phoneNumber||u.contact||"—"}</td>${declinedDate}<td>${actions}</td>`;
+        tbody.appendChild(tr);
+      });
+      setTimeout(() => {
+        if(tbody === pendingTable) handleScrollShadows(pendingTableCard);
+        if(tbody === activeTable) handleScrollShadows(activeTableCard);
+        if(tbody === inactiveTable) handleScrollShadows(inactiveTableCard);
+        if(tbody === declinedTable) handleScrollShadows(declinedTableCard);
+      }, 100);
+    }
+
+    function filterUsers(searchTerm, allUsers) {
+      return allUsers.filter(({data:u})=>{
+        const q = (searchTerm||"").toLowerCase();
+        return (u.firstName||"").toLowerCase().includes(q) ||
+               (u.surname||"").toLowerCase().includes(q) ||
+               (u.email||"").toLowerCase().includes(q) ||
+               (u.barangay||"").toLowerCase().includes(q) ||
+               (u.position||"").toLowerCase().includes(q);
+      });
+    }
+
+    // Action functions (exposed to window so buttons in table rows can call them)
+    window.approveUser = async function(userId) {
+      if(!confirm("Approve this user?")) return;
+      try {
+        await updateDoc(doc(db, "users", userId), { status: "active" });
+        alert("User approved successfully!");
+      } catch(err) {
+        console.error("Error approving user:", err);
+        alert("Error approving user.");
+      }
+    };
+
+    window.declineUser = async function(userId) {
+      if(!confirm("Decline this user registration?")) return;
+      try {
+        await updateDoc(doc(db, "users", userId), { status: "declined", declinedAt: new Date().toISOString() });
+        alert("User registration declined.");
+      } catch(err) {
+        console.error("Error declining user:", err);
+        alert("Error declining user.");
+      }
+    };
+
+    window.makeInactive = async function(userId) {
+      if(!confirm("Make this user inactive?")) return;
+      try {
+        await updateDoc(doc(db, "users", userId), { status: "inactive" });
+        alert("User set to inactive.");
+      } catch(err) {
+        console.error("Error:", err);
+        alert("Error setting user inactive.");
+      }
+    };
+
+    window.activateUser = async function(userId) {
+      if(!confirm("Activate this user?")) return;
+      try {
+        await updateDoc(doc(db, "users", userId), { status: "active" });
+        alert("User activated!");
+      } catch(err) {
+        console.error("Error:", err);
+        alert("Error activating user.");
+      }
+    };
+
+    window.reapproveUser = async function(userId) {
+      if(!confirm("Move this user back to pending for review?")) return;
+      try {
+        await updateDoc(doc(db, "users", userId), { status: "pending", declinedAt: null });
+        alert("User moved to pending registrations.");
+      } catch(err) {
+        console.error("Error:", err);
+        alert("Error re-approving user.");
+      }
+    };
+
+    window.permanentlyDeleteUser = async function(userId) {
+      if(!confirm("PERMANENTLY DELETE this user? This cannot be undone!")) return;
+      try {
+        await deleteDoc(doc(db, "users", userId));
+        alert("User permanently deleted.");
+      } catch(err) {
+        console.error("Error deleting user:", err);
+        alert("Error deleting user.");
+      }
+    };
+
+    // Edit modal helpers
+    window.openEditModal = function(userId) {
+      const user = allActiveUsers.find(u => u.id === userId);
+      if(!user) return;
+      document.getElementById('editUserId').value = userId;
+      document.getElementById('editFirstName').value = user.data.firstName || "";
+      document.getElementById('editLastName').value = user.data.surname || "";
+      document.getElementById('editEmail').value = user.data.email || "";
+      document.getElementById('editBarangay').value = user.data.barangay || "";
+      document.getElementById('editPosition').value = user.data.position || "";
+      document.getElementById('editContact').value = user.data.phoneNumber || user.data.contact || "";
+      editModal.classList.add('show');
+    };
+
+    if (closeModal) closeModal.addEventListener('click', () => editModal.classList.remove('show'));
+    if (cancelEdit) cancelEdit.addEventListener('click', () => editModal.classList.remove('show'));
+
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById('editUserId').value;
+      try {
+        await updateDoc(doc(db, "users", userId), {
+          firstName: document.getElementById('editFirstName').value,
+          surname: document.getElementById('editLastName').value,
+          email: document.getElementById('editEmail').value,
+          barangay: document.getElementById('editBarangay').value,
+          position: document.getElementById('editPosition').value,
+          phoneNumber: document.getElementById('editContact').value
+        });
+        alert("User updated successfully!");
+        editModal.classList.remove('show');
+      } catch(err) {
+        console.error("Error updating user:", err);
+        alert("Error updating user.");
+      }
+    });
+
+    // Subscribe to Firestore queries and keep notification setup
+    try {
+      // Pending users
+      const qPending = query(collection(db, "users"), where("status", "==", "pending"));
+      onSnapshot(qPending, (snapshot) => {
+        allPendingUsers = [];
+        snapshot.forEach((docSnap) => {
+          const u = docSnap.data();
+          if (isBarangayPosition(u.position)) {
+            allPendingUsers.push({ id: docSnap.id, data: u });
+          }
+        });
+        pendingCountEl.textContent = `(${allPendingUsers.length})`;
+        renderTable(pendingTable, allPendingUsers, 'pending');
+      });
+
+      // Active users
+      const qActive = query(collection(db, "users"), where("status", "==", "active"));
+      onSnapshot(qActive, (snapshot) => {
+        allActiveUsers = [];
+        snapshot.forEach((docSnap) => {
+          const u = docSnap.data();
+          if (isBarangayPosition(u.position)) {
+            allActiveUsers.push({ id: docSnap.id, data: u });
+          }
+        });
+        activeCountEl.textContent = `(${allActiveUsers.length})`;
+        renderTable(activeTable, allActiveUsers, 'active');
+      });
+
+      // Inactive users
+      const qInactive = query(collection(db, "users"), where("status", "==", "inactive"));
+      onSnapshot(qInactive, (snapshot) => {
+        allInactiveUsers = [];
+        snapshot.forEach((docSnap) => {
+          const u = docSnap.data();
+          if (isBarangayPosition(u.position)) {
+            allInactiveUsers.push({ id: docSnap.id, data: u });
+          }
+        });
+        inactiveCountEl.textContent = `(${allInactiveUsers.length})`;
+        renderTable(inactiveTable, allInactiveUsers, 'inactive');
+      });
+
+      // Declined users
+      const qDeclined = query(collection(db, "users"), where("status", "==", "declined"));
+      onSnapshot(qDeclined, (snapshot) => {
+        allDeclinedUsers = [];
+        snapshot.forEach((docSnap) => {
+          const u = docSnap.data();
+          if (isBarangayPosition(u.position)) {
+            allDeclinedUsers.push({ id: docSnap.id, data: u });
+          }
+        });
+        declinedCountEl.textContent = `(${allDeclinedUsers.length})`;
+        renderTable(declinedTable, allDeclinedUsers, 'declined');
+      });
+
+      // Setup the notification tracking for existing reports (to avoid duplicate alerts)
+      const reportDocs = await getDocs(collection(db, "reports"));
+      reportDocs.forEach((d) => trackedReportIds.add(d.id));
+
+      // Setup real-time notification listeners for users and reports
+      onSnapshot(collection(db, "users"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const userId = change.doc.id;
+          const data = change.doc.data();
+          const currentStatus = normalizeStatus(data.status);
+          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+          const position = data.position || "User";
+
+          if (change.type === "added") {
+            trackedUserStatuses[userId] = currentStatus;
+            if (currentStatus === "active" && isBarangayPosition(position)) {
+              addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+            }
+          }
+
+          if (change.type === "modified") {
+            const oldStatus = trackedUserStatuses[userId];
+            if (oldStatus !== "active" && currentStatus === "active" && isBarangayPosition(position)) {
+              addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
+            }
+            trackedUserStatuses[userId] = currentStatus;
+          }
+        });
+      });
+
+      // Reports -> when a new report doc is added -> notify
+      onSnapshot(collection(db, "reports"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const id = change.doc.id;
+          const data = change.doc.data();
+          if (change.type === "added" && !trackedReportIds.has(id)) {
+            trackedReportIds.add(id);
+            const barangay = data.barangay || data.location || "Unknown location";
+            const type = data.reportType || data.type || data.projectName || "Report";
+            addNotification("report", "New report submitted", `${type} in ${barangay}`);
+          }
+        });
+      });
+
+    } catch (err) {
+      console.error("Error setting up collections:", err);
+    }
+
+    // Profile sync & auth guard
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        console.warn("No user detected. Redirecting to login...");
+        window.location.href = "logout.html";
+        return;
+      }
+      try {
+        const userDocRef = doc(db, "users", user.uid);
+
+        // Real-time profile sync (name & avatar) — updates navbar and sidebar
+        onSnapshot(userDocRef, async (userDocSnap) => {
+          if (!userDocSnap.exists()) {
+            console.error("User document not found.");
+            window.location.href = "logout.html";
+            return;
+          }
+          const data = userDocSnap.data();
+          // ensure admin only
+          if (data.position !== "Admin") {
+            alert("Unauthorized access!");
+            window.location.href = "logout.html";
+            return;
+          }
+          const displayName = data.name || data.firstName || "Admin";
+          const photoURL = data.profilePic || data.photoURL || "image.png";
+          if (navUsername) navUsername.textContent = displayName;
+          if (sidebarUsername) sidebarUsername.textContent = displayName;
+          if (navAvatar) navAvatar.src = photoURL;
+        });
+
+        // Once logged-in, mark initial notification UI refresh (if needed)
+        updateNotificationUI();
+
+      } catch (err) {
+        console.error("Error loading admin or users:", err);
+        window.location.href = "logout.html";
+      }
+    });
+
+    // Wire search inputs to filtering
+    if (searchPending) searchPending.addEventListener('input', (e) => {
+      const filtered = filterUsers(e.target.value.toLowerCase(), allPendingUsers);
+      renderTable(pendingTable, filtered, 'pending');
+    });
+    if (searchActive) searchActive.addEventListener('input', (e) => {
+      const filtered = filterUsers(e.target.value.toLowerCase(), allActiveUsers);
+      renderTable(activeTable, filtered, 'active');
+    });
+    if (searchInactive) searchInactive.addEventListener('input', (e) => {
+      const filtered = filterUsers(e.target.value.toLowerCase(), allInactiveUsers);
+      renderTable(inactiveTable, filtered, 'inactive');
+    });
+    if (searchDeclined) searchDeclined.addEventListener('input', (e) => {
+      const filtered = filterUsers(e.target.value.toLowerCase(), allDeclinedUsers);
+      renderTable(declinedTable, filtered, 'declined');
+    });
+
+    // Logout handling (sidebar button)
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to logout?")) return;
+        try {
+          await signOut(auth);
+          window.location.href = "logout.html";
+        } catch (err) {
+          console.error("Logout error:", err);
+        }
+      });
+    }
+
+  </script>
+</body>
+</html>
