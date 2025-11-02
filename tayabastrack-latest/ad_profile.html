@@ -158,7 +158,7 @@
                 <h2>TayabaStrack</h2>
             </div>
             <ul class="sidebar-menu">
-                <li><a href="ad_dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
+                <li><a href="ad_dash.html"><i class="fa fa-home"></i> Dashboard</a></li>
                 <li><a href="ad_reports.html"><i class="fa fa-tasks"></i> Manage Reports</a></li>
                 <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
                 <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
@@ -416,8 +416,99 @@
 
     editPhoto.addEventListener("change",e=>{const file=e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){alert('Please select an image file');editPhoto.value='';return}if(file.size>5*1024*1024){alert('Image size should be less than 5MB');editPhoto.value='';return}const reader=new FileReader();reader.onload=ev=>{previewImg.src=ev.target.result};reader.readAsDataURL(file)});
 
-    window.saveEdit=async function(){if(!currentUser){alert("No user logged in");return}const{updateDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");const{ref,uploadBytes,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");const{getStorage}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");const uid=currentUser.uid;const userRef=doc(window.db,"users",uid);const saveBtn=document.getElementById("saveBtn");const updated={name:document.getElementById("editName").value.trim(),ID:document.getElementById("editID").value.trim(),email:document.getElementById("editEmail").value.trim(),phone:document.getElementById("editPhone").value.trim(),address:document.getElementById("editAddress").value.trim(),gender:document.getElementById("editGender").value.trim()};if(!updated.name){alert("Name is required");return}const file=editPhoto.files[0];try{saveBtn.disabled=true;saveBtn.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving...';if(file){const storage=getStorage();const timestamp=Date.now();const fileExt=file.name.split('.').pop();const fileName=`profile_${timestamp}.${fileExt}`;const storageRef=ref(storage,`user_images/${uid}/${fileName}`);await uploadBytes(storageRef,file);const url=await getDownloadURL(storageRef);updated.photoURL=url;console.log("Photo uploaded successfully:",url)}await updateDoc(userRef,updated);alert("Profile updated successfully!");closeEditModal();editPhoto.value=''}catch(err){console.error("Error details:",err);alert("Error updating profile: "+err.message)}finally{saveBtn.disabled=false;saveBtn.innerHTML='<i class="fa fa-save"></i> Save Changes'}};
-
+    window.saveEdit = async function() {
+  if (!currentUser) {
+    alert("No user logged in");
+    return;
+  }
+  
+  const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+  const { getStorage, ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+  
+  const uid = currentUser.uid;
+  const userRef = doc(window.db, "users", uid);
+  const saveBtn = document.getElementById("saveBtn");
+  
+  const updated = {
+    name: document.getElementById("editName").value.trim(),
+    ID: document.getElementById("editID").value.trim(),
+    email: document.getElementById("editEmail").value.trim(),
+    phone: document.getElementById("editPhone").value.trim(),
+    address: document.getElementById("editAddress").value.trim(),
+    gender: document.getElementById("editGender").value.trim()
+  };
+  
+  if (!updated.name) {
+    alert("Name is required");
+    return;
+  }
+  
+  const file = editPhoto.files[0];
+  
+  try {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+    
+    if (file) {
+      console.log("Starting photo upload for user:", uid);
+      const storage = getStorage();
+      const timestamp = Date.now();
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      const allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+      
+      if (!allowedExts.includes(fileExt)) {
+        throw new Error("Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed.");
+      }
+      
+      const fileName = `profile_${timestamp}.${fileExt}`;  // ✅ Added =
+      const storagePath = `user_images/${uid}/${fileName}`;  // ✅ Added =
+      const storageRef = ref(storage, storagePath);
+      
+      console.log("Uploading to:", storagePath);
+      console.log("File size:", file.size, "bytes");
+      
+      const snapshot = await uploadBytes(storageRef, file);
+      console.log("Upload complete! Snapshot:", snapshot);
+      
+      const url = await getDownloadURL(snapshot.ref);
+      updated.photoURL = url;
+      console.log("Photo URL obtained:", url);
+    }
+    
+    console.log("Updating Firestore document...");
+    await updateDoc(userRef, updated);
+    console.log("Firestore update complete!");
+    
+    alert("Profile updated successfully!");
+    closeEditModal();
+    editPhoto.value = '';
+    
+  } catch (err) {
+    console.error("=== ERROR DETAILS ===");
+    console.error("Error object:", err);
+    console.error("Error code:", err.code);
+    console.error("Error message:", err.message);
+    console.error("Stack trace:", err.stack);
+    
+    let errorMsg = "Error updating profile:\n\n";
+    
+    if (err.code === "storage/unauthorized" || err.message.includes("storage/unauthorized")) {
+      errorMsg += "❌ Storage permission denied.\n\nPlease check your Firebase Storage rules in the Firebase Console:\n1. Go to Storage → Rules\n2. Make sure user_images/{userId}/{allPaths=**} allows write for authenticated users";
+    } else if (err.code === "permission-denied") {
+      errorMsg += "❌ Firestore permission denied.\n\nCheck your Firestore security rules.";
+    } else if (err.message.includes("Invalid file type")) {
+      errorMsg += err.message;
+    } else {
+      errorMsg += err.message;
+    }
+    
+    alert(errorMsg);
+    
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
+  }
+};
     window.addEventListener("click",(e)=>{if(e.target===editModal)closeEditModal()});
   </script>
 
