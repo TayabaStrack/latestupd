@@ -13,12 +13,12 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow-x: hidden; }
 
         .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; height: 100vh; overflow-y: auto; transition: left 0.3s; }
-        .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; }
-        .sidebar-header img { width: 40px; }
-        .sidebar-header h2 { font-size: 1.2rem; }
-        .sidebar-menu { list-style: none; }
+        .sidebar-header { display: flex; align-items: center; justify-content: flex-start; gap: 12px; margin-bottom: 2rem; padding: 0 1rem; }
+        .sidebar-header img { width: 50px; height: 50px; object-fit: contain; }
+        .sidebar-header h2 { font-size: 1.3rem; font-weight: 600; }
+        .sidebar-menu { list-style: none; padding: 0; }
         .sidebar-menu li { margin: 0.5rem 0; }
-        .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
         .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
 
         .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
@@ -112,7 +112,7 @@
     <aside class="sidebar">
         <div>
             <div class="sidebar-header">
-                <img src="logu.png" alt="Logo" class="logo" />
+                <img src="logo.png" alt="Logo" class="logo" />
                 <h2>TayabaStrack</h2>
             </div>
            <ul class="sidebar-menu">
@@ -276,9 +276,6 @@
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-  // ===============================
-  // 🔥 FIREBASE CONFIG
-  // ===============================
   const firebaseConfig = {
     apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
     authDomain: "tayabastrack-23b95.firebaseapp.com",
@@ -293,9 +290,6 @@
   const db = getFirestore(app);
   const storage = getStorage(app);
 
-  // ===============================
-  // 🧭 DOM ELEMENTS
-  // ===============================
   const navbarName = document.getElementById("navbarName");
   const navbarAvatar = document.getElementById("navbarAvatar");
   const logoutBtn = document.getElementById("logoutBtn");
@@ -314,22 +308,43 @@
   const profileToggle = document.getElementById("profileToggle");
   const dropdownMenu = document.getElementById("dropdownMenu");
 
-  // ===============================
-  // 📌 STATE
-  // ===============================
   let notificationsList = [];
-  let seenNotificationIds = new Set();
-  let trackedUserStatuses = {};
-  let trackedReportIds = new Set();
+  let trackedIds = new Set();
   let currentFilter = "all";
 
   function normalizeStatus(status) {
     return (status || "").toLowerCase().trim();
   }
 
-  // ===============================
-  // 🔔 NOTIFICATION UI HANDLERS
-  // ===============================
+  function saveNotificationsToLocalStorage() {
+    try {
+      localStorage.setItem('notifications', JSON.stringify(notificationsList));
+      localStorage.setItem('trackedIds', JSON.stringify([...trackedIds]));
+    } catch (error) {
+      console.error("Error saving notifications:", error);
+    }
+  }
+
+  function loadNotificationsFromLocalStorage() {
+    try {
+      const savedNotifications = localStorage.getItem('notifications');
+      const savedTrackedIds = localStorage.getItem('trackedIds');
+      
+      if (savedNotifications) {
+        notificationsList = JSON.parse(savedNotifications).map(n => ({
+          ...n,
+          timestamp: new Date(n.timestamp)
+        }));
+      }
+      
+      if (savedTrackedIds) {
+        trackedIds = new Set(JSON.parse(savedTrackedIds));
+      }
+    } catch (error) {
+      console.error("Error loading notifications:", error);
+    }
+  }
+
   notificationBell.addEventListener("click", (e) => {
     e.stopPropagation();
     notificationMenu.classList.toggle("show");
@@ -338,12 +353,13 @@
 
   clearNotificationsBtn.addEventListener("click", () => {
     notificationsList = [];
-    seenNotificationIds.clear();
+    saveNotificationsToLocalStorage();
     updateNotificationUI();
   });
 
   markAllReadBtn.addEventListener("click", () => {
     notificationsList.forEach(n => n.read = true);
+    saveNotificationsToLocalStorage();
     updateNotificationUI();
   });
 
@@ -371,23 +387,24 @@
     });
   });
 
-  function addNotification(type, message, detail) {
-    const cleanMsg = (message || "").trim();
-    const cleanDetail = (detail || "").trim();
-    const timestamp = new Date();
-    const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
+  function addNotification(type, message, detail, uniqueId) {
+    if (trackedIds.has(uniqueId)) return;
     
-    if (seenNotificationIds.has(id)) return;
-    seenNotificationIds.add(id);
+    trackedIds.add(uniqueId);
+    
+    const timestamp = new Date();
+    const id = `${type}-${uniqueId}-${timestamp.getTime()}`;
     
     notificationsList.unshift({
       id,
       type,
-      message: cleanMsg,
-      detail: cleanDetail,
+      message: message.trim(),
+      detail: detail.trim(),
       timestamp: timestamp,
       read: false
     });
+    
+    saveNotificationsToLocalStorage();
     updateNotificationUI();
   }
 
@@ -435,22 +452,8 @@
     }
   }
 
-  // ===============================
-  // 🧭 NOTIFICATION FETCH & REAL-TIME
-  // ===============================
   async function setupRealtimeNotifications() {
-    const userSnap = await getDocs(collection(db, "users"));
-    userSnap.forEach((docSnap) => {
-      const userId = docSnap.id;
-      const data = docSnap.data();
-      const status = normalizeStatus(data.status);
-      trackedUserStatuses[userId] = status;
-      if (status === "active") {
-        const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-        const position = data.position || "User";
-        addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
-      }
-    });
+    loadNotificationsFromLocalStorage();
 
     onSnapshot(collection(db, "users"), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
@@ -460,53 +463,33 @@
         const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
         const position = data.position || "User";
 
-        if (change.type === "added") {
-          trackedUserStatuses[userId] = currentStatus;
+        if (change.type === "added" || change.type === "modified") {
           if (currentStatus === "active") {
-            addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
-          } 
-        }
-
-        if (change.type === "modified") {
-          const oldStatus = trackedUserStatuses[userId];
-          if (oldStatus !== "active" && currentStatus === "active") {
-            addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+            const uniqueId = `user-${userId}-active`;
+            addNotification("user", `User approved: ${fullName}`, `Position: ${position}`, uniqueId);
           }
-          trackedUserStatuses[userId] = currentStatus;
         }
       });
     });
 
-    const reportSnap = await getDocs(collection(db, "reports"));
-    reportSnap.forEach((docSnap) => {
-      const id = docSnap.id;
-      trackedReportIds.add(id);
-      const data = docSnap.data();
-      const barangay = data.barangay || data.location || "Unknown location";
-      const type = data.reportType || data.type || data.projectName || "Report";
-      addNotification("report", "Report submitted", `${type} in ${barangay}`);
-    });
-
     onSnapshot(collection(db, "reports"), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
-        const id = change.doc.id;
+        const reportId = change.doc.id;
         const data = change.doc.data();
-        if (change.type === "added" && !trackedReportIds.has(id)) {
-          trackedReportIds.add(id);
+        
+        if (change.type === "added") {
           const barangay = data.barangay || data.location || "Unknown location";
           const type = data.reportType || data.type || data.projectName || "Report";
-          addNotification("report", "New report submitted", `${type} in ${barangay}`);
+          const uniqueId = `report-${reportId}`;
+          addNotification("report", "New report submitted", `${type} in ${barangay}`, uniqueId);
         }
       });
     });
 
     updateNotificationUI();
-    console.log("✅ Notifications active — existing + new");
+    console.log("Notifications system active");
   }
 
-  // ===============================
-  // 🖼️ IMAGE FETCH
-  // ===============================
   async function getImageUrl(imagePath) {
     try {
       if (!imagePath) return null;
@@ -518,9 +501,6 @@
     }
   }
 
-  // ===============================
-  // 🔐 AUTH & DASHBOARD
-  // ===============================
   onAuthStateChanged(auth, async (user) => {
     if (!user) return (window.location.href = "logout.html");
 
@@ -568,9 +548,6 @@
     window.location.href = "logout.html";
   });
 
-  // ===============================
-  // 📊 REPORTS DASHBOARD
-  // ===============================
   async function loadDashboardData() {
     const snapshot = await getDocs(collection(db, "reports"));
     let total = 0, pending = 0, ongoing = 0, completed = 0;
@@ -601,7 +578,9 @@
     ongoingEl.textContent = ongoing;
     completedEl.textContent = completed;
     updateChart(completed, ongoing, pending);
-    if (window.miniMap) addReportMarkers();
+    if (window.miniMap) {
+      addReportMarkers();
+    }
     loadReportImages();
   }
 

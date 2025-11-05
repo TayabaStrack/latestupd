@@ -2,20 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0"/>
   <title>User Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: auto; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: auto; zoom: 1.0;  }
     
-    .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; flex-shrink: 0; height: 100vh; position: fixed; left: 0; top: 0; z-index: 50; transition: left 0.3s; }
-    .sidebar-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; }
-    .sidebar-header img { width: 40px; }
-    .sidebar-header h2 { font-size: 1.2rem; margin: 0; }
+    .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; flex-shrink: 0; height: 100vh; position: fixed; left: 0; top: 0; z-index: 50; transition: left 0.3s; overflow-y: auto; }
+    .sidebar-header { display: flex; align-items: center; justify-content: flex-start; gap: 12px; margin-bottom: 2rem; padding: 0 1rem; }
+    .sidebar-header img { width: 50px; height: 50px; object-fit: contain; }
+    .sidebar-header h2 { font-size: 1.3rem; font-weight: 600; margin: 0; }
     .sidebar-menu { list-style: none; }
     .sidebar-menu li { margin: 0.5rem 0; }
-    .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
+    .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
     .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
     .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
     .logout-btn { background-color: #d9534f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -77,28 +78,73 @@
     .dropdown-menu a i { margin-right: 8px; width: 20px; text-align: center; }
     
     .user-section { padding: 1.5rem; flex: 1; overflow-y: auto; overflow-x: hidden; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px; }
-    .header h2 { color: #004aad; }
-    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .actions button { background: #004aad; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
-    .actions button:hover { background: #005ce6; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px; }
+    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-left: auto; }
+    .actions button { background: #004aad; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
+    .actions button:hover { background: #005ce6; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0, 74, 173, 0.3); }
     .actions input { padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; }
+
+    .view-toggle-container { display: flex; justify-content: center; margin-bottom: 1.5rem; }
+    .view-toggle { position: relative; display: inline-flex; background: #e8eef5; border-radius: 50px; padding: 4px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1); }
+    .view-toggle-btn { position: relative; z-index: 2; padding: 0.7rem 2rem; border: none; background: transparent; color: #666; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: color 0.3s ease; border-radius: 50px; display: flex; align-items: center; gap: 0.5rem; }
+    .view-toggle-btn.active { color: #fff; }
+    .view-toggle-btn i { font-size: 1rem; }
+    .slider-bg { position: absolute; top: 4px; left: 4px; height: calc(100% - 8px); background: linear-gradient(135deg, #004aad 0%, #0066cc 100%); border-radius: 50px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 10px rgba(0, 74, 173, 0.4); z-index: 1; }
 
     .scroll-hint { background: linear-gradient(135deg, #004aad 0%, #0066cc 100%); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; text-align: center; margin: 10px 0 12px 0; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(0, 74, 173, 0.2); flex-shrink: 0; }
     .scroll-hint i { animation: slideHint 2s ease-in-out infinite; }
     @keyframes slideHint { 0%, 100% { transform: translateX(-4px); } 50% { transform: translateX(4px); } }
 
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 5000; padding: 1rem; }
-    .modal-content { background: #fff; padding: 1.2rem; border-radius: 12px; border: 3px solid #004aad; width: 380px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
-    .modal-content h2 { margin-bottom: 0.8rem; color: #004aad; text-align: center; font-size: 1.2rem; }
-    .form-group { display: flex; flex-direction: column; margin-bottom: 0.7rem; }
-    .form-group input, .form-group select { padding: 0.5rem; border: none; background: #f1f1f1; border-radius: 6px; font-size: 0.9rem; }
-    .password-wrap { position: relative; }
-    .password-wrap i { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #555; cursor: pointer; font-size: 0.9rem; }
-    .modal-actions { margin-top: 0.6rem; display: flex; justify-content: flex-end; gap: 0.5rem; }
-    .modal-actions button { border: none; padding: 0.4rem 0.9rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
-    .cancel-btn { background: #ccc; color: #333; }
-    .save-btn { background: #004aad; color: #fff; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 5000; padding: 1rem; }
+    .modal-content { background: #fff; padding: 1.5rem; border-radius: 12px; border: 3px solid #004aad; width: 520px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+    .modal-content h2 { margin-bottom: 1.2rem; color: #004aad; text-align: center; font-size: 1.4rem; }
+    .form-group { display: flex; flex-direction: column; margin-bottom: 1rem; }
+    .form-group label { font-weight: 600; margin-bottom: 0.4rem; color: #333; font-size: 0.9rem; }
+    .form-group input, .form-group select { padding: 0.65rem; border: 1px solid #ddd; background: #f9f9f9; border-radius: 6px; font-size: 0.9rem; transition: all 0.2s; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #004aad; background: #fff; box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.1); }
+    
+    .password-section { background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+    .password-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
+    .password-header label { font-weight: 600; color: #004aad; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .password-input-group { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
+    .password-input-wrapper { flex: 1; position: relative; }
+    .password-input-wrapper input { width: 100%; padding: 0.65rem 40px 0.65rem 0.65rem; font-family: 'Courier New', monospace; letter-spacing: 1px; font-size: 0.9rem; border: 1px solid #ddd; background: #f9f9f9; border-radius: 6px; }
+    .toggle-password { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #666; cursor: pointer; font-size: 1rem; transition: color 0.2s; background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
+    .toggle-password:hover { color: #004aad; }
+    .generate-btn { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: #fff; border: none; padding: 0.65rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.3s; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3); }
+    .generate-btn:hover { background: linear-gradient(135deg, #218838 0%, #1aa179 100%); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(40, 167, 69, 0.5); }
+    
+    .password-options { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 0.8rem; }
+    .options-title { font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+    .length-control { margin-bottom: 0.8rem; }
+    .length-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+    .length-header span:first-child { font-size: 0.85rem; color: #555; }
+    .length-value { font-weight: 700; color: #004aad; font-size: 0.95rem; background: #e3f2fd; padding: 2px 8px; border-radius: 4px; }
+    .length-slider { width: 100%; height: 6px; border-radius: 3px; background: linear-gradient(to right, #004aad 0%, #0066cc 100%); outline: none; -webkit-appearance: none; opacity: 0.7; transition: opacity 0.2s; }
+    .length-slider:hover { opacity: 1; }
+    .length-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #004aad; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: all 0.2s; }
+    .length-slider::-webkit-slider-thumb:hover { background: #003d8f; transform: scale(1.15); }
+    .length-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #004aad; cursor: pointer; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: all 0.2s; }
+    .length-slider::-moz-range-thumb:hover { background: #003d8f; transform: scale(1.15); }
+    
+    .checkbox-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+    .checkbox-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem; background: #f9f9f9; border-radius: 4px; transition: background 0.2s; }
+    .checkbox-item:hover { background: #e8f4fd; }
+    .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #004aad; }
+    .checkbox-item label { font-size: 0.85rem; color: #555; cursor: pointer; user-select: none; }
+    
+    .strength-indicator { margin-top: 0.8rem; }
+    .strength-label { font-size: 0.85rem; color: #555; margin-bottom: 0.4rem; font-weight: 500; }
+    .strength-bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; position: relative; }
+    .strength-fill { height: 100%; transition: width 0.3s ease, background 0.3s ease; border-radius: 4px; }
+    .strength-text { font-size: 0.85rem; margin-top: 0.4rem; font-weight: 600; text-align: center; }
+    
+    .modal-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.8rem; padding-top: 1rem; border-top: 2px solid #e0e0e0; }
+    .modal-actions button { border: none; padding: 0.65rem 1.8rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: all 0.3s; }
+    .cancel-btn { background: #6c757d; color: #fff; }
+    .cancel-btn:hover { background: #5a6268; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3); }
+    .save-btn { background: linear-gradient(135deg, #004aad 0%, #0066cc 100%); color: #fff; box-shadow: 0 2px 8px rgba(0, 74, 173, 0.3); }
+    .save-btn:hover { background: linear-gradient(135deg, #003d8f 0%, #0052a3 100%); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 74, 173, 0.5); }
 
     .table-wrapper { margin-top: 1rem; }
     .table-card { overflow-x: auto; overflow-y: hidden; border-radius: 10px; background: #fff; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); scroll-behavior: smooth; position: relative; margin-bottom: 1.5rem; }
@@ -107,8 +153,8 @@
 
     table { width: 100%; border-collapse: collapse; table-layout: auto; min-width: 1500px; }
     thead { background: #f5f8fb; color: #333; }
-    thead th { font-weight: 700; padding: 0.7rem 0.75rem; text-align: left; border-bottom: 2px solid #e0e0e0; }
-    th, td { text-align: left; padding: 0.6rem 0.8rem; font-size: 0.85rem; border-bottom: 1px solid #f0f2f5; overflow: visible; white-space: nowrap; }
+    thead th { font-weight: 700; padding: 0.8rem 0.75rem; text-align: left; border-bottom: 2px solid #e0e0e0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.7rem 0.8rem; font-size: 0.85rem; border-bottom: 1px solid #f0f2f5; overflow: visible; white-space: nowrap; }
     tbody tr:nth-child(even) { background: #fbfdff; }
     tbody tr:hover { background: #f1f8ff; }
 
@@ -122,21 +168,30 @@
     th:nth-child(8), td:nth-child(8) { min-width: 200px; }
 
     .password-cell { display: flex; align-items: center; gap: 8px; }
-    .password-text { font-family: monospace; background: #f0f0f0; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
-    .copy-btn { background: #28a745 !important; color: #fff; border: none; padding: 4px 8px !important; border-radius: 4px; cursor: pointer; font-size: 0.75rem; transition: 0.3s; margin: 0 !important; }
-    .copy-btn:hover { background: #218838 !important; }
+    .password-hidden { font-family: 'Courier New', monospace; background: #f0f0f0; padding: 5px 10px; border-radius: 4px; font-size: 0.85rem; letter-spacing: 2px; color: #666; user-select: none; }
+    .show-password-btn { background: #17a2b8 !important; color: #fff; border: none; padding: 5px 10px !important; border-radius: 4px; cursor: pointer; font-size: 0.75rem; transition: 0.3s; margin: 0 !important; display: flex; align-items: center; gap: 4px; }
+    .show-password-btn:hover { background: #138496 !important; transform: scale(1.05); }
+    .copy-btn { background: #28a745 !important; color: #fff; border: none; padding: 5px 10px !important; border-radius: 4px; cursor: pointer; font-size: 0.75rem; transition: 0.3s; margin: 0 !important; }
+    .copy-btn:hover { background: #218838 !important; transform: scale(1.05); }
 
-    td button { padding: 0.3rem 0.6rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 4px; }
+    td button { padding: 0.4rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 4px; transition: all 0.2s; font-weight: 500; }
     td button:first-child { background: #004aad; color: #fff; }
+    td button:first-child:hover { background: #003d8f; transform: translateY(-1px); }
     td button:last-child { background: #d9534f; color: #fff; }
+    td button:last-child:hover { background: #c9302c; transform: translateY(-1px); }
 
-    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-align: center; }
+    .status-badge { display: inline-block; padding: 5px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-align: center; }
     .status-pending { background: #ffc107; color: #fff; }
     .status-active { background: #007bff; color: #fff; }
     .status-inactive { background: #dc3545; color: #fff; }
 
-    .user-section .header, .user-section h3 { display: flex; justify-content: space-between; align-items: center; }
-    .user-section h3 { margin: 1rem 0 0.5rem 0; }
+    .user-section h3 { margin: 1.5rem 0 0.8rem 0; color: #004aad; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem; }
+    .user-section h3 i { font-size: 1.1rem; }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
+    .view-only-cell { color: #17a2b8; font-weight: 600; font-size: 0.85rem; }
 
     @media (max-width: 980px) {
       .sidebar { left: -240px; }
@@ -146,6 +201,9 @@
       .navbar h1 { font-size: 1.1rem; }
       .actions { width: 100%; }
       .actions input { flex: 1; }
+      .view-toggle-btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
+      .checkbox-grid { grid-template-columns: 1fr; }
+      .password-input-group { flex-direction: column; }
     }
   </style>
 </head>
@@ -153,7 +211,7 @@
   <aside class="sidebar">
     <div>
       <div class="sidebar-header">
-        <img src="logu.png" alt="Logo" class="logo">
+        <img src="logo.png" alt="Logo" class="logo">
         <h2>TayabaStrack</h2>
       </div>
       <ul class="sidebar-menu">
@@ -220,9 +278,21 @@
 
     <div class="user-section">
       <div class="header">
-        <h2>Admins</h2>
+        <div class="view-toggle-container" style="margin: 0;">
+          <div class="view-toggle">
+            <div class="slider-bg" id="sliderBg"></div>
+            <button class="view-toggle-btn active" id="adminBtn" onclick="switchView('admin')">
+              <i class="fa fa-user-shield"></i> ADMINS
+            </button>
+            <button class="view-toggle-btn" id="officialBtn" onclick="switchView('official')">
+              <i class="fa fa-users"></i> BARANGAY OFFICIALS
+            </button>
+          </div>
+        </div>
         <div class="actions">
-          <button onclick="openAddModal()">Add User</button>
+          <button onclick="openAddModal()">
+            <i class="fa fa-user-plus"></i> Add User
+          </button>
           <input type="text" id="searchInput" placeholder="Search user" oninput="searchUser()"/>
         </div>
       </div>
@@ -232,38 +302,139 @@
         <span>Scroll horizontally to view all columns</span>
       </div>
 
-      <h3>Pending Admins</h3>
-      <div class="table-wrapper">
-        <div class="table-card"><table><thead><tr>
-          <th>First Name</th><th>Last Name</th><th>Email</th><th>Barangay</th><th>Position</th><th>Password</th><th>Status</th><th>Actions</th>
-        </tr></thead><tbody id="pendingAdmins"></tbody></table></div>
+      <div id="adminsView" class="view-section active">
+        <h3><i class="fa fa-clock"></i> Pending Admins</h3>
+        <div class="table-wrapper">
+          <div class="table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Barangay</th>
+                  <th>Position</th>
+                  <th>Password</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pendingAdmins"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <h3><i class="fa fa-check-circle"></i> Active Admins</h3>
+        <div class="table-wrapper">
+          <div class="table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Barangay</th>
+                  <th>Position</th>
+                  <th>Password</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="activeAdmins"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <h3><i class="fa fa-times-circle"></i> Inactive Admins</h3>
+        <div class="table-wrapper">
+          <div class="table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Barangay</th>
+                  <th>Position</th>
+                  <th>Password</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inactiveAdmins"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <h3>Active Admins</h3>
-      <div class="table-wrapper">
-        <div class="table-card"><table><thead><tr>
-          <th>First Name</th><th>Last Name</th><th>Email</th><th>Barangay</th><th>Position</th><th>Password</th><th>Status</th><th>Actions</th>
-        </tr></thead><tbody id="activeAdmins"></tbody></table></div>
-      </div>
+      <div id="officialsView" class="view-section">
+        <h3><i class="fa fa-check-circle"></i> Active Barangay Officials</h3>
+        <div class="table-wrapper">
+          <div class="table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Barangay</th>
+                  <th>Position</th>
+                  <th>Contact</th>
+                  <th>Status</th>
+                  <th>Access</th>
+                </tr>
+              </thead>
+              <tbody id="activeOfficials"></tbody>
+            </table>
+          </div>
+        </div>
 
-      <h3>Inactive Admins</h3>
-      <div class="table-wrapper">
-        <div class="table-card"><table><thead><tr>
-          <th>First Name</th><th>Last Name</th><th>Email</th><th>Barangay</th><th>Position</th><th>Password</th><th>Status</th><th>Actions</th>
-        </tr></thead><tbody id="inactiveAdmins"></tbody></table></div>
+        <h3><i class="fa fa-times-circle"></i> Inactive Barangay Officials</h3>
+        <div class="table-wrapper">
+          <div class="table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Barangay</th>
+                  <th>Position</th>
+                  <th>Contact</th>
+                  <th>Status</th>
+                  <th>Access</th>
+                </tr>
+              </thead>
+              <tbody id="inactiveOfficials"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="modal" id="userModal">
     <div class="modal-content">
-      <h2>Add User</h2>
+      <h2><i class="fa fa-user-plus"></i> Add User</h2>
       <form id="addUserForm">
-        <div class="form-group"><input type="text" id="firstName" placeholder="First Name" required></div>
-        <div class="form-group"><input type="text" id="lastName" placeholder="Last Name" required></div>
-        <div class="form-group"><input type="text" id="name" placeholder="Full Name" required></div>
-        <div class="form-group"><input type="email" id="email" placeholder="Email" required></div>
         <div class="form-group">
+          <label><i class="fa fa-user"></i> First Name</label>
+          <input type="text" id="firstName" placeholder="Enter first name" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa fa-user"></i> Last Name</label>
+          <input type="text" id="lastName" placeholder="Enter last name" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa fa-id-card"></i> Full Name</label>
+          <input type="text" id="name" placeholder="Enter full name" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa fa-envelope"></i> Email</label>
+          <input type="email" id="email" placeholder="Enter email address" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa fa-map-marker-alt"></i> Barangay</label>
           <select id="barangay" required>
             <option value="">Select Barangay</option>
             <option value="Alitao">Alitao</option>
@@ -334,14 +505,79 @@
             <option value="Wakas">Wakas</option>
           </select>
         </div>
-        <div class="form-group"><select id="position" required><option value="">Select Position</option><option>Super Admin</option><option>Admin</option><option>Barangay Official</option></select></div>
-        <div class="form-group password-wrap">
-          <input type="password" id="password" placeholder="Password" required>
-          <i class="fa fa-eye" onclick="togglePassword()"></i>
+        <div class="form-group">
+          <label><i class="fa fa-briefcase"></i> Position</label>
+          <select id="position" required>
+            <option value="">Select Position</option>
+            <option>Super Admin</option>
+            <option>Admin</option>
+            <option>Barangay Official</option>
+          </select>
         </div>
+        
+        <div class="password-section">
+          <div class="password-header">
+            <label><i class="fa fa-lock"></i> Password Generator</label>
+          </div>
+          <div class="password-input-group">
+            <div class="password-input-wrapper">
+              <input type="password" id="password" placeholder="Generated password" required readonly>
+              <button type="button" class="toggle-password" id="togglePasswordIcon" onclick="togglePasswordVisibility()">
+                <i class="fa fa-eye"></i>
+              </button>
+            </div>
+            <button type="button" class="generate-btn" onclick="generatePassword()">
+              <i class="fa fa-sync-alt"></i> Generate
+            </button>
+          </div>
+          
+          <div class="password-options">
+            <div class="options-title">
+              <i class="fa fa-cog"></i> Password Options
+            </div>
+            <div class="length-control">
+              <div class="length-header">
+                <span>Length:</span>
+                <span class="length-value" id="lengthValue">16</span>
+              </div>
+              <input type="range" class="length-slider" id="passwordLength" min="8" max="32" value="16" oninput="updateLengthValue()">
+            </div>
+            <div class="checkbox-grid">
+              <div class="checkbox-item">
+                <input type="checkbox" id="includeUppercase" checked>
+                <label for="includeUppercase">Uppercase (A-Z)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="includeLowercase" checked>
+                <label for="includeLowercase">Lowercase (a-z)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="includeNumbers" checked>
+                <label for="includeNumbers">Numbers (0-9)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="includeSymbols" checked>
+                <label for="includeSymbols">Symbols (!@#$%)</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="strength-indicator">
+            <div class="strength-label">Password Strength:</div>
+            <div class="strength-bar">
+              <div class="strength-fill" id="strengthFill"></div>
+            </div>
+            <div class="strength-text" id="strengthText">Not Generated</div>
+          </div>
+        </div>
+        
         <div class="modal-actions">
-          <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
-          <button type="submit" class="save-btn">Save</button>
+          <button type="button" class="cancel-btn" onclick="closeModal()">
+            <i class="fa fa-times"></i> Cancel
+          </button>
+          <button type="submit" class="save-btn">
+            <i class="fa fa-save"></i> Save User
+          </button>
         </div>
       </form>
     </div>
@@ -372,6 +608,176 @@
       }
     });
   }
+
+  let currentView = 'admin';
+
+  function switchView(view) {
+    currentView = view;
+    const adminBtn = document.getElementById('adminBtn');
+    const officialBtn = document.getElementById('officialBtn');
+    const sliderBg = document.getElementById('sliderBg');
+    const adminsView = document.getElementById('adminsView');
+    const officialsView = document.getElementById('officialsView');
+
+    if (view === 'admin') {
+      adminBtn.classList.add('active');
+      officialBtn.classList.remove('active');
+      adminsView.classList.add('active');
+      officialsView.classList.remove('active');
+      
+      const btnWidth = adminBtn.offsetWidth;
+      sliderBg.style.width = btnWidth + 'px';
+      sliderBg.style.transform = 'translateX(0)';
+    } else {
+      officialBtn.classList.add('active');
+      adminBtn.classList.remove('active');
+      officialsView.classList.add('active');
+      adminsView.classList.remove('active');
+      
+      const btnWidth = officialBtn.offsetWidth;
+      const adminWidth = adminBtn.offsetWidth;
+      sliderBg.style.width = btnWidth + 'px';
+      sliderBg.style.transform = `translateX(${adminWidth}px)`;
+    }
+  }
+
+  window.addEventListener('load', function() {
+    const adminBtn = document.getElementById('adminBtn');
+    const sliderBg = document.getElementById('sliderBg');
+    sliderBg.style.width = adminBtn.offsetWidth + 'px';
+  });
+
+  window.addEventListener('resize', function() {
+    if (currentView === 'admin') {
+      const adminBtn = document.getElementById('adminBtn');
+      document.getElementById('sliderBg').style.width = adminBtn.offsetWidth + 'px';
+    } else {
+      const officialBtn = document.getElementById('officialBtn');
+      const adminBtn = document.getElementById('adminBtn');
+      const sliderBg = document.getElementById('sliderBg');
+      sliderBg.style.width = officialBtn.offsetWidth + 'px';
+      sliderBg.style.transform = `translateX(${adminBtn.offsetWidth}px)`;
+    }
+  });
+
+  function updateLengthValue() {
+    const length = document.getElementById('passwordLength').value;
+    document.getElementById('lengthValue').textContent = length;
+  }
+
+  function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password');
+    const icon = document.getElementById('togglePasswordIcon').querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+
+  function generatePassword() {
+    const length = parseInt(document.getElementById('passwordLength').value);
+    const includeUppercase = document.getElementById('includeUppercase').checked;
+    const includeLowercase = document.getElementById('includeLowercase').checked;
+    const includeNumbers = document.getElementById('includeNumbers').checked;
+    const includeSymbols = document.getElementById('includeSymbols').checked;
+
+    if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
+      alert('Please select at least one character type!');
+      return;
+    }
+
+    let charset = '';
+    if (includeUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    if (includeLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
+    if (includeNumbers) charset += '0123456789';
+    if (includeSymbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+    let password = '';
+    const randomValues = new Uint32Array(length);
+    window.crypto.getRandomValues(randomValues);
+    
+    for (let i = 0; i < length; i++) {
+      password += charset[randomValues[i] % charset.length];
+    }
+
+    document.getElementById('password').value = password;
+    calculatePasswordStrength(password);
+  }
+
+  function calculatePasswordStrength(password) {
+    let strength = 0;
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthText = document.getElementById('strengthText');
+
+    if (password.length >= 8) strength += 20;
+    if (password.length >= 12) strength += 20;
+    if (password.length >= 16) strength += 10;
+    if (/[a-z]/.test(password)) strength += 10;
+    if (/[A-Z]/.test(password)) strength += 10;
+    if (/[0-9]/.test(password)) strength += 15;
+    if (/[^a-zA-Z0-9]/.test(password)) strength += 15;
+
+    strengthFill.style.width = strength + '%';
+
+    if (strength < 40) {
+      strengthFill.style.background = '#dc3545';
+      strengthText.textContent = 'Weak';
+      strengthText.style.color = '#dc3545';
+    } else if (strength < 70) {
+      strengthFill.style.background = '#ffc107';
+      strengthText.textContent = 'Medium';
+      strengthText.style.color = '#ffc107';
+    } else {
+      strengthFill.style.background = '#28a745';
+      strengthText.textContent = 'Strong';
+      strengthText.style.color = '#28a745';
+    }
+  }
+
+  window.openAddModal = () => {
+    document.getElementById("userModal").style.display = "flex";
+    generatePassword();
+  };
+  
+  window.closeModal = () => {
+    document.getElementById("userModal").style.display = "none";
+    document.getElementById("addUserForm").reset();
+    document.getElementById('strengthFill').style.width = '0%';
+    document.getElementById('strengthText').textContent = 'Not Generated';
+    document.getElementById('strengthText').style.color = '#666';
+  };
+
+  window.copyPassword = (password) => {
+    navigator.clipboard.writeText(password).then(() => {
+      alert("Password copied to clipboard!");
+    }).catch(() => {
+      alert("Failed to copy password");
+    });
+  };
+
+  window.toggleTablePassword = (btnElement, password) => {
+    const cell = btnElement.parentElement;
+    const hiddenSpan = cell.querySelector('.password-hidden');
+    const icon = btnElement.querySelector('i');
+    
+    if (hiddenSpan.textContent === '••••••••') {
+      hiddenSpan.textContent = password;
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+      btnElement.title = 'Hide';
+    } else {
+      hiddenSpan.textContent = '••••••••';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+      btnElement.title = 'Show';
+    }
+  };
 </script>
 
 <script type="module">
@@ -380,7 +786,7 @@
     getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut
   } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
   import { 
-    getFirestore, collection, doc, setDoc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, getDoc, getDocs 
+    getFirestore, collection, doc, setDoc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, getDoc
   } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -398,9 +804,6 @@
 
   let superAdminData = null;
 
-  // ===============================
-  // 🔔 NOTIFICATION STATE & UI
-  // ===============================
   const notificationBell = document.getElementById("notificationBell");
   const notificationBadge = document.getElementById("notificationBadge");
   const notificationMenu = document.getElementById("notificationMenu");
@@ -409,30 +812,91 @@
   const markAllReadBtn = document.getElementById("markAllReadBtn");
 
   let notificationsList = [];
-  let seenNotificationIds = new Set();
-  let trackedUserStatuses = {};
-  let trackedReportIds = new Set();
+  let trackedIds = new Set();
   let currentFilter = "all";
 
   function normalizeStatus(status) {
     return (status || "").toLowerCase().trim();
   }
 
+  function isBarangayPosition(position) {
+    if (!position) return false;
+    const pos = position.toLowerCase().trim();
+    return pos.includes("barangay") || 
+           pos.includes("brgy") || 
+           pos.includes("brgy.") || 
+           pos.includes("kagawad") ||
+           pos.includes("sk kagawad") ||
+           pos.includes("captain") ||
+           pos.includes("secretary") ||
+           pos.includes("treasurer");
+  }
+
+  function saveNotificationsToLocalStorage() {
+    try {
+      localStorage.setItem('notifications', JSON.stringify(notificationsList));
+      localStorage.setItem('trackedIds', JSON.stringify([...trackedIds]));
+    } catch (error) {
+      console.error("Error saving notifications:", error);
+    }
+  }
+
+  function loadNotificationsFromLocalStorage() {
+    try {
+      const savedNotifications = localStorage.getItem('notifications');
+      const savedTrackedIds = localStorage.getItem('trackedIds');
+      
+      if (savedNotifications) {
+        notificationsList = JSON.parse(savedNotifications).map(n => ({
+          ...n,
+          timestamp: new Date(n.timestamp)
+        }));
+      }
+      
+      if (savedTrackedIds) {
+        trackedIds = new Set(JSON.parse(savedTrackedIds));
+      }
+    } catch (error) {
+      console.error("Error loading notifications:", error);
+    }
+  }
+
   notificationBell.addEventListener("click", (e) => {
     e.stopPropagation();
     notificationMenu.classList.toggle("show");
-    document.getElementById("dropdownMenu").classList.remove("show");
+    const dropdown = document.getElementById("dropdownMenu");
+    if (dropdown) dropdown.classList.remove("show");
   });
 
   clearNotificationsBtn.addEventListener("click", () => {
     notificationsList = [];
-    seenNotificationIds.clear();
+    trackedIds.clear();
+    saveNotificationsToLocalStorage();
     updateNotificationUI();
   });
 
   markAllReadBtn.addEventListener("click", () => {
     notificationsList.forEach(n => n.read = true);
+    saveNotificationsToLocalStorage();
     updateNotificationUI();
+  });
+
+  const profileToggle = document.getElementById("profileToggle");
+  const dropdownMenu = document.getElementById("dropdownMenu");
+
+  profileToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdownMenu.classList.toggle("show");
+    notificationMenu.classList.remove("show");
+  });
+
+  window.addEventListener("click", (e) => {
+    if (!e.target.closest(".profile-dropdown")) {
+      dropdownMenu.classList.remove("show");
+    }
+    if (!e.target.closest(".notification-menu") && e.target !== notificationBell) {
+      notificationMenu.classList.remove("show");
+    }
   });
 
   document.querySelectorAll(".filter-btn").forEach((btn) => {
@@ -444,23 +908,24 @@
     });
   });
 
-  function addNotification(type, message, detail) {
-    const cleanMsg = (message || "").trim();
-    const cleanDetail = (detail || "").trim();
-    const timestamp = new Date();
-    const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
+  function addNotification(type, message, detail, uniqueId) {
+    if (trackedIds.has(uniqueId)) return;
     
-    if (seenNotificationIds.has(id)) return;
-    seenNotificationIds.add(id);
+    trackedIds.add(uniqueId);
+    
+    const timestamp = new Date();
+    const id = `${type}-${uniqueId}-${timestamp.getTime()}`;
     
     notificationsList.unshift({
       id,
       type,
-      message: cleanMsg,
-      detail: cleanDetail,
+      message: message.trim(),
+      detail: detail.trim(),
       timestamp: timestamp,
       read: false
     });
+    
+    saveNotificationsToLocalStorage();
     updateNotificationUI();
   }
 
@@ -508,22 +973,8 @@
     }
   }
 
-  // ===============================
-  // 🧭 NOTIFICATION FETCH & REAL-TIME
-  // ===============================
   async function setupRealtimeNotifications() {
-    const userSnap = await getDocs(collection(db, "users"));
-    userSnap.forEach((docSnap) => {
-      const userId = docSnap.id;
-      const data = docSnap.data();
-      const status = normalizeStatus(data.status);
-      trackedUserStatuses[userId] = status;
-      if (status === "active") {
-        const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-        const position = data.position || "User";
-        addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
-      }
-    });
+    loadNotificationsFromLocalStorage();
 
     onSnapshot(collection(db, "users"), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
@@ -533,71 +984,35 @@
         const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
         const position = data.position || "User";
 
-        if (change.type === "added") {
-          trackedUserStatuses[userId] = currentStatus;
-          if (currentStatus === "active") {
-            addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
-          }
-        }
-
         if (change.type === "modified") {
-          const oldStatus = trackedUserStatuses[userId];
-          if (oldStatus !== "active" && currentStatus === "active") {
-            addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+          if (currentStatus === "active") {
+            const uniqueId = `user-${userId}-active`;
+            if (!trackedIds.has(uniqueId)) {
+              addNotification("user", `User approved: ${fullName}`, `Position: ${position}`, uniqueId);
+            }
           }
-          trackedUserStatuses[userId] = currentStatus;
         }
       });
     });
 
-    const reportSnap = await getDocs(collection(db, "reports"));
-    reportSnap.forEach((docSnap) => {
-      const id = docSnap.id;
-      trackedReportIds.add(id);
-      const data = docSnap.data();
-      const barangay = data.barangay || data.location || "Unknown location";
-      const type = data.reportType || data.type || data.projectName || "Report";
-      addNotification("report", "Report submitted", `${type} in ${barangay}`);
-    });
-
     onSnapshot(collection(db, "reports"), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
-        const id = change.doc.id;
+        const reportId = change.doc.id;
         const data = change.doc.data();
-        if (change.type === "added" && !trackedReportIds.has(id)) {
-          trackedReportIds.add(id);
+        
+        if (change.type === "added") {
           const barangay = data.barangay || data.location || "Unknown location";
           const type = data.reportType || data.type || data.projectName || "Report";
-          addNotification("report", "New report submitted", `${type} in ${barangay}`);
+          const uniqueId = `report-${reportId}`;
+          addNotification("report", "New report submitted", `${type} in ${barangay}`, uniqueId);
         }
       });
     });
 
     updateNotificationUI();
-    console.log("✅ Notifications active — existing + new");
+    console.log("Notifications system active");
   }
 
-  // ==========================
-  // UI CONTROLS
-  // ==========================
-  window.openAddModal = () => document.getElementById("userModal").style.display = "flex";
-  window.closeModal = () => document.getElementById("userModal").style.display = "none";
-  window.togglePassword = () => {
-    const p = document.getElementById("password");
-    p.type = p.type === "password" ? "text" : "password";
-  };
-
-  window.copyPassword = (password) => {
-    navigator.clipboard.writeText(password).then(() => {
-      alert("Password copied to clipboard!");
-    }).catch(() => {
-      alert("Failed to copy password");
-    });
-  };
-
-  // ==========================
-  // ADD USER (PENDING ONLY)
-  // ==========================
   document.getElementById("addUserForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const firstName = document.getElementById("firstName").value.trim();
@@ -607,6 +1022,8 @@
     const barangay = document.getElementById("barangay").value.trim();
     const position = document.getElementById("position").value;
     const password = document.getElementById("password").value;
+
+    const hashedPassword = CryptoJS.SHA256(password).toString();
 
     const currentUser = auth.currentUser;
     if (!currentUser) {
@@ -623,41 +1040,47 @@
         email,
         barangay,
         position,
-        password,
+        password: password,
+        hashedPassword: hashedPassword,
         status: "Pending",
-        role: "Admin",
+        role: position === "Barangay Official" ? "Official" : "Admin",
         createdAt: serverTimestamp()
       });
 
       closeModal();
       document.getElementById("addUserForm").reset();
-      alert("User added successfully (Pending)!");
+      alert("User added successfully (Pending approval)!");
     } catch (err) {
       console.error("Error adding user:", err);
       alert("Error: " + err.message);
     }
   });
 
-  // ==========================
-  // LISTEN TO USERS CHANGES
-  // ==========================
   const pendingTable = document.getElementById("pendingAdmins");
   const activeTable = document.getElementById("activeAdmins");
   const inactiveTable = document.getElementById("inactiveAdmins");
+  const activeOfficialsTable = document.getElementById("activeOfficials");
+  const inactiveOfficialsTable = document.getElementById("inactiveOfficials");
 
-  const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
+  const q = query(collection(db, "users"));
   onSnapshot(q, (snap) => {
     pendingTable.innerHTML = "";
     activeTable.innerHTML = "";
     inactiveTable.innerHTML = "";
+    activeOfficialsTable.innerHTML = "";
+    inactiveOfficialsTable.innerHTML = "";
 
     snap.forEach(docSnap => {
       const u = docSnap.data();
-      if (u.position !== "Admin") return;
-
+      const rawStatus = u.status || "";
+      const status = normalizeStatus(rawStatus);
+      
       const passwordDisplay = u.password 
         ? `<div class="password-cell">
-             <span class="password-text">${u.password}</span>
+             <span class="password-hidden">••••••••</span>
+             <button class="show-password-btn" onclick="toggleTablePassword(this, '${u.password}')" title="Show">
+               <i class="fa fa-eye"></i>
+             </button>
              <button class="copy-btn" onclick="copyPassword('${u.password}')">
                <i class="fa fa-copy"></i>
              </button>
@@ -665,45 +1088,81 @@
         : '<span style="color: #999;">N/A</span>';
 
       let statusBadge = '';
-      if (u.status === "Pending") statusBadge = '<span class="status-badge status-pending">Pending</span>';
-      else if (u.status === "Active") statusBadge = '<span class="status-badge status-active">Active</span>';
-      else if (u.status === "Inactive") statusBadge = '<span class="status-badge status-inactive">Inactive</span>';
+      if (status === "pending") statusBadge = '<span class="status-badge status-pending">Pending</span>';
+      else if (status === "active") statusBadge = '<span class="status-badge status-active">Active</span>';
+      else if (status === "inactive") statusBadge = '<span class="status-badge status-inactive">Inactive</span>';
+      else statusBadge = '<span class="status-badge" style="background:#999;color:#fff;">Unknown</span>';
 
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${u.firstName || ""}</td>
-        <td>${u.lastName || ""}</td>
-        <td>${u.email || ""}</td>
-        <td>${u.barangay || ""}</td>
-        <td>${u.position || ""}</td>
-        <td>${passwordDisplay}</td>
-        <td>${statusBadge}</td>
-        <td>
-          ${
-            u.status === "Pending" ? `<button onclick="approveUser('${docSnap.id}')">Approve</button>` :
-            u.status === "Active" ? `<button onclick="deactivateUser('${docSnap.id}')">Deactivate</button>` :
-            u.status === "Inactive" ? `<button onclick="activateUser('${docSnap.id}')">Activate</button>` : ''
-          }
-          <button onclick="deleteUser('${docSnap.id}')">Delete</button>
-        </td>
-      `;
+      const isAdmin = u.position === "Admin" || u.position === "Super Admin";
+      const isBrgyOfficial = isBarangayPosition(u.position);
 
-      if (u.status === "Pending") pendingTable.appendChild(tr);
-      else if (u.status === "Active") activeTable.appendChild(tr);
-      else if (u.status === "Inactive") inactiveTable.appendChild(tr);
+      if (isAdmin) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${u.firstName || ""}</td>
+          <td>${u.lastName || ""}</td>
+          <td>${u.email || ""}</td>
+          <td>${u.barangay || ""}</td>
+          <td>${u.position || ""}</td>
+          <td>${passwordDisplay}</td>
+          <td>${statusBadge}</td>
+          <td>
+            ${
+              status === "pending" ? `<button onclick="approveUser('${docSnap.id}')">Approve</button>` :
+              status === "active" ? `<button onclick="deactivateUser('${docSnap.id}')">Deactivate</button>` :
+              status === "inactive" ? `<button onclick="activateUser('${docSnap.id}')">Activate</button>` : ''
+            }
+            <button onclick="deleteUser('${docSnap.id}')">Delete</button>
+          </td>
+        `;
+
+        if (status === "pending") pendingTable.appendChild(tr);
+        else if (status === "active") activeTable.appendChild(tr);
+        else if (status === "inactive") inactiveTable.appendChild(tr);
+      }
+
+      if (isBrgyOfficial) {
+        const contactDisplay = u.phoneNumber || u.contact || "—";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${u.firstName || ""}</td>
+          <td>${u.lastName || u.surname || ""}</td>
+          <td>${u.email || ""}</td>
+          <td>${u.barangay || ""}</td>
+          <td>${u.position || ""}</td>
+          <td>${contactDisplay}</td>
+          <td>${statusBadge}</td>
+          <td><span class="view-only-cell"><i class="fa fa-eye"></i> View Only</span></td>
+        `;
+
+        if (status === "active") activeOfficialsTable.appendChild(tr);
+        else if (status === "inactive") inactiveOfficialsTable.appendChild(tr);
+      }
     });
+
+    if (pendingTable.innerHTML === "") {
+      pendingTable.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777;padding:1rem">No pending admins found.</td></tr>';
+    }
+    if (activeTable.innerHTML === "") {
+      activeTable.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777;padding:1rem">No active admins found.</td></tr>';
+    }
+    if (inactiveTable.innerHTML === "") {
+      inactiveTable.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777;padding:1rem">No inactive admins found.</td></tr>';
+    }
+    if (activeOfficialsTable.innerHTML === "") {
+      activeOfficialsTable.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777;padding:1rem">No active barangay officials found.</td></tr>';
+    }
+    if (inactiveOfficialsTable.innerHTML === "") {
+      inactiveOfficialsTable.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777;padding:1rem">No inactive barangay officials found.</td></tr>';
+    }
   });
 
-  // ==========================
-  // 🔥 CRITICAL FIX: APPROVE USER
-  // ==========================
   window.approveUser = async (oldDocId) => {
-    if (!confirm("Approve this admin and create their login credentials?")) return;
-
+    if (!confirm("Approve this user and create their login credentials?")) return;
+    
     try {
       console.log("🔄 Starting approval process for document ID:", oldDocId);
       
-      // Step 1: Get the pending user data
       const oldDocRef = doc(db, "users", oldDocId);
       const oldDocSnap = await getDoc(oldDocRef);
       
@@ -713,13 +1172,12 @@
       }
       
       const userData = oldDocSnap.data();
-      console.log("📦 User data retrieved:", userData);
+      console.log("User data retrieved:", userData);
 
-      // Step 2: Create Firebase Auth account using secondary app
       const secondaryApp = initializeApp(firebaseConfig, "Secondary-" + Date.now());
       const secondaryAuth = getAuth(secondaryApp);
 
-      console.log("🔐 Creating Firebase Auth account...");
+      console.log("Creating Firebase Auth account...");
       const userCredential = await createUserWithEmailAndPassword(
         secondaryAuth, 
         userData.email, 
@@ -727,11 +1185,10 @@
       );
       
       const newUid = userCredential.user.uid;
-      console.log("✅ Auth account created with UID:", newUid);
+      console.log("Auth account created with UID:", newUid);
 
-      // Step 3: Create NEW document with UID as document ID
       const newDocRef = doc(db, "users", newUid);
-      console.log("📝 Creating new Firestore document with ID:", newUid);
+      console.log("Creating new Firestore document with ID:", newUid);
       
       await setDoc(newDocRef, {
         firstName: userData.firstName,
@@ -741,28 +1198,27 @@
         barangay: userData.barangay,
         position: userData.position,
         password: userData.password,
+        hashedPassword: userData.hashedPassword,
         status: "Active",
-        role: userData.role || "Admin",
+        role: userData.role || (userData.position === "Barangay Official" ? "Official" : "Admin"),
         createdAt: userData.createdAt || serverTimestamp(),
         approvedAt: serverTimestamp()
       });
       
-      console.log("✅ New document created successfully");
+      console.log("New document created successfully");
 
-      // Step 4: Delete the old pending document
-      console.log("🗑️ Deleting old pending document:", oldDocId);
+      console.log("Deleting old pending document:", oldDocId);
       await deleteDoc(oldDocRef);
-      console.log("✅ Old document deleted");
+      console.log("Old document deleted");
 
-      // Step 5: Sign out from secondary auth and delete secondary app
       await signOut(secondaryAuth);
       await deleteApp(secondaryApp);
-      console.log("✅ Secondary app cleaned up");
+      console.log("Secondary app cleaned up");
 
       alert(`✅ ${userData.name} has been approved successfully!\n\nThey can now login with:\nEmail: ${userData.email}\nPassword: (the one you set)`);
       
     } catch (err) {
-      console.error("❌ Error approving user:", err);
+      console.error("Error approving user:", err);
       console.error("Error code:", err.code);
       console.error("Error message:", err.message);
       
@@ -778,14 +1234,11 @@
     }
   };
 
-  // ==========================
-  // ACTIVATE / DEACTIVATE / DELETE USER
-  // ==========================
   window.deactivateUser = async (id) => {
-    if (confirm("Deactivate this admin? They will not be able to login.")) {
+    if (confirm("Deactivate this user? They will not be able to login.")) {
       try {
         await updateDoc(doc(db, "users", id), { status: "Inactive" });
-        alert("Admin deactivated successfully!");
+        alert("User deactivated successfully!");
       } catch (err) {
         console.error("Error deactivating user:", err);
         alert("Error: " + err.message);
@@ -794,10 +1247,10 @@
   };
 
   window.activateUser = async (id) => {
-    if (confirm("Activate this admin? They will be able to login again.")) {
+    if (confirm("Activate this user? They will be able to login again.")) {
       try {
         await updateDoc(doc(db, "users", id), { status: "Active" });
-        alert("Admin activated successfully!");
+        alert("User activated successfully!");
       } catch (err) {
         console.error("Error activating user:", err);
         alert("Error: " + err.message);
@@ -817,54 +1270,32 @@
     }
   };
 
-  // ==========================
-  // SEARCH FUNCTION
-  // ==========================
   window.searchUser = () => {
     const input = document.getElementById("searchInput").value.toLowerCase();
-    [pendingTable, activeTable, inactiveTable].forEach(table => {
+    [pendingTable, activeTable, inactiveTable, activeOfficialsTable, inactiveOfficialsTable].forEach(table => {
       [...table.querySelectorAll("tr")].forEach(row => {
-        const firstName = row.cells[0].textContent.toLowerCase();
-        const lastName = row.cells[1].textContent.toLowerCase();
-        const email = row.cells[2].textContent.toLowerCase();
-        row.style.display = firstName.includes(input) || lastName.includes(input) || email.includes(input) ? "" : "none";
+        if (row.cells.length > 0) {
+          const firstName = row.cells[0].textContent.toLowerCase();
+          const lastName = row.cells[1].textContent.toLowerCase();
+          const email = row.cells[2].textContent.toLowerCase();
+          const barangay = row.cells[3].textContent.toLowerCase();
+          row.style.display = firstName.includes(input) || lastName.includes(input) || email.includes(input) || barangay.includes(input) ? "" : "none";
+        }
       });
     });
   };
 
-  // ==========================
-  // PROFILE DROPDOWN & LOGOUT
-  // ==========================
-  const profileToggle = document.getElementById("profileToggle");
-  const dropdownMenu = document.getElementById("dropdownMenu");
-
-  profileToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    dropdownMenu.classList.toggle("show");
-    notificationMenu.classList.remove("show");
-  });
-
-  window.addEventListener("click", (e) => {
-    if (!e.target.closest(".profile-dropdown")) {
-      dropdownMenu.classList.remove("show");
-    }
-    if (!e.target.closest(".notification-menu") && e.target !== notificationBell) {
-      notificationMenu.classList.remove("show");
-    }
-  });
-
   const handleLogout = async (e) => {
     e.preventDefault();
-    await signOut(auth);
-    window.location.href = "logout.html";
+    if (confirm("Are you sure you want to logout?")) {
+      await signOut(auth);
+      window.location.href = "logout.html";
+    }
   };
 
   document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
   document.getElementById("dropdownLogoutBtn").addEventListener("click", handleLogout);
 
-  // ==========================
-  // AUTH CHECK
-  // ==========================
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       const userDocRef = doc(db, "users", user.uid);
@@ -903,7 +1334,7 @@
           return;
         }
 
-        console.log("✅ Super Admin authenticated and authorized");
+        console.log("Super Admin authenticated and authorized");
       }, (error) => {
         console.error("Error in user snapshot:", error);
       });
