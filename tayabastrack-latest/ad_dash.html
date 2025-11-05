@@ -367,156 +367,324 @@
 
     <!-- Notification System -->
     <script>
-        let notificationsList = [];
-        let seenNotificationIds = new Set();
-        let trackedUserStatuses = {};
-        let trackedReportIds = new Set();
-        let currentFilter = "all";
+    let notificationsList = [];
+    let seenNotificationIds = new Set();
+    let trackedUserStatuses = {};
+    let trackedReportIds = new Set();
+    let currentFilter = "all";
 
-        function normalizeStatus(status) { return (status || "").toLowerCase().trim(); }
+    function normalizeStatus(status) { 
+        return (status || "").toLowerCase().trim(); 
+    }
 
-        function isBarangayPosition(position) {
-            if (!position) return false;
-            const pos = position.toLowerCase();
-            return pos.includes("barangay") || pos.includes("brgy") || pos.includes("brgy.");
+    function isBarangayPosition(position) {
+        if (!position) return false;
+        const pos = position.toLowerCase();
+        return pos.includes("barangay") || pos.includes("brgy") || pos.includes("brgy.");
+    }
+
+    // Save notification to Firestore
+    async function saveNotificationToFirestore(db, notification) {
+        const { collection, addDoc, serverTimestamp } = await import(
+            "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+        );
+        
+        try {
+            await addDoc(collection(db, "notifications"), {
+                type: notification.type,
+                message: notification.message,
+                detail: notification.detail,
+                timestamp: serverTimestamp(),
+                read: false
+            });
+        } catch (error) {
+            console.error("Error saving notification:", error);
         }
+    }
 
-        function addNotification(type, message, detail) {
-            const cleanMsg = (message || "").trim();
-            const cleanDetail = (detail || "").trim();
-            const timestamp = new Date();
-            const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
-            if (seenNotificationIds.has(id)) return;
-            seenNotificationIds.add(id);
-            notificationsList.unshift({ id, type, message: cleanMsg, detail: cleanDetail, timestamp: timestamp, read: false });
-            updateNotificationUI();
-        }
-
-        function updateNotificationUI() {
-            let filtered = [...notificationsList];
-            if (currentFilter === "report") {
-                filtered = filtered.filter((n) => n.type === "report");
-            } else if (currentFilter === "user") {
-                filtered = filtered.filter((n) => n.type === "user");
-            } else if (currentFilter === "24h") {
-                const ago = Date.now() - 24 * 60 * 60 * 1000;
-                filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
-            }
-            filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-            const unreadCount = notificationsList.filter(n => !n.read).length;
-            const notificationBadge = document.getElementById("notificationBadge");
-            if (unreadCount > 0) {
-                notificationBadge.textContent = unreadCount;
-                notificationBadge.classList.add("show");
-            } else {
-                notificationBadge.textContent = "";
-                notificationBadge.classList.remove("show");
-            }
-            const notificationList = document.getElementById("notificationList");
-            if (filtered.length === 0) {
-                notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
-            } else {
-                notificationList.innerHTML = filtered.map((n) => `<div class="notification-item ${n.read ? '' : 'unread'}"><div class="notification-icon ${n.type}">${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}</div><div class="notification-content"><p><strong>${n.message}</strong></p><p>${n.detail}</p><span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span></div></div>`).join("");
-            }
-        }
-
-        const notificationBell = document.getElementById("notificationBell");
-        const notificationMenu = document.getElementById("notificationMenu");
-        const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
-        const markAllReadBtn = document.getElementById("markAllReadBtn");
-
-        notificationBell.addEventListener("click", (e) => {
-            e.stopPropagation();
-            notificationMenu.classList.toggle("show");
-            document.getElementById("dropdownMenu").classList.remove("show");
-        });
-        clearNotificationsBtn.addEventListener("click", () => {
+    // Load notifications from Firestore
+    async function loadNotificationsFromFirestore(db) {
+        const { collection, getDocs, query, orderBy, limit } = await import(
+            "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+        );
+        
+        try {
+            const q = query(
+                collection(db, "notifications"),
+                orderBy("timestamp", "desc"),
+                limit(100) // Load last 100 notifications
+            );
+            const snapshot = await getDocs(q);
+            
             notificationsList = [];
             seenNotificationIds.clear();
+            
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const notification = {
+                    id: doc.id,
+                    type: data.type,
+                    message: data.message,
+                    detail: data.detail,
+                    timestamp: data.timestamp?.toDate() || new Date(),
+                    read: data.read || false
+                };
+                notificationsList.push(notification);
+                seenNotificationIds.add(notification.id);
+            });
+            
             updateNotificationUI();
-        });
-        markAllReadBtn.addEventListener("click", () => {
-            notificationsList.forEach(n => n.read = true);
-            updateNotificationUI();
-        });
-
-        document.querySelectorAll(".filter-btn").forEach((btn) => {
-            btn.addEventListener("click", (e) => {
-                document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
-                e.target.classList.add("active");
-                currentFilter = e.target.dataset.filter;
-                updateNotificationUI();
-            });
-        });
-
-        async function setupRealtimeNotifications(db) {
-            const { collection, getDocs, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-            const userSnap = await getDocs(collection(db, "users"));
-            userSnap.forEach((docSnap) => {
-                const userId = docSnap.id;
-                const data = docSnap.data();
-                const status = normalizeStatus(data.status);
-                trackedUserStatuses[userId] = status;
-            });
-            onSnapshot(collection(db, "users"), (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    const userId = change.doc.id;
-                    const data = change.doc.data();
-                    const currentStatus = normalizeStatus(data.status);
-                    const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-                    const position = data.position || "User";
-                    if (change.type === "added") {
-                        trackedUserStatuses[userId] = currentStatus;
-                        if (currentStatus === "active" && isBarangayPosition(position)) {
-                            addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
-                        }
-                    }
-                    if (change.type === "modified") {
-                        const oldStatus = trackedUserStatuses[userId];
-                        if (oldStatus !== "active" && currentStatus === "active" && isBarangayPosition(position)) {
-                            addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
-                        }
-                        trackedUserStatuses[userId] = currentStatus;
-                    }
-                });
-            });
-            const reportSnap = await getDocs(collection(db, "reports"));
-            reportSnap.forEach((docSnap) => {
-                trackedReportIds.add(docSnap.id);
-            });
-            onSnapshot(collection(db, "reports"), (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    const id = change.doc.id;
-                    const data = change.doc.data();
-                    if (change.type === "added" && !trackedReportIds.has(id)) {
-                        trackedReportIds.add(id);
-                        const barangay = data.barangay || data.location || "Unknown location";
-                        const type = data.reportType || data.type || data.projectName || "Report";
-                        addNotification("report", "New report submitted", `${type} in ${barangay}`);
-                    }
-                });
-            });
-            updateNotificationUI();
+        } catch (error) {
+            console.error("Error loading notifications:", error);
         }
+    }
 
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        const profileToggle = document.getElementById('profileToggle');
+    // Update notification read status in Firestore
+    async function markNotificationAsRead(db, notificationId) {
+        const { doc, updateDoc } = await import(
+            "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+        );
+        
+        try {
+            await updateDoc(doc(db, "notifications", notificationId), {
+                read: true
+            });
+        } catch (error) {
+            console.error("Error marking notification as read:", error);
+        }
+    }
 
-        profileToggle.addEventListener("click", (e) => {
-            e.stopPropagation();
-            dropdownMenu.classList.toggle("show");
+    // Clear all notifications from Firestore
+    async function clearAllNotificationsFromFirestore(db) {
+        const { collection, getDocs, deleteDoc, doc } = await import(
+            "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+        );
+        
+        try {
+            const snapshot = await getDocs(collection(db, "notifications"));
+            const deletePromises = snapshot.docs.map(docSnap => 
+                deleteDoc(doc(db, "notifications", docSnap.id))
+            );
+            await Promise.all(deletePromises);
+        } catch (error) {
+            console.error("Error clearing notifications:", error);
+        }
+    }
+
+    // Modified addNotification function
+    async function addNotification(type, message, detail, db) {
+        const cleanMsg = (message || "").trim();
+        const cleanDetail = (detail || "").trim();
+        const timestamp = new Date();
+        const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
+        
+        if (seenNotificationIds.has(id)) return;
+        seenNotificationIds.add(id);
+        
+        const notification = {
+            id,
+            type,
+            message: cleanMsg,
+            detail: cleanDetail,
+            timestamp: timestamp,
+            read: false
+        };
+        
+        notificationsList.unshift(notification);
+        
+        // Save to Firestore
+        if (db) {
+            await saveNotificationToFirestore(db, notification);
+        }
+        
+        updateNotificationUI();
+    }
+
+    function updateNotificationUI() {
+        let filtered = [...notificationsList];
+        if (currentFilter === "report") {
+            filtered = filtered.filter((n) => n.type === "report");
+        } else if (currentFilter === "user") {
+            filtered = filtered.filter((n) => n.type === "user");
+        } else if (currentFilter === "24h") {
+            const ago = Date.now() - 24 * 60 * 60 * 1000;
+            filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+        }
+        filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+        
+        const unreadCount = notificationsList.filter(n => !n.read).length;
+        const notificationBadge = document.getElementById("notificationBadge");
+        if (unreadCount > 0) {
+            notificationBadge.textContent = unreadCount;
+            notificationBadge.classList.add("show");
+        } else {
+            notificationBadge.textContent = "";
+            notificationBadge.classList.remove("show");
+        }
+        
+        const notificationList = document.getElementById("notificationList");
+        if (filtered.length === 0) {
+            notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
+        } else {
+            notificationList.innerHTML = filtered.map((n) => `
+                <div class="notification-item ${n.read ? '' : 'unread'}">
+                    <div class="notification-icon ${n.type}">
+                        ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
+                    </div>
+                    <div class="notification-content">
+                        <p><strong>${n.message}</strong></p>
+                        <p>${n.detail}</p>
+                        <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+                </div>
+            `).join("");
+        }
+    }
+
+    const notificationBell = document.getElementById("notificationBell");
+    const notificationMenu = document.getElementById("notificationMenu");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+    const markAllReadBtn = document.getElementById("markAllReadBtn");
+
+    // Store db reference globally
+    let globalDb = null;
+
+    notificationBell.addEventListener("click", (e) => {
+        e.stopPropagation();
+        notificationMenu.classList.toggle("show");
+        document.getElementById("dropdownMenu").classList.remove("show");
+    });
+
+    clearNotificationsBtn.addEventListener("click", async () => {
+        if (globalDb) {
+            await clearAllNotificationsFromFirestore(globalDb);
+        }
+        notificationsList = [];
+        seenNotificationIds.clear();
+        updateNotificationUI();
+    });
+
+    markAllReadBtn.addEventListener("click", async () => {
+        const { doc, updateDoc } = await import(
+            "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+        );
+        
+        // Update local state
+        notificationsList.forEach(n => n.read = true);
+        
+        // Update Firestore
+        if (globalDb) {
+            const updatePromises = notificationsList.map(n => {
+                if (n.id && !n.id.includes('-')) { // Only update Firestore documents
+                    try {
+                        return updateDoc(doc(globalDb, "notifications", n.id), { read: true });
+                    } catch (error) {
+                        console.error("Error updating notification:", error);
+                        return Promise.resolve();
+                    }
+                }
+                return Promise.resolve();
+            });
+            await Promise.all(updatePromises);
+        }
+        
+        updateNotificationUI();
+    });
+
+    document.querySelectorAll(".filter-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+            document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+            e.target.classList.add("active");
+            currentFilter = e.target.dataset.filter;
+            updateNotificationUI();
+        });
+    });
+
+    async function setupRealtimeNotifications(db) {
+        globalDb = db; // Store db reference
+        
+        const { collection, getDocs, onSnapshot } = await import(
+            "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+        );
+        
+        // Load existing notifications from Firestore first
+        await loadNotificationsFromFirestore(db);
+        
+        // Track existing users
+        const userSnap = await getDocs(collection(db, "users"));
+        userSnap.forEach((docSnap) => {
+            const userId = docSnap.id;
+            const data = docSnap.data();
+            const status = normalizeStatus(data.status);
+            trackedUserStatuses[userId] = status;
+        });
+        
+        // Listen for user changes
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const userId = change.doc.id;
+                const data = change.doc.data();
+                const currentStatus = normalizeStatus(data.status);
+                const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+                const position = data.position || "User";
+                
+                if (change.type === "added") {
+                    trackedUserStatuses[userId] = currentStatus;
+                    if (currentStatus === "active" && isBarangayPosition(position)) {
+                        addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`, db);
+                    }
+                }
+                if (change.type === "modified") {
+                    const oldStatus = trackedUserStatuses[userId];
+                    if (oldStatus !== "active" && currentStatus === "active" && isBarangayPosition(position)) {
+                        addNotification("user", `User approved: ${fullName}`, `Position: ${position}`, db);
+                    }
+                    trackedUserStatuses[userId] = currentStatus;
+                }
+            });
+        });
+        
+        // Track existing reports
+        const reportSnap = await getDocs(collection(db, "reports"));
+        reportSnap.forEach((docSnap) => {
+            trackedReportIds.add(docSnap.id);
+        });
+        
+        // Listen for new reports
+        onSnapshot(collection(db, "reports"), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const id = change.doc.id;
+                const data = change.doc.data();
+                if (change.type === "added" && !trackedReportIds.has(id)) {
+                    trackedReportIds.add(id);
+                    const barangay = data.barangay || data.location || "Unknown location";
+                    const type = data.reportType || data.type || data.projectName || "Report";
+                    addNotification("report", "New report submitted", `${type} in ${barangay}`, db);
+                }
+            });
+        });
+        
+        updateNotificationUI();
+    }
+
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const profileToggle = document.getElementById('profileToggle');
+
+    profileToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle("show");
+        notificationMenu.classList.remove("show");
+    });
+
+    window.addEventListener('click', (e) => {
+        if (!e.target.closest('.profile-dropdown')) {
+            dropdownMenu.classList.remove("show");
+        }
+        if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
             notificationMenu.classList.remove("show");
-        });
-
-        window.addEventListener('click', (e) => {
-            if (!e.target.closest('.profile-dropdown')) {
-                dropdownMenu.classList.remove("show");
-            }
-            if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
-                notificationMenu.classList.remove("show");
-            }
-        });
-    </script>
+        }
+    });
+</script>
 
     <!-- Firebase + Chart -->
     <script type="module">

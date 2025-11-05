@@ -173,7 +173,7 @@
         </div>
     </aside>
 
-  <nav class="navbar">
+<nav class="navbar">
     <div style="display:flex;align-items:center;gap:1rem;">
       <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fa fa-bars"></i></button>
       <h1>My Profile</h1>
@@ -203,7 +203,6 @@
       </div>
       <div class="profile-dropdown" id="profileToggle">
         <img src="image.png" alt="avatar" class="avatar" id="navAvatar">
-        <span class="username" id="navUsername">Loading...</span>
         <div class="dropdown-menu" id="dropdownMenu">
           <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
         </div>
@@ -303,13 +302,19 @@
         <div class="photo-upload-section">
           <img id="previewImg" class="preview" src="image.png" alt="Profile Preview">
           <div class="upload-btn-wrapper">
-            <label class="upload-btn">
+            <label class="upload-btn" onclick="document.getElementById('editPhoto').click()">
               <i class="fa fa-camera"></i>
               <span>Choose Photo</span>
-              <input type="file" id="editPhoto" accept="image/*">
             </label>
+            <input type="file" id="editPhoto" accept="image/*" style="display:none;">
           </div>
           <div class="upload-hint">JPG, PNG • Max 5MB</div>
+          <div id="uploadProgressContainer" style="display:none; margin-top:10px; width:100%;">
+            <div style="background:#e0e0e0; border-radius:10px; overflow:hidden; height:8px;">
+              <div id="uploadProgressBar" style="background:#4CAF50; height:100%; width:0%; transition:width 0.3s;"></div>
+            </div>
+            <div id="uploadProgressText" style="font-size:12px; color:#666; margin-top:5px; text-align:center;"></div>
+          </div>
         </div>
         <div class="form-grid">
           <div class="form-field full-width">
@@ -345,7 +350,7 @@
     </div>
   </div>
 
-  <script>
+<script>
     function toggleMobileMenu(){document.querySelector('.sidebar').classList.toggle('mobile-open')}
     document.addEventListener('click',function(e){const sidebar=document.querySelector('.sidebar');const menuBtn=document.querySelector('.mobile-menu-btn');if(window.innerWidth<=980&&!sidebar.contains(e.target)&&!menuBtn.contains(e.target)){sidebar.classList.remove('mobile-open')}});
 
@@ -359,6 +364,10 @@
     let trackedUserStatuses={};
     let trackedReportIds=new Set();
     let currentFilter="all";
+    
+    // Photo upload variables
+    let selectedPhotoFile = null;
+    let previewPhotoURL = null;
 
     function normalizeStatus(status){return(status||"").toLowerCase().trim()}
 
@@ -412,107 +421,315 @@
     const previewImg=document.getElementById("previewImg");
 
     window.openEditModal=function(){editModal.style.display="flex"};
-    window.closeEditModal=function(){editModal.style.display="none"};
+    window.closeEditModal=function(){
+      editModal.style.display="none";
+      selectedPhotoFile = null;
+      editPhoto.value = '';
+      document.getElementById('uploadProgressContainer').style.display = 'none';
+    };
 
-    editPhoto.addEventListener("change",e=>{const file=e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){alert('Please select an image file');editPhoto.value='';return}if(file.size>5*1024*1024){alert('Image size should be less than 5MB');editPhoto.value='';return}const reader=new FileReader();reader.onload=ev=>{previewImg.src=ev.target.result};reader.readAsDataURL(file)});
+    // ===== IMAGE COMPRESSION =====
+    async function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.8) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
 
-    window.saveEdit = async function() {
+            if (width > height) {
+              if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+              }
+            } else {
+              if (height > maxHeight) {
+                width = (width * maxHeight) / height;
+                height = maxHeight;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+              resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+            }, 'image/jpeg', quality);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ===== VALIDATE FILE =====
+    function validateImageFile(file) {
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+      const maxSize = 5 * 1024 * 1024;
+
+      if (!validTypes.includes(file.type)) {
+        return { valid: false, error: 'Please select a valid image (JPG, PNG, WEBP, or GIF)' };
+      }
+
+      if (file.size > maxSize) {
+        return { valid: false, error: 'Image size must be less than 5MB' };
+      }
+
+      return { valid: true };
+    }
+
+    // ===== HANDLE FILE SELECTION =====
+    editPhoto.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        alert(validation.error);
+        editPhoto.value = '';
+        return;
+      }
+
+      try {
+        previewImg.style.opacity = '0.5';
+        
+        const compressedFile = await compressImage(file);
+        selectedPhotoFile = compressedFile;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          previewPhotoURL = ev.target.result;
+          previewImg.src = previewPhotoURL;
+          previewImg.style.opacity = '1';
+          
+          const sizeKB = (compressedFile.size / 1024).toFixed(2);
+          console.log(`Image compressed: ${sizeKB}KB`);
+        };
+        reader.readAsDataURL(compressedFile);
+
+      } catch (err) {
+        console.error('Error processing image:', err);
+        alert('Error processing image. Please try another file.');
+        editPhoto.value = '';
+        previewImg.style.opacity = '1';
+      }
+    });
+
+    // ===== UPDATE PROGRESS UI =====
+    function updateUploadProgress(progress) {
+      const progressContainer = document.getElementById('uploadProgressContainer');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressText = document.getElementById('uploadProgressText');
+      
+      if (progress > 0) {
+        progressContainer.style.display = 'block';
+      } else {
+        progressContainer.style.display = 'none';
+      }
+      
+      if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+      }
+      if (progressText) {
+        progressText.textContent = `Uploading: ${progress.toFixed(0)}%`;
+      }
+    }
+
+    // ===== UPLOAD PHOTO TO FIREBASE =====
+    async function uploadProfilePhoto(userId, file) {
+      const { getStorage, ref, uploadBytesResumable, getDownloadURL } = 
+        await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+      
+      const storage = getStorage();
+      const timestamp = Date.now();
+      const fileName = `profile_${timestamp}.jpg`;
+      const storagePath = `user_images/${userId}/${fileName}`;
+      const storageRef = ref(storage, storagePath);
+
+      return new Promise((resolve, reject) => {
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            updateUploadProgress(progress);
+            console.log(`Upload progress: ${progress.toFixed(0)}%`);
+          },
+          (error) => {
+            console.error('Upload error:', error);
+            reject(error);
+          },
+          async () => {
+            try {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve(downloadURL);
+            } catch (err) {
+              reject(err);
+            }
+          }
+        );
+      });
+    }
+
+    // ===== SAVE PROFILE WITH PHOTO =====
+window.saveEdit = async function() {
   if (!currentUser) {
     alert("No user logged in");
     return;
   }
-  
+
   const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-  const { getStorage, ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+  const { getAuth } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
   
-  const uid = currentUser.uid;
-  const userRef = doc(window.db, "users", uid);
+  const auth = getAuth();
   const saveBtn = document.getElementById("saveBtn");
-  
-  const updated = {
-    name: document.getElementById("editName").value.trim(),
-    ID: document.getElementById("editID").value.trim(),
-    email: document.getElementById("editEmail").value.trim(),
-    phone: document.getElementById("editPhone").value.trim(),
-    address: document.getElementById("editAddress").value.trim(),
-    gender: document.getElementById("editGender").value.trim()
-  };
-  
-  if (!updated.name) {
-    alert("Name is required");
-    return;
-  }
-  
-  const file = editPhoto.files[0];
   
   try {
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+
+    // 🔥 FORCE TOKEN REFRESH
+    console.log('🔐 Refreshing auth token...');
+    await auth.currentUser.getIdToken(true);
+    console.log('✅ Token refreshed');
+
+    const uid = currentUser.uid;
+    const userRef = doc(window.db, "users", uid);
     
-    if (file) {
-      console.log("Starting photo upload for user:", uid);
-      const storage = getStorage();
-      const timestamp = Date.now();
-      const fileExt = file.name.split('.').pop().toLowerCase();
-      const allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-      
-      if (!allowedExts.includes(fileExt)) {
-        throw new Error("Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed.");
-      }
-      
-      const fileName = `profile_${timestamp}.${fileExt}`;  // ✅ Added =
-      const storagePath = `user_images/${uid}/${fileName}`;  // ✅ Added =
-      const storageRef = ref(storage, storagePath);
-      
-      console.log("Uploading to:", storagePath);
-      console.log("File size:", file.size, "bytes");
-      
-      const snapshot = await uploadBytes(storageRef, file);
-      console.log("Upload complete! Snapshot:", snapshot);
-      
-      const url = await getDownloadURL(snapshot.ref);
-      updated.photoURL = url;
-      console.log("Photo URL obtained:", url);
+    const updated = {
+      name: document.getElementById("editName").value.trim(),
+      ID: document.getElementById("editID").value.trim(),
+      email: document.getElementById("editEmail").value.trim(),
+      phone: document.getElementById("editPhone").value.trim(),
+      address: document.getElementById("editAddress").value.trim(),
+      gender: document.getElementById("editGender").value.trim()
+    };
+    
+    if (!updated.name) {
+      alert("Name is required");
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
+      return;
     }
-    
-    console.log("Updating Firestore document...");
+
+    // Upload photo if selected
+    if (selectedPhotoFile) {
+      console.log('📤 Starting photo upload...');
+      console.log('User ID:', uid);
+      console.log('File:', selectedPhotoFile.name, selectedPhotoFile.size, 'bytes');
+      
+      const photoURL = await uploadProfilePhoto(uid, selectedPhotoFile);
+      updated.photoURL = photoURL;
+      console.log('✅ Photo uploaded:', photoURL);
+      
+      // Update UI immediately
+      document.getElementById('profilePic').src = photoURL;
+      document.getElementById('navAvatar').src = photoURL;
+      document.getElementById('previewImg').src = photoURL;
+    }
+
+    console.log('💾 Updating Firestore...');
     await updateDoc(userRef, updated);
-    console.log("Firestore update complete!");
-    
+    console.log('✅ Profile updated successfully!');
+
     alert("Profile updated successfully!");
     closeEditModal();
     editPhoto.value = '';
-    
+    selectedPhotoFile = null;
+    previewPhotoURL = null;
+
   } catch (err) {
-    console.error("=== ERROR DETAILS ===");
-    console.error("Error object:", err);
+    console.error("❌ Error:", err);
     console.error("Error code:", err.code);
     console.error("Error message:", err.message);
-    console.error("Stack trace:", err.stack);
-    
+
     let errorMsg = "Error updating profile:\n\n";
-    
-    if (err.code === "storage/unauthorized" || err.message.includes("storage/unauthorized")) {
-      errorMsg += "❌ Storage permission denied.\n\nPlease check your Firebase Storage rules in the Firebase Console:\n1. Go to Storage → Rules\n2. Make sure user_images/{userId}/{allPaths=**} allows write for authenticated users";
-    } else if (err.code === "permission-denied") {
-      errorMsg += "❌ Firestore permission denied.\n\nCheck your Firestore security rules.";
-    } else if (err.message.includes("Invalid file type")) {
-      errorMsg += err.message;
+
+    if (err.code === "storage/unauthorized") {
+      errorMsg += "❌ Storage permission denied.\n\n";
+      errorMsg += "Try logging out and back in.";
+    } else if (err.code === "storage/quota-exceeded") {
+      errorMsg += "❌ Storage quota exceeded.";
+    } else if (err.code === "storage/unauthenticated") {
+      errorMsg += "❌ Not authenticated.\n\nPlease log out and log back in.";
+    } else if (err.message.includes('CORS')) {
+      errorMsg += "❌ CORS error.\n\nThis is a Firebase configuration issue.";
     } else {
       errorMsg += err.message;
     }
-    
+
     alert(errorMsg);
-    
+
   } finally {
     saveBtn.disabled = false;
     saveBtn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
+    updateUploadProgress(0);
   }
 };
-    window.addEventListener("click",(e)=>{if(e.target===editModal)closeEditModal()});
-  </script>
 
-  <script type="module">
+// ===== 7. OPTIONAL: REMOVE CURRENT PHOTO =====
+window.removeProfilePhoto = async function() {
+if (!confirm('Remove your profile photo? Your profile will show the default avatar.')) {
+return;
+}
+
+try {
+const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+const uid = currentUser.uid;
+const userRef = doc(window.db, "users", uid);
+
+await updateDoc(userRef, { photoURL: '' });
+
+// Reset preview to default
+previewImg.src = 'image.png';
+selectedPhotoFile = null;
+editPhoto.value = '';
+
+alert('Profile photo removed');
+} catch (err) {
+console.error('Error removing photo:', err);
+alert('Error removing photo: ' + err.message);
+}
+};
+
+// ===== 8. DRAG & DROP (BONUS) =====
+const dropZone = document.getElementById('photoDropZone'); // Add this element in HTML
+
+if (dropZone) {
+dropZone.addEventListener('dragover', (e) => {
+e.preventDefault();
+dropZone.classList.add('drag-over');
+});
+
+dropZone.addEventListener('dragleave', () => {
+dropZone.classList.remove('drag-over');
+});
+
+dropZone.addEventListener('drop', async (e) => {
+e.preventDefault();
+dropZone.classList.remove('drag-over');
+
+const file = e.dataTransfer.files[0];
+if (file && file.type.startsWith('image/')) {
+// Simulate file input change
+const dataTransfer = new DataTransfer();
+dataTransfer.items.add(file);
+editPhoto.files = dataTransfer.files;
+editPhoto.dispatchEvent(new Event('change'));
+}
+});
+}
+
+    window.addEventListener("click",(e)=>{if(e.target===editModal)closeEditModal()});
+</script>
+
+<script type="module">
     import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import{getFirestore,doc,onSnapshot,serverTimestamp,updateDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -567,7 +784,6 @@
         }
         
         const elements={
-          navUsername:fullName,
           displayName:fullName,
           displayRole:data.position||data.role||"Admin",
           accountType:data.position||data.role||"Admin"
@@ -636,6 +852,6 @@
         console.error("Error loading calendar:",err);
       }
     });
-  </script>
+</script>
 </body>
 </html>
