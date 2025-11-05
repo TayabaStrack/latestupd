@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Bulletin | Admin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,sans-serif;display:flex;min-height:100vh;background:#f5f7fb;color:#333;overflow:hidden}
+
+/* SIDEBAR - IMPROVED VERSION */
+.sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;height:100vh;overflow-y:auto;transition:left 0.3s ease}
+.sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem;padding:0 1rem}
+.sidebar-header img{width:40px;height:40px;object-fit:contain}
+.sidebar-header h2{font-size:1.2rem;margin:0;font-weight:600}
+.sidebar-menu{list-style:none;padding-left:0;margin:0}
+.sidebar-menu li{margin:0.5rem 0}
+.sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s;border-left:4px solid transparent}
+.sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
+.sidebar-menu a i{width:20px;text-align:center;font-size:1rem}
+.sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2);margin-top:auto}
+.logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.logout-btn:hover{background-color:#c9302c}
+
+/* NAVBAR - IMPROVED VERSION */
+.navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40;transition:left 0.3s ease}
+.navbar h1{font-size:1.4rem;color:#004aad;margin:0}
+.navbar-left{display:flex;align-items:center;gap:1rem}
+.mobile-menu-btn{display:none;background:none;border:none;color:#004aad;font-size:1.5rem;cursor:pointer;padding:0.5rem}
+.fa-bell{font-size:1.2rem;position:relative;cursor:pointer;color:#333}
+.badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none;min-width:18px;text-align:center}
+.badge.show{display:flex;align-items:center;justify-content:center}
+.notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.15);width:340px;max-height:420px;overflow:hidden;z-index:1000;font-family:"Segoe UI",Tahoma,sans-serif;animation:fadeIn 0.2s ease-in-out}
+.notification-menu.show{display:block}
+.notification-header{padding:0.9rem 1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f9f9f9}
+.notification-header h3{font-size:1rem;color:#333;margin:0;font-weight:600}
+.notification-actions{display:flex;gap:0.5rem;align-items:center}
+.action-icon-btn{background:none;border:none;color:#666;cursor:pointer;font-size:1rem;padding:0.3rem;transition:color 0.2s ease;display:flex;align-items:center;justify-content:center}
+.action-icon-btn:hover{color:#004aad}
+.action-icon-btn i{font-size:0.95rem}
+.notification-filters{display:flex;justify-content:space-between;gap:0.5rem;padding:0.5rem 1rem;border-bottom:1px solid #eee;background:#fafafa}
+.filter-btn{flex:1;padding:0.4rem 0.6rem;font-size:0.8rem;background:#f2f2f2;border:1px solid #ddd;border-radius:6px;cursor:pointer;transition:all 0.25s ease;color:#333}
+.filter-btn:hover{background:#004aad;color:#fff}
+.filter-btn.active{background:#004aad;color:#fff;border-color:#004aad}
+.notification-list{max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#ccc transparent}
+.notification-list::-webkit-scrollbar{width:6px}
+.notification-list::-webkit-scrollbar-thumb{background:#ccc;border-radius:10px}
+.notification-list::-webkit-scrollbar-track{background:transparent}
+.notification-item{padding:0.8rem 1rem;border-bottom:1px solid #f0f0f0;display:flex;gap:0.8rem;align-items:flex-start;transition:background 0.2s;position:relative}
+.notification-item:hover{background:#f5f7ff}
+.notification-item.unread{background:#f0f7ff}
+.notification-item.unread::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:60%;background:#004aad;border-radius:0 4px 4px 0}
+.notification-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
+.notification-icon.user{background:#e3f2fd;color:#1976d2}
+.notification-icon.report{background:#fff3e0;color:#f57c00}
+.notification-content{flex:1}
+.notification-content p{margin:0;font-size:0.86rem;color:#333;line-height:1.3}
+.notification-content .time{color:#999;font-size:0.75rem;margin-top:0.25rem}
+.notification-empty{padding:2rem;text-align:center;color:#999;font-size:0.9rem}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:0.5rem;border-radius:8px;transition:background 0.2s}
+.profile-dropdown:hover{background:#f5f7fb}
+.avatar{width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid #004aad}
+.username{font-weight:500;color:#333}
+.dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
+.dropdown-menu.show{display:block}
+.dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem;transition:background 0.2s}
+.dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
+.dropdown-menu a i{margin-right:8px;width:20px;text-align:center}
+
+/* MAIN CONTENT */
+.main{margin-left:250px;margin-top:64px;flex:1;display:flex;flex-direction:column;min-width:0;height:calc(100vh - 64px);overflow:hidden;transition:margin-left 0.3s ease}
+.reports-section{padding:1.5rem;flex:1;overflow-y:auto;overflow-x:hidden}
+.report-box{background:#fff;border-radius:10px;padding:16px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+.report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:10px}
+.report-box-header h2{color:#004aad;font-size:1.05rem}
+.report-actions input{padding:.4rem .75rem;border:1px solid #e0e0e0;border-radius:18px;font-size:.9rem;width:260px}
+.scroll-hint{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:8px 12px;border-radius:6px;font-size:0.85rem;text-align:center;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(0,74,173,0.2)}
+.scroll-hint i{animation:slideHint 2s ease-in-out infinite}
+@keyframes slideHint{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+.table-wrapper{position:relative}
+.table-card{overflow-x:auto;overflow-y:hidden;border-radius:8px;background:#fff;padding:8px;box-shadow:0 2px 6px rgba(0,0,0,0.03);scroll-behavior:smooth;position:relative}
+.table-card::-webkit-scrollbar{height:10px}
+.table-card::-webkit-scrollbar-track{background:#e9eef5;border-radius:5px}
+.table-card::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);border-radius:5px;border:2px solid #e9eef5}
+table{width:100%;border-collapse:collapse;min-width:1600px}
+thead th{background:#f5f8fb;color:#333;font-weight:700;padding:.7rem .75rem;text-align:left;white-space:nowrap;border-bottom:2px solid #e0e0e0}
+th,td{padding:.5rem .75rem;font-size:.85rem;vertical-align:top;border-bottom:1px solid #f0f2f5}
+tbody tr:nth-child(even){background:#fbfdff}
+tbody tr:hover{background:#f1f8ff}
+.col-small{width:110px}
+.col-coords{width:140px}
+.truncate{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+.status{display:inline-block;padding:.25rem .5rem;border-radius:6px;color:#fff;font-weight:700;font-size:.75rem;min-width:80px;text-align:center}
+.pending{background:#f6c23e;color:#2b2b2b}
+.ongoing{background:#36b9cc;color:#fff}
+.completed{background:#1cc88a;color:#fff}
+.action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
+.coords-vertical{display:flex;flex-direction:column;gap:4px;font-size:0.8rem}
+.coords-vertical span{white-space:nowrap}
+.modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
+.modal-content{background:#fff;width:100%;max-width:980px;border-radius:12px;padding:18px;max-height:92vh;overflow:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.modal-header h2{color:#004aad;font-size:1.1rem;margin:0}
+.close-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#444}
+.modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.modal-row{display:flex;flex-direction:column}
+.modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
+.modal-row input[type="text"],.modal-row textarea,.modal-row input[type="date"],.modal-row input[type="number"]{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
+.modal-row textarea{min-height:80px;resize:vertical}
+.img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px;cursor:pointer}
+.modal-footer{text-align:right;margin-top:12px}
+.btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;margin-left:8px}
+.btn-save{background:#004aad;color:#fff}
+.btn-cancel{background:#9e9e9e;color:#fff}
+.loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
+.spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MOBILE RESPONSIVE */
+@media (max-width:980px){
+  .sidebar{left:-250px}
+  .sidebar.mobile-open{left:0}
+  .navbar{left:0}
+  .main{margin-left:0}
+  .mobile-menu-btn{display:block !important}
+  .username{display:none}
+  .modal-grid{grid-template-columns:1fr}
+  .report-actions input{width:100%}
+}
+</style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div>
+    <div class="sidebar-header">
+      <img src="logu.png" alt="Logo">
+      <h2>TayabaStrack</h2>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="ad_dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
+      <li><a href="ad_reports.html"><i class="fa fa-tasks"></i> Manage Reports</a></li>
+      <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
+      <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
+      <li class="active"><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
+    </ul>
+  </div>
+  <div class="sidebar-footer">
+    <button class="logout-btn" id="logoutBtn">
+      <i class="fa fa-sign-out-alt"></i>
+      <span>Logout</span>
+    </button>
+  </div>
+</aside>
+
+<nav class="navbar">
+  <div class="navbar-left">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+      <i class="fa fa-bars"></i>
+    </button>
+    <h1>Report Bulletin</h1>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <div style="position:relative">
+      <i class="fa fa-bell" id="notificationBell"></i>
+      <span class="badge" id="notificationBadge">0</span>
+      <div class="notification-menu" id="notificationMenu">
+        <div class="notification-header">
+          <h3>Notifications</h3>
+          <div class="notification-actions">
+            <button class="action-icon-btn" id="markAllReadBtn" title="Mark all as read"><i class="fa fa-check-double"></i></button>
+            <button class="action-icon-btn" id="clearNotificationsBtn" title="Clear all"><i class="fa fa-trash-alt"></i></button>
+          </div>
+        </div>
+        <div class="notification-filters">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="report">Reports</button>
+          <button class="filter-btn" data-filter="user">Users</button>
+          <button class="filter-btn" data-filter="24h">Last 24h</button>
+        </div>
+        <div class="notification-list" id="notificationList">
+          <div class="notification-empty">No new notifications</div>
+        </div>
+      </div>
+    </div>
+    <div class="profile-dropdown" id="profileToggle">
+      <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar">
+      <span class="username" id="navUsername">Loading...</span>
+      <div class="dropdown-menu" id="dropdownMenu">
+        <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+  <section class="reports-section">
+    <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+    <div class="report-box">
+      <div class="report-box-header">
+        <h2>Completed Reports</h2>
+        <div class="report-actions"><input id="searchCompleted" placeholder="Search completed..."></div>
+      </div>
+      <div class="scroll-hint"><i class="fas fa-arrows-alt-h"></i><span>Scroll horizontally to view all columns</span></div>
+      <div class="table-wrapper">
+        <div class="table-card" id="completedTableCard">
+          <table>
+            <thead>
+              <tr>
+                <th>Project Name</th><th>Barangay</th><th style="min-width:250px">Description</th><th class="col-small">Dimensions (W×H)</th><th>Before Image</th><th>After Image</th><th class="col-coords">Coordinates</th><th style="min-width:180px">Timestamp</th><th style="min-width:200px">Start Date & Deadline</th><th style="min-width:180px">Contractor & Supplier</th><th>Completion Date</th><th>Reporter Position</th><th class="col-small">Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="completedBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="editModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Edit Report Details</h2>
+      <button class="close-btn" id="closeModal">&times;</button>
+    </div>
+    <div class="modal-body"><div class="modal-grid" id="modalGrid"></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" id="cancelBtn">Close</button>
+      <button class="btn btn-save" id="saveChangesBtn">Save Changes</button>
+      <button class="btn btn-save" id="postToBulletinBtn">Post to Bulletin</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Mobile menu toggle
+  function toggleMobileMenu() {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+  }
+
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('sidebar');
+    const menuBtn = document.querySelector('.mobile-menu-btn');
+    
+    if (window.innerWidth <= 980 && 
+        !sidebar.contains(e.target) && 
+        !menuBtn.contains(e.target)) {
+      sidebar.classList.remove('mobile-open');
+    }
+  });
+</script>
+
+<!-- Notification System -->
+<script>
+let notificationsList=[];let seenNotificationIds=new Set();let trackedUserStatuses={};let trackedReportIds=new Set();let currentFilter="all";
+function normalizeStatus(s){return(s||"").toLowerCase().trim()}
+function isBarangayPosition(p){if(!p)return false;const pos=p.toLowerCase();return pos.includes("barangay")||pos.includes("brgy")||pos.includes("brgy.")}
+function addNotification(t,m,d){const cleanMsg=(m||"").trim();const cleanDetail=(d||"").trim();const timestamp=new Date();const id=`${t}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;if(seenNotificationIds.has(id))return;seenNotificationIds.add(id);notificationsList.unshift({id,type:t,message:cleanMsg,detail:cleanDetail,timestamp:timestamp,read:false});updateNotificationUI()}
+function updateNotificationUI(){let filtered=[...notificationsList];if(currentFilter==="report"){filtered=filtered.filter((n)=>n.type==="report")}else if(currentFilter==="user"){filtered=filtered.filter((n)=>n.type==="user")}else if(currentFilter==="24h"){const ago=Date.now()-24*60*60*1000;filtered=filtered.filter((n)=>n.timestamp.getTime()>ago)}filtered.sort((a,b)=>b.timestamp.getTime()-a.timestamp.getTime());const unreadCount=notificationsList.filter(n=>!n.read).length;const notificationBadge=document.getElementById("notificationBadge");if(unreadCount>0){notificationBadge.textContent=unreadCount;notificationBadge.classList.add("show")}else{notificationBadge.textContent="";notificationBadge.classList.remove("show")}const notificationList=document.getElementById("notificationList");if(filtered.length===0){notificationList.innerHTML='<div class="notification-empty">No notifications</div>'}else{notificationList.innerHTML=filtered.map((n)=>`<div class="notification-item ${n.read?'':'unread'}"><div class="notification-icon ${n.type}">${n.type==="user"?'<i class="fa fa-user"></i>':'<i class="fa fa-flag"></i>'}</div><div class="notification-content"><p><strong>${n.message}</strong></p><p>${n.detail}</p><span class="time">${n.timestamp.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span></div></div>`).join("")}}
+const notificationBell=document.getElementById("notificationBell");const notificationMenu=document.getElementById("notificationMenu");const clearNotificationsBtn=document.getElementById("clearNotificationsBtn");const markAllReadBtn=document.getElementById("markAllReadBtn");
+notificationBell.addEventListener("click",(e)=>{e.stopPropagation();notificationMenu.classList.toggle("show");document.getElementById("dropdownMenu").classList.remove("show")});
+clearNotificationsBtn.addEventListener("click",()=>{notificationsList=[];seenNotificationIds.clear();updateNotificationUI()});
+markAllReadBtn.addEventListener("click",()=>{notificationsList.forEach(n=>n.read=true);updateNotificationUI()});
+document.querySelectorAll(".filter-btn").forEach((btn)=>{btn.addEventListener("click",(e)=>{document.querySelectorAll(".filter-btn").forEach((b)=>b.classList.remove("active"));e.target.classList.add("active");currentFilter=e.target.dataset.filter;updateNotificationUI()})});
+async function setupRealtimeNotifications(db){const{collection,getDocs,onSnapshot}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");const userSnap=await getDocs(collection(db,"users"));userSnap.forEach((docSnap)=>{const userId=docSnap.id;const data=docSnap.data();const status=normalizeStatus(data.status);trackedUserStatuses[userId]=status});onSnapshot(collection(db,"users"),(snapshot)=>{snapshot.docChanges().forEach((change)=>{const userId=change.doc.id;const data=change.doc.data();const currentStatus=normalizeStatus(data.status);const fullName=data.name||`${data.firstName||""} ${data.lastName||""}`.trim()||"Unknown User";const position=data.position||"User";if(change.type==="added"){trackedUserStatuses[userId]=currentStatus;if(currentStatus==="active"&&isBarangayPosition(position)){addNotification("user",`New user approved: ${fullName}`,`Position: ${position}`)}}if(change.type==="modified"){const oldStatus=trackedUserStatuses[userId];if(oldStatus!=="active"&&currentStatus==="active"&&isBarangayPosition(position)){addNotification("user",`User approved: ${fullName}`,`Position: ${position}`)}trackedUserStatuses[userId]=currentStatus}})});const reportSnap=await getDocs(collection(db,"reports"));reportSnap.forEach((docSnap)=>{trackedReportIds.add(docSnap.id)});onSnapshot(collection(db,"reports"),(snapshot)=>{snapshot.docChanges().forEach((change)=>{const id=change.doc.id;const data=change.doc.data();if(change.type==="added"&&!trackedReportIds.has(id)){trackedReportIds.add(id);const barangay=data.barangay||data.location||"Unknown location";const type=data.reportType||data.type||data.projectName||"Report";addNotification("report","New report submitted",`${type} in ${barangay}`)}})});updateNotificationUI()}
+const dropdownMenu=document.getElementById('dropdownMenu');const profileToggle=document.getElementById('profileToggle');
+profileToggle.addEventListener("click",(e)=>{e.stopPropagation();dropdownMenu.classList.toggle("show");notificationMenu.classList.remove("show")});
+window.addEventListener('click',(e)=>{if(!e.target.closest('.profile-dropdown')){dropdownMenu.classList.remove("show")}if(!e.target.closest('.notification-menu')&&e.target!==notificationBell){notificationMenu.classList.remove("show")}});
+</script>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getFirestore,collection,query,where,orderBy,onSnapshot,getDoc,doc,updateDoc,setDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getStorage,ref,getDownloadURL,uploadBytes}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const firebaseConfig={apiKey:"AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",authDomain:"tayabastrack-23b95.firebaseapp.com",projectId:"tayabastrack-23b95",storageBucket:"tayabastrack-23b95.firebasestorage.app",messagingSenderId:"674055915366",appId:"1:674055915366:web:aa560336c1f8b504eeaaa7"};
+
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
+window.db=db;
+
+const completedBody=document.getElementById("completedBody"),searchCompleted=document.getElementById("searchCompleted"),editModal=document.getElementById("editModal"),modalGrid=document.getElementById("modalGrid"),closeModal=document.getElementById("closeModal"),cancelBtn=document.getElementById("cancelBtn"),logoutBtn=document.getElementById("logoutBtn"),loadingOverlay=document.getElementById("loadingOverlay"),postToBulletinBtn=document.getElementById("postToBulletinBtn"),saveChangesBtn=document.getElementById("saveChangesBtn"),navUsername=document.getElementById("navUsername"),navbarAvatar=document.getElementById("navbarAvatar");
+
+let currentDocId=null,currentDocData=null;
+
+function showLoading(show=true){loadingOverlay.style.display=show?"flex":"none"}
+
+function formatTimestamp(timestamp){
+  if(!timestamp)return"";
+  let date;
+  if(timestamp.toDate)date=timestamp.toDate();
+  else if(typeof timestamp==="string")date=new Date(timestamp);
+  else return timestamp;
+  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+  month=months[date.getMonth()],
+  day=String(date.getDate()).padStart(2,"0"),
+  year=date.getFullYear();
+  let hours=date.getHours();
+  const minutes=String(date.getMinutes()).padStart(2,"0"),
+  ampm=hours>=12?"PM":"AM";
+  hours=hours%12||12;
+  return`${month}/${day}/${year} | ${hours}:${minutes} ${ampm}`;
+}
+
+function formatDate(timestamp){
+  if(!timestamp)return"Not Set";
+  let date;
+  if(timestamp.toDate)date=timestamp.toDate();
+  else if(typeof timestamp==="string")date=new Date(timestamp);
+  else return"Not Set";
+  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+  m=months[date.getMonth()],
+  d=String(date.getDate()).padStart(2,"0"),
+  y=date.getFullYear();
+  return`${m} ${d}, ${y}`;
+}
+
+async function getReporterPosition(userId){
+  if(!userId)return"Unknown";
+  try{
+    const userDoc=await getDoc(doc(db,"users",userId));
+    if(userDoc.exists()){
+      const userData=userDoc.data();
+      return userData.position||"Unknown";
+    }
+  }catch(err){
+    console.error("Error getting user position:",err);
+  }
+  return"Unknown";
+}
+
+function createEditableField(key,value,type="text",label=""){
+  const wrapper=document.createElement("div");
+  wrapper.className="modal-row";
+  const labelElem=document.createElement("label");
+  labelElem.textContent=label||key.replace(/([A-Z])/g," $1").replace(/^./,str=>str.toUpperCase());
+  wrapper.appendChild(labelElem);
+  
+  if(type==="image"){
+    const input=document.createElement("input");
+    input.type="text";
+    input.id=`field-${key}`;
+    input.value=value||"";
+    input.readOnly=true;
+    input.placeholder="No image URL";
+    wrapper.appendChild(input);
+    if(value){
+      const img=document.createElement("img");
+      img.src=value;
+      img.alt="image preview";
+      img.className="img-preview";
+      img.style.cursor="pointer";
+      img.title="Click to view full size";
+      img.addEventListener("click",()=>showImageModal(value));
+      wrapper.appendChild(img);
+    }else{
+      const ph=document.createElement("div");
+      ph.style.marginTop="6px";
+      ph.style.color="#666";
+      ph.style.fontSize=".9rem";
+      ph.textContent="No image available";
+      wrapper.appendChild(ph);
+    }
+    return wrapper;
+  }
+  
+  const input=document.createElement("input");
+  input.type=type;
+  input.id=`field-${key}`;
+  if(type==="date"&&value){
+    if(value.toDate){
+      const date=value.toDate();
+      input.value=date.toISOString().split("T")[0];
+    }else if(typeof value==="string"){
+      input.value=value.split("T")[0];
+    }
+  }else{
+    input.value=value===undefined||value===null?"":String(value);
+  }
+  wrapper.appendChild(input);
+  return wrapper;
+}
+
+async function handleAfterImageUpload(file){
+  if(!currentDocId){alert("No report selected");return false}
+  if(!file){alert("Please select a file");return false}
+  try{
+    const fileName=`afterImages/${currentDocId}_${Date.now()}_${file.name}`,
+    storageRef=ref(storage,fileName);
+    const snapshot=await uploadBytes(storageRef,file);
+    const url=await getDownloadURL(snapshot.ref);
+    currentDocData.afterImage=url;
+    const afterImageField=document.getElementById("field-afterImage");
+    if(afterImageField){
+      afterImageField.value=url;
+      const parent=afterImageField.parentElement;
+      let img=parent.querySelector(".img-preview");
+      if(!img){
+        const placeholder=parent.querySelector("div[style*='color:#666']");
+        placeholder&&placeholder.remove();
+        img=document.createElement("img");
+        img.className="img-preview";
+        img.style.cursor="pointer";
+        img.addEventListener("click",()=>showImageModal(url));
+        parent.appendChild(img);
+      }
+      img.src=url;
+    }
+    return true;
+  }catch(err){
+    console.error("Error uploading image:",err);
+    alert("Error uploading image: "+err.message);
+    return false;
+  }
+}
+
+async function buildTableRow(docSnap){
+  const r=docSnap.data(),tr=document.createElement("tr");
+  const addCell=(c,cls="")=>{
+    const td=document.createElement("td");
+    cls&&(td.className=cls);
+    typeof c==="string"?td.textContent=c:td.appendChild(c);
+    tr.appendChild(td);
+  };
+  
+  addCell(r.projectName||r.reportId||"Unnamed Project");
+  addCell(r.barangay||"—");
+  
+  const desc=document.createElement("span");
+  desc.className="truncate";
+  desc.textContent=r.description||"—";
+  desc.title=r.description||"—";
+  addCell(desc);
+  
+  const dims=r.width&&r.height?`${r.width}×${r.height}`:r.width||r.height||"—";
+  addCell(dims,"col-small");
+  
+  const imgSpan=document.createElement("span"),imagePath=r.incidentImage||r.imageUrl||r.image;
+  if(imagePath){
+    const link=document.createElement("a");
+    link.href="#";
+    link.textContent="View";
+    link.style.cssText="color:#004aad;text-decoration:none;font-weight:700;cursor:pointer";
+    link.onclick=e=>{e.preventDefault();showImageModal(imagePath)};
+    imgSpan.appendChild(link);
+  }else{
+    imgSpan.textContent="No";
+  }
+  addCell(imgSpan);
+  
+  const afterImgSpan=document.createElement("span"),afterImagePath=r.afterImage||r.completionImage||r.afterImageUrl;
+  if(afterImagePath){
+    const link=document.createElement("a");
+    link.href="#";
+    link.textContent="View";
+    link.style.cssText="color:#004aad;text-decoration:none;font-weight:700;cursor:pointer";
+    link.onclick=e=>{e.preventDefault();showImageModal(afterImagePath)};
+    afterImgSpan.appendChild(link);
+  }else{
+    afterImgSpan.textContent="No";
+  }
+  addCell(afterImgSpan);
+  
+  const coordsDiv=document.createElement("div");
+  coordsDiv.className="coords-vertical";
+  const latSpan=document.createElement("span");
+  latSpan.textContent=`Lat: ${r.latitude||"N/A"}`;
+  const lngSpan=document.createElement("span");
+  lngSpan.textContent=`Lng: ${r.longitude||"N/A"}`;
+  coordsDiv.appendChild(latSpan);
+  coordsDiv.appendChild(lngSpan);
+  addCell(coordsDiv,"col-coords");
+  
+  addCell(formatTimestamp(r.timestamp||r.createdAt));
+  
+  const startDeadlineDiv=document.createElement("div");
+  startDeadlineDiv.style.cssText="display:flex;gap:8px;align-items:center;white-space:nowrap";
+  const startSpan=document.createElement("span");
+  startSpan.textContent=formatDate(r.startDate);
+  const dashSpan=document.createElement("span");
+  dashSpan.textContent="–";
+  const deadlineSpan=document.createElement("span");
+  deadlineSpan.textContent=formatDate(r.endDate||r.deadline);
+  startDeadlineDiv.appendChild(startSpan);
+  startDeadlineDiv.appendChild(dashSpan);
+  startDeadlineDiv.appendChild(deadlineSpan);
+  addCell(startDeadlineDiv);
+  
+  const contractorSupplierDiv=document.createElement("div");
+  contractorSupplierDiv.style.cssText="display:flex;flex-direction:column;gap:2px;font-size:0.8rem";
+  const contractorSpan=document.createElement("span");
+  contractorSpan.textContent=`C: ${r.contractor||"N/A"}`;
+  const supplierSpan=document.createElement("span");
+  supplierSpan.textContent=`S: ${r.supplier||"N/A"}`;
+  contractorSupplierDiv.appendChild(contractorSpan);
+  contractorSupplierDiv.appendChild(supplierSpan);
+  addCell(contractorSupplierDiv);
+  
+  addCell(formatDate(r.completionDate));
+  
+  const reporterPosition=await getReporterPosition(r.userId);
+  addCell(reporterPosition);
+  
+  const status=document.createElement("span"),s=(r.status||"Pending").toLowerCase();
+  status.className=`status ${s==="pending"?"pending":s==="ongoing"?"ongoing":"completed"}`;
+  status.textContent=r.status||"Pending";
+  addCell(status,"col-small");
+  
+  const editLink=document.createElement("a");
+  editLink.href="#";
+  editLink.textContent="Edit";
+  editLink.dataset.id=docSnap.id;
+  editLink.className="edit-link";
+  editLink.style.cssText="color:#004aad;text-decoration:none;font-weight:700;cursor:pointer";
+  addCell(editLink,"action");
+  
+  return tr;
+}
+
+function showImageModal(imageUrl){
+  if(!imageUrl){alert("No image available");return}
+  const imgModal=document.createElement("div");
+  imgModal.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer";
+  const img=document.createElement("img");
+  img.src=imageUrl;
+  img.style.cssText="max-width:90%;max-height:90%;object-fit:contain;border-radius:8px";
+  img.onerror=()=>{imgModal.remove();alert("Failed to load image")};
+  const closeBtn=document.createElement("button");
+  closeBtn.textContent="×";
+  closeBtn.style.cssText="position:absolute;top:20px;right:20px;background:white;border:none;font-size:30px;cursor:pointer;width:40px;height:40px;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,0.3)";
+  imgModal.appendChild(img);
+  imgModal.appendChild(closeBtn);
+  document.body.appendChild(imgModal);
+  imgModal.addEventListener("click",()=>imgModal.remove());
+  closeBtn.addEventListener("click",e=>{e.stopPropagation();imgModal.remove()});
+}
+
+function attachSearch(inputElem,tableBody){
+  if(!inputElem)return;
+  inputElem.addEventListener("keyup",()=>{
+    const filter=inputElem.value.toLowerCase(),rows=tableBody.getElementsByTagName("tr");
+    for(let i=0;i<rows.length;i++){
+      const cells=rows[i].getElementsByTagName("td");
+      let show=false;
+      for(let j=0;j<cells.length;j++){
+        if(cells[j].innerText.toLowerCase().includes(filter)){
+          show=true;
+          break;
+        }
+      }
+      rows[i].style.display=show?"":"none";
+    }
+  });
+}
+
+attachSearch(searchCompleted,completedBody);
+
+async function openEditFromRow(e){
+  e.preventDefault();
+  const id=e.currentTarget.dataset.id;
+  await openModalForDoc(id);
+}
+
+async function openModalForDoc(id){
+  currentDocId=id;
+  try{
+    showLoading(true);
+    const snap=await getDoc(doc(db,"reports",id));
+    if(!snap.exists()){
+      alert("Report not found");
+      showLoading(false);
+      return;
+    }
+    currentDocData=snap.data();
+    modalGrid.innerHTML="";
+    
+    const fields=[
+      {key:"projectName",label:"Project Name",type:"text",editable:true},
+      {key:"reportId",label:"Report ID",type:"text",editable:false},
+      {key:"barangay",label:"Barangay",type:"text",editable:true},
+      {key:"description",label:"Description",type:"text",editable:true},
+      {key:"width",label:"Width",type:"number",editable:true},
+      {key:"height",label:"Height",type:"number",editable:true},
+      {key:"incidentImage",label:"Before Image",type:"image",editable:false},
+      {key:"afterImage",label:"After Image",type:"image",editable:false},
+      {key:"latitude",label:"Latitude",type:"text",editable:true},
+      {key:"longitude",label:"Longitude",type:"text",editable:true},
+      {key:"status",label:"Status",type:"text",editable:true},
+      {key:"startDate",label:"Start Date",type:"date",editable:true},
+      {key:"endDate",label:"End Date / Deadline",type:"date",editable:true},
+      {key:"contractor",label:"Contractor",type:"text",editable:true},
+      {key:"supplier",label:"Supplier",type:"text",editable:true},
+      {key:"completionDate",label:"Completion Date",type:"date",editable:true}
+    ];
+    
+    fields.forEach(field=>{
+      let value=currentDocData[field.key];
+      if(field.key==="incidentImage"&&!value){
+        value=currentDocData.imageUrl||currentDocData.image;
+      }
+      if(field.key==="afterImage"&&!value){
+        value=currentDocData.completionImage;
+      }
+      const row=createEditableField(field.key,value,field.type,field.label);
+      if(!field.editable){
+        const input=row.querySelector("input");
+        if(input&&field.type!=="image"){
+          input.readOnly=true;
+        }
+      }
+      modalGrid.appendChild(row);
+    });
+    
+    const uploadSection=document.createElement("div");
+    uploadSection.style.cssText="grid-column: 1 / -1; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;";
+    const uploadTitle=document.createElement("h3");
+    uploadTitle.textContent="Upload/Update After Image";
+    uploadTitle.style.cssText="color: #004aad; font-size: 1rem; margin-bottom: 12px;";
+    uploadSection.appendChild(uploadTitle);
+    
+    const fileInputContainer=document.createElement("div");
+    fileInputContainer.className="modal-row";
+    const fileInput=document.createElement("input");
+    fileInput.type="file";
+    fileInput.id="afterImageFile";
+    fileInput.accept="image/*";
+    fileInput.style.cssText="padding: 8px; border: 1px solid #e0e0e0; border-radius: 8px;";
+    fileInputContainer.appendChild(fileInput);
+    uploadSection.appendChild(fileInputContainer);
+    
+    const uploadBtn=document.createElement("button");
+    uploadBtn.textContent="Upload After Image";
+    uploadBtn.className="btn btn-save";
+    uploadBtn.style.marginTop="12px";
+    uploadBtn.addEventListener("click",async()=>{
+      const file=fileInput.files[0];
+      if(!file){
+        alert("Please select an image file first");
+        return;
+      }
+      uploadBtn.disabled=true;
+      uploadBtn.textContent="Uploading...";
+      const success=await handleAfterImageUpload(file);
+      if(success){
+        try{
+          await updateDoc(doc(db,"reports",currentDocId),{afterImage:currentDocData.afterImage});
+          alert("After image uploaded and saved successfully! The table will update automatically.");
+          fileInput.value="";
+          closeEditModal();
+        }catch(err){
+          console.error("Error saving to Firestore:",err);
+          alert("Image uploaded but couldn't save to database: "+err.message);
+        }
+      }
+      uploadBtn.disabled=false;
+      uploadBtn.textContent="Upload After Image";
+    });
+    uploadSection.appendChild(uploadBtn);
+    modalGrid.appendChild(uploadSection);
+    
+    showLoading(false);
+    editModal.style.display="flex";
+    editModal.querySelector(".modal-content").scrollTop=0;
+  }catch(err){
+    console.error(err);
+    alert("Failed to open report. See console.");
+    showLoading(false);
+  }
+}
+
+function closeEditModal(){
+  currentDocId=null;
+  currentDocData=null;
+  editModal.style.display="none";
+}
+
+cancelBtn.addEventListener("click",closeEditModal);
+closeModal.addEventListener("click",closeEditModal);
+
+saveChangesBtn.addEventListener("click",async()=>{
+  if(!currentDocId)return;
+  const inputs=modalGrid.querySelectorAll("[id^='field-']"),updates={};
+  inputs.forEach(inp=>{
+    const key=inp.id.replace("field-","");
+    if(key==="afterImageFile"||inp.readOnly)return;
+    if(inp.type==="number"){
+      updates[key]=inp.value===""?null:Number(inp.value);
+    }else if(inp.type==="date"){
+      updates[key]=inp.value===""?null:new Date(inp.value);
+    }else{
+      updates[key]=inp.value;
+    }
+  });
+  try{
+    await updateDoc(doc(db,"reports",currentDocId),updates);
+    alert("Changes saved successfully!");
+    closeEditModal();
+  }catch(err){
+    console.error(err);
+    alert("Save failed. See console.");
+  }
+});
+
+postToBulletinBtn.addEventListener("click",async()=>{
+  if(!currentDocId)return;
+  try{
+    let dateValue=new Date();
+    if(currentDocData.createdAt&&currentDocData.createdAt.toDate){
+      dateValue=currentDocData.createdAt.toDate();
+    }else if(currentDocData.timestamp){
+      dateValue=new Date(currentDocData.timestamp);
+    }
+    const bulletinData={
+      projectName:currentDocData.projectName||currentDocData.reportId||"",
+      barangay:currentDocData.barangay||"",
+      issue:currentDocData.description||"",
+      date:dateValue,
+      completionDate:currentDocData.completionDate||"",
+      imageURL:currentDocData.imageUrl||currentDocData.incidentImage||"",
+      afterImage:currentDocData.afterImage||"",
+      description:currentDocData.description||"",
+      latitude:currentDocData.latitude||"",
+      longitude:currentDocData.longitude||"",
+      status:currentDocData.status||"Completed",
+      startDate:currentDocData.startDate||"",
+      endDate:currentDocData.endDate||"",
+      contractor:currentDocData.contractor||"",
+      supplier:currentDocData.supplier||""
+    };
+    await setDoc(doc(db,"ad_bulletin",currentDocId),bulletinData);
+    alert("Report posted to bulletin!");
+    closeEditModal();
+  }catch(err){
+    console.error(err);
+    alert("Error posting to bulletin.");
+  }
+});
+
+window.addEventListener("click",ev=>{
+  if(ev.target===editModal){
+    closeEditModal();
+  }
+});
+
+logoutBtn.addEventListener("click",async()=>{
+  if(confirm("Are you sure you want to logout?")){
+    await signOut(auth);
+    window.location.href="logout.html";
+  }
+});
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){
+    window.location.href="logout.html";
+    return;
+  }
+  
+  try{
+    const userDocRef=doc(db,"users",user.uid);
+    
+    onSnapshot(userDocRef,async(userDoc)=>{
+      if(!userDoc.exists()){
+        window.location.href="logout.html";
+        return;
+      }
+      
+      const d=userDoc.data();
+      
+      if(d.position!=="Admin"){
+        alert("Unauthorized access!");
+        window.location.href="logout.html";
+        return;
+      }
+      
+      navUsername.textContent=d.name||d.firstName||"Admin";
+      const photoURL=d.photoURL||d.profilePic||"image.png";
+      navbarAvatar.src=photoURL;
+    });
+    
+    await setupRealtimeNotifications(db);
+    
+    const reportsQuery=query(collection(db,"reports"),orderBy("createdAt","desc"));
+    onSnapshot(reportsQuery,async snapshot=>{
+      completedBody.innerHTML="";
+      if(snapshot.empty){
+        completedBody.innerHTML='<tr><td colspan="14" style="text-align:center;padding:2rem;color:#999">No completed reports found.</td></tr>';
+        return;
+      }
+      
+      const completedReports=[];
+      for(const docSnap of snapshot.docs){
+        const r=docSnap.data(),status=(r.status||"").toString().toLowerCase().trim();
+        if(status==="completed"||status==="repaired"||status==="posted"){
+          completedReports.push(docSnap);
+        }
+      }
+      
+      if(completedReports.length===0){
+        completedBody.innerHTML='<tr><td colspan="14" style="text-align:center;padding:2rem;color:#999">No completed reports found.</td></tr>';
+        return;
+      }
+      
+      for(const docSnap of completedReports){
+        const row=await buildTableRow(docSnap);
+        completedBody.appendChild(row);
+      }
+      
+      document.querySelectorAll(".edit-link").forEach(a=>{
+        a.removeEventListener("click",openEditFromRow);
+        a.addEventListener("click",openEditFromRow);
+      });
+    });
+  }catch(err){
+    console.error(err);
+    window.location.href="logout.html";
+  }
+});
+</script>
+</body>
+</html>
