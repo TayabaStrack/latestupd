@@ -115,13 +115,6 @@
     .modal-close{position:absolute;top:20px;right:24px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
     .modal-close:hover{background:rgba(255,255,255,0.3)}
     .modal-body{padding:24px}
-    .photo-upload-section{text-align:center;margin-bottom:24px;padding:20px;background:linear-gradient(135deg,#f0f7ff 0%,#e3f2fd 100%);border-radius:10px;border:2px dashed #004aad}
-    .photo-upload-section .preview{display:block;margin:0 auto 16px;border-radius:50%;width:100px;height:100px;object-fit:cover;border:4px solid #004aad;box-shadow:0 4px 12px rgba(0,74,173,0.2)}
-    .upload-btn-wrapper{position:relative;display:inline-block}
-    .upload-btn-wrapper input[type=file]{display:none}
-    .upload-btn{background:#004aad;color:white;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:all 0.3s;border:none}
-    .upload-btn:hover{background:#00327a;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,74,173,0.3)}
-    .upload-hint{font-size:12px;color:#666;margin-top:10px}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     .form-field{display:flex;flex-direction:column}
     .form-field.full-width{grid-column:1 / -1}
@@ -153,10 +146,12 @@
 <body>
   <aside class="sidebar">
     <div>
-      <div class="sidebar-header">
-        <img src="logu.png" alt="Logo">
-        <h2>TayabaStrack</h2>
-      </div>
+      <div class="sidebar-header" style="display:flex;align-items:center;gap:12px;">
+            <div style="width:50px;height:50px;border-radius:50%;background:#fff;display:inline-flex;align-items:center;justify-content:center;overflow:visible;">
+                <img src="logo.png" alt="Logo" style="width:72px;height:72px;object-fit:contain;display:block;align-items:center;" />
+            </div>
+            <h2 style="margin:0;">TayabaStrack</h2>
+            </div>
       <ul class="sidebar-menu">
         <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
         <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
@@ -205,7 +200,6 @@
         <span class="username" id="navUsername">Loading...</span>
         <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
           <a href="profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
-          <a href="#" id="navLogoutBtn"><i class="fa fa-sign-out-alt"></i>&nbsp; Logout</a>
         </div>
       </div>
     </div>
@@ -302,18 +296,6 @@
       </div>
       
       <div class="modal-body">
-        <div class="photo-upload-section">
-          <img id="previewImg" class="preview" src="image.png" alt="Profile Preview">
-          <div class="upload-btn-wrapper">
-            <label class="upload-btn">
-              <i class="fa fa-camera"></i>
-              <span>Choose Photo</span>
-              <input type="file" id="editPhoto" accept="image/*">
-            </label>
-          </div>
-          <div class="upload-hint">JPG, PNG • Max 5MB</div>
-        </div>
-
         <div class="form-grid">
           <div class="form-field full-width">
             <label><i class="fa fa-user"></i> Full Name</label>
@@ -575,16 +557,12 @@
     window.addEventListener('click',(e)=>{if(!e.target.closest('.profile-dropdown')){dropdownMenu.classList.remove("show")}if(!e.target.closest('.notification-menu')&&e.target!==notificationBell){notificationMenu.classList.remove("show")}});
 
     const editModal=document.getElementById("editModal");
-    const editPhoto=document.getElementById("editPhoto");
-    const previewImg=document.getElementById("previewImg");
 
     window.openEditModal=function(){editModal.style.display="flex"};
     window.closeEditModal=function(){editModal.style.display="none"};
 
-    editPhoto.addEventListener("change",e=>{const file=e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){alert('Please select an image file');editPhoto.value='';return}if(file.size>5*1024*1024){alert('Image size should be less than 5MB');editPhoto.value='';return}const reader=new FileReader();reader.onload=ev=>{previewImg.src=ev.target.result};reader.readAsDataURL(file)});
-
     function updateAllProfilePhotos(photoURL) {
-      const photoElements = ["profilePic", "navAvatar", "previewImg"];
+      const photoElements = ["profilePic", "navAvatar"];
       photoElements.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -596,7 +574,61 @@
       });
     }
 
-    window.saveEdit=async function(){if(!currentUser){alert("No user logged in");return}const{updateDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");const{getStorage,ref,uploadBytes,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");const uid=currentUser.uid;const userRef=doc(window.db,"users",uid);const saveBtn=document.getElementById("saveBtn");const updated={name:document.getElementById("editName").value.trim(),ID:document.getElementById("editID").value.trim(),email:document.getElementById("editEmail").value.trim(),phone:document.getElementById("editPhone").value.trim(),address:document.getElementById("editAddress").value.trim(),gender:document.getElementById("editGender").value.trim()};if(!updated.name){alert("Name is required");return}const file=editPhoto.files[0];try{saveBtn.disabled=true;saveBtn.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving...';if(file){console.log("Starting photo upload for user:",uid);const storage=getStorage();const timestamp=Date.now();const fileExt=file.name.split('.').pop().toLowerCase();const allowedExts=['jpg','jpeg','png','gif','webp'];if(!allowedExts.includes(fileExt)){throw new Error("Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed.")}const fileName=`profile_${timestamp}.${fileExt}`;const storagePath=`user_images/${uid}/${fileName}`;const storageRef=ref(storage,storagePath);console.log("Uploading to:",storagePath);console.log("File size:",file.size,"bytes");const snapshot=await uploadBytes(storageRef,file);console.log("Upload complete! Snapshot:",snapshot);const url=await getDownloadURL(snapshot.ref);updated.photoURL=url;console.log("Photo URL obtained:",url)}console.log("Updating Firestore document...");await updateDoc(userRef,updated);console.log("Firestore update complete!");alert("Profile updated successfully!");closeEditModal();editPhoto.value=''}catch(err){console.error("=== ERROR DETAILS ===");console.error("Error object:",err);console.error("Error code:",err.code);console.error("Error message:",err.message);console.error("Stack trace:",err.stack);let errorMsg="Error updating profile:\n\n";if(err.code==="storage/unauthorized"||err.message.includes("storage/unauthorized")){errorMsg+="❌ Storage permission denied.\n\nPlease check your Firebase Storage rules in the Firebase Console:\n1. Go to Storage → Rules\n2. Make sure user_images/{userId}/{allPaths=**} allows write for authenticated users"}else if(err.code==="permission-denied"){errorMsg+="❌ Firestore permission denied.\n\nCheck your Firestore security rules."}else if(err.message.includes("Invalid file type")){errorMsg+=err.message}else{errorMsg+=err.message}alert(errorMsg)}finally{saveBtn.disabled=false;saveBtn.innerHTML='<i class="fa fa-save"></i> Save Changes'}};
+    window.saveEdit=async function(){
+      if(!currentUser){
+        alert("No user logged in");
+        return;
+      }
+      
+      const{updateDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const uid=currentUser.uid;
+      const userRef=doc(window.db,"users",uid);
+      const saveBtn=document.getElementById("saveBtn");
+      
+      const updated={
+        name:document.getElementById("editName").value.trim(),
+        ID:document.getElementById("editID").value.trim(),
+        email:document.getElementById("editEmail").value.trim(),
+        phone:document.getElementById("editPhone").value.trim(),
+        address:document.getElementById("editAddress").value.trim(),
+        gender:document.getElementById("editGender").value.trim()
+      };
+      
+      if(!updated.name){
+        alert("Name is required");
+        return;
+      }
+
+      try{
+        saveBtn.disabled=true;
+        saveBtn.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving...';
+        
+        console.log("Updating Firestore document...");
+        await updateDoc(userRef,updated);
+        console.log("Firestore update complete!");
+        
+        alert("Profile updated successfully!");
+        closeEditModal();
+        
+      }catch(err){
+        console.error("=== ERROR DETAILS ===");
+        console.error("Error object:",err);
+        console.error("Error code:",err.code);
+        console.error("Error message:",err.message);
+        
+        let errorMsg="Error updating profile:\n\n";
+        if(err.code==="permission-denied"){
+          errorMsg+="❌ Firestore permission denied.\n\nCheck your Firestore security rules.";
+        }else{
+          errorMsg+=err.message;
+        }
+        alert(errorMsg);
+        
+      }finally{
+        saveBtn.disabled=false;
+        saveBtn.innerHTML='<i class="fa fa-save"></i> Save Changes';
+      }
+    };
 
     window.addEventListener("click",(e)=>{if(e.target===editModal)closeEditModal()});
   </script>
@@ -623,11 +655,6 @@
     }
 
     document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
-    const navLogoutBtn = document.getElementById('navLogoutBtn');
-    navLogoutBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      handleLogout();
-    });
 
     onAuthStateChanged(auth, async(user)=>{
       if(!user) {
