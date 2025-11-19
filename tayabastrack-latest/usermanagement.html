@@ -177,6 +177,8 @@
     td button { padding: 0.4rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 4px; transition: all 0.2s; font-weight: 500; }
     td button:first-child { background: #004aad; color: #fff; }
     td button:first-child:hover { background: #003d8f; transform: translateY(-1px); }
+    td button:nth-child(2) { background: #17a2b8; color: #fff; }
+    td button:nth-child(2):hover { background: #138496; transform: translateY(-1px); }
     td button:last-child { background: #d9534f; color: #fff; }
     td button:last-child:hover { background: #c9302c; transform: translateY(-1px); }
 
@@ -415,7 +417,7 @@
 
   <div class="modal" id="userModal">
     <div class="modal-content">
-      <h2><i class="fa fa-user-plus"></i> Add User</h2>
+      <h2 id="modalTitle"><i class="fa fa-user-plus"></i> Add User</h2>
       <form id="addUserForm">
         <div class="form-group">
           <label><i class="fa fa-user"></i> First Name</label>
@@ -507,15 +509,25 @@
         </div>
         <div class="form-group">
           <label><i class="fa fa-briefcase"></i> Position</label>
-          <select id="position" required>
+          <select id="position" onchange="updatePositionOptions()" required>
             <option value="">Select Position</option>
             <option>Super Admin</option>
             <option>Admin</option>
-            <option>Barangay Official</option>
+            <option>Barangay Captain</option>
+            <option>Barangay Kagawad</option>
+            <option>Barangay Secretary</option>
+            <option>Barangay Treasurer</option>
+            <option>SK Chairperson</option>
+            <option>SK Kagawad</option>
+            <option>Barangay Health Worker</option>
+            <option>Barangay Tanod</option>
+            <option>Barangay Nutritionist</option>
+            <option>Day Care Worker</option>
+            <option>Other</option>
           </select>
         </div>
         
-        <div class="password-section">
+        <div class="password-section" id="passwordSection">
           <div class="password-header">
             <label><i class="fa fa-lock"></i> Password Generator</label>
           </div>
@@ -575,8 +587,178 @@
           <button type="button" class="cancel-btn" onclick="closeModal()">
             <i class="fa fa-times"></i> Cancel
           </button>
-          <button type="submit" class="save-btn">
+          <button type="submit" class="save-btn" id="submitBtn">
             <i class="fa fa-save"></i> Save User
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h2><i class="fa fa-user-edit"></i> Edit User</h2>
+      <form id="editUserForm">
+        <input type="hidden" id="editUserId">
+        <div class="form-group">
+          <label><i class="fa fa-user"></i> First Name</label>
+          <input type="text" id="editFirstName" placeholder="Enter first name" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa fa-user"></i> Last Name</label>
+          <input type="text" id="editLastName" placeholder="Enter last name" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa fa-id-card"></i> Full Name</label>
+          <input type="text" id="editName" placeholder="Enter full name" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa fa-envelope"></i> Email</label>
+          <input type="email" id="editEmail" placeholder="Enter email address" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa fa-map-marker-alt"></i> Barangay</label>
+          <select id="editBarangay" required>
+            <option value="">Select Barangay</option>
+            <option value="Alitao">Alitao</option>
+            <option value="Alsam Ibaba">Alsam Ibaba</option>
+            <option value="Alsam Ilaya">Alsam Ilaya</option>
+            <option value="Alupay">Alupay</option>
+            <option value="Angeles Zone I (Poblacion)">Angeles Zone I (Poblacion)</option>
+            <option value="Angeles Zone II">Angeles Zone II</option>
+            <option value="Angeles Zone III">Angeles Zone III</option>
+            <option value="Angeles Zone IV">Angeles Zone IV</option>
+            <option value="Angustias Zone I (Poblacion)">Angustias Zone I (Poblacion)</option>
+            <option value="Angustias Zone II">Angustias Zone II</option>
+            <option value="Angustias Zone III">Angustias Zone III</option>
+            <option value="Angustias Zone IV">Angustias Zone IV</option>
+            <option value="Anos">Anos</option>
+            <option value="Ayaas">Ayaas</option>
+            <option value="Baguio">Baguio</option>
+            <option value="Banilad">Banilad</option>
+            <option value="Ibabang Bukal">Ibabang Bukal</option>
+            <option value="Ilayang Bukal">Ilayang Bukal</option>
+            <option value="Calantas">Calantas</option>
+            <option value="Calumpang">Calumpang</option>
+            <option value="Camaysa">Camaysa</option>
+            <option value="Dapdap">Dapdap</option>
+            <option value="Kanlurang Domoit">Kanlurang Domoit</option>
+            <option value="Silangang Domoit">Silangang Domoit</option>
+            <option value="Gibanga">Gibanga</option>
+            <option value="Ibas">Ibas</option>
+            <option value="Ilasan Ibaba">Ilasan Ibaba</option>
+            <option value="Ilasan Ilaya">Ilasan Ilaya</option>
+            <option value="Ipilan">Ipilan</option>
+            <option value="Isabang">Isabang</option>
+            <option value="Katigan Kanluran">Katigan Kanluran</option>
+            <option value="Katigan Silangan">Katigan Silangan</option>
+            <option value="Lakawan">Lakawan</option>
+            <option value="Lalo">Lalo</option>
+            <option value="Lawigue">Lawigue</option>
+            <option value="Lita">Lita</option>
+            <option value="Malaoa">Malaoa</option>
+            <option value="Masin">Masin</option>
+            <option value="Mate">Mate</option>
+            <option value="Mateuna">Mateuna</option>
+            <option value="Mayowe">Mayowe</option>
+            <option value="Ibabang Nangka">Ibabang Nangka</option>
+            <option value="Ilayang Nangka">Ilayang Nangka</option>
+            <option value="Opias">Opias</option>
+            <option value="Ibabang Palale">Ibabang Palale</option>
+            <option value="Ilayang Palale">Ilayang Palale</option>
+            <option value="Kanlurang Palale">Kanlurang Palale</option>
+            <option value="Silangang Palale">Silangang Palale</option>
+            <option value="Pandakaki">Pandakaki</option>
+            <option value="Pook">Pook</option>
+            <option value="Potol">Potol</option>
+            <option value="San Diego Zone I (Poblacion)">San Diego Zone I (Poblacion)</option>
+            <option value="San Diego Zone II (Poblacion)">San Diego Zone II (Poblacion)</option>
+            <option value="San Diego Zone III">San Diego Zone III</option>
+            <option value="San Diego Zone IV">San Diego Zone IV</option>
+            <option value="San Isidro Zone I (Poblacion)">San Isidro Zone I (Poblacion)</option>
+            <option value="San Isidro Zone II">San Isidro Zone II</option>
+            <option value="San Isidro Zone III">San Isidro Zone III</option>
+            <option value="San Isidro Zone IV">San Isidro Zone IV</option>
+            <option value="San Roque Zone I (Poblacion)">San Roque Zone I (Poblacion)</option>
+            <option value="San Roque Zone II">San Roque Zone II</option>
+            <option value="Talolong">Talolong</option>
+            <option value="Tamlong">Tamlong</option>
+            <option value="Tongko">Tongko</option>
+            <option value="Valencia">Valencia</option>
+            <option value="Wakas">Wakas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fa fa-briefcase"></i> Position</label>
+          <select id="editPosition" required>
+            <option value="">Select Position</option>
+            <option>Super Admin</option>
+            <option>Admin</option>
+          </select>
+        </div>
+        
+        <div class="password-section">
+          <div class="password-header">
+            <label><i class="fa fa-lock"></i> Password Generator</label>
+          </div>
+          <div class="password-input-group">
+            <div class="password-input-wrapper">
+              <input type="password" id="editPassword" placeholder="Generated password" required readonly>
+              <button type="button" class="toggle-password" id="toggleEditPasswordIcon" onclick="toggleEditPasswordVisibility()">
+                <i class="fa fa-eye"></i>
+              </button>
+            </div>
+            <button type="button" class="generate-btn" onclick="generateEditPassword()">
+              <i class="fa fa-sync-alt"></i> Generate
+            </button>
+          </div>
+          
+          <div class="password-options">
+            <div class="options-title">
+              <i class="fa fa-cog"></i> Password Options
+            </div>
+            <div class="length-control">
+              <div class="length-header">
+                <span>Length:</span>
+                <span class="length-value" id="editLengthValue">16</span>
+              </div>
+              <input type="range" class="length-slider" id="editPasswordLength" min="8" max="32" value="16" oninput="updateEditLengthValue()">
+            </div>
+            <div class="checkbox-grid">
+              <div class="checkbox-item">
+                <input type="checkbox" id="editIncludeUppercase" checked>
+                <label for="editIncludeUppercase">Uppercase (A-Z)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="editIncludeLowercase" checked>
+                <label for="editIncludeLowercase">Lowercase (a-z)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="editIncludeNumbers" checked>
+                <label for="editIncludeNumbers">Numbers (0-9)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="editIncludeSymbols" checked>
+                <label for="editIncludeSymbols">Symbols (!@#$%)</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="strength-indicator">
+            <div class="strength-label">Password Strength:</div>
+            <div class="strength-bar">
+              <div class="strength-fill" id="editStrengthFill"></div>
+            </div>
+            <div class="strength-text" id="editStrengthText">Not Generated</div>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button type="button" class="cancel-btn" onclick="closeEditModal()">
+            <i class="fa fa-times"></i> Cancel
+          </button>
+          <button type="submit" class="save-btn">
+            <i class="fa fa-save"></i> Update User
           </button>
         </div>
       </form>
@@ -665,9 +847,29 @@
     document.getElementById('lengthValue').textContent = length;
   }
 
+  function updateEditLengthValue() {
+    const length = document.getElementById('editPasswordLength').value;
+    document.getElementById('editLengthValue').textContent = length;
+  }
+
   function togglePasswordVisibility() {
     const passwordInput = document.getElementById('password');
     const icon = document.getElementById('togglePasswordIcon').querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+
+  function toggleEditPasswordVisibility() {
+    const passwordInput = document.getElementById('editPassword');
+    const icon = document.getElementById('toggleEditPasswordIcon').querySelector('i');
     
     if (passwordInput.type === 'password') {
       passwordInput.type = 'text';
@@ -707,13 +909,43 @@
     }
 
     document.getElementById('password').value = password;
-    calculatePasswordStrength(password);
+    calculatePasswordStrength(password, 'strengthFill', 'strengthText');
   }
 
-  function calculatePasswordStrength(password) {
+  function generateEditPassword() {
+    const length = parseInt(document.getElementById('editPasswordLength').value);
+    const includeUppercase = document.getElementById('editIncludeUppercase').checked;
+    const includeLowercase = document.getElementById('editIncludeLowercase').checked;
+    const includeNumbers = document.getElementById('editIncludeNumbers').checked;
+    const includeSymbols = document.getElementById('editIncludeSymbols').checked;
+
+    if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
+      alert('Please select at least one character type!');
+      return;
+    }
+
+    let charset = '';
+    if (includeUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    if (includeLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
+    if (includeNumbers) charset += '0123456789';
+    if (includeSymbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+    let password = '';
+    const randomValues = new Uint32Array(length);
+    window.crypto.getRandomValues(randomValues);
+    
+    for (let i = 0; i < length; i++) {
+      password += charset[randomValues[i] % charset.length];
+    }
+
+    document.getElementById('editPassword').value = password;
+    calculatePasswordStrength(password, 'editStrengthFill', 'editStrengthText');
+  }
+
+  function calculatePasswordStrength(password, fillId, textId) {
     let strength = 0;
-    const strengthFill = document.getElementById('strengthFill');
-    const strengthText = document.getElementById('strengthText');
+    const strengthFill = document.getElementById(fillId);
+    const strengthText = document.getElementById(textId);
 
     if (password.length >= 8) strength += 20;
     if (password.length >= 12) strength += 20;
@@ -740,8 +972,25 @@
     }
   }
 
+  function updatePositionOptions() {
+    const position = document.getElementById('position').value;
+    const passwordSection = document.getElementById('passwordSection');
+    
+    const isAdminPosition = position === 'Super Admin' || position === 'Admin';
+    
+    if (isAdminPosition) {
+      passwordSection.style.display = 'block';
+    } else {
+      passwordSection.style.display = 'none';
+    }
+  }
+
   window.openAddModal = () => {
+    document.getElementById("modalTitle").innerHTML = '<i class="fa fa-user-plus"></i> Add User';
+    document.getElementById("submitBtn").innerHTML = '<i class="fa fa-save"></i> Save User';
     document.getElementById("userModal").style.display = "flex";
+    document.getElementById("position").value = "";
+    updatePositionOptions();
     generatePassword();
   };
   
@@ -751,6 +1000,31 @@
     document.getElementById('strengthFill').style.width = '0%';
     document.getElementById('strengthText').textContent = 'Not Generated';
     document.getElementById('strengthText').style.color = '#666';
+    document.getElementById('passwordSection').style.display = 'block';
+  };
+
+  window.openEditModal = (userId, userData) => {
+    document.getElementById("editModal").style.display = "flex";
+    document.getElementById("editUserId").value = userId;
+    document.getElementById("editFirstName").value = userData.firstName || "";
+    document.getElementById("editLastName").value = userData.lastName || "";
+    document.getElementById("editName").value = userData.name || "";
+    document.getElementById("editEmail").value = userData.email || "";
+    document.getElementById("editBarangay").value = userData.barangay || "";
+    document.getElementById("editPosition").value = userData.position || "";
+    document.getElementById("editPassword").value = userData.password || "";
+    
+    if (userData.password) {
+      calculatePasswordStrength(userData.password, 'editStrengthFill', 'editStrengthText');
+    }
+  };
+
+  window.closeEditModal = () => {
+    document.getElementById("editModal").style.display = "none";
+    document.getElementById("editUserForm").reset();
+    document.getElementById('editStrengthFill').style.width = '0%';
+    document.getElementById('editStrengthText').textContent = 'Not Generated';
+    document.getElementById('editStrengthText').style.color = '#666';
   };
 
   window.copyPassword = (password) => {
@@ -822,11 +1096,25 @@
   function isBarangayPosition(position) {
     if (!position) return false;
     const pos = position.toLowerCase().trim();
-    return pos.includes("barangay") || 
+    const barangayPositions = [
+      'barangay captain',
+      'barangay kagawad', 
+      'barangay secretary',
+      'barangay treasurer',
+      'sk chairperson',
+      'sk kagawad',
+      'barangay health worker',
+      'barangay tanod',
+      'barangay nutritionist',
+      'day care worker',
+      'other'
+    ];
+    
+    return barangayPositions.some(p => pos.includes(p)) || 
+           pos.includes("barangay") || 
            pos.includes("brgy") || 
            pos.includes("brgy.") || 
            pos.includes("kagawad") ||
-           pos.includes("sk kagawad") ||
            pos.includes("captain") ||
            pos.includes("secretary") ||
            pos.includes("treasurer");
@@ -1023,7 +1311,8 @@
     const position = document.getElementById("position").value;
     const password = document.getElementById("password").value;
 
-    const hashedPassword = CryptoJS.SHA256(password).toString();
+    const isAdminPosition = position === "Super Admin" || position === "Admin";
+    const hashedPassword = isAdminPosition ? CryptoJS.SHA256(password).toString() : null;
 
     const currentUser = auth.currentUser;
     if (!currentUser) {
@@ -1033,25 +1322,73 @@
 
     try {
       const userRef = doc(collection(db, "users"));
-      await setDoc(userRef, {
+      const userData = {
         firstName,
         lastName,
         name,
         email,
         barangay,
         position,
-        password: password,
-        hashedPassword: hashedPassword,
-        status: "Pending",
-        role: position === "Barangay Official" ? "Official" : "Admin",
         createdAt: serverTimestamp()
-      });
+      };
+
+      if (isAdminPosition) {
+        userData.password = password;
+        userData.hashedPassword = hashedPassword;
+        userData.status = "Pending";
+        userData.role = "Admin";
+      } else {
+        userData.status = "Active";
+        userData.role = "Official";
+      }
+
+      await setDoc(userRef, userData);
 
       closeModal();
       document.getElementById("addUserForm").reset();
-      alert("User added successfully (Pending approval)!");
+      
+      if (isAdminPosition) {
+        alert("Admin user added successfully (Pending approval)!");
+      } else {
+        alert("Barangay Official added successfully!");
+      }
     } catch (err) {
       console.error("Error adding user:", err);
+      alert("Error: " + err.message);
+    }
+  });
+
+  document.getElementById("editUserForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const userId = document.getElementById("editUserId").value;
+    const firstName = document.getElementById("editFirstName").value.trim();
+    const lastName = document.getElementById("editLastName").value.trim();
+    const name = document.getElementById("editName").value.trim();
+    const email = document.getElementById("editEmail").value.trim();
+    const barangay = document.getElementById("editBarangay").value.trim();
+    const position = document.getElementById("editPosition").value;
+    const password = document.getElementById("editPassword").value;
+
+    const hashedPassword = CryptoJS.SHA256(password).toString();
+
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        firstName,
+        lastName,
+        name,
+        email,
+        barangay,
+        position,
+        password,
+        hashedPassword,
+        updatedAt: serverTimestamp()
+      });
+
+      closeEditModal();
+      alert("User updated successfully!");
+    } catch (err) {
+      console.error("Error updating user:", err);
       alert("Error: " + err.message);
     }
   });
@@ -1069,6 +1406,9 @@
     inactiveTable.innerHTML = "";
     activeOfficialsTable.innerHTML = "";
     inactiveOfficialsTable.innerHTML = "";
+
+    const activeOfficialsData = [];
+    const inactiveOfficialsData = [];
 
     snap.forEach(docSnap => {
       const u = docSnap.data();
@@ -1098,6 +1438,7 @@
 
       if (isAdmin) {
         const tr = document.createElement("tr");
+        const userDataStr = JSON.stringify(u).replace(/"/g, '&quot;');
         tr.innerHTML = `
           <td>${u.firstName || ""}</td>
           <td>${u.lastName || ""}</td>
@@ -1107,11 +1448,10 @@
           <td>${passwordDisplay}</td>
           <td>${statusBadge}</td>
           <td>
-            ${
-              status === "pending" ? `<button onclick="approveUser('${docSnap.id}')">Approve</button>` :
-              status === "active" ? `<button onclick="deactivateUser('${docSnap.id}')">Deactivate</button>` :
-              status === "inactive" ? `<button onclick="activateUser('${docSnap.id}')">Activate</button>` : ''
-            }
+            ${status === "pending" ? `<button onclick="approveUser('${docSnap.id}')">Approve</button>` : ''}
+            ${status === "active" || status === "inactive" ? `<button onclick="openEditModal('${docSnap.id}', ${userDataStr})">Edit</button>` : ''}
+            ${status === "active" ? `<button onclick="deactivateUser('${docSnap.id}')">Deactivate</button>` : ''}
+            ${status === "inactive" ? `<button onclick="activateUser('${docSnap.id}')">Activate</button>` : ''}
             <button onclick="deleteUser('${docSnap.id}')">Delete</button>
           </td>
         `;
@@ -1123,21 +1463,55 @@
 
       if (isBrgyOfficial) {
         const contactDisplay = u.phoneNumber || u.contact || "—";
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${u.firstName || ""}</td>
-          <td>${u.lastName || u.surname || ""}</td>
-          <td>${u.email || ""}</td>
-          <td>${u.barangay || ""}</td>
-          <td>${u.position || ""}</td>
-          <td>${contactDisplay}</td>
-          <td>${statusBadge}</td>
-          <td><span class="view-only-cell"><i class="fa fa-eye"></i> View Only</span></td>
-        `;
+        const officialData = {
+          firstName: u.firstName || "",
+          lastName: u.lastName || u.surname || "",
+          email: u.email || "",
+          barangay: u.barangay || "",
+          position: u.position || "",
+          contact: contactDisplay,
+          statusBadge: statusBadge
+        };
 
-        if (status === "active") activeOfficialsTable.appendChild(tr);
-        else if (status === "inactive") inactiveOfficialsTable.appendChild(tr);
+        if (status === "active") {
+          activeOfficialsData.push(officialData);
+        } else if (status === "inactive") {
+          inactiveOfficialsData.push(officialData);
+        }
       }
+    });
+
+    activeOfficialsData.sort((a, b) => a.barangay.localeCompare(b.barangay));
+    inactiveOfficialsData.sort((a, b) => a.barangay.localeCompare(b.barangay));
+
+    activeOfficialsData.forEach(official => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${official.firstName}</td>
+        <td>${official.lastName}</td>
+        <td>${official.email}</td>
+        <td>${official.barangay}</td>
+        <td>${official.position}</td>
+        <td>${official.contact}</td>
+        <td>${official.statusBadge}</td>
+        <td><span class="view-only-cell"><i class="fa fa-eye"></i> View Only</span></td>
+      `;
+      activeOfficialsTable.appendChild(tr);
+    });
+
+    inactiveOfficialsData.forEach(official => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${official.firstName}</td>
+        <td>${official.lastName}</td>
+        <td>${official.email}</td>
+        <td>${official.barangay}</td>
+        <td>${official.position}</td>
+        <td>${official.contact}</td>
+        <td>${official.statusBadge}</td>
+        <td><span class="view-only-cell"><i class="fa fa-eye"></i> View Only</span></td>
+      `;
+      inactiveOfficialsTable.appendChild(tr);
     });
 
     if (pendingTable.innerHTML === "") {
