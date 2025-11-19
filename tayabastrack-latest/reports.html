@@ -948,31 +948,75 @@
             const q=query(collection(db,"reports"),orderBy("createdAt","desc"));
             
             reportsUnsub=onSnapshot(q,async (snap)=>{
-              pendingBody.innerHTML="";
-              ongoingBody.innerHTML="";
-              completedBody.innerHTML="";
-              declinedBody.innerHTML="";
+              const pendingReports = [];
+              const ongoingReports = [];
+              const completedReports = [];
+              const declinedReports = [];
               
               for (const docSnap of snap.docs) {
                 const data=docSnap.data();
                 const status=(data.status||"pending").toLowerCase().trim();
                 
                 if(status==="pending") {
-                  const row=await buildTableRow(docSnap, "pending");
-                  pendingBody.appendChild(row);
+                  pendingReports.push({docSnap, data});
                 }
                 else if(status==="ongoing") {
-                  const row=await buildTableRow(docSnap, "ongoing");
-                  ongoingBody.appendChild(row);
+                  ongoingReports.push({docSnap, data});
                 }
                 else if(status==="repaired" || status==="posted") {
-                  const row=await buildTableRow(docSnap, "completed");
-                  completedBody.appendChild(row);
+                  completedReports.push({docSnap, data});
                 }
                 else if(status==="declined") {
-                  const row=await buildTableRow(docSnap, "declined");
-                  declinedBody.appendChild(row);
+                  declinedReports.push({docSnap, data});
                 }
+              }
+              
+              pendingReports.sort((a, b) => {
+                const barangayA = (a.data.barangay || "").toLowerCase();
+                const barangayB = (b.data.barangay || "").toLowerCase();
+                return barangayA.localeCompare(barangayB);
+              });
+              
+              ongoingReports.sort((a, b) => {
+                const barangayA = (a.data.barangay || "").toLowerCase();
+                const barangayB = (b.data.barangay || "").toLowerCase();
+                return barangayA.localeCompare(barangayB);
+              });
+              
+              completedReports.sort((a, b) => {
+                const barangayA = (a.data.barangay || "").toLowerCase();
+                const barangayB = (b.data.barangay || "").toLowerCase();
+                return barangayA.localeCompare(barangayB);
+              });
+              
+              declinedReports.sort((a, b) => {
+                const barangayA = (a.data.barangay || "").toLowerCase();
+                const barangayB = (b.data.barangay || "").toLowerCase();
+                return barangayA.localeCompare(barangayB);
+              });
+              
+              pendingBody.innerHTML="";
+              for (const item of pendingReports) {
+                const row = await buildTableRow(item.docSnap, "pending");
+                pendingBody.appendChild(row);
+              }
+              
+              ongoingBody.innerHTML="";
+              for (const item of ongoingReports) {
+                const row = await buildTableRow(item.docSnap, "ongoing");
+                ongoingBody.appendChild(row);
+              }
+              
+              completedBody.innerHTML="";
+              for (const item of completedReports) {
+                const row = await buildTableRow(item.docSnap, "completed");
+                completedBody.appendChild(row);
+              }
+              
+              declinedBody.innerHTML="";
+              for (const item of declinedReports) {
+                const row = await buildTableRow(item.docSnap, "declined");
+                declinedBody.appendChild(row);
               }
             });
           }
