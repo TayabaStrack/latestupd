@@ -20,6 +20,12 @@
         .sidebar-menu li { margin: 0.5rem 0; }
         .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
         .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
+        .sidebar-submenu { list-style: none; padding-left: 2rem; display: none; }
+        .sidebar-submenu.show { display: block; }
+        .sidebar-submenu a { padding: 0.6rem 1rem; font-size: 0.9rem; }
+        .sidebar-menu .has-submenu > a { justify-content: space-between; }
+        .sidebar-menu .has-submenu > a .fa-chevron-down { transition: transform 0.3s; font-size: 0.7rem; }
+        .sidebar-menu .has-submenu.open > a .fa-chevron-down { transform: rotate(180deg); }
 
         .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
         .logout-btn { background-color: #d9534f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -111,16 +117,26 @@
 <body>
     <aside class="sidebar">
         <div>
-            <div class="sidebar-header" style="display:flex;align-items:center;gap:12px;">
-            <div style="width:50px;height:50px;border-radius:50%;background:#fff;display:inline-flex;align-items:center;justify-content:center;overflow:visible;">
-                <img src="logo.png" alt="Logo" style="width:72px;height:72px;object-fit:contain;display:block;align-items:center;" />
-            </div>
-            <h2 style="margin:0;">TayabaStrack</h2>
+            <div class="sidebar-header">
+                <img src="logo.png" alt="Logo" class="logo" />
+                <h2>TayabaStrack</h2>
             </div>
            <ul class="sidebar-menu">
                 <li class="active"><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
                 <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
-                <li><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
+                <li class="has-submenu">
+                  <a href="#" onclick="toggleSubmenu(event)">
+                    <span><i class="fa fa-tasks"></i>&nbsp; Manage Reports</span>
+                    <i class="fa fa-chevron-down"></i>
+                  </a>
+                  <ul class="sidebar-submenu">
+                    <li><a href="reports-pending.html"><i class="fa fa-clock"></i>&nbsp; Pending Reports</a></li>
+                    <li><a href="reports-ongoing.html"><i class="fa fa-spinner"></i>&nbsp; Ongoing Reports</a></li>
+                    <li><a href="reports-completed.html"><i class="fa fa-check-circle"></i>&nbsp; Completed Reports</a></li>
+                    <li><a href="reports-declined.html"><i class="fa fa-times-circle"></i>&nbsp; Declined Reports</a></li>
+                  </ul>
+                </li>
+                <li><a href="auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
             </ul>
         </div>
 
@@ -206,6 +222,14 @@
     </main>
 
     <script>
+        function toggleSubmenu(e) {
+            e.preventDefault();
+            const parent = e.currentTarget.parentElement;
+            parent.classList.toggle('open');
+            const submenu = parent.querySelector('.sidebar-submenu');
+            submenu.classList.toggle('show');
+        }
+
         function toggleMobileMenu() {
             document.querySelector('.sidebar').classList.toggle('mobile-open');
         }
