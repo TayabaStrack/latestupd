@@ -8,7 +8,7 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI', Tahoma, sans-serif;display:flex;min-height:100vh;background:#f5f7fb;color:#333;overflow:auto}
-    .sidebar{width:240px;min-width:240px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:left 0.3s}
+    .sidebar{width:240px;min-width:240px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:left 0.3s;overflow-y:auto}
     .sidebar-header{display:flex;align-items:center;justify-content:flex-start;gap:12px;margin-bottom:2rem;padding:0 1rem}
     .sidebar-header img{width:50px;height:50px;object-fit:contain}
     .sidebar-header h2{font-size:1.3rem;font-weight:600}
@@ -16,6 +16,12 @@
     .sidebar-menu li { margin: 0.5rem 0; }
     .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
     .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
+    .sidebar-submenu{list-style:none;padding-left:2rem;display:none}
+    .sidebar-submenu.show{display:block}
+    .sidebar-submenu a{padding:0.6rem 1rem;font-size:0.9rem}
+    .sidebar-menu .has-submenu > a{justify-content:space-between}
+    .sidebar-menu .has-submenu > a .fa-chevron-down{transition:transform 0.3s;font-size:0.7rem}
+    .sidebar-menu .has-submenu.open > a .fa-chevron-down{transform:rotate(180deg)}
     .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2)}
     .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
     .logout-btn:hover{background-color:#c9302c}
@@ -98,6 +104,12 @@
     td button:disabled{background:#ccc;cursor:not-allowed;opacity:0.6}
     .coords-vertical{display:flex;flex-direction:column;gap:2px;font-size:0.8rem}
     .coords-vertical span{white-space:nowrap}
+    .pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:12px}
+    .pagination button{padding:0.5rem 0.8rem;border:1px solid #ddd;background:#fff;color:#004aad;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all 0.2s}
+    .pagination button:hover:not(:disabled){background:#004aad;color:#fff}
+    .pagination button:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
+    .pagination button.active{background:#004aad;color:#fff;border-color:#004aad}
+    .pagination-info{color:#666;font-size:0.85rem;margin:0 8px}
     .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
     .modal-content{background:#fff;width:100%;max-width:980px;border-radius:12px;padding:18px;max-height:92vh;overflow:auto}
     .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -123,16 +135,26 @@
 <body>
   <aside class="sidebar">
     <div>
-      <div class="sidebar-header" style="display:flex;align-items:center;gap:12px;">
-            <div style="width:50px;height:50px;border-radius:50%;background:#fff;display:inline-flex;align-items:center;justify-content:center;overflow:visible;">
-                <img src="logo.png" alt="Logo" style="width:72px;height:72px;object-fit:contain;display:block;align-items:center;" />
-            </div>
-            <h2 style="margin:0;">TayabaStrack</h2>
-            </div>
+      <div class="sidebar-header">
+        <img src="logo.png" alt="Logo">
+        <h2>TayabaStrack</h2>
+      </div>
       <ul class="sidebar-menu">
         <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
         <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
-        <li class="active"><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
+        <li class="has-submenu open">
+          <a href="#" onclick="toggleSubmenu(event)">
+            <span><i class="fa fa-tasks"></i>&nbsp; Manage Reports</span>
+            <i class="fa fa-chevron-down"></i>
+          </a>
+          <ul class="sidebar-submenu show">
+            <li><a href="reports-pending.html"><i class="fa fa-clock"></i>&nbsp; Pending Reports</a></li>
+            <li><a href="reports-ongoing.html"><i class="fa fa-spinner"></i>&nbsp; Ongoing Reports</a></li>
+            <li><a href="reports-completed.html"><i class="fa fa-check-circle"></i>&nbsp; Completed Reports</a></li>
+            <li><a href="reports-declined.html"><i class="fa fa-times-circle"></i>&nbsp; Declined Reports</a></li>
+          </ul>
+        </li>
+        <li><a href="auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
       </ul>
     </div>
     <div class="sidebar-footer">
@@ -145,7 +167,7 @@
       <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
         <i class="fa fa-bars"></i>
       </button>
-      <h1>Manage Reports</h1>
+      <h1 id="pageTitle">Manage Reports</h1>
     </div>
     <div style="display:flex;align-items:center;gap:14px">
       <div style="position:relative">
@@ -192,7 +214,7 @@
         <div class="spinner" role="status" aria-label="Loading"></div>
       </div>
 
-      <div class="report-box">
+      <div class="report-box" id="pendingSection">
         <div class="report-box-header">
           <h2>Pending Reports (View Only - Admins Approve)</h2>
           <div class="report-actions">
@@ -213,9 +235,10 @@
             <tbody id="pendingBody"></tbody>
           </table>
         </div>
+        <div class="pagination" id="pendingPagination"></div>
       </div>
 
-      <div class="report-box">
+      <div class="report-box" id="ongoingSection" style="display:none">
         <div class="report-box-header">
           <h2>Ongoing Reports (View Only)</h2>
           <div class="report-actions">
@@ -236,9 +259,10 @@
             <tbody id="ongoingBody"></tbody>
           </table>
         </div>
+        <div class="pagination" id="ongoingPagination"></div>
       </div>
 
-      <div class="report-box">
+      <div class="report-box" id="completedSection" style="display:none">
         <div class="report-box-header">
           <h2>Completed Reports (Repaired - View Only)</h2>
           <div class="report-actions">
@@ -259,9 +283,10 @@
             <tbody id="completedBody"></tbody>
           </table>
         </div>
+        <div class="pagination" id="completedPagination"></div>
       </div>
 
-      <div class="report-box">
+      <div class="report-box" id="declinedSection" style="display:none">
         <div class="report-box-header">
           <h2>Declined Reports</h2>
           <div class="report-actions">
@@ -282,6 +307,7 @@
             <tbody id="declinedBody"></tbody>
           </table>
         </div>
+        <div class="pagination" id="declinedPagination"></div>
       </div>
     </section>
   </main>
@@ -302,6 +328,14 @@
   </div>
 
   <script>
+    function toggleSubmenu(e) {
+      e.preventDefault();
+      const parent = e.currentTarget.parentElement;
+      parent.classList.toggle('open');
+      const submenu = parent.querySelector('.sidebar-submenu');
+      submenu.classList.toggle('show');
+    }
+
     function toggleMobileMenu() {
       document.querySelector('.sidebar').classList.toggle('mobile-open');
     }
@@ -326,6 +360,35 @@
         }
       });
     }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const section = urlParams.get('section') || 'pending';
+    
+    function showSection(sectionName) {
+      document.getElementById('pendingSection').style.display = 'none';
+      document.getElementById('ongoingSection').style.display = 'none';
+      document.getElementById('completedSection').style.display = 'none';
+      document.getElementById('declinedSection').style.display = 'none';
+      
+      const sectionMap = {
+        'pending': 'pendingSection',
+        'ongoing': 'ongoingSection',
+        'completed': 'completedSection',
+        'declined': 'declinedSection'
+      };
+      
+      const titleMap = {
+        'pending': 'Pending Reports',
+        'ongoing': 'Ongoing Reports',
+        'completed': 'Completed Reports',
+        'declined': 'Declined Reports'
+      };
+      
+      document.getElementById(sectionMap[sectionName]).style.display = 'block';
+      document.getElementById('pageTitle').textContent = titleMap[sectionName];
+    }
+    
+    showSection(section);
   </script>
 
   <script type="module">
@@ -356,6 +419,10 @@
     const searchOngoing = document.getElementById("searchOngoing");
     const searchCompleted = document.getElementById("searchCompleted");
     const searchDeclined = document.getElementById("searchDeclined");
+    const pendingPagination = document.getElementById("pendingPagination");
+    const ongoingPagination = document.getElementById("ongoingPagination");
+    const completedPagination = document.getElementById("completedPagination");
+    const declinedPagination = document.getElementById("declinedPagination");
     
     const viewModal = document.getElementById("viewModal");
     const viewModalGrid = document.getElementById("viewModalGrid");
@@ -380,6 +447,21 @@
     let notificationsList = [];
     let trackedIds = new Set();
     let currentFilter = "all";
+    
+    let allPendingReports = [];
+    let allOngoingReports = [];
+    let allCompletedReports = [];
+    let allDeclinedReports = [];
+    let filteredPendingReports = [];
+    let filteredOngoingReports = [];
+    let filteredCompletedReports = [];
+    let filteredDeclinedReports = [];
+    
+    let currentPendingPage = 1;
+    let currentOngoingPage = 1;
+    let currentCompletedPage = 1;
+    let currentDeclinedPage = 1;
+    const itemsPerPage = 10;
 
     function normalizeStatus(status) {
       return (status || "").toLowerCase().trim();
@@ -544,12 +626,6 @@
       console.log("Notifications system active");
     }
 
-    function isBarangayPosition(position) {
-      if (!position) return false;
-      const pos = position.toLowerCase().trim();
-      return pos.includes("barangay captain") || pos.includes("brgy captain") || pos.includes("brgy. captain") || pos.includes("barangay official") || pos.includes("brgy official") || pos.includes("brgy. official");
-    }
-
     function formatTimestamp(timestamp) {
       if (!timestamp) return "";
       let date;
@@ -606,15 +682,206 @@
       return "Unknown";
     }
 
-    function attachSearch(inputElem, tableBody) {
-      inputElem.addEventListener("keyup", ()=>{
-        const val=inputElem.value.toLowerCase();
-        [...tableBody.rows].forEach(r=>{
-          const text=r.innerText.toLowerCase();
-          r.style.display=text.includes(val)?"":"none";
-        });
+    function renderPagination(paginationContainer, currentPage, totalItems, onPageChange) {
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+      
+      if (totalPages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+      }
+      
+      let html = '';
+      
+      html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="window.changePage('${paginationContainer.id}', ${currentPage - 1})">
+        <i class="fa fa-chevron-left"></i> Previous
+      </button>`;
+      
+      const startItem = (currentPage - 1) * itemsPerPage + 1;
+      const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+      html += `<span class="pagination-info">Showing ${startItem}-${endItem} of ${totalItems}</span>`;
+      
+      const maxVisiblePages = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      
+      if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+      
+      if (startPage > 1) {
+        html += `<button onclick="window.changePage('${paginationContainer.id}', 1)">1</button>`;
+        if (startPage > 2) {
+          html += `<span class="pagination-info">...</span>`;
+        }
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        html += `<button class="${i === currentPage ? 'active' : ''}" onclick="window.changePage('${paginationContainer.id}', ${i})">${i}</button>`;
+      }
+      
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          html += `<span class="pagination-info">...</span>`;
+        }
+        html += `<button onclick="window.changePage('${paginationContainer.id}', ${totalPages})">${totalPages}</button>`;
+      }
+      
+      html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="window.changePage('${paginationContainer.id}', ${currentPage + 1})">
+        Next <i class="fa fa-chevron-right"></i>
+      </button>`;
+      
+      paginationContainer.innerHTML = html;
+    }
+
+    window.changePage = function(paginationId, newPage) {
+      if (paginationId === 'pendingPagination') {
+        currentPendingPage = newPage;
+        renderPendingTable();
+      } else if (paginationId === 'ongoingPagination') {
+        currentOngoingPage = newPage;
+        renderOngoingTable();
+      } else if (paginationId === 'completedPagination') {
+        currentCompletedPage = newPage;
+        renderCompletedTable();
+      } else if (paginationId === 'declinedPagination') {
+        currentDeclinedPage = newPage;
+        renderDeclinedTable();
+      }
+    };
+
+    async function renderPendingTable() {
+      pendingBody.innerHTML = "";
+      const startIndex = (currentPendingPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageItems = filteredPendingReports.slice(startIndex, endIndex);
+      
+      for (const item of pageItems) {
+        const row = await buildTableRow(item.docSnap, "pending");
+        pendingBody.appendChild(row);
+      }
+      
+      renderPagination(pendingPagination, currentPendingPage, filteredPendingReports.length, (page) => {
+        currentPendingPage = page;
+        renderPendingTable();
       });
     }
+
+    async function renderOngoingTable() {
+      ongoingBody.innerHTML = "";
+      const startIndex = (currentOngoingPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageItems = filteredOngoingReports.slice(startIndex, endIndex);
+      
+      for (const item of pageItems) {
+        const row = await buildTableRow(item.docSnap, "ongoing");
+        ongoingBody.appendChild(row);
+      }
+      
+      renderPagination(ongoingPagination, currentOngoingPage, filteredOngoingReports.length, (page) => {
+        currentOngoingPage = page;
+        renderOngoingTable();
+      });
+    }
+
+    async function renderCompletedTable() {
+      completedBody.innerHTML = "";
+      const startIndex = (currentCompletedPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageItems = filteredCompletedReports.slice(startIndex, endIndex);
+      
+      for (const item of pageItems) {
+        const row = await buildTableRow(item.docSnap, "completed");
+        completedBody.appendChild(row);
+      }
+      
+      renderPagination(completedPagination, currentCompletedPage, filteredCompletedReports.length, (page) => {
+        currentCompletedPage = page;
+        renderCompletedTable();
+      });
+    }
+
+    async function renderDeclinedTable() {
+      declinedBody.innerHTML = "";
+      const startIndex = (currentDeclinedPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageItems = filteredDeclinedReports.slice(startIndex, endIndex);
+      
+      for (const item of pageItems) {
+        const row = await buildTableRow(item.docSnap, "declined");
+        declinedBody.appendChild(row);
+      }
+      
+      renderPagination(declinedPagination, currentDeclinedPage, filteredDeclinedReports.length, (page) => {
+        currentDeclinedPage = page;
+        renderDeclinedTable();
+      });
+    }
+
+    function attachSearch(inputElem, reportsArray, filteredArray, renderFunction, pageVariable) {
+      inputElem.addEventListener("keyup", () => {
+        const val = inputElem.value.toLowerCase();
+        
+        if (val === '') {
+          if (inputElem.id === 'searchPending') {
+            filteredPendingReports = [...allPendingReports];
+            currentPendingPage = 1;
+            renderPendingTable();
+          } else if (inputElem.id === 'searchOngoing') {
+            filteredOngoingReports = [...allOngoingReports];
+            currentOngoingPage = 1;
+            renderOngoingTable();
+          } else if (inputElem.id === 'searchCompleted') {
+            filteredCompletedReports = [...allCompletedReports];
+            currentCompletedPage = 1;
+            renderCompletedTable();
+          } else if (inputElem.id === 'searchDeclined') {
+            filteredDeclinedReports = [...allDeclinedReports];
+            currentDeclinedPage = 1;
+            renderDeclinedTable();
+          }
+          return;
+        }
+        
+        if (inputElem.id === 'searchPending') {
+          filteredPendingReports = allPendingReports.filter(item => {
+            const data = item.data;
+            const searchText = `${data.projectName || ''} ${data.barangay || ''} ${data.description || ''}`.toLowerCase();
+            return searchText.includes(val);
+          });
+          currentPendingPage = 1;
+          renderPendingTable();
+        } else if (inputElem.id === 'searchOngoing') {
+          filteredOngoingReports = allOngoingReports.filter(item => {
+            const data = item.data;
+            const searchText = `${data.projectName || ''} ${data.barangay || ''} ${data.description || ''}`.toLowerCase();
+            return searchText.includes(val);
+          });
+          currentOngoingPage = 1;
+          renderOngoingTable();
+        } else if (inputElem.id === 'searchCompleted') {
+          filteredCompletedReports = allCompletedReports.filter(item => {
+            const data = item.data;
+            const searchText = `${data.projectName || ''} ${data.barangay || ''} ${data.description || ''}`.toLowerCase();
+            return searchText.includes(val);
+          });
+          currentCompletedPage = 1;
+          renderCompletedTable();
+        } else if (inputElem.id === 'searchDeclined') {
+          filteredDeclinedReports = allDeclinedReports.filter(item => {
+            const data = item.data;
+            const searchText = `${data.projectName || ''} ${data.barangay || ''} ${data.description || ''}`.toLowerCase();
+            return searchText.includes(val);
+          });
+          currentDeclinedPage = 1;
+          renderDeclinedTable();
+        }
+      });
+    }
+
+    attachSearch(searchPending, allPendingReports, filteredPendingReports, renderPendingTable, 'currentPendingPage');
+    attachSearch(searchOngoing, allOngoingReports, filteredOngoingReports, renderOngoingTable, 'currentOngoingPage');
+    attachSearch(searchCompleted, allCompletedReports, filteredCompletedReports, renderCompletedTable, 'currentCompletedPage');
+    attachSearch(searchDeclined, allDeclinedReports, filteredDeclinedReports, renderDeclinedTable, 'currentDeclinedPage');
 
     async function openViewModal(e){
       e.preventDefault();
@@ -864,11 +1131,6 @@
       return tr;
     }
 
-    attachSearch(searchPending, pendingBody);
-    attachSearch(searchOngoing, ongoingBody);
-    attachSearch(searchCompleted, completedBody);
-    attachSearch(searchDeclined, declinedBody);
-
     closeViewModal.onclick=()=>{
       viewModal.style.display="none";
     };
@@ -997,29 +1259,25 @@
                 return barangayA.localeCompare(barangayB);
               });
               
-              pendingBody.innerHTML="";
-              for (const item of pendingReports) {
-                const row = await buildTableRow(item.docSnap, "pending");
-                pendingBody.appendChild(row);
-              }
+              allPendingReports = pendingReports;
+              allOngoingReports = ongoingReports;
+              allCompletedReports = completedReports;
+              allDeclinedReports = declinedReports;
               
-              ongoingBody.innerHTML="";
-              for (const item of ongoingReports) {
-                const row = await buildTableRow(item.docSnap, "ongoing");
-                ongoingBody.appendChild(row);
-              }
+              filteredPendingReports = [...allPendingReports];
+              filteredOngoingReports = [...allOngoingReports];
+              filteredCompletedReports = [...allCompletedReports];
+              filteredDeclinedReports = [...allDeclinedReports];
               
-              completedBody.innerHTML="";
-              for (const item of completedReports) {
-                const row = await buildTableRow(item.docSnap, "completed");
-                completedBody.appendChild(row);
-              }
+              currentPendingPage = 1;
+              currentOngoingPage = 1;
+              currentCompletedPage = 1;
+              currentDeclinedPage = 1;
               
-              declinedBody.innerHTML="";
-              for (const item of declinedReports) {
-                const row = await buildTableRow(item.docSnap, "declined");
-                declinedBody.appendChild(row);
-              }
+              await renderPendingTable();
+              await renderOngoingTable();
+              await renderCompletedTable();
+              await renderDeclinedTable();
             });
           }
         }, (error) => {
