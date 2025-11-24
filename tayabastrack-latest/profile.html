@@ -80,6 +80,13 @@
     .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
     .calendar-header h3{color:#0b3e89;font-size:1.1rem;margin:0}
     .sync-status{font-size:0.75rem;color:#666;margin-top:8px;text-align:center;padding:8px;background:#f0f8ff;border-radius:6px}
+    .calendar-legend{display:flex;justify-content:center;gap:1rem;margin-top:10px;padding:8px;background:#f9fafb;border-radius:6px;flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:6px;font-size:0.75rem;color:#666}
+    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .legend-dot.start{background:#1cc88a}
+    .legend-dot.end{background:#f6c23e}
+    .legend-dot.ongoing{background:#004aad}
+    .legend-label{font-weight:500}
     .calendar-view{background:#fff;border-radius:8px;overflow:hidden;width:100%}
     .calendar-nav{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#004aad;color:#fff}
     .calendar-nav button{background:rgba(255,255,255,0.2);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:13px}
@@ -95,26 +102,54 @@
     .calendar-day-number{font-size:11px;font-weight:600;color:#333;margin-bottom:2px}
     .calendar-day.other-month .calendar-day-number{color:#999}
     .event-indicators{display:flex;gap:2px;flex-wrap:wrap;margin-top:auto;padding-top:2px}
+    .event-count-badge{background:#004aad;color:#fff;font-size:9px;font-weight:700;border-radius:10px;padding:2px 6px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;min-width:18px}
+    .event-count-badge:hover{background:#00327a;transform:scale(1.1)}
     .event-dot{width:7px;height:7px;border-radius:50%;cursor:pointer;transition:transform 0.2s}
     .event-dot:hover{transform:scale(1.4)}
     .event-dot.start{background:#1cc88a}
     .event-dot.end{background:#f6c23e}
     .event-dot.ongoing{background:#004aad}
-    .event-tooltip{position:fixed;background:white;border:2px solid #004aad;border-radius:8px;padding:16px;box-shadow:0 6px 20px rgba(0,0,0,0.3);z-index:10000;min-width:320px;max-width:400px;font-size:13px;display:none;pointer-events:none}
-    .event-tooltip.show{display:block}
-    .event-tooltip-title{font-weight:700;color:#004aad;margin-bottom:12px;font-size:16px;border-bottom:2px solid #004aad;padding-bottom:8px}
-    .event-tooltip-section{margin:10px 0;line-height:1.6}
-    .event-tooltip-label{font-weight:600;color:#666;display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
-    .event-tooltip-value{color:#222;font-size:14px;display:block}
-    .event-tooltip-image{width:100%;max-height:180px;object-fit:cover;border-radius:6px;margin-top:12px;border:2px solid #e0e0e0}
+    .day-events-modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:9999;padding:20px}
+    .day-events-modal.show{display:flex}
+    .day-events-content{background:white;border-radius:12px;width:100%;max-width:700px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalSlideIn 0.3s ease-out}
+    @keyframes modalSlideIn{from{opacity:0;transform:translateY(-30px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .day-events-header{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:20px 24px;border-radius:12px 12px 0 0;position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center}
+    .day-events-header h2{color:#fff;margin:0;font-size:1.3rem;font-weight:600}
+    .day-events-close{background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+    .day-events-close:hover{background:rgba(255,255,255,0.3)}
+    .day-events-body{padding:20px}
+    .event-card{background:#f8f9fa;border-left:4px solid #004aad;border-radius:8px;padding:16px;margin-bottom:16px;transition:all 0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+    .event-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.15);transform:translateY(-2px)}
+    .event-card:last-child{margin-bottom:0}
+    .event-card-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:12px}
+    .event-card-title{font-size:1.1rem;font-weight:700;color:#004aad;margin:0}
+    .event-card-status{display:flex;gap:6px;align-items:center}
+    .status-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:0.5px}
+    .status-badge.start{background:#d4edda;color:#155724}
+    .status-badge.ongoing{background:#cce5ff;color:#004085}
+    .status-badge.end{background:#fff3cd;color:#856404}
+    .event-card-details{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .event-detail{display:flex;flex-direction:column}
+    .event-detail-label{font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+    .event-detail-value{font-size:14px;color:#333;font-weight:500}
+    .event-card-image{width:100%;max-height:200px;object-fit:cover;border-radius:6px;margin-top:12px;border:2px solid #e0e0e0}
+    .event-card-dates{display:flex;gap:12px;padding-top:12px;border-top:1px solid #dee2e6;margin-top:12px;font-size:12px;color:#666}
+    .event-card-dates span{display:flex;align-items:center;gap:6px}
+    .event-card-dates i{color:#004aad}
     .modal{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;padding:20px}
     .modal-content{background:white;border-radius:12px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;animation:modalSlideIn 0.3s ease-out}
-    @keyframes modalSlideIn{from{opacity:0;transform:translateY(-30px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
     .modal-header{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:20px 24px;border-radius:12px 12px 0 0;position:relative}
     .modal-header h2{color:#fff;margin:0;font-size:1.3rem;font-weight:600}
     .modal-close{position:absolute;top:20px;right:24px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
     .modal-close:hover{background:rgba(255,255,255,0.3)}
     .modal-body{padding:24px}
+    .photo-upload-section{text-align:center;margin-bottom:24px;padding:20px;background:linear-gradient(135deg,#f0f7ff 0%,#e3f2fd 100%);border-radius:10px;border:2px dashed #004aad}
+    .photo-upload-section .preview{display:block;margin:0 auto 16px;border-radius:50%;width:100px;height:100px;object-fit:cover;border:4px solid #004aad;box-shadow:0 4px 12px rgba(0,74,173,0.2)}
+    .upload-btn-wrapper{position:relative;display:inline-block}
+    .upload-btn-wrapper input[type=file]{display:none}
+    .upload-btn{background:#004aad;color:white;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:all 0.3s;border:none}
+    .upload-btn:hover{background:#00327a;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,74,173,0.3)}
+    .upload-hint{font-size:12px;color:#666;margin-top:10px}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     .form-field{display:flex;flex-direction:column}
     .form-field.full-width{grid-column:1 / -1}
@@ -138,7 +173,8 @@
       .calendar-day{min-height:45px}
       .event-dot{width:6px;height:6px}
       .form-grid{grid-template-columns:1fr}
-      .modal-content{max-width:95%}
+      .modal-content,.day-events-content{max-width:95%}
+      .event-card-details{grid-template-columns:1fr}
     }
     .mobile-menu-btn{display:none;background:none;border:none;color:#004aad;font-size:1.5rem;cursor:pointer;padding:0.5rem}
   </style>
@@ -146,17 +182,16 @@
 <body>
   <aside class="sidebar">
     <div>
-      <div class="sidebar-header" style="display:flex;align-items:center;gap:12px;">
-            <div style="width:50px;height:50px;border-radius:50%;background:#fff;display:inline-flex;align-items:center;justify-content:center;overflow:visible;">
-                <img src="logo.png" alt="Logo" style="width:72px;height:72px;object-fit:contain;display:block;align-items:center;" />
-            </div>
-            <h2 style="margin:0;">TayabaStrack</h2>
-            </div>
-      <ul class="sidebar-menu">
-        <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
-        <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
-        <li><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
-      </ul>
+      <div class="sidebar-header">
+        <img src="logu.png" alt="Logo">
+        <h2>TayabaStrack</h2>
+      </div>
+       <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
+                <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
+                <li><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
+                <li><a href="auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
+            </ul>
     </div>
     <div class="sidebar-footer">
       <button class="logout-btn" id="sidebarLogoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</button>
@@ -200,6 +235,7 @@
         <span class="username" id="navUsername">Loading...</span>
         <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
           <a href="profile.html"><i class="fa fa-user"></i>&nbsp; Profile</a>
+          <a href="#" id="navLogoutBtn"><i class="fa fa-sign-out-alt"></i>&nbsp; Logout</a>
         </div>
       </div>
     </div>
@@ -261,31 +297,35 @@
             <div class="sync-status" id="syncStatus">
               <i class="fa fa-check-circle" style="color:#1cc88a"></i> Auto-syncing ongoing reports...
             </div>
+            <div class="calendar-legend">
+              <div class="legend-item">
+                <span class="legend-dot start"></span>
+                <span class="legend-label">Start Date</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot ongoing"></span>
+                <span class="legend-label">Ongoing</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot end"></span>
+                <span class="legend-label">End Date</span>
+              </div>
+            </div>
           </div>
         </aside>
       </div>
     </div>
   </main>
 
-  <div class="event-tooltip" id="eventTooltip">
-    <div class="event-tooltip-title" id="tooltipTitle"></div>
-    <div class="event-tooltip-section">
-      <span class="event-tooltip-label">Project Name</span>
-      <span class="event-tooltip-value" id="tooltipProjectName"></span>
+  <div class="day-events-modal" id="dayEventsModal">
+    <div class="day-events-content">
+      <div class="day-events-header">
+        <h2 id="dayEventsTitle">Inspections</h2>
+        <button class="day-events-close" onclick="closeDayEventsModal()">&times;</button>
+      </div>
+      <div class="day-events-body" id="dayEventsBody">
+      </div>
     </div>
-    <div class="event-tooltip-section">
-      <span class="event-tooltip-label">Barangay</span>
-      <span class="event-tooltip-value" id="tooltipBarangay"></span>
-    </div>
-    <div class="event-tooltip-section">
-      <span class="event-tooltip-label">Contractor & Supplier</span>
-      <span class="event-tooltip-value" id="tooltipContractorSupplier"></span>
-    </div>
-    <div class="event-tooltip-section">
-      <span class="event-tooltip-label">Allocated Budget</span>
-      <span class="event-tooltip-value" id="tooltipBudget"></span>
-    </div>
-    <img id="tooltipImage" class="event-tooltip-image" style="display:none;" alt="Project">
   </div>
 
   <div class="modal" id="editModal">
@@ -296,6 +336,18 @@
       </div>
       
       <div class="modal-body">
+        <div class="photo-upload-section">
+          <img id="previewImg" class="preview" src="image.png" alt="Profile Preview">
+          <div class="upload-btn-wrapper">
+            <label class="upload-btn">
+              <i class="fa fa-camera"></i>
+              <span>Choose Photo</span>
+              <input type="file" id="editPhoto" accept="image/*">
+            </label>
+          </div>
+          <div class="upload-hint">JPG, PNG • Max 5MB</div>
+        </div>
+
         <div class="form-grid">
           <div class="form-field full-width">
             <label><i class="fa fa-user"></i> Full Name</label>
@@ -534,17 +586,211 @@
     function previousMonth(){selectedMonth--;if(selectedMonth<0){selectedMonth=11;selectedYear--}renderCalendar()}
     function nextMonth(){selectedMonth++;if(selectedMonth>11){selectedMonth=0;selectedYear++}renderCalendar()}
 
-    function renderCalendar(){const firstDay=new Date(selectedYear,selectedMonth,1);const lastDay=new Date(selectedYear,selectedMonth+1,0);const prevLastDay=new Date(selectedYear,selectedMonth,0);const firstDayIndex=firstDay.getDay();const lastDayIndex=lastDay.getDay();const nextDays=7-lastDayIndex-1;const months=['January','February','March','April','May','June','July','August','September','October','November','December'];document.getElementById('currentMonthYear').textContent=`${months[selectedMonth]} ${selectedYear}`;let days='';for(let x=firstDayIndex;x>0;x--){days+=`<div class="calendar-day other-month"><div class="calendar-day-number">${prevLastDay.getDate()-x+1}</div></div>`}for(let i=1;i<=lastDay.getDate();i++){const isToday=i===currentDate.getDate()&&selectedMonth===currentDate.getMonth()&&selectedYear===currentDate.getFullYear();const currentDateStr=`${selectedYear}-${String(selectedMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;const eventsForDay=ongoingReports.filter(report=>{const start=formatDateForComparison(report.startDate);const end=formatDateForComparison(report.endDate);return currentDateStr>=start&&currentDateStr<=end});let eventHTML='';if(eventsForDay.length>0){eventHTML='<div class="event-indicators">';eventsForDay.forEach(report=>{const start=formatDateForComparison(report.startDate);const end=formatDateForComparison(report.endDate);let dotClass='event-dot';if(currentDateStr===start){dotClass+=' start'}else if(currentDateStr===end){dotClass+=' end'}else{dotClass+=' ongoing'}eventHTML+=`<div class="${dotClass}" onclick="showEventTooltip(event,'${report.id}')" title="${report.projectName}"></div>`});eventHTML+='</div>'}days+=`<div class="calendar-day ${isToday?'today':''}"><div class="calendar-day-number">${i}</div>${eventHTML}</div>`}for(let j=1;j<=nextDays;j++){days+=`<div class="calendar-day other-month"><div class="calendar-day-number">${j}</div></div>`}document.getElementById('calendarDays').innerHTML=days}
+    function renderCalendar(){
+      const firstDay=new Date(selectedYear,selectedMonth,1);
+      const lastDay=new Date(selectedYear,selectedMonth+1,0);
+      const prevLastDay=new Date(selectedYear,selectedMonth,0);
+      const firstDayIndex=firstDay.getDay();
+      const lastDayIndex=lastDay.getDay();
+      const nextDays=7-lastDayIndex-1;
+      const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+      document.getElementById('currentMonthYear').textContent=`${months[selectedMonth]} ${selectedYear}`;
+      
+      let days='';
+      
+      for(let x=firstDayIndex;x>0;x--){
+        days+=`<div class="calendar-day other-month"><div class="calendar-day-number">${prevLastDay.getDate()-x+1}</div></div>`;
+      }
+      
+      for(let i=1;i<=lastDay.getDate();i++){
+        const isToday=i===currentDate.getDate()&&selectedMonth===currentDate.getMonth()&&selectedYear===currentDate.getFullYear();
+        const currentDateStr=`${selectedYear}-${String(selectedMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+        
+        const eventsForDay=ongoingReports.filter(report=>{
+          const start=formatDateForComparison(report.startDate);
+          const end=formatDateForComparison(report.endDate);
+          return currentDateStr>=start&&currentDateStr<=end;
+        });
+        
+        let eventHTML='';
+        if(eventsForDay.length>0){
+          eventHTML='<div class="event-indicators">';
+          if(eventsForDay.length===1){
+            const report=eventsForDay[0];
+            const start=formatDateForComparison(report.startDate);
+            const end=formatDateForComparison(report.endDate);
+            let dotClass='event-dot';
+            if(currentDateStr===start){
+              dotClass+=' start';
+            }else if(currentDateStr===end){
+              dotClass+=' end';
+            }else{
+              dotClass+=' ongoing';
+            }
+            eventHTML+=`<div class="${dotClass}" onclick="showDayEvents(event,'${currentDateStr}')" title="${report.projectName}"></div>`;
+          }else{
+            eventHTML+=`<div class="event-count-badge" onclick="showDayEvents(event,'${currentDateStr}')" title="View ${eventsForDay.length} inspections">${eventsForDay.length}</div>`;
+          }
+          eventHTML+='</div>';
+        }
+        
+        days+=`<div class="calendar-day ${isToday?'today':''}" onclick="showDayEvents(event,'${currentDateStr}')"><div class="calendar-day-number">${i}</div>${eventHTML}</div>`;
+      }
+      
+      for(let j=1;j<=nextDays;j++){
+        days+=`<div class="calendar-day other-month"><div class="calendar-day-number">${j}</div></div>`;
+      }
+      
+      document.getElementById('calendarDays').innerHTML=days;
+    }
 
-    function formatDateForComparison(date){if(!date)return'';const d=date instanceof Date?date:(date.toDate?date.toDate():new Date(date));return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+    function formatDateForComparison(date){
+      if(!date)return'';
+      const d=date instanceof Date?date:(date.toDate?date.toDate():new Date(date));
+      return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
 
-    async function loadOngoingReports(db){try{const{collection,query,where,onSnapshot}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");const{getStorage,ref,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");const storage=getStorage();const reportsRef=collection(db,'reports');const q=query(reportsRef,where('status','==','Ongoing'));onSnapshot(q,async(snapshot)=>{ongoingReports=[];let eventCount=0;for(const doc of snapshot.docs){const data=doc.data();if(data.startDate&&data.endDate){const startDate=data.startDate.toDate?data.startDate.toDate():new Date(data.startDate);const endDate=data.endDate.toDate?data.endDate.toDate():new Date(data.endDate);let imageUrl='';if(data.incidentImage||data.imageUrl||data.image){const imagePath=data.incidentImage||data.imageUrl||data.image;if(imagePath.startsWith('http')){imageUrl=imagePath}else{try{imageUrl=await getDownloadURL(ref(storage,imagePath))}catch(err){console.error("Error loading image:",err)}}}ongoingReports.push({id:doc.id,startDate:startDate,endDate:endDate,projectName:data.projectName||'Unnamed Project',barangay:data.barangay||'N/A',contractor:data.contractor||'N/A',supplier:data.supplier||'N/A',allocatedBudget:data.allocatedBudget||'N/A',imageUrl:imageUrl});eventCount++}}renderCalendar();const syncStatus=document.getElementById('syncStatus');syncStatus.innerHTML=`<i class="fa fa-check-circle" style="color:#1cc88a"></i> Auto-synced ${eventCount} ongoing inspection${eventCount!==1?'s':''} - Last updated: ${new Date().toLocaleTimeString()}`})}catch(err){console.error("Error loading ongoing reports:",err);document.getElementById('syncStatus').innerHTML=`<i class="fa fa-exclamation-circle" style="color:#d9534f"></i> Error syncing calendar`}}
+    window.showDayEvents=function(event,dateStr){
+      event.stopPropagation();
+      
+      const eventsForDay=ongoingReports.filter(report=>{
+        const start=formatDateForComparison(report.startDate);
+        const end=formatDateForComparison(report.endDate);
+        return dateStr>=start&&dateStr<=end;
+      });
+      
+      if(eventsForDay.length===0){
+        return;
+      }
+      
+      const dateObj=new Date(dateStr);
+      const formattedDate=dateObj.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+      
+      document.getElementById('dayEventsTitle').textContent=`Inspections on ${formattedDate}`;
+      
+      const dayEventsBody=document.getElementById('dayEventsBody');
+      dayEventsBody.innerHTML=eventsForDay.map(report=>{
+        const start=formatDateForComparison(report.startDate);
+        const end=formatDateForComparison(report.endDate);
+        
+        let statusBadge='';
+        let statusClass='';
+        if(dateStr===start){
+          statusBadge='<span class="status-badge start">Start Date</span>';
+          statusClass='start';
+        }else if(dateStr===end){
+          statusBadge='<span class="status-badge end">End Date</span>';
+          statusClass='end';
+        }else{
+          statusBadge='<span class="status-badge ongoing">Ongoing</span>';
+          statusClass='ongoing';
+        }
+        
+        const imageHTML=report.imageUrl?`<img src="${report.imageUrl}" class="event-card-image" alt="${report.projectName}"/>`:'';
+        
+        return`
+          <div class="event-card">
+            <div class="event-card-header">
+              <h3 class="event-card-title">${report.projectName}</h3>
+              <div class="event-card-status">${statusBadge}</div>
+            </div>
+            
+            <div class="event-card-details">
+              <div class="event-detail">
+                <span class="event-detail-label"><i class="fa fa-map-marker-alt"></i> Barangay</span>
+                <span class="event-detail-value">${report.barangay}</span>
+              </div>
+              
+              <div class="event-detail">
+                <span class="event-detail-label"><i class="fa fa-dollar-sign"></i> Budget</span>
+                <span class="event-detail-value">${report.allocatedBudget}</span>
+              </div>
+              
+              <div class="event-detail">
+                <span class="event-detail-label"><i class="fa fa-hard-hat"></i> Contractor</span>
+                <span class="event-detail-value">${report.contractor}</span>
+              </div>
+              
+              <div class="event-detail">
+                <span class="event-detail-label"><i class="fa fa-truck"></i> Supplier</span>
+                <span class="event-detail-value">${report.supplier}</span>
+              </div>
+            </div>
+            
+            ${imageHTML}
+            
+            <div class="event-card-dates">
+              <span><i class="fa fa-calendar-day"></i> Start: ${new Date(report.startDate).toLocaleDateString()}</span>
+              <span><i class="fa fa-calendar-check"></i> End: ${new Date(report.endDate).toLocaleDateString()}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('dayEventsModal').classList.add('show');
+    };
 
-    window.showEventTooltip=function(event,reportId){event.stopPropagation();const report=ongoingReports.find(r=>r.id===reportId);if(!report)return;const tooltip=document.getElementById('eventTooltip');document.getElementById('tooltipTitle').textContent=`Inspection Details`;document.getElementById('tooltipProjectName').textContent=report.projectName;document.getElementById('tooltipBarangay').textContent=report.barangay;document.getElementById('tooltipContractorSupplier').textContent=`${report.contractor} & ${report.supplier}`;document.getElementById('tooltipBudget').textContent=report.allocatedBudget;const tooltipImage=document.getElementById('tooltipImage');if(report.imageUrl){tooltipImage.src=report.imageUrl;tooltipImage.style.display='block'}else{tooltipImage.style.display='none'}const x=event.clientX;const y=event.clientY;tooltip.style.left=x+15+'px';tooltip.style.top=y+15+'px';setTimeout(()=>{const rect=tooltip.getBoundingClientRect();if(rect.right>window.innerWidth){tooltip.style.left=(x-rect.width-15)+'px'}if(rect.bottom>window.innerHeight){tooltip.style.top=(y-rect.height-15)+'px'}},0);tooltip.classList.add('show');document.addEventListener('click',hideEventTooltipOnClick)};
+    window.closeDayEventsModal=function(){
+      document.getElementById('dayEventsModal').classList.remove('show');
+    };
 
-    function hideEventTooltipOnClick(e){if(!e.target.closest('.event-dot')&&!e.target.closest('.event-tooltip')){hideEventTooltip();document.removeEventListener('click',hideEventTooltipOnClick)}}
-
-    window.hideEventTooltip=function(){document.getElementById('eventTooltip').classList.remove('show')};
+    async function loadOngoingReports(db){
+      try{
+        const{collection,query,where,onSnapshot}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const{getStorage,ref,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+        const storage=getStorage();
+        const reportsRef=collection(db,'reports');
+        const q=query(reportsRef,where('status','==','Ongoing'));
+        
+        onSnapshot(q,async(snapshot)=>{
+          ongoingReports=[];
+          let eventCount=0;
+          
+          for(const doc of snapshot.docs){
+            const data=doc.data();
+            if(data.startDate&&data.endDate){
+              const startDate=data.startDate.toDate?data.startDate.toDate():new Date(data.startDate);
+              const endDate=data.endDate.toDate?data.endDate.toDate():new Date(data.endDate);
+              
+              let imageUrl='';
+              if(data.incidentImage||data.imageUrl||data.image){
+                const imagePath=data.incidentImage||data.imageUrl||data.image;
+                if(imagePath.startsWith('http')){
+                  imageUrl=imagePath;
+                }else{
+                  try{
+                    imageUrl=await getDownloadURL(ref(storage,imagePath));
+                  }catch(err){
+                    console.error("Error loading image:",err);
+                  }
+                }
+              }
+              
+              ongoingReports.push({
+                id:doc.id,
+                startDate:startDate,
+                endDate:endDate,
+                projectName:data.projectName||'Unnamed Project',
+                barangay:data.barangay||'N/A',
+                contractor:data.contractor||'N/A',
+                supplier:data.supplier||'N/A',
+                allocatedBudget:data.allocatedBudget||'N/A',
+                imageUrl:imageUrl
+              });
+              eventCount++;
+            }
+          }
+          
+          renderCalendar();
+          
+          const syncStatus=document.getElementById('syncStatus');
+          syncStatus.innerHTML=`<i class="fa fa-check-circle" style="color:#1cc88a"></i> Auto-synced ${eventCount} ongoing inspection${eventCount!==1?'s':''} - Last updated: ${new Date().toLocaleTimeString()}`;
+        });
+      }catch(err){
+        console.error("Error loading ongoing reports:",err);
+        document.getElementById('syncStatus').innerHTML=`<i class="fa fa-exclamation-circle" style="color:#d9534f"></i> Error syncing calendar`;
+      }
+    }
 
     const dropdownMenu=document.getElementById('dropdownMenu');
     const profileToggle=document.getElementById('profileToggle');
@@ -554,15 +800,47 @@
       notificationMenu.classList.remove("show");
     });
 
-    window.addEventListener('click',(e)=>{if(!e.target.closest('.profile-dropdown')){dropdownMenu.classList.remove("show")}if(!e.target.closest('.notification-menu')&&e.target!==notificationBell){notificationMenu.classList.remove("show")}});
+    window.addEventListener('click',(e)=>{
+      if(!e.target.closest('.profile-dropdown')){
+        dropdownMenu.classList.remove("show");
+      }
+      if(!e.target.closest('.notification-menu')&&e.target!==notificationBell){
+        notificationMenu.classList.remove("show");
+      }
+      if(e.target.id==='dayEventsModal'){
+        closeDayEventsModal();
+      }
+    });
 
     const editModal=document.getElementById("editModal");
+    const editPhoto=document.getElementById("editPhoto");
+    const previewImg=document.getElementById("previewImg");
 
     window.openEditModal=function(){editModal.style.display="flex"};
     window.closeEditModal=function(){editModal.style.display="none"};
 
+    editPhoto.addEventListener("change",e=>{
+      const file=e.target.files[0];
+      if(!file)return;
+      if(!file.type.startsWith('image/')){
+        alert('Please select an image file');
+        editPhoto.value='';
+        return;
+      }
+      if(file.size>5*1024*1024){
+        alert('Image size should be less than 5MB');
+        editPhoto.value='';
+        return;
+      }
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        previewImg.src=ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
     function updateAllProfilePhotos(photoURL) {
-      const photoElements = ["profilePic", "navAvatar"];
+      const photoElements = ["profilePic", "navAvatar", "previewImg"];
       photoElements.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -581,6 +859,9 @@
       }
       
       const{updateDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const{ref,uploadBytes,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+      const{getStorage}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+      
       const uid=currentUser.uid;
       const userRef=doc(window.db,"users",uid);
       const saveBtn=document.getElementById("saveBtn");
@@ -598,39 +879,42 @@
         alert("Name is required");
         return;
       }
-
+      
+      const file=editPhoto.files[0];
+      
       try{
         saveBtn.disabled=true;
         saveBtn.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving...';
         
-        console.log("Updating Firestore document...");
-        await updateDoc(userRef,updated);
-        console.log("Firestore update complete!");
+        if(file){
+          const storage=getStorage();
+          const timestamp=Date.now();
+          const fileExt=file.name.split('.').pop();
+          const fileName=`profile_${timestamp}.${fileExt}`;
+          const storageRef=ref(storage,`user_images/${uid}/${fileName}`);
+          await uploadBytes(storageRef,file);
+          const url=await getDownloadURL(storageRef);
+          updated.photoURL=url;
+          console.log("Photo uploaded successfully:",url);
+          updateAllProfilePhotos(url);
+        }
         
+        await updateDoc(userRef,updated);
         alert("Profile updated successfully!");
         closeEditModal();
-        
+        editPhoto.value='';
       }catch(err){
-        console.error("=== ERROR DETAILS ===");
-        console.error("Error object:",err);
-        console.error("Error code:",err.code);
-        console.error("Error message:",err.message);
-        
-        let errorMsg="Error updating profile:\n\n";
-        if(err.code==="permission-denied"){
-          errorMsg+="❌ Firestore permission denied.\n\nCheck your Firestore security rules.";
-        }else{
-          errorMsg+=err.message;
-        }
-        alert(errorMsg);
-        
+        console.error("Error details:",err);
+        alert("Error updating profile: "+err.message);
       }finally{
         saveBtn.disabled=false;
         saveBtn.innerHTML='<i class="fa fa-save"></i> Save Changes';
       }
     };
 
-    window.addEventListener("click",(e)=>{if(e.target===editModal)closeEditModal()});
+    window.addEventListener("click",(e)=>{
+      if(e.target===editModal)closeEditModal();
+    });
   </script>
 
   <script type="module">
@@ -655,6 +939,11 @@
     }
 
     document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
+    const navLogoutBtn = document.getElementById('navLogoutBtn');
+    navLogoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      handleLogout();
+    });
 
     onAuthStateChanged(auth, async(user)=>{
       if(!user) {
