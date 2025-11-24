@@ -68,47 +68,6 @@
       text-align: center;
     }
 
-    .tabs {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-      gap: 0;
-    }
-
-    .tab {
-      flex: 1;
-      padding: 0.8rem;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 600;
-      background: #b3d1f0;
-      color: #003d8a;
-      transition: all 0.2s ease;
-      position: relative;
-      z-index: 1;
-    }
-
-    .tab:first-child {
-      border-radius: 6px 0 0 6px;
-    }
-
-    .tab:last-child {
-      border-radius: 0 6px 6px 0;
-    }
-
-    .tab.active {
-      background: #004aad;
-      color: #fff;
-      font-weight: bold;
-      transform: scale(1.02);
-      z-index: 2;
-    }
-
-    .tab:hover:not(.active) {
-      background: #8cb8e6;
-    }
-
     h2 {
       margin-bottom: 1.5rem;
       color: #004aad;
@@ -225,16 +184,6 @@
     a:hover {
       text-decoration: underline;
       color: #00327a;
-    }
-
-    /* Roles with smooth transition */
-    .role {
-      display: none;
-      animation: fadeIn 0.4s ease;
-    }
-
-    .active-role {
-      display: block;
     }
 
     @keyframes fadeIn {
@@ -370,53 +319,28 @@
     </div>
 
     <h1>Welcome to TayabasTrack</h1>
-    <p id="access-panel">Super Admin Access Panel</p>
+    <p>Secure Access Portal</p>
   </div>
 
   <!-- Right Panel -->
   <div class="right-panel">
     <div class="login-box">
 
-      <div class="tabs">
-        <button class="tab active" id="tab-super" onclick="switchRole('super')">Super Admin</button>
-        <button class="tab" id="tab-admin" onclick="switchRole('admin')">Admin</button>
+      <h2>Login</h2>
+      <input type="email" id="user-email" placeholder="Email Address" onkeypress="handleKeyPress(event)"/>
+      <div class="password-container">
+        <input type="password" id="user-password" placeholder="Password" onkeypress="handleKeyPress(event)"/>
+        <button type="button" class="password-toggle" onclick="togglePassword('user-password', this)" aria-label="Toggle password visibility">
+          <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path class="eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle class="eye-open" cx="12" cy="12" r="3"></circle>
+            <path class="eye-closed" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" style="display:none;"></path>
+            <line class="eye-closed" x1="1" y1="1" x2="23" y2="23" style="display:none;"></line>
+          </svg>
+        </button>
       </div>
-
-      <div id="role-super" class="role active-role">
-        <h2>Super Admin Login</h2>
-        <input type="email" id="super-email" placeholder="Email Address" onkeypress="handleKeyPress(event, 'super')"/>
-        <div class="password-container">
-          <input type="password" id="super-password" placeholder="Password" onkeypress="handleKeyPress(event, 'super')"/>
-          <button type="button" class="password-toggle" onclick="togglePassword('super-password', this)" aria-label="Toggle password visibility">
-            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path class="eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle class="eye-open" cx="12" cy="12" r="3"></circle>
-              <path class="eye-closed" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" style="display:none;"></path>
-              <line class="eye-closed" x1="1" y1="1" x2="23" y2="23" style="display:none;"></line>
-            </svg>
-          </button>
-        </div>
-        <button onclick="loginUser('super')">Login</button>
-        <a href="#" onclick="openModal(); return false;">Forgot Password?</a>
-      </div>
-
-      <div id="role-admin" class="role">
-        <h2>Admin Login</h2>
-        <input type="email" id="admin-email" placeholder="Email Address" onkeypress="handleKeyPress(event, 'admin')"/>
-        <div class="password-container">
-          <input type="password" id="admin-password" placeholder="Password" onkeypress="handleKeyPress(event, 'admin')"/>
-          <button type="button" class="password-toggle" onclick="togglePassword('admin-password', this)" aria-label="Toggle password visibility">
-            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path class="eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle class="eye-open" cx="12" cy="12" r="3"></circle>
-              <path class="eye-closed" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" style="display:none;"></path>
-              <line class="eye-closed" x1="1" y1="1" x2="23" y2="23" style="display:none;"></line>
-            </svg>
-          </button>
-        </div>
-        <button onclick="loginUser('admin')">Login</button>
-        <a href="#" onclick="openModal(); return false;">Forgot Password?</a>
-      </div>
+      <button onclick="loginUser()">Login</button>
+      <a href="#" onclick="openModal(); return false;">Forgot Password?</a>
 
     </div>
   </div>
@@ -517,10 +441,10 @@
       }
     }
 
-    // ✅ Login Function with enhanced debugging and error handling
-    window.loginUser = async function(type) {
-      const emailInput = document.getElementById(type + "-email");
-      const passwordInput = document.getElementById(type + "-password");
+    // ✅ Unified Login Function - Automatically detects role
+    window.loginUser = async function() {
+      const emailInput = document.getElementById("user-email");
+      const passwordInput = document.getElementById("user-password");
       const loginButton = event.target;
 
       const email = emailInput.value.trim();
@@ -537,7 +461,6 @@
 
       try {
         console.log("🔐 Attempting login for:", email);
-        console.log("📍 Login type:", type);
         
         // Step 1: Authenticate with Firebase Auth
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -574,21 +497,11 @@
         console.log("   Normalized Position:", normalizedPosition);
         console.log("   Original Status:", status);
         console.log("   Normalized Status:", normalizedStatus);
-        console.log("   Login Type:", type);
 
-        // 🔒 Strict role check (case-insensitive)
-        if (type === "super" && normalizedPosition !== "super admin") {
-          console.warn("⚠️ Access denied: User is not a Super Admin");
-          alert("You are not authorized to login here. Please use the correct login panel.");
-          await signOut(auth);
-          loginButton.disabled = false;
-          loginButton.textContent = "Login";
-          return;
-        }
-
-        if (type === "admin" && normalizedPosition !== "admin") {
-          console.warn("⚠️ Access denied: User is not an Admin");
-          alert("You are not authorized to login here. Please use the correct login panel.");
+        // 🔒 Validate user has a recognized position
+        if (normalizedPosition !== "super admin" && normalizedPosition !== "admin") {
+          console.warn("⚠️ Access denied: User does not have Super Admin or Admin role");
+          alert("You are not authorized to access this system. Only Super Admin and Admin accounts can login here.");
           await signOut(auth);
           loginButton.disabled = false;
           loginButton.textContent = "Login";
@@ -647,13 +560,7 @@
           window.location.href = "dashboard.html";
         } else if (normalizedPosition === "admin") {
           console.log("➡️ Redirecting to Admin dashboard");
-          window.location.href = "ad_dash.html";
-        } else {
-          console.error("❌ Unknown position:", position);
-          alert("Unknown position. Please contact the administrator.");
-          await signOut(auth);
-          loginButton.disabled = false;
-          loginButton.textContent = "Login";
+          window.location.href = "ad_dashboard.html";
         }
 
       } catch (error) {
@@ -683,53 +590,9 @@
     }
 
     // ✅ Handle Enter key press for login
-    window.handleKeyPress = function(event, type) {
+    window.handleKeyPress = function(event) {
       if (event.key === 'Enter') {
-        loginUser(type);
-      }
-    }
-
-    // ✅ Smooth Role Switching
-    window.switchRole = function(role) {
-      // Remove active classes
-      document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-      document.querySelectorAll(".role").forEach(roleDiv => roleDiv.classList.remove("active-role"));
-
-      // Clear input fields and reset password visibility
-      if (role === 'super') {
-        document.getElementById("admin-email").value = "";
-        document.getElementById("admin-password").value = "";
-        document.getElementById("admin-password").type = "password";
-        const adminEyeOpen = document.querySelectorAll('#role-admin .eye-open');
-        const adminEyeClosed = document.querySelectorAll('#role-admin .eye-closed');
-        adminEyeOpen.forEach(el => el.style.display = 'block');
-        adminEyeClosed.forEach(el => el.style.display = 'none');
-        
-        document.getElementById("tab-super").classList.add("active");
-        document.getElementById("role-super").classList.add("active-role");
-        document.getElementById("access-panel").textContent = "Super Admin Access Panel";
-        
-        // Focus on super admin email field
-        setTimeout(() => {
-          document.getElementById("super-email").focus();
-        }, 100);
-      } else {
-        document.getElementById("super-email").value = "";
-        document.getElementById("super-password").value = "";
-        document.getElementById("super-password").type = "password";
-        const superEyeOpen = document.querySelectorAll('#role-super .eye-open');
-        const superEyeClosed = document.querySelectorAll('#role-super .eye-closed');
-        superEyeOpen.forEach(el => el.style.display = 'block');
-        superEyeClosed.forEach(el => el.style.display = 'none');
-        
-        document.getElementById("tab-admin").classList.add("active");
-        document.getElementById("role-admin").classList.add("active-role");
-        document.getElementById("access-panel").textContent = "Admin Access Panel";
-        
-        // Focus on admin email field
-        setTimeout(() => {
-          document.getElementById("admin-email").focus();
-        }, 100);
+        loginUser();
       }
     }
 
@@ -768,7 +631,7 @@
 
     // Auto-focus on email field when page loads
     window.addEventListener('load', function() {
-      document.getElementById("super-email").focus();
+      document.getElementById("user-email").focus();
     });
   </script>
 </body>
