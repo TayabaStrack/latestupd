@@ -67,6 +67,47 @@
         }
         .logout-btn:hover { background-color: #c9302c; }
 
+/* Submenu Styling - Add this to your existing CSS */
+.sidebar-submenu {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-submenu.open {
+  max-height: 500px; /* Adjust based on number of items */
+}
+
+.sidebar-submenu li {
+  margin: 0;
+}
+
+.sidebar-submenu a {
+  padding: 0.6rem 1.5rem 0.6rem 3rem !important;
+  font-size: 0.9rem;
+  border-left: 4px solid transparent;
+}
+
+.sidebar-submenu li.active a {
+  background: #042f68;
+  border-left: 4px solid #fff;
+}
+
+.has-submenu > a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.has-submenu > a .fa-chevron-down {
+  transition: transform 0.3s ease;
+  margin-left: auto;
+}
+        
         /* NAVBAR - IMPROVED VERSION */
         .navbar {
             position: fixed;
@@ -227,10 +268,22 @@
 
             <ul class="sidebar-menu">
                 <li class="active"><a href="ad_dash.html"><i class="fa fa-home"></i> Dashboard</a></li>
-                <li><a href="ad_reports.html"><i class="fa fa-tasks"></i> Manage Reports</a></li>
+                <li class="has-submenu">
+                  <a href="#" onclick="toggleSubmenu(event)">
+                    <span><i class="fa fa-tasks"></i>&nbsp; Manage Reports</span>
+                    <i class="fa fa-chevron-down"></i>
+                  </a>
+                  <ul class="sidebar-submenu">
+                    <li><a href="ad_repopend.html"><i class="fa fa-clock"></i>&nbsp; Pending Reports</a></li>
+                    <li><a href="ad_repon.html"><i class="fa fa-spinner"></i>&nbsp; Ongoing Reports</a></li>
+                    <li><a href="ad_repcom.html"><i class="fa fa-check-circle"></i>&nbsp; Completed Reports</a></li>
+                    <li><a href="ad_repdec.html"><i class="fa fa-times-circle"></i>&nbsp; Declined Reports</a></li>
+                  </ul>
+                </li>
                 <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
                 <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
                 <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
+                 <li><a href="ad_auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
             </ul>
         </div>
 
@@ -687,6 +740,8 @@
             notificationMenu.classList.remove("show");
         }
     });
+
+    
 </script>
 
     <!-- Firebase + Chart -->
@@ -839,6 +894,7 @@
                 }
             }
         }
+        
     </script>
 </body>
 </html>
