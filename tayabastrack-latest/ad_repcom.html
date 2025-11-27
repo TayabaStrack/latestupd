@@ -271,80 +271,107 @@
     </div>
   </nav>
 
+<main class="main">
+  <section class="reports-section">
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+    </div>
 
-  <main class="main">
-    <section class="reports-section">
-      <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-      </div>
-
-      <div class="report-box">
-        <div class="report-box-header">
-          <h2>Completed Reports (Repaired)</h2>
-          <div class="report-actions">
-            <input id="searchCompleted" placeholder="Search completed...">
-          </div>
-        </div>
-        <div class="scroll-hint">
-          <i class="fas fa-arrows-alt-h"></i>
-          <span>Scroll horizontally to view all columns</span>
-        </div>
-        <div class="table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Allocated Budget</th><th>Start Date & Deadline</th><th>Contractor & Supplier</th><th>Completion Date</th><th>Penalties</th><th>Reporter Position</th><th>Status</th><th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="completedBody"></tbody>
-          </table>
+    <div class="report-box">
+      <div class="report-box-header">
+        <h2>Completed Reports (Repaired)</h2>
+        <div class="report-actions">
+          <input id="searchCompleted" placeholder="Search completed...">
         </div>
       </div>
-
-    </section>
-  </main>
- 
-  <div class="modal" id="editCompletedModal" aria-hidden="true">
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editCompletedTitle">
-      <div class="modal-header">
-        <h2 id="editCompletedTitle">Edit Completion & View Progress</h2>
-        <button class="close-btn" id="closeCompletedModal" title="Close">&times;</button>
+      <div class="scroll-hint">
+        <i class="fas fa-arrows-alt-h"></i>
+        <span>Scroll horizontally to view all columns</span>
       </div>
-      <div class="modal-body">
-        <div class="modal-grid">
-          <div class="modal-row">
-            <label>Project Name</label>
-            <input type="text" id="editCompletedProjectName" disabled>
-          </div>
-          <div class="modal-row">
-            <label for="editCompletionDate">Completion Date</label>
-            <input type="date" id="editCompletionDate">
-          </div>
-          <div class="modal-row full-width">
-            <label for="editPenalties">Penalties (if applicable)</label>
-            <textarea id="editPenalties" placeholder="Enter penalties if project exceeded deadline..."></textarea>
-          </div>
-          <div class="modal-row full-width">
-            <label>Progress Report (View Only)</label>
-            <textarea id="viewProgressReport" disabled style="min-height:120px"></textarea>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-cancel" id="cancelCompletedEdit">Cancel</button>
-        <button class="btn btn-save" id="saveCompletedChanges">Save Changes</button>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Project Name</th>
+              <th>Barangay</th>
+              <th>Description</th>
+              <th>Dimensions (W×H)</th>
+              <th>Image</th>
+              <th>Coordinates</th>
+              <th>Timestamp</th>
+              <th>Proposed Budget</th>
+              <th>Allocated Budget</th>
+              <th>Start Date & Deadline</th>
+              <th>Contractor & Supplier</th>
+              <th>Completion Date</th>
+              <th>Penalties</th>
+              <th>Reporter Position</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="completedBody"></tbody>
+        </table>
       </div>
     </div>
+  </section>
+</main>
+
+<div class="modal" id="editCompletedModal" aria-hidden="true">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editCompletedTitle">
+    <div class="modal-header">
+      <h2 id="editCompletedTitle">Edit Completion & View Progress</h2>
+      <button class="close-btn" id="closeCompletedModal" title="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
+        <div class="modal-row">
+          <label>Project Name</label>
+          <input type="text" id="editCompletedProjectName" disabled>
+        </div>
+        <div class="modal-row">
+          <label for="editCompletionDate">Completion Date</label>
+          <input type="date" id="editCompletionDate">
+        </div>
+        <div class="modal-row">
+          <label for="editTargetDate">Target/Deadline Date</label>
+          <input type="date" id="editTargetDate">
+        </div>
+        <div class="modal-row">
+          <label for="editAdditionalExtension">Additional Extension (Days)</label>
+          <input type="number" id="editAdditionalExtension" min="0" value="0" placeholder="0">
+        </div>
+        <div class="modal-row">
+          <label for="editUndeliveredPercent">Undelivered Percentage (%)</label>
+          <input type="number" id="editUndeliveredPercent" min="0" max="100" value="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="modal-row">
+          <label>Actual Duration (Days)</label>
+          <input type="text" id="editActualDuration" disabled>
+        </div>
+        <div class="modal-row full-width">
+          <label for="editPenalties">Penalties (Liquidated Damages)</label>
+          <textarea id="editPenalties" placeholder="Liquidated Damages will appear here automatically..." disabled></textarea>
+        </div>
+        <div class="modal-row full-width">
+          <label>Progress Report (View Only)</label>
+          <textarea id="viewProgressReport" disabled style="min-height:120px"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" id="cancelCompletedEdit">Cancel</button>
+      <button class="btn btn-save" id="saveCompletedChanges">Save Changes</button>
+    </div>
   </div>
+</div>
 
 <script type="module">
-  // ===== FIREBASE IMPORTS =====
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, query, orderBy, onSnapshot, getDoc, doc, updateDoc, setDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, query, orderBy, onSnapshot, getDoc, doc, updateDoc, setDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-  // ===== FIREBASE CONFIGURATION =====
   const firebaseConfig = {
     apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
     authDomain: "tayabastrack-23b95.firebaseapp.com",
@@ -359,693 +386,746 @@
   const db = getFirestore(app);
   const storage = getStorage(app);
 
-  // ===== DOM ELEMENTS =====
+  // DOM Elements
   const completedBody = document.getElementById("completedBody");
   const searchCompleted = document.getElementById("searchCompleted");
   const editCompletedModal = document.getElementById("editCompletedModal");
   const closeCompletedModal = document.getElementById("closeCompletedModal");
   const cancelCompletedEdit = document.getElementById("cancelCompletedEdit");
   const saveCompletedChanges = document.getElementById("saveCompletedChanges");
-  const navUsername = document.getElementById("navUsername");
-  const navAvatar = document.getElementById("navAvatar");
   const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
-  const loadingOverlay = document.getElementById("loadingOverlay");
+  const profileToggle = document.getElementById("profileToggle");
+  const dropdownMenu = document.getElementById("dropdownMenu");
   const notificationBell = document.getElementById("notificationBell");
-  const notificationMenu = document.getElementById("notificationMenu");
   const notificationBadge = document.getElementById("notificationBadge");
+  const notificationMenu = document.getElementById("notificationMenu");
   const notificationList = document.getElementById("notificationList");
-  const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
-  const markAllReadBtn = document.getElementById("markAllReadBtn");
-  const dropdownMenu = document.getElementById('dropdownMenu');
-  const profileToggle = document.getElementById('profileToggle');
 
-  // ===== GLOBAL VARIABLES =====
   let currentDocId = null;
   let reportsUnsub = null;
-  let notificationsList = [];
-  let seenNotificationIds = new Set();
-  let trackedUserStatuses = {};
-  let trackedReportIds = new Set();
-  let currentFilter = "all";
+  let notificationsUnsub = null;
+  let currentFilter = 'all';
 
-  // ===== MOBILE MENU FUNCTIONS =====
-  window.toggleMobileMenu = function() {
-    document.getElementById('sidebar').classList.toggle('mobile-open');
-  };
-
-  // Close mobile menu when clicking outside
-  document.addEventListener('click', function(e) {
-    const sidebar = document.getElementById('sidebar');
-    const menuBtn = document.querySelector('.mobile-menu-btn');
-    
-    if (window.innerWidth <= 980 && 
-        !sidebar.contains(e.target) && 
-        !menuBtn.contains(e.target)) {
-      sidebar.classList.remove('mobile-open');
-    }
-  });
-
-// ===== IMPROVED SUBMENU TOGGLE FUNCTION =====
-window.toggleSubmenu = function(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  
-  const parentLi = event.currentTarget.parentElement;
-  const submenu = parentLi.querySelector('.sidebar-submenu');
-  const chevron = event.currentTarget.querySelector('.fa-chevron-down');
-  
-  if (submenu) {
-    const isOpen = submenu.classList.contains('open');
-    
-    // Close all other submenus first
-    document.querySelectorAll('.sidebar-submenu').forEach(sub => {
-      if (sub !== submenu) {
-        sub.classList.remove('open');
-      }
-    });
-    
-    // Reset all chevrons
-    document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
-      if (chev !== chevron) {
-        chev.style.transform = 'rotate(0deg)';
-      }
-    });
-    
-    // Toggle current submenu
-    if (isOpen) {
-      submenu.classList.remove('open');
-      if (chevron) {
-        chevron.style.transform = 'rotate(0deg)';
-      }
-    } else {
-      submenu.classList.add('open');
-      if (chevron) {
-        chevron.style.transform = 'rotate(180deg)';
-      }
-    }
-  }
-};
-
-// ===== AUTO-OPEN SUBMENU FOR CURRENT PAGE =====
-window.addEventListener('DOMContentLoaded', function() {
-  const currentPage = window.location.pathname.split('/').pop();
-  
-  // Map of pages to their parent submenu
-  const submenuPages = {
-    'ad_repopend.html': 'manage-reports',
-    'ad_repon.html': 'manage-reports',
-    'ad_repcom.html': 'manage-reports',
-    'ad_repdec.html': 'manage-reports'
-  };
-  
-  // Check if current page is in a submenu
-  if (submenuPages[currentPage]) {
-    const submenu = document.querySelector('.sidebar-submenu');
-    const chevron = document.querySelector('.has-submenu > a .fa-chevron-down');
-    
-    if (submenu) {
-      submenu.classList.add('open');
-      if (chevron) {
-        chevron.style.transform = 'rotate(180deg)';
-      }
-    }
-    
-    // Add active class to current submenu item
-    document.querySelectorAll('.sidebar-submenu a').forEach(link => {
-      if (link.getAttribute('href') === currentPage) {
-        link.parentElement.classList.add('active');
-      }
-    });
-  }
-  
-  // Add active class to main sidebar items
-  document.querySelectorAll('.sidebar-menu > li > a').forEach(link => {
-    const href = link.getAttribute('href');
-    if (href && href === currentPage) {
-      link.parentElement.classList.add('active');
-    }
-  });
-});
-
-// ===== CLOSE SUBMENU WHEN CLICKING OUTSIDE =====
-document.addEventListener('click', function(e) {
-  const sidebar = document.getElementById('sidebar');
-  
-  // Only handle submenu closing if click is outside the has-submenu link
-  if (sidebar && !e.target.closest('.has-submenu > a')) {
-    const clickedInsideSidebar = sidebar.contains(e.target);
-    const clickedSubmenuLink = e.target.closest('.sidebar-submenu a');
-    
-    // If clicked a submenu link, allow navigation but keep submenu open
-    if (clickedSubmenuLink) {
-      return;
-    }
-    
-    // If clicked outside sidebar on mobile, close everything
-    if (!clickedInsideSidebar && window.innerWidth <= 980) {
-      document.querySelectorAll('.sidebar-submenu').forEach(sub => {
-        sub.classList.remove('open');
-      });
-      document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
-        chev.style.transform = 'rotate(0deg)';
-      });
-    }
-  }
-});
-
-  // ===== NOTIFICATION SYSTEM FUNCTIONS =====
-  function normalizeStatus(status) { 
-    return (status || "").toLowerCase().trim(); 
-  }
-
-  function isBarangayPosition(position) {
-    if (!position) return false;
-    const pos = position.toLowerCase();
-    return pos.includes("barangay") || pos.includes("brgy") || pos.includes("brgy.");
-  }
-
-  function addNotification(type, message, detail) {
-    const cleanMsg = (message || "").trim();
-    const cleanDetail = (detail || "").trim();
-    const timestamp = new Date();
-    const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
-    if (seenNotificationIds.has(id)) return;
-    seenNotificationIds.add(id);
-    notificationsList.unshift({ 
-      id, 
-      type, 
-      message: cleanMsg, 
-      detail: cleanDetail, 
-      timestamp: timestamp, 
-      read: false 
-    });
-    updateNotificationUI();
-  }
-
-  function updateNotificationUI() {
-    let filtered = [...notificationsList];
-    if (currentFilter === "report") {
-      filtered = filtered.filter((n) => n.type === "report");
-    } else if (currentFilter === "user") {
-      filtered = filtered.filter((n) => n.type === "user");
-    } else if (currentFilter === "24h") {
-      const ago = Date.now() - 24 * 60 * 60 * 1000;
-      filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
-    }
-    filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-    
-    const unreadCount = notificationsList.filter(n => !n.read).length;
-    if (unreadCount > 0) {
-      notificationBadge.textContent = unreadCount;
-      notificationBadge.classList.add("show");
-    } else {
-      notificationBadge.textContent = "";
-      notificationBadge.classList.remove("show");
-    }
-    
-    if (filtered.length === 0) {
-      notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
-    } else {
-      notificationList.innerHTML = filtered.map((n) => `
-        <div class="notification-item ${n.read ? '' : 'unread'}">
-          <div class="notification-icon ${n.type}">
-            ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
-          </div>
-          <div class="notification-content">
-            <p><strong>${n.message}</strong></p>
-            <p>${n.detail}</p>
-            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-          </div>
-        </div>
-      `).join("");
-    }
-  }
-
-  async function setupRealtimeNotifications(db) {
-    const userSnap = await getDocs(collection(db, "users"));
-    userSnap.forEach((docSnap) => {
-      const userId = docSnap.id;
-      const data = docSnap.data();
-      const status = normalizeStatus(data.status);
-      trackedUserStatuses[userId] = status;
-    });
-    
-    onSnapshot(collection(db, "users"), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const userId = change.doc.id;
-        const data = change.doc.data();
-        const currentStatus = normalizeStatus(data.status);
-        const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-        const position = data.position || "User";
-        
-        if (change.type === "added") {
-          trackedUserStatuses[userId] = currentStatus;
-          if (currentStatus === "active" && isBarangayPosition(position)) {
-            addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
-          }
-        }
-        
-        if (change.type === "modified") {
-          const oldStatus = trackedUserStatuses[userId];
-          if (oldStatus !== "active" && currentStatus === "active" && isBarangayPosition(position)) {
-            addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
-          }
-          trackedUserStatuses[userId] = currentStatus;
-        }
-      });
-    });
-    
-    const reportSnap = await getDocs(collection(db, "reports"));
-    reportSnap.forEach((docSnap) => {
-      trackedReportIds.add(docSnap.id);
-    });
-    
-    onSnapshot(collection(db, "reports"), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const id = change.doc.id;
-        const data = change.doc.data();
-        if (change.type === "added" && !trackedReportIds.has(id)) {
-          trackedReportIds.add(id);
-          const barangay = data.barangay || data.location || "Unknown location";
-          const type = data.reportType || data.type || data.projectName || "Report";
-          addNotification("report", "New report submitted", `${type} in ${barangay}`);
-        }
-      });
-    });
-    
-    updateNotificationUI();
-  }
-
-  // ===== NOTIFICATION EVENT LISTENERS =====
-  notificationBell.addEventListener("click", (e) => {
-    e.stopPropagation();
-    notificationMenu.classList.toggle("show");
-    dropdownMenu.classList.remove("show");
-  });
-
-  clearNotificationsBtn.addEventListener("click", () => {
-    notificationsList = [];
-    seenNotificationIds.clear();
-    updateNotificationUI();
-  });
-
-  markAllReadBtn.addEventListener("click", () => {
-    notificationsList.forEach(n => n.read = true);
-    updateNotificationUI();
-  });
-
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
-      e.target.classList.add("active");
-      currentFilter = e.target.dataset.filter;
-      updateNotificationUI();
-    });
-  });
-
-  // ===== PROFILE DROPDOWN EVENT LISTENERS =====
-  profileToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    dropdownMenu.classList.toggle("show");
-    notificationMenu.classList.remove("show");
-  });
-
-  window.addEventListener('click', (e) => {
-    if (!e.target.closest('.profile-dropdown')) {
-      dropdownMenu.classList.remove("show");
-    }
-    if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
-      notificationMenu.classList.remove("show");
-    }
-  });
-
-  // ===== UTILITY FUNCTIONS =====
-  function formatTimestamp(timestamp) {
-    if (!timestamp) return "";
-    let date;
-    if (timestamp.toDate) date = timestamp.toDate();
-    else if (typeof timestamp === 'string') date = new Date(timestamp);
-    else return timestamp;
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const m = months[date.getMonth()];
-    const d = String(date.getDate()).padStart(2,'0');
-    const y = date.getFullYear();
-    let h = date.getHours();
-    const min = String(date.getMinutes()).padStart(2,'0');
-    const ampm = h>=12?'PM':'AM';
-    h = h%12||12;
-    return `${m}/${d}/${y} | ${h}:${min} ${ampm}`;
-  }
-
-  function formatDate(timestamp) {
-    if (!timestamp) return "Not Set";
-    let date;
-    if (timestamp.toDate) date = timestamp.toDate();
-    else if (typeof timestamp === 'string') date = new Date(timestamp);
-    else return "Not Set";
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const m = months[date.getMonth()];
-    const d = String(date.getDate()).padStart(2,'0');
-    const y = date.getFullYear();
-    return `${m} ${d}, ${y}`;
-  }
+  // ============================================
+  // UTILITY FUNCTIONS
+  // ============================================
 
   function formatDateForInput(timestamp) {
     if (!timestamp) return "";
     let date;
     if (timestamp.toDate) date = timestamp.toDate();
     else if (typeof timestamp === 'string') date = new Date(timestamp);
+    else if (timestamp instanceof Date) date = timestamp;
     else return "";
-    return date.toISOString().split('T')[0];
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
-  async function getImageUrl(imagePath) {
-    if (!imagePath) return null;
-    if (imagePath.startsWith('http')) return imagePath;
-    try {
-      const url = await getDownloadURL(ref(storage, imagePath));
-      return url;
-    } catch (err) {
-      console.error("Error getting image URL:", err);
-      return null;
-    }
-  }
-
-  async function getReporterPosition(userId) {
-    if (!userId) return "Unknown";
-    try {
-      const userDoc = await getDoc(doc(db, "users", userId));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        return userData.position || "User";
-      }
-    } catch (err) {
-      console.error("Error getting user position:", err);
-    }
-    return "Unknown";
-  }
-
-  function attachSearch(inputElem, tableBody) {
-    inputElem.addEventListener("keyup", ()=>{
-      const val=inputElem.value.toLowerCase();
-      [...tableBody.rows].forEach(r=>{
-        const text=r.innerText.toLowerCase();
-        r.style.display=text.includes(val)?"":"none";
-      });
+  function formatDateForDisplay(timestamp) {
+    if (!timestamp) return "";
+    let date;
+    if (timestamp.toDate) date = timestamp.toDate();
+    else if (typeof timestamp === 'string') date = new Date(timestamp);
+    else if (timestamp instanceof Date) date = timestamp;
+    else return "";
+    
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
     });
   }
 
-  // ===== MODAL FUNCTIONS =====
-  async function openEditCompletedModal(e){
-    e.preventDefault();
-    const id=e.currentTarget.dataset.id;
-    currentDocId = id;
-    
+  function timeAgo(timestamp) {
+    if (!timestamp) return "";
+    let date;
+    if (timestamp.toDate) date = timestamp.toDate();
+    else if (typeof timestamp === 'string') date = new Date(timestamp);
+    else if (timestamp instanceof Date) date = timestamp;
+    else return "";
+
+    const seconds = Math.floor((new Date() - date) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " years ago";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " months ago";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " minutes ago";
+    return Math.floor(seconds) + " seconds ago";
+  }
+
+  // ============================================
+  // PROJECT COST RETRIEVAL
+  // ============================================
+
+  async function getProjectCost(reportId) {
     try {
-      const snap = await getDoc(doc(db,"reports",id));
-      if(!snap.exists()) {
-        alert("Report not found");
-        return;
-      }
-      
+      const snap = await getDoc(doc(db, "reports", reportId));
+      if (!snap.exists()) return 0;
       const data = snap.data();
       
-      document.getElementById("editCompletedProjectName").value = data.projectName || data.reportId || "";
-      document.getElementById("editCompletionDate").value = formatDateForInput(data.completionDate);
-      document.getElementById("editPenalties").value = data.penalties || "";
-      document.getElementById("viewProgressReport").value = data.progressReport || "No progress report available";
+      // Try to get allocated budget first, then proposed budget
+      let cost = 0;
+      if (data.allocatedBudget) {
+        cost = parseFloat(data.allocatedBudget.replace(/[₱,]/g, ''));
+      } else if (data.proposedBudget) {
+        cost = parseFloat(data.proposedBudget.replace(/[₱,]/g, ''));
+      }
       
-      editCompletedModal.style.display="flex";
-    } catch(err) {
-      alert("Error opening report: " + err.message);
+      return cost || 0;
+    } catch (err) {
+      console.error("Error getting project cost:", err);
+      return 0;
     }
   }
 
-  // ===== BUILD TABLE ROW FUNCTION =====
-  async function buildTableRow(docSnap, tableType) {
+  // ============================================
+  // LIQUIDATED DAMAGES CALCULATION
+  // ============================================
+
+  async function computeLiquidatedDamages(reportId, completionDate, targetDate, additionalExtension = 0, undeliveredPercent = 0) {
+    try {
+      // Get project cost
+      const projectCost = await getProjectCost(reportId);
+      if (!projectCost || projectCost === 0) {
+        return { 
+          amount: 0, 
+          days: 0, 
+          details: "No project cost available" 
+        };
+      }
+
+      // Convert dates to Date objects
+      const completedDate = completionDate instanceof Date ? completionDate : new Date(completionDate);
+      const deadlineDate = targetDate instanceof Date ? targetDate : new Date(targetDate);
+
+      // Validate dates
+      if (isNaN(completedDate.getTime()) || isNaN(deadlineDate.getTime())) {
+        return {
+          amount: 0,
+          days: 0,
+          details: "Invalid dates provided"
+        };
+      }
+
+      // Calculate adjusted deadline with extensions
+      const adjustedDeadline = new Date(deadlineDate);
+      adjustedDeadline.setDate(adjustedDeadline.getDate() + parseInt(additionalExtension || 0));
+
+      // Calculate days of delay
+      const timeDiff = completedDate - adjustedDeadline;
+      const daysOfDelay = Math.max(0, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
+
+      // If no delay, no liquidated damages
+      if (daysOfDelay === 0) {
+        return { 
+          amount: 0, 
+          days: 0, 
+          details: "Completed on time - No penalties" 
+        };
+      }
+
+      // Calculate undelivered cost
+      const undeliveredPercentValue = parseFloat(undeliveredPercent) || 0;
+      const undeliveredCost = projectCost * (undeliveredPercentValue / 100);
+
+      // If 0% undelivered, no penalties
+      if (undeliveredCost === 0) {
+        return {
+          amount: 0,
+          days: daysOfDelay,
+          details: `${daysOfDelay} day(s) delay but 0% undelivered - No penalties`
+        };
+      }
+
+      // LD Formula: 0.1% (1/10 of 1%) per day of delay on undelivered cost
+      // LD = Undelivered Cost × 0.001 × Days of Delay
+      const ldAmount = undeliveredCost * 0.001 * daysOfDelay;
+
+      return {
+        amount: ldAmount,
+        days: daysOfDelay,
+        undeliveredCost: undeliveredCost,
+        projectCost: projectCost,
+        details: `${daysOfDelay} day(s) × ₱${undeliveredCost.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${undeliveredPercentValue}% undelivered) × 0.1%`
+      };
+
+    } catch (err) {
+      console.error("Error computing LD:", err);
+      return { 
+        amount: 0, 
+        days: 0, 
+        details: "Calculation error: " + err.message 
+      };
+    }
+  }
+
+  // ============================================
+  // AUTO-UPDATE LD DISPLAY
+  // ============================================
+
+  async function updateLiquidatedDamages() {
+    if (!currentDocId) return;
+
+    const completionDate = document.getElementById("editCompletionDate").value;
+    const targetDate = document.getElementById("editTargetDate").value;
+    const additionalExtension = document.getElementById("editAdditionalExtension").value || 0;
+    const undeliveredPercent = document.getElementById("editUndeliveredPercent").value || 0;
+
+    if (!completionDate || !targetDate) {
+      document.getElementById("editPenalties").value = "Please enter both completion and target dates";
+      return;
+    }
+
+    // Show loading state
+    document.getElementById("editPenalties").value = "Calculating...";
+
+    const result = await computeLiquidatedDamages(
+      currentDocId,
+      completionDate,
+      targetDate,
+      additionalExtension,
+      undeliveredPercent
+    );
+
+    // Format the penalties display
+    let penaltiesText = "";
+    if (result.amount > 0) {
+      penaltiesText = `₱${result.amount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}\n\n`;
+      penaltiesText += `Details: ${result.details}`;
+    } else {
+      penaltiesText = result.details;
+    }
+
+    document.getElementById("editPenalties").value = penaltiesText;
+  }
+
+  // ============================================
+  // MODAL FUNCTIONS
+  // ============================================
+
+  async function openEditCompletedModal(e) {
+    e.preventDefault();
+    const id = e.currentTarget.dataset.id;
+    currentDocId = id;
+
+    const snap = await getDoc(doc(db, "reports", id));
+    if (!snap.exists()) {
+      alert("Report not found");
+      return;
+    }
+
+    const data = snap.data();
+
+    // Fill basic fields
+    document.getElementById("editCompletedProjectName").value = data.projectName || "";
+    document.getElementById("editCompletionDate").value = formatDateForInput(data.completionDate);
+    document.getElementById("editTargetDate").value = formatDateForInput(data.endDate || data.targetDate);
+    document.getElementById("editAdditionalExtension").value = data.additionalExtension || 0;
+    document.getElementById("editUndeliveredPercent").value = data.undeliveredPercent || 0;
+    document.getElementById("viewProgressReport").value = data.progressReport || "No progress report available";
+
+    // Calculate actual duration
+    if (data.startDate && data.completionDate) {
+      const start = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
+      const completed = data.completionDate.toDate ? data.completionDate.toDate() : new Date(data.completionDate);
+      const duration = Math.ceil((completed - start) / (1000 * 60 * 60 * 24));
+      document.getElementById("editActualDuration").value = `${duration} days`;
+    } else {
+      document.getElementById("editActualDuration").value = "N/A";
+    }
+
+    // Calculate and display liquidated damages
+    await updateLiquidatedDamages();
+
+    editCompletedModal.style.display = "flex";
+  }
+
+  function closeModal() {
+    editCompletedModal.style.display = "none";
+    currentDocId = null;
+  }
+
+  // ============================================
+  // SAVE CHANGES
+  // ============================================
+
+  async function saveChanges() {
+    if (!currentDocId) return;
+
+    const completionDate = document.getElementById("editCompletionDate").value;
+    const targetDate = document.getElementById("editTargetDate").value;
+    const additionalExtension = document.getElementById("editAdditionalExtension").value || 0;
+    const undeliveredPercent = document.getElementById("editUndeliveredPercent").value || 0;
+    const penalties = document.getElementById("editPenalties").value;
+
+    if (!completionDate) {
+      alert("Please select a completion date.");
+      return;
+    }
+    if (!targetDate) {
+      alert("Please select a target/deadline date.");
+      return;
+    }
+
+    // Calculate actual duration
+    let actualDuration = 0;
+    const snap = await getDoc(doc(db, "reports", currentDocId));
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data.startDate) {
+        const start = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
+        const completed = new Date(completionDate);
+        actualDuration = Math.ceil((completed - start) / (1000 * 60 * 60 * 24));
+      }
+    }
+
+    try {
+      const reportRef = doc(db, "reports", currentDocId);
+      await updateDoc(reportRef, {
+        completionDate: new Date(completionDate),
+        targetDate: new Date(targetDate),
+        additionalExtension: parseInt(additionalExtension),
+        undeliveredPercent: parseFloat(undeliveredPercent),
+        actualDuration: actualDuration,
+        penalties: penalties,
+        updatedAt: new Date()
+      });
+
+      alert("Completion details and liquidated damages saved successfully!");
+      closeModal();
+    } catch (err) {
+      console.error("Save error:", err);
+      alert("Save failed: " + err.message);
+    }
+  }
+
+  // ============================================
+  // BUILD TABLE ROW
+  // ============================================
+
+  async function buildTableRow(docSnap) {
     const r = docSnap.data();
     const tr = document.createElement("tr");
-    const addCell = (c, cls="")=>{
-      const td=document.createElement("td");
-      if(cls)td.className=cls;
-      if(typeof c==="string")td.textContent=c;else td.appendChild(c);
+    
+    const addCell = (content) => {
+      const td = document.createElement("td");
+      if (typeof content === "string") {
+        td.textContent = content;
+      } else {
+        td.appendChild(content);
+      }
       tr.appendChild(td);
     };
-    
-    addCell(r.projectName || r.reportId || "Unnamed Project");
-    addCell(r.barangay||"");
-    
-    const desc=document.createElement("span");
-    desc.className="truncate";
-    desc.textContent=r.description||"";
-    desc.title=r.description||"";
-    addCell(desc);
-    
-    const dims=(r.width&&r.height)?`${r.width}×${r.height}`:(r.width||r.height||"");
-    addCell(dims);
-    
-    const imgSpan=document.createElement("span");
-    const imagePath = r.incidentImage || r.imageUrl || r.image;
-    if(imagePath){
-      const link=document.createElement("a");
-      link.href="#";
-      link.textContent="View";
-      link.onclick=async (e)=>{
-        e.preventDefault();
-        const imgUrl = await getImageUrl(imagePath);
-        if(!imgUrl) {
-          alert("Could not load image");
-          return;
-        }
-        const overlay=document.createElement("div");
-        overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
-        const img=document.createElement("img");
-        img.src=imgUrl;
-        img.style.cssText="max-width:90%;max-height:90%;border-radius:8px;";
-        overlay.appendChild(img);
-        overlay.onclick=()=>overlay.remove();
-        document.body.appendChild(overlay);
-      };
-      imgSpan.appendChild(link);
-    } else imgSpan.textContent="No";
-    addCell(imgSpan);
-    
-    const coordsDiv = document.createElement("div");
-    coordsDiv.className = "coords-vertical";
+
+    // Project Name
+    addCell(r.projectName || "N/A");
+
+    // Barangay
+    addCell(r.barangay || "N/A");
+
+    // Description
+    const descCell = document.createElement("span");
+    descCell.className = "truncate";
+    descCell.textContent = r.description || "N/A";
+    descCell.title = r.description || "";
+    addCell(descCell);
+
+    // Dimensions
+    addCell(r.width && r.height ? `${r.width}×${r.height}` : "N/A");
+
+    // Image
+    const imgCell = document.createElement("a");
+    imgCell.href = "#";
+    imgCell.textContent = "View";
+    imgCell.style.color = "#004aad";
+    imgCell.onclick = async (e) => {
+      e.preventDefault();
+      if (r.imageUrl) {
+        window.open(r.imageUrl, '_blank');
+      } else {
+        alert("No image available");
+      }
+    };
+    addCell(imgCell);
+
+    // Coordinates
+    const coordDiv = document.createElement("div");
+    coordDiv.className = "coords-vertical";
     const latSpan = document.createElement("span");
     latSpan.textContent = `Lat: ${r.latitude || "N/A"}`;
     const lngSpan = document.createElement("span");
     lngSpan.textContent = `Lng: ${r.longitude || "N/A"}`;
-    coordsDiv.appendChild(latSpan);
-    coordsDiv.appendChild(lngSpan);
-    addCell(coordsDiv);
-    
-    addCell(formatTimestamp(r.timestamp||r.createdAt));
-    
-    let proposedBudget = r.proposedBudget || "Not Set";
-    if(!r.proposedBudget && r.budgetMin && r.budgetMax) {
-      proposedBudget = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
+    coordDiv.appendChild(latSpan);
+    coordDiv.appendChild(lngSpan);
+    addCell(coordDiv);
+
+    // Timestamp
+    addCell(formatDateForDisplay(r.timestamp || r.createdAt));
+
+    // Proposed Budget
+    addCell(r.proposedBudget || "₱0");
+
+    // Allocated Budget
+    addCell(r.allocatedBudget || "₱0");
+
+    // Start Date & Deadline (with extension info)
+    let deadlineText = `${formatDateForDisplay(r.startDate) || "N/A"} – ${formatDateForDisplay(r.endDate || r.targetDate) || "N/A"}`;
+    if (r.additionalExtension && r.additionalExtension > 0) {
+      deadlineText += ` (+${r.additionalExtension}d ext)`;
     }
-    addCell(proposedBudget);
-    
-    let allocatedBudget = r.allocatedBudget || "Not Set";
-    addCell(allocatedBudget);
-    
-    const startDeadlineDiv = document.createElement("div");
-    startDeadlineDiv.style.cssText = "display:flex;gap:8px;align-items:center;white-space:nowrap";
-    const startSpan = document.createElement("span");
-    startSpan.textContent = formatDate(r.startDate);
-    const dashSpan = document.createElement("span");
-    dashSpan.textContent = "–";
-    const deadlineSpan = document.createElement("span");
-    deadlineSpan.textContent = formatDate(r.endDate || r.deadline);
-    startDeadlineDiv.appendChild(startSpan);
-    startDeadlineDiv.appendChild(dashSpan);
-    startDeadlineDiv.appendChild(deadlineSpan);
-    addCell(startDeadlineDiv);
-    
-    const contractorSupplierDiv = document.createElement("div");
-    contractorSupplierDiv.style.cssText = "display:flex;flex-direction:column;gap:2px;font-size:0.8rem";
-    const contractorSpan = document.createElement("span");
-    contractorSpan.textContent = `C: ${r.contractor || "N/A"}`;
-    const supplierSpan = document.createElement("span");
-    supplierSpan.textContent = `S: ${r.supplier || "N/A"}`;
-    contractorSupplierDiv.appendChild(contractorSpan);
-    contractorSupplierDiv.appendChild(supplierSpan);
-    addCell(contractorSupplierDiv);
-    
-    addCell(formatDate(r.completionDate));
-    
-    const penaltiesSpan = document.createElement("span");
-    penaltiesSpan.className = "truncate";
-    penaltiesSpan.textContent = r.penalties || "None";
-    penaltiesSpan.title = r.penalties || "None";
-    addCell(penaltiesSpan);
-    
-    const reporterPosition = await getReporterPosition(r.userId);
-    addCell(reporterPosition);
-    
-    const status=document.createElement("span");
-    const s=(r.status||"Pending").toLowerCase();
-    status.className=`status ${s}`;
-    status.textContent=r.status||"Pending";
-    addCell(status);
-    
-    const action=document.createElement("span");
-    action.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;";
-    
-    const viewBtn=document.createElement("button");
-    viewBtn.className="btn-edit";
-    viewBtn.textContent="View Details";
-    viewBtn.dataset.id=docSnap.id;
-    viewBtn.onclick=openEditCompletedModal;
-    
-    const editBtn=document.createElement("button");
-    editBtn.className="btn-edit";
-    editBtn.textContent="Edit";
-    editBtn.dataset.id=docSnap.id;
-    editBtn.onclick=openEditCompletedModal;
-    
-    action.appendChild(viewBtn);
-    action.appendChild(editBtn);
-    
-    addCell(action,"action");
-    
+    addCell(deadlineText);
+
+    // Contractor & Supplier
+    addCell(`C: ${r.contractor || "N/A"}, S: ${r.supplier || "N/A"}`);
+
+    // Completion Date
+    addCell(formatDateForDisplay(r.completionDate) || "Not set");
+
+    // Penalties column - show calculated LD
+    const penaltiesText = r.penalties || "Not calculated";
+    addCell(penaltiesText);
+
+    // Reporter Position
+    addCell(r.reporterPosition || r.userId || "N/A");
+
+    // Status
+    const statusSpan = document.createElement("span");
+    statusSpan.className = `status ${(r.status || "").toLowerCase()}`;
+    statusSpan.textContent = r.status || "N/A";
+    addCell(statusSpan);
+
+    // Action
+    const actionCell = document.createElement("td");
+    actionCell.className = "action";
+    const editBtn = document.createElement("button");
+    editBtn.className = "btn-edit";
+    editBtn.textContent = "View/Edit";
+    editBtn.dataset.id = docSnap.id;
+    editBtn.onclick = openEditCompletedModal;
+    actionCell.appendChild(editBtn);
+    tr.appendChild(actionCell);
+
     return tr;
   }
 
-  // ===== ATTACH SEARCH =====
-  attachSearch(searchCompleted, completedBody);
+  // ============================================
+  // NOTIFICATION SYSTEM
+  // ============================================
 
-  // ===== MODAL EVENT LISTENERS =====
-  closeCompletedModal.onclick=()=>{
-    editCompletedModal.style.display="none";
-    currentDocId = null;
-  };
-  
-  cancelCompletedEdit.onclick=()=>{
-    editCompletedModal.style.display="none";
-    currentDocId = null;
-  };
+  async function setupNotifications() {
+    const notificationsRef = collection(db, "notifications");
+    const q = query(notificationsRef, orderBy("timestamp", "desc"));
 
-  saveCompletedChanges.addEventListener("click", async () => {
-    if (!currentDocId) return;
-    
-    const completionDate = document.getElementById("editCompletionDate").value;
-    const penalties = document.getElementById("editPenalties").value.trim();
-    
-    if(!completionDate) {
-      alert("Please select a completion date.");
+    notificationsUnsub = onSnapshot(q, (snapshot) => {
+      const notifications = [];
+      let unreadCount = 0;
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        notifications.push({ id: doc.id, ...data });
+        if (!data.read) unreadCount++;
+      });
+
+      // Update badge
+      notificationBadge.textContent = unreadCount;
+      if (unreadCount > 0) {
+        notificationBadge.classList.add('show');
+      } else {
+        notificationBadge.classList.remove('show');
+      }
+
+      // Render notifications
+      renderNotifications(notifications);
+    });
+  }
+
+  function renderNotifications(notifications) {
+    notificationList.innerHTML = '';
+
+    if (notifications.length === 0) {
+      notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
       return;
     }
-    
-    try {
-      const reportRef = doc(db,"reports",currentDocId);
-      await updateDoc(reportRef, {
-        completionDate: new Date(completionDate),
-        penalties: penalties
+
+    // Filter notifications based on current filter
+    let filtered = notifications;
+    const now = new Date();
+    const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+
+    if (currentFilter === 'report') {
+      filtered = notifications.filter(n => n.type === 'report');
+    } else if (currentFilter === 'user') {
+      filtered = notifications.filter(n => n.type === 'user');
+    } else if (currentFilter === '24h') {
+      filtered = notifications.filter(n => {
+        const timestamp = n.timestamp?.toDate() || new Date(n.timestamp);
+        return timestamp >= oneDayAgo;
       });
+    }
+
+    if (filtered.length === 0) {
+      notificationList.innerHTML = '<div class="notification-empty">No notifications for this filter</div>';
+      return;
+    }
+
+    filtered.forEach(notif => {
+      const item = document.createElement('div');
+      item.className = `notification-item ${!notif.read ? 'unread' : ''}`;
       
-      const reportSnap = await getDoc(reportRef);
-      if(reportSnap.exists()) {
-        const reportData = reportSnap.data();
-        
-        const bulletinData = {
-          barangay: reportData.barangay || "",
-          issue: reportData.description || "",
-          date: reportData.createdAt || new Date(),
-          completionDate: new Date(completionDate),
-          imageURL: reportData.imageUrl || reportData.incidentImage || "",
-          description: reportData.description || "",
-          affectedAgeGroups: reportData.affectedAgeGroups || "",
-          peopleInvolved: reportData.peopleInvolved || "",
-          latitude: reportData.latitude || "",
-          longitude: reportData.longitude || "",
-          status: reportData.status || "Repaired",
-          projectName: reportData.projectName || reportData.reportId || "",
-          penalties: penalties
-        };
-        
-        await setDoc(doc(db, "ad_bulletin", currentDocId), bulletinData);
-      }
+      const iconType = notif.type === 'user' ? 'user' : 'report';
+      const iconClass = notif.type === 'user' ? 'fa-user' : 'fa-file-alt';
       
-      alert("Completion date and penalties saved and synced to bulletin!");
-      editCompletedModal.style.display="none";
-      currentDocId = null;
-    } catch (err) {
-      console.error(err);
-      alert("Save failed: " + err.message);
+      item.innerHTML = `
+        <div class="notification-icon ${iconType}">
+          <i class="fa ${iconClass}"></i>
+        </div>
+        <div class="notification-content">
+          <p>${notif.message}</p>
+          <span class="time">${timeAgo(notif.timestamp)}</span>
+        </div>
+      `;
+      
+      item.onclick = async () => {
+        if (!notif.read) {
+          await updateDoc(doc(db, "notifications", notif.id), { read: true });
+        }
+        if (notif.link) {
+          window.location.href = notif.link;
+        }
+      };
+      
+      notificationList.appendChild(item);
+    });
+  }
+
+  // Notification bell click
+  if (notificationBell) {
+    notificationBell.addEventListener('click', (e) => {
+      e.stopPropagation();
+      notificationMenu.classList.toggle('show');
+    });
+  }
+
+  // Close notification menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (notificationMenu && !notificationMenu.contains(e.target) && e.target !== notificationBell) {
+      notificationMenu.classList.remove('show');
     }
   });
 
-  // ===== LOGOUT FUNCTION =====
-  async function handleLogout() {
-    try {
-      await signOut(auth);
-      window.location.href = "logout.html";
-    } catch(err) {
-      alert("Error logging out: " + err.message);
-    }
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentFilter = this.dataset.filter;
+      
+      // Re-fetch and render with new filter
+      const notificationsRef = collection(db, "notifications");
+      const q = query(notificationsRef, orderBy("timestamp", "desc"));
+      getDocs(q).then(snapshot => {
+        const notifications = [];
+        snapshot.forEach(doc => {
+          notifications.push({ id: doc.id, ...doc.data() });
+        });
+        renderNotifications(notifications);
+      });
+    });
+  });
+
+  // Mark all as read
+  const markAllReadBtn = document.getElementById('markAllReadBtn');
+  if (markAllReadBtn) {
+    markAllReadBtn.addEventListener('click', async () => {
+      const notificationsRef = collection(db, "notifications");
+      const q = query(notificationsRef, where("read", "==", false));
+      const snapshot = await getDocs(q);
+      
+      const promises = [];
+      snapshot.forEach(doc => {
+        promises.push(updateDoc(doc.ref, { read: true }));
+      });
+      
+      await Promise.all(promises);
+    });
   }
 
-  sidebarLogoutBtn.addEventListener("click", handleLogout);
+  // Clear all notifications
+  const clearNotificationsBtn = document.getElementById('clearNotificationsBtn');
+  if (clearNotificationsBtn) {
+    clearNotificationsBtn.addEventListener('click', async () => {
+      if (confirm('Are you sure you want to clear all notifications?')) {
+        const notificationsRef = collection(db, "notifications");
+        const snapshot = await getDocs(notificationsRef);
+        
+        const promises = [];
+        snapshot.forEach(doc => {
+          promises.push(updateDoc(doc.ref, { read: true }));
+        });
+        
+        await Promise.all(promises);
+      }
+    });
+  }
 
-  // ===== AUTHENTICATION & REAL-TIME DATA LOADING =====
-  onAuthStateChanged(auth, async(user)=>{
-    if(!user) {
-      window.location.href="logout.html";
+  // ============================================
+  // SEARCH FUNCTIONALITY
+  // ============================================
+
+  searchCompleted.addEventListener("keyup", () => {
+    const val = searchCompleted.value.toLowerCase();
+    [...completedBody.rows].forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(val) ? "" : "none";
+    });
+  });
+
+  // ============================================
+  // EVENT LISTENERS
+  // ============================================
+
+  closeCompletedModal.onclick = closeModal;
+  cancelCompletedEdit.onclick = closeModal;
+  saveCompletedChanges.onclick = saveChanges;
+
+  // Auto-calculate LD when fields change
+  document.getElementById("editCompletionDate").addEventListener("change", updateLiquidatedDamages);
+  document.getElementById("editTargetDate").addEventListener("change", updateLiquidatedDamages);
+  document.getElementById("editAdditionalExtension").addEventListener("input", updateLiquidatedDamages);
+  document.getElementById("editUndeliveredPercent").addEventListener("input", updateLiquidatedDamages);
+
+  // Logout functionality
+  if (sidebarLogoutBtn) {
+    sidebarLogoutBtn.addEventListener("click", async () => {
+      if (confirm("Are you sure you want to logout?")) {
+        try {
+          await signOut(auth);
+          window.location.href = "logout.html";
+        } catch (err) {
+          console.error("Logout error:", err);
+          alert("Error logging out: " + err.message);
+        }
+      }
+    });
+  }
+
+  // Profile dropdown toggle
+  if (profileToggle && dropdownMenu) {
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle("show");
+    });
+
+    document.addEventListener("click", () => {
+      dropdownMenu.classList.remove("show");
+    });
+  }
+
+  // Mobile menu toggle
+  window.toggleMobileMenu = function() {
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) {
+      sidebar.classList.toggle("mobile-open");
+    }
+  };
+
+  // Submenu toggle
+  window.toggleSubmenu = function(event) {
+    event.preventDefault();
+    const submenu = event.currentTarget.nextElementSibling;
+    const chevron = event.currentTarget.querySelector('.fa-chevron-down');
+
+    if (submenu) {
+      submenu.classList.toggle('open');
+    }
+    if (chevron) {
+      chevron.style.transform = submenu.classList.contains('open') 
+        ? 'rotate(180deg)' 
+        : 'rotate(0deg)';
+    }
+  };
+
+  // ============================================
+  // AUTHENTICATION & DATA LOADING
+  // ============================================
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "logout.html";
       return;
     }
-    
+
     try {
-      const userDocRef = doc(db,"users",user.uid);
-      
-      // REAL-TIME PROFILE PICTURE & USERNAME SYNC
-      onSnapshot(userDocRef, async(docSnap)=>{
-        if(!docSnap.exists()) {
-          alert("User data not found! Redirecting...");
-          window.location.href="logout.html";
-          return;
+      const userDocRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDocRef);
+
+      if (!userSnap.exists()) {
+        alert("User data not found! Redirecting...");
+        window.location.href = "logout.html";
+        return;
+      }
+
+      const userData = userSnap.data();
+
+      // Check if user is Admin
+      if (userData.position !== "Admin") {
+        alert("Unauthorized access! Only Admins can access this page.");
+        window.location.href = "logout.html";
+        return;
+      }
+
+      // Update navbar profile info
+      const navUsername = document.getElementById("navUsername");
+      const navAvatar = document.getElementById("navAvatar");
+
+      if (navUsername) {
+        navUsername.textContent = userData.name || userData.firstName || "Admin";
+      }
+      if (navAvatar) {
+        navAvatar.src = userData.photoURL || userData.profilePic || "image.png";
+      }
+
+      // Setup real-time profile updates
+      onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const d = docSnap.data();
+          if (navUsername) navUsername.textContent = d.name || d.firstName || "Admin";
+          if (navAvatar) navAvatar.src = d.photoURL || d.profilePic || "image.png";
         }
-        
-        const d = docSnap.data();
-        
-        if(d.position!=="Admin") {
-          alert("Unauthorized access! Only Admins can access this page.");
-          window.location.href="logout.html";
-          return;
-        }
-        
-        // UPDATE PROFILE PICTURE AND USERNAME IN REAL-TIME
-        navUsername.textContent = d.name || d.firstName || "Admin";
-        const photoURL = d.photoURL || d.profilePic || "image.png";
-        navAvatar.src = photoURL;
       });
 
+      // Setup notifications
+      await setupNotifications();
+
       // Load completed reports with real-time updates
-      const q = query(
-        collection(db,"reports"), 
-        orderBy("createdAt","desc")
-      );
-      
-      if(reportsUnsub) reportsUnsub();
-      
-      reportsUnsub = onSnapshot(q, async (snap)=>{
-        completedBody.innerHTML="";
-        
+      const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
+
+      if (reportsUnsub) reportsUnsub();
+
+      reportsUnsub = onSnapshot(q, async (snap) => {
+        completedBody.innerHTML = "";
+
         for (const docSnap of snap.docs) {
           const data = docSnap.data();
           const status = (data.status || "").toLowerCase().trim();
-          
+
           // Only show completed/repaired reports
-          if(status === "repaired" || status === "posted") {
-            const row = await buildTableRow(docSnap, "completed");
+          if (status === "repaired" || status === "posted" || status === "completed") {
+            const row = await buildTableRow(docSnap);
             completedBody.appendChild(row);
           }
         }
-        
+
         // Show message if no completed reports
-        if(completedBody.children.length === 0) {
+        if (completedBody.children.length === 0) {
           const emptyRow = document.createElement("tr");
           const emptyCell = document.createElement("td");
           emptyCell.colSpan = 16;
@@ -1058,13 +1138,9 @@ document.addEventListener('click', function(e) {
         }
       });
 
-      // SETUP REAL-TIME NOTIFICATION SYSTEM
-      await setupRealtimeNotifications(db);
-
-    } catch(err) {
+    } catch (err) {
       console.error("Error loading user data:", err);
-      alert("Error loading user data. Please try again.");
-      window.location.href="logout.html";
+      alert("Error loading user data: " + err.message);
     }
   });
 </script>
