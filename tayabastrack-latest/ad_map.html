@@ -71,6 +71,47 @@
     }
     .logout-btn:hover { background-color: #c9302c; }
 
+/* Submenu Styling */
+.sidebar-submenu {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-submenu.open {
+  max-height: 500px;
+}
+
+.sidebar-submenu li {
+  margin: 0;
+}
+
+.sidebar-submenu a {
+  padding: 0.6rem 1.5rem 0.6rem 3rem !important;
+  font-size: 0.9rem;
+  border-left: 4px solid transparent;
+}
+
+.sidebar-submenu li.active a {
+  background: #042f68;
+  border-left: 4px solid #fff;
+}
+
+.has-submenu > a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.has-submenu > a .fa-chevron-down {
+  transition: transform 0.3s ease;
+  margin-left: auto;
+}
+
     /* NAVBAR - IMPROVED VERSION */
     .navbar {
       position: fixed;
@@ -242,10 +283,22 @@
             </div>
       <ul class="sidebar-menu">
         <li><a href="ad_dash.html"><i class="fa fa-home"></i> Dashboard</a></li>
-        <li><a href="ad_reports.html"><i class="fa fa-tasks"></i> Manage Reports</a></li>
+        <li class="has-submenu">
+          <a href="#" onclick="toggleSubmenu(event)">
+            <span><i class="fa fa-tasks"></i>&nbsp; Manage Reports</span>
+            <i class="fa fa-chevron-down"></i>
+          </a>
+          <ul class="sidebar-submenu">
+            <li><a href="ad_repopend.html"><i class="fa fa-clock"></i>&nbsp; Pending Reports</a></li>
+            <li><a href="ad_repon.html"><i class="fa fa-spinner"></i>&nbsp; Ongoing Reports</a></li>
+            <li><a href="ad_repcom.html"><i class="fa fa-check-circle"></i>&nbsp; Completed Reports</a></li>
+            <li><a href="ad_repdec.html"><i class="fa fa-times-circle"></i>&nbsp; Declined Reports</a></li>
+          </ul>
+        </li>
         <li class="active"><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
         <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
         <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
+        <li><a href="ad_auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
       </ul>
     </div>
     <div class="sidebar-footer">
@@ -437,6 +490,22 @@
       document.getElementById('sidebar').classList.toggle('mobile-open');
     }
 
+    // Submenu toggle function
+    function toggleSubmenu(event) {
+      event.preventDefault();
+      const submenu = event.currentTarget.nextElementSibling;
+      const chevron = event.currentTarget.querySelector('.fa-chevron-down');
+
+      if (submenu) {
+        submenu.classList.toggle('open');
+      }
+      if (chevron) {
+        chevron.style.transform = submenu.classList.contains('open') 
+          ? 'rotate(180deg)' 
+          : 'rotate(0deg)';
+      }
+    }
+
     // Close mobile menu when clicking outside
     document.addEventListener('click', function(e) {
       const sidebar = document.getElementById('sidebar');
@@ -549,61 +618,70 @@
           const userId = change.doc.id;
           const data = change.doc.data();
           const currentStatus = normalizeStatus(data.status);
-          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-          const position = data.position || "User";
-          if (change.type === "added") {
-            trackedUserStatuses[userId] = currentStatus;
-            if (currentStatus === "active" && isBarangayPosition(position)) {
-              addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
-            }
-          }
-          if (change.type === "modified") {
-            const oldStatus = trackedUserStatuses[userId];
-            if (oldStatus !== "active" && currentStatus === "active" && isBarangayPosition(position)) {
-              addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
-            }
-            trackedUserStatuses[userId] = currentStatus;
-          }
-        });
-      });
-      const reportSnap = await getDocs(collection(db, "reports"));
-      reportSnap.forEach((docSnap) => {
-        trackedReportIds.add(docSnap.id);
-      });
-      onSnapshot(collection(db, "reports"), (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          const id = change.doc.id;
-          const data = change.doc.data();
-          if (change.type === "added" && !trackedReportIds.has(id)) {
+          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim()|| "Unknown User";
+const position = data.position || "User";
+if (change.type === "added") {
+trackedUserStatuses[userId] = currentStatus;
+if (currentStatus === "active" && isBarangayPosition(position)) {
+addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+}
+}
+if (change.type === "modified") {
+    const oldStatus = trackedUserStatuses[userId];
+    if (oldStatus !== "active" && currentStatus === "active" && isBarangayPosition(position)) {
+        addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
+    }
+    trackedUserStatuses[userId] = currentStatus;
+}
+});
+});
+
+// TRACK EXISTING REPORTS
+const reportSnap = await getDocs(collection(db, "reports"));
+reportSnap.forEach((docSnap) => {
+    trackedReportIds.add(docSnap.id);
+});
+
+onSnapshot(collection(db, "reports"), (snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+        const id = change.doc.id;
+        const data = change.doc.data();
+
+        if (change.type === "added" && !trackedReportIds.has(id)) {
             trackedReportIds.add(id);
+
             const barangay = data.barangay || data.location || "Unknown location";
             const type = data.reportType || data.type || data.projectName || "Report";
-            addNotification("report", "New report submitted", `${type} in ${barangay}`);
-          }
-        });
-      });
-      updateNotificationUI();
-    }
 
-    const profileToggle = document.getElementById("profileToggle");
-    const dropdownMenu = document.getElementById("dropdownMenu");
-
-    profileToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      dropdownMenu.classList.toggle("show");
-      notificationMenu.classList.remove("show");
+            addNotification(
+                "report",
+                "New report submitted",
+                `${type} in ${barangay}`
+            );
+        }
     });
+});
 
-    window.addEventListener("click", (e) => {
-      if (!e.target.closest(".profile-dropdown")) {
-        dropdownMenu.classList.remove("show");
-      }
-      if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
-        notificationMenu.classList.remove("show");
-      }
-    });
+updateNotificationUI();
+}
+const profileToggle = document.getElementById("profileToggle");
+const dropdownMenu = document.getElementById("dropdownMenu");
+
+profileToggle.addEventListener("click", (e) => {
+  e.stopPropagation();
+  dropdownMenu.classList.toggle("show");
+  notificationMenu.classList.remove("show");
+});
+
+window.addEventListener("click", (e) => {
+  if (!e.target.closest(".profile-dropdown")) {
+    dropdownMenu.classList.remove("show");
+  }
+  if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
+    notificationMenu.classList.remove("show");
+  }
+});
   </script>
-
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";

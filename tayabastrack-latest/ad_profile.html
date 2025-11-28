@@ -928,7 +928,7 @@
     async function handleLogout() {
       try {
         await signOut(auth);
-        window.location.href = "logout.html";
+        window.location.href = "login.html";
       } catch(err) {
         alert("Error logging out: " + err.message);
       }
@@ -939,7 +939,7 @@
     onAuthStateChanged(auth, async(user)=>{
       if(!user) {
         console.warn("No user logged in.");
-        window.location.href="logout.html";
+        window.location.href="login.html";
         return;
       }
       
