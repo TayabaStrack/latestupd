@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Manage Reports | TayabaStrack Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI', Tahoma, sans-serif;display:flex;min-height:100vh;background:#f5f7fb;color:#333;overflow:hidden}
+    
+    /* SIDEBAR - IMPROVED VERSION */
+    .sidebar{width:250px;min-width:250px;background:#004aad;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:1rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;height:100vh;overflow-y:auto;transition:left 0.3s ease}
+    .sidebar-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem;padding:0 1rem}
+    .sidebar-header img{width:50px;height:50px;object-fit:contain}
+    .sidebar-header h2{font-size:1.2rem;margin:0;font-weight:600}
+    .sidebar-menu{list-style:none;padding-left:0;margin:0}
+    .sidebar-menu li{margin:0.5rem 0}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s;border-left:4px solid transparent}
+    .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
+    .sidebar-menu a i{width:20px;text-align:center;font-size:1rem}
+    .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2);margin-top:auto}
+    .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+    .logout-btn:hover{background-color:#c9302c}
+    
+    /* NAVBAR - IMPROVED VERSION */
+    .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40;transition:left 0.3s ease}
+    .navbar h1{font-size:1.4rem;color:#004aad;margin:0}
+    .navbar-left{display:flex;align-items:center;gap:1rem}
+    .mobile-menu-btn{display:none;background:none;border:none;color:#004aad;font-size:1.5rem;cursor:pointer;padding:0.5rem}
+    .profile{display:flex;align-items:center;gap:1rem}
+    .fa-bell{font-size:1.2rem;position:relative;cursor:pointer;color:#333}
+    .badge{background:red;color:#fff;font-size:.7rem;border-radius:50%;padding:3px 6px;position:absolute;top:-8px;right:-8px;display:none;min-width:18px;text-align:center}
+    .badge.show{display:flex;align-items:center;justify-content:center}
+    
+    /* Notification Menu */
+    .notification-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.15);width:340px;max-height:420px;overflow:hidden;z-index:1000;font-family:"Segoe UI", Tahoma, sans-serif;animation:fadeIn 0.2s ease-in-out}
+    .notification-menu.show{display:block}
+    .notification-header{padding:0.9rem 1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f9f9f9}
+    .notification-header h3{font-size:1rem;color:#333;margin:0;font-weight:600}
+    .notification-actions{display:flex;gap:0.5rem;align-items:center}
+    .action-icon-btn{background:none;border:none;color:#666;cursor:pointer;font-size:1rem;padding:0.3rem;transition:color 0.2s ease;display:flex;align-items:center;justify-content:center}
+    .action-icon-btn:hover{color:#004aad}
+    .action-icon-btn i{font-size:0.95rem}
+    
+    .notification-filters{display:flex;justify-content:space-between;gap:0.5rem;padding:0.5rem 1rem;border-bottom:1px solid #eee;background:#fafafa}
+    .filter-btn{flex:1;padding:0.4rem 0.6rem;font-size:0.8rem;background:#f2f2f2;border:1px solid #ddd;border-radius:6px;cursor:pointer;transition:all 0.25s ease;color:#333}
+    .filter-btn:hover{background:#004aad;color:#fff}
+    .filter-btn.active{background:#004aad;color:#fff;border-color:#004aad}
+    
+    .notification-list{max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#ccc transparent}
+    .notification-list::-webkit-scrollbar{width:6px}
+    .notification-list::-webkit-scrollbar-thumb{background:#ccc;border-radius:10px}
+    .notification-list::-webkit-scrollbar-track{background:transparent}
+    .notification-item{padding:0.8rem 1rem;border-bottom:1px solid #f0f0f0;display:flex;gap:0.8rem;align-items:flex-start;transition:background 0.2s;position:relative}
+    .notification-item:hover{background:#f5f7ff}
+    .notification-item.unread{background:#f0f7ff}
+    .notification-item.unread::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:60%;background:#004aad;border-radius:0 4px 4px 0}
+    .notification-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
+    .notification-icon.user{background:#e3f2fd;color:#1976d2}
+    .notification-icon.report{background:#fff3e0;color:#f57c00}
+    .notification-content{flex:1}
+    .notification-content p{margin:0;font-size:0.86rem;color:#333;line-height:1.3}
+    .notification-content .time{color:#999;font-size:0.75rem;margin-top:0.25rem}
+    .notification-empty{padding:2rem;text-align:center;color:#999;font-size:0.9rem}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+    
+    .profile-dropdown{position:relative;display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:0.5rem;border-radius:8px;transition:background 0.2s}
+    .profile-dropdown:hover{background:#f5f7fb}
+    .avatar{width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid #004aad}
+    .username{font-weight:500;color:#333}
+    .dropdown-menu{display:none;position:absolute;top:120%;right:0;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 8px rgba(0,0,0,.15);min-width:200px;z-index:1000}
+    .dropdown-menu.show{display:block}
+    .dropdown-menu a{display:block;padding:.6rem 1rem;text-decoration:none;color:#333;font-size:.9rem;transition:background 0.2s}
+    .dropdown-menu a:hover{background:#f0f0f0;color:#004aad}
+    .dropdown-menu a i{margin-right:8px;width:20px;text-align:center}
+    
+    /* MAIN CONTENT */
+    .main{margin-left:250px;margin-top:64px;flex:1;display:block;padding:20px 28px;height:calc(100vh - 64px);overflow-y:auto;overflow-x:hidden;transition:margin-left 0.3s ease}
+    .reports-section{padding-bottom:40px;max-width:100%}
+    .report-box{background:#fff;border-radius:10px;padding:16px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.04);overflow:visible}
+    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .report-box-header h2{color:#004aad;font-size:1.05rem}
+    .report-actions input{padding:.4rem .75rem;border:1px solid #e0e0e0;border-radius:18px;font-size:.9rem;width:260px}
+    .scroll-hint{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:8px 12px;border-radius:6px;font-size:0.85rem;text-align:center;margin:10px 0 12px 0;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(0,74,173,0.2);flex-shrink:0}
+    .scroll-hint i{animation:slideHint 2s ease-in-out infinite}
+    @keyframes slideHint{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+    .table-card{overflow-x:auto;overflow-y:hidden;border-radius:10px;background:#fff;padding:8px;box-shadow:0 2px 6px rgba(0,0,0,0.05);scroll-behavior:smooth;position:relative;margin-bottom:0;width:100%}
+    .table-card::-webkit-scrollbar{height:10px}
+    .table-card::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);border-radius:5px}
+    table{width:100%;border-collapse:collapse;table-layout:auto;min-width:2000px}
+    thead{background:#f5f8fb;color:#333}
+    thead th{font-weight:700;padding:0.7rem 0.75rem;text-align:left;border-bottom:2px solid #e0e0e0;white-space:nowrap}
+    th,td{text-align:left;padding:0.6rem 0.8rem;font-size:0.85rem;border-bottom:1px solid #f0f2f5;overflow:visible;white-space:nowrap}
+    tbody tr:nth-child(even){background:#fbfdff}
+    tbody tr:hover{background:#f1f8ff}
+    .truncate{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+    .status{display:inline-block;padding:.25rem .5rem;border-radius:6px;color:#fff;font-weight:700;font-size:.75rem;min-width:80px;text-align:center}
+    .pending{background:#f6c23e;color:#2b2b2b}
+    .ongoing{background:#36b9cc;color:#fff}
+    .repaired{background:#1cc88a;color:#fff}
+    .completed{background:#1cc88a;color:#fff}
+    .declined{background:#d9534f;color:#fff}
+    .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
+    .action a.decline{color:#d9534f}
+    td button{padding:0.3rem 0.6rem;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;margin-right:4px}
+    td button.btn-approve{background:#1cc88a;color:#fff}
+    td button.btn-decline{background:#d9534f;color:#fff}
+    td button.btn-edit{background:#004aad;color:#fff}
+    td button:disabled{background:#ccc;cursor:not-allowed;opacity:0.6}
+    .coords-vertical{display:flex;flex-direction:column;gap:2px;font-size:0.8rem}
+    .coords-vertical span{white-space:nowrap}
+    .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
+    .modal-content{background:#fff;width:100%;max-width:980px;border-radius:12px;padding:18px;max-height:92vh;overflow:auto}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .modal-header h2{color:#004aad;font-size:1.1rem;margin:0}
+    .close-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#444}
+    .modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .modal-row{display:flex;flex-direction:column}
+    .modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
+    .modal-row input[type="text"],.modal-row input[type="number"],.modal-row input[type="date"],.modal-row textarea,.modal-row select{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
+    .modal-row textarea{min-height:80px;resize:vertical}
+    .modal-row.full-width{grid-column:1 / -1}
+    .img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px}
+    .modal-footer{text-align:right;margin-top:12px}
+    .btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;margin-left:8px}
+    .btn-save{background:#004aad;color:#fff}
+    .btn-cancel{background:#9e9e9e;color:#fff}
+    .btn-delete{background:#d9534f;color:#fff}
+    .decline-modal{display:none;position:fixed;z-index:3000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.5);justify-content:center;align-items:center;padding:18px}
+    .decline-modal-content{background:#fff;width:100%;max-width:600px;border-radius:12px;padding:24px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto}
+    .decline-modal-header{margin-bottom:20px}
+    .decline-modal-header h3{color:#d9534f;font-size:1.3rem;margin:0}
+    .decline-form-group{margin-bottom:18px}
+    .decline-form-group label{display:block;font-weight:600;margin-bottom:8px;color:#333;font-size:0.95rem}
+    .decline-form-group label .required{color:#d9534f;margin-left:3px}
+    .decline-form-group textarea{width:100%;min-height:100px;padding:10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.95rem;resize:vertical;font-family:inherit}
+    .decline-form-group input:focus,.decline-form-group textarea:focus{outline:none;border-color:#004aad;box-shadow:0 0 0 3px rgba(0,74,173,0.1)}
+    .decline-modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0}
+    .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
+    .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    
+    /* MOBILE RESPONSIVE */
+    @media (max-width:980px){
+      .sidebar{left:-250px}
+      .sidebar.mobile-open{left:0}
+      .navbar{left:0}
+      .main{margin-left:0}
+      .mobile-menu-btn{display:block !important}
+      .username{display:none}
+      .modal-grid{grid-template-columns:1fr}
+      .report-actions input{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="sidebar-header" style="display:flex;align-items:center;gap:12px;">
+            <div style="width:50px;height:50px;border-radius:50%;background:#fff;display:inline-flex;align-items:center;justify-content:center;overflow:visible;">
+                <img src="logo.png" alt="Logo" style="width:72px;height:72px;object-fit:contain;display:block;align-items:center;" />
+            </div>
+            <h2 style="margin:0;">TayabaStrack</h2>
+            </div>
+      <ul class="sidebar-menu">
+        <li><a href="ad_dash.html"><i class="fa fa-home"></i> Dashboard</a></li>
+        <li class="has-submenu">
+                  <a href="#" onclick="toggleSubmenu(event)">
+                    <span><i class="fa fa-tasks"></i>&nbsp; Manage Reports</span>
+                    <i class="fa fa-chevron-down"></i>
+                  </a>
+                  <ul class="sidebar-submenu">
+                    <li><a href="ad_repopend.html"><i class="fa fa-clock"></i>&nbsp; Pending Reports</a></li>
+                    <li><a href="ad_repon.html"><i class="fa fa-spinner"></i>&nbsp; Ongoing Reports</a></li>
+                    <li><a href="ad_repcom.html"><i class="fa fa-check-circle"></i>&nbsp; Completed Reports</a></li>
+                    <li><a href="ad_repdec.html"><i class="fa fa-times-circle"></i>&nbsp; Declined Reports</a></li>
+                  </ul>
+                </li>
+        <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
+        <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
+        <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="sidebarLogoutBtn">
+        <i class="fa fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <nav class="navbar">
+    <div class="navbar-left">
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa fa-bars"></i>
+      </button>
+      <h1>Manage Reports</h1>
+    </div>
+    <div class="profile">
+      <div style="position:relative">
+        <i class="fa fa-bell" id="notificationBell"></i>
+        <span class="badge" id="notificationBadge">0</span>
+        <div class="notification-menu" id="notificationMenu">
+          <div class="notification-header">
+            <h3>Notifications</h3>
+            <div class="notification-actions">
+              <button class="action-icon-btn" id="markAllReadBtn" title="Mark all as read"><i class="fa fa-check-double"></i></button>
+              <button class="action-icon-btn" id="clearNotificationsBtn" title="Clear all"><i class="fa fa-trash-alt"></i></button>
+            </div>
+          </div>
+          <div class="notification-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="report">Reports</button>
+            <button class="filter-btn" data-filter="user">Users</button>
+            <button class="filter-btn" data-filter="24h">Last 24h</button>
+          </div>
+          <div class="notification-list" id="notificationList">
+            <div class="notification-empty">No new notifications</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-dropdown" id="profileToggle">
+        <img src="image.png" alt="Profile" class="avatar" id="navAvatar">
+        <span class="username" id="navUsername">---</span>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="ad_profile.html"><i class="fa fa-user"></i> Profile</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <section class="reports-section">
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Pending Reports</h2>
+          <div class="report-actions">
+            <input id="searchPending" placeholder="Search pending...">
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Start Date & Deadline</th><th>Reporter Position</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="pendingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Ongoing Reports</h2>
+          <div class="report-actions">
+            <input id="searchOngoing" placeholder="Search ongoing...">
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Allocated Budget</th><th>Start Date & Deadline</th><th>Inspection Date</th><th>Contractor & Supplier</th><th>Reporter Position</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ongoingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Completed Reports (Repaired)</h2>
+          <div class="report-actions">
+            <input id="searchCompleted" placeholder="Search completed...">
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Allocated Budget</th><th>Start Date & Deadline</th><th>Contractor & Supplier</th><th>Completion Date</th><th>Penalties</th><th>Reporter Position</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="completedBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="report-box-header">
+          <h2>Declined Reports</h2>
+          <div class="report-actions">
+            <input id="searchDeclined" placeholder="Search declined...">
+          </div>
+        </div>
+        <div class="scroll-hint">
+          <i class="fas fa-arrows-alt-h"></i>
+          <span>Scroll horizontally to view all columns</span>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Start Date & Deadline</th><th>Reporter Position</th><th>Status</th><th>Decline Reason</th>
+              </tr>
+            </thead>
+            <tbody id="declinedBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="editPendingModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editPendingTitle">
+      <div class="modal-header">
+        <h2 id="editPendingTitle">Edit Pending Report</h2>
+        <button class="close-btn" id="closePendingModal" title="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div class="modal-row">
+            <label for="editPendingProjectName">Project Name</label>
+            <input type="text" id="editPendingProjectName">
+          </div>
+          <div class="modal-row">
+            <label>Timestamp</label>
+            <input type="text" id="editPendingTimestamp" disabled>
+          </div>
+          <div class="modal-row">
+            <label>Reporter Position</label>
+            <input type="text" id="editPendingPosition" disabled>
+          </div>
+          <div class="modal-row">
+            <label for="editPendingBarangay">Barangay</label>
+            <input type="text" id="editPendingBarangay">
+          </div>
+          <div class="modal-row full-width">
+            <label for="editPendingDescription">Description</label>
+            <textarea id="editPendingDescription"></textarea>
+          </div>
+          <div class="modal-row">
+            <label for="editPendingWidth">Width (m)</label>
+            <input type="number" id="editPendingWidth" step="0.01">
+          </div>
+          <div class="modal-row">
+            <label for="editPendingHeight">Height (m)</label>
+            <input type="number" id="editPendingHeight" step="0.01">
+          </div>
+          <div class="modal-row">
+            <label for="editPendingLatitude">Latitude</label>
+            <input type="text" id="editPendingLatitude">
+          </div>
+          <div class="modal-row">
+            <label for="editPendingLongitude">Longitude</label>
+            <input type="text" id="editPendingLongitude">
+          </div>
+          <div class="modal-row">
+            <label for="editPendingProposedBudget">Proposed Budget</label>
+            <input type="text" id="editPendingProposedBudget" placeholder="e.g., ₱50,000 - ₱100,000">
+          </div>
+          <div class="modal-row">
+            <label for="editPendingStartDate">Start Date</label>
+            <input type="date" id="editPendingStartDate">
+          </div>
+          <div class="modal-row">
+            <label for="editPendingDeadline">Deadline</label>
+            <input type="date" id="editPendingDeadline">
+          </div>
+          <div class="modal-row full-width">
+            <label>Image</label>
+            <img id="editPendingImage" class="img-preview" alt="Report image" style="display:none">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-cancel" id="cancelPendingEdit">Cancel</button>
+        <button class="btn btn-save" id="savePendingChanges">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="editOngoingModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editOngoingTitle">
+      <div class="modal-header">
+        <h2 id="editOngoingTitle">Edit Ongoing Report</h2>
+        <button class="close-btn" id="closeOngoingModal" title="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div class="modal-row">
+            <label>Project Name</label>
+            <input type="text" id="editOngoingProjectName" disabled>
+          </div>
+          <div class="modal-row">
+            <label>Timestamp</label>
+            <input type="text" id="editOngoingTimestamp" disabled>
+          </div>
+          <div class="modal-row">
+            <label>Reporter Position</label>
+            <input type="text" id="editOngoingPosition" disabled>
+          </div>
+          <div class="modal-row">
+            <label>Barangay</label>
+            <input type="text" id="editOngoingBarangay" disabled>
+          </div>
+          <div class="modal-row full-width">
+            <label>Description</label>
+            <textarea id="editOngoingDescription" disabled></textarea>
+          </div>
+          <div class="modal-row">
+            <label for="editOngoingAllocatedBudget">Allocated Budget</label>
+            <input type="text" id="editOngoingAllocatedBudget" placeholder="e.g., ₱75,000">
+          </div>
+          <div class="modal-row">
+            <label for="editOngoingInspectionDate">Inspection Date</label>
+            <input type="date" id="editOngoingInspectionDate">
+          </div>
+          <div class="modal-row">
+            <label for="editOngoingContractor">Contractor</label>
+            <input type="text" id="editOngoingContractor">
+          </div>
+          <div class="modal-row">
+            <label for="editOngoingSupplier">Supplier</label>
+            <input type="text" id="editOngoingSupplier">
+          </div>
+          <div class="modal-row full-width">
+            <label for="editOngoingProgressReport">Progress Report</label>
+            <textarea id="editOngoingProgressReport" placeholder="Enter progress updates..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-cancel" id="cancelOngoingEdit">Cancel</button>
+        <button class="btn btn-save" id="saveOngoingChanges">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="editCompletedModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editCompletedTitle">
+      <div class="modal-header">
+        <h2 id="editCompletedTitle">Edit Completion & View Progress</h2>
+        <button class="close-btn" id="closeCompletedModal" title="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div class="modal-row">
+            <label>Project Name</label>
+            <input type="text" id="editCompletedProjectName" disabled>
+          </div>
+          <div class="modal-row">
+            <label for="editCompletionDate">Completion Date</label>
+            <input type="date" id="editCompletionDate">
+          </div>
+          <div class="modal-row full-width">
+            <label for="editPenalties">Penalties (if applicable)</label>
+            <textarea id="editPenalties" placeholder="Enter penalties if project exceeded deadline..."></textarea>
+          </div>
+          <div class="modal-row full-width">
+            <label>Progress Report (View Only)</label>
+            <textarea id="viewProgressReport" disabled style="min-height:120px"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-cancel" id="cancelCompletedEdit">Cancel</button>
+        <button class="btn btn-save" id="saveCompletedChanges">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="decline-modal" id="declineModal">
+    <div class="decline-modal-content">
+      <div class="decline-modal-header">
+        <h3>Decline Report</h3>
+      </div>
+      <div class="decline-form-group">
+        <label for="declineReason">Reason for Declining <span class="required">*</span></label>
+        <textarea id="declineReason" placeholder="Enter detailed reason for declining this report..." required></textarea>
+      </div>
+      <div class="decline-modal-footer">
+        <button class="btn btn-cancel" id="cancelDeclineBtn">Cancel</button>
+        <button class="btn btn-delete" id="confirmDeclineBtn">Confirm Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      document.getElementById('sidebar').classList.toggle('mobile-open');
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.querySelector('.mobile-menu-btn');
+      
+      if (window.innerWidth <= 980 && 
+          !sidebar.contains(e.target) && 
+          !menuBtn.contains(e.target)) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+  </script>
+    <!-- Notification System Script -->
+  <script>
+    let notificationsList = [];
+    let seenNotificationIds = new Set();
+    let trackedUserStatuses = {};
+    let trackedReportIds = new Set();
+    let currentFilter = "all";
+
+    function normalizeStatus(status) { return (status || "").toLowerCase().trim(); }
+
+    function isBarangayPosition(position) {
+      if (!position) return false;
+      const pos = position.toLowerCase();
+      return pos.includes("barangay") || pos.includes("brgy") || pos.includes("brgy.");
+    }
+
+    function addNotification(type, message, detail) {
+      const cleanMsg = (message || "").trim();
+      const cleanDetail = (detail || "").trim();
+      const timestamp = new Date();
+      const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
+      if (seenNotificationIds.has(id)) return;
+      seenNotificationIds.add(id);
+      notificationsList.unshift({ id, type, message: cleanMsg, detail: cleanDetail, timestamp: timestamp, read: false });
+      updateNotificationUI();
+    }
+
+    function updateNotificationUI() {
+      let filtered = [...notificationsList];
+      if (currentFilter === "report") {
+        filtered = filtered.filter((n) => n.type === "report");
+      } else if (currentFilter === "user") {
+        filtered = filtered.filter((n) => n.type === "user");
+      } else if (currentFilter === "24h") {
+        const ago = Date.now() - 24 * 60 * 60 * 1000;
+        filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+      }
+      filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      const unreadCount = notificationsList.filter(n => !n.read).length;
+      const notificationBadge = document.getElementById("notificationBadge");
+      if (unreadCount > 0) {
+        notificationBadge.textContent = unreadCount;
+        notificationBadge.classList.add("show");
+      } else {
+        notificationBadge.textContent = "";
+        notificationBadge.classList.remove("show");
+      }
+      const notificationList = document.getElementById("notificationList");
+      if (filtered.length === 0) {
+        notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
+      } else {
+        notificationList.innerHTML = filtered.map((n) => `<div class="notification-item ${n.read ? '' : 'unread'}"><div class="notification-icon ${n.type}">${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}</div><div class="notification-content"><p><strong>${n.message}</strong></p><p>${n.detail}</p><span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span></div></div>`).join("");
+      }
+    }
+
+    const notificationBell = document.getElementById("notificationBell");
+    const notificationMenu = document.getElementById("notificationMenu");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+    const markAllReadBtn = document.getElementById("markAllReadBtn");
+
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notificationMenu.classList.toggle("show");
+      document.getElementById("dropdownMenu").classList.remove("show");
+    });
+    clearNotificationsBtn.addEventListener("click", () => {
+      notificationsList = [];
+      seenNotificationIds.clear();
+      updateNotificationUI();
+    });
+    markAllReadBtn.addEventListener("click", () => {
+      notificationsList.forEach(n => n.read = true);
+      updateNotificationUI();
+    });
+
+    document.querySelectorAll(".filter-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+        e.target.classList.add("active");
+        currentFilter = e.target.dataset.filter;
+        updateNotificationUI();
+      });
+    });
+
+    async function setupRealtimeNotifications(db) {
+      const { collection, getDocs, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const userSnap = await getDocs(collection(db, "users"));
+      userSnap.forEach((docSnap) => {
+        const userId = docSnap.id;
+        const data = docSnap.data();
+        const status = normalizeStatus(data.status);
+        trackedUserStatuses[userId] = status;
+      });
+      onSnapshot(collection(db, "users"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const userId = change.doc.id;
+          const data = change.doc.data();
+          const currentStatus = normalizeStatus(data.status);
+          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+          const position = data.position || "User";
+          if (change.type === "added") {
+            trackedUserStatuses[userId] = currentStatus;
+            if (currentStatus === "active" && isBarangayPosition(position)) {
+              addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
+            }
+          }
+          if (change.type === "modified") {
+            const oldStatus = trackedUserStatuses[userId];
+            if (oldStatus !== "active" && currentStatus === "active" && isBarangayPosition(position)) {
+              addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
+            }
+            trackedUserStatuses[userId] = currentStatus;
+          }
+        });
+      });
+      const reportSnap = await getDocs(collection(db, "reports"));
+      reportSnap.forEach((docSnap) => {
+        trackedReportIds.add(docSnap.id);
+      });
+      onSnapshot(collection(db, "reports"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const id = change.doc.id;
+          const data = change.doc.data();
+          if (change.type === "added" && !trackedReportIds.has(id)) {
+            trackedReportIds.add(id);
+            const barangay = data.barangay || data.location || "Unknown location";
+            const type = data.reportType || data.type || data.projectName || "Report";
+            addNotification("report", "New report submitted", `${type} in ${barangay}`);
+          }
+        });
+      });
+      updateNotificationUI();
+    }
+
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const profileToggle = document.getElementById('profileToggle');
+
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle("show");
+      notificationMenu.classList.remove("show");
+    });
+
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('.profile-dropdown')) {
+        dropdownMenu.classList.remove("show");
+      }
+      if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
+        notificationMenu.classList.remove("show");
+      }
+    });
+    
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, orderBy, onSnapshot, getDoc, doc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.firebasestorage.app",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const pendingBody = document.getElementById("pendingBody");
+    const ongoingBody = document.getElementById("ongoingBody");
+    const completedBody = document.getElementById("completedBody");
+    const declinedBody = document.getElementById("declinedBody");
+    const searchPending = document.getElementById("searchPending");
+    const searchOngoing = document.getElementById("searchOngoing");
+    const searchCompleted = document.getElementById("searchCompleted");
+    const searchDeclined = document.getElementById("searchDeclined");
+    
+    const editPendingModal = document.getElementById("editPendingModal");
+    const closePendingModal = document.getElementById("closePendingModal");
+    const cancelPendingEdit = document.getElementById("cancelPendingEdit");
+    const savePendingChanges = document.getElementById("savePendingChanges");
+    
+    const editOngoingModal = document.getElementById("editOngoingModal");
+    const closeOngoingModal = document.getElementById("closeOngoingModal");
+    const cancelOngoingEdit = document.getElementById("cancelOngoingEdit");
+    const saveOngoingChanges = document.getElementById("saveOngoingChanges");
+    
+    const editCompletedModal = document.getElementById("editCompletedModal");
+    const closeCompletedModal = document.getElementById("closeCompletedModal");
+    const cancelCompletedEdit = document.getElementById("cancelCompletedEdit");
+    const saveCompletedChanges = document.getElementById("saveCompletedChanges");
+    
+    const declineModal = document.getElementById("declineModal");
+    const declineReason = document.getElementById("declineReason");
+    const cancelDeclineBtn = document.getElementById("cancelDeclineBtn");
+    const confirmDeclineBtn = document.getElementById("confirmDeclineBtn");
+    const navUsername = document.getElementById("navUsername");
+    const navAvatar = document.getElementById("navAvatar");
+    const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+
+    let currentDocId = null;
+    let reportToDecline = null;
+    let reportsUnsub = null;
+
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return "";
+      let date;
+      if (timestamp.toDate) date = timestamp.toDate();
+      else if (typeof timestamp === 'string') date = new Date(timestamp);
+      else return timestamp;
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const m = months[date.getMonth()];
+      const d = String(date.getDate()).padStart(2,'0');
+      const y = date.getFullYear();
+      let h = date.getHours();
+      const min = String(date.getMinutes()).padStart(2,'0');
+      const ampm = h>=12?'PM':'AM';
+      h = h%12||12;
+      return `${m}/${d}/${y} | ${h}:${min} ${ampm}`;
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return "Not Set";
+      let date;
+      if (timestamp.toDate) date = timestamp.toDate();
+      else if (typeof timestamp === 'string') date = new Date(timestamp);
+      else return "Not Set";
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const m = months[date.getMonth()];
+      const d = String(date.getDate()).padStart(2,'0');
+      const y = date.getFullYear();
+      return `${m} ${d}, ${y}`;
+    }
+
+    function formatDateForInput(timestamp) {
+      if (!timestamp) return "";
+      let date;
+      if (timestamp.toDate) date = timestamp.toDate();
+      else if (typeof timestamp === 'string') date = new Date(timestamp);
+      else return "";
+      return date.toISOString().split('T')[0];
+    }
+
+    async function getImageUrl(imagePath) {
+      if (!imagePath) return null;
+      if (imagePath.startsWith('http')) return imagePath;
+      try {
+        const url = await getDownloadURL(ref(storage, imagePath));
+        return url;
+      } catch (err) {
+        console.error("Error getting image URL:", err);
+        return null;
+      }
+    }
+
+    async function getReporterPosition(userId) {
+      if (!userId) return "Unknown";
+      try {
+        const userDoc = await getDoc(doc(db, "users", userId));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          return userData.position || "User";
+        }
+      } catch (err) {
+        console.error("Error getting user position:", err);
+      }
+      return "Unknown";
+    }
+
+    function attachSearch(inputElem, tableBody) {
+      inputElem.addEventListener("keyup", ()=>{
+        const val=inputElem.value.toLowerCase();
+        [...tableBody.rows].forEach(r=>{
+          const text=r.innerText.toLowerCase();
+          r.style.display=text.includes(val)?"":"none";
+        });
+      });
+    }
+
+    async function approveReport(e){
+      e.preventDefault();
+      const id=e.currentTarget.dataset.id;
+      
+      if(!confirm("Approve this report and change status to Ongoing?")) return;
+      
+      try {
+        await updateDoc(doc(db, "reports", id), {
+          status: "Ongoing",
+          approvedAt: serverTimestamp()
+        });
+        alert("Report approved and moved to Ongoing!");
+      } catch(err) {
+        alert("Error approving report: " + err.message);
+      }
+    }
+
+    async function markAsCompleted(e){
+      e.preventDefault();
+      const id=e.currentTarget.dataset.id;
+      
+      if(!confirm("Mark this report as Completed (Repaired)?")) return;
+      
+      try {
+        await updateDoc(doc(db, "reports", id), {
+          status: "Repaired",
+          completedAt: serverTimestamp()
+        });
+        alert("Report marked as completed and moved to Completed Reports!");
+      } catch(err) {
+        alert("Error marking report as completed: " + err.message);
+      }
+    }
+
+    function openDeclineModal(e){
+      e.preventDefault();
+      const id=e.currentTarget.dataset.id;
+      reportToDecline = id;
+      
+      declineReason.value = "";
+      declineModal.style.display="flex";
+    }
+
+    async function openEditPendingModal(e){
+      e.preventDefault();
+      const id=e.currentTarget.dataset.id;
+      currentDocId = id;
+      
+      try {
+        const snap = await getDoc(doc(db,"reports",id));
+        if(!snap.exists()) {
+          alert("Report not found");
+          return;
+        }
+        
+        const data = snap.data();
+        const position = await getReporterPosition(data.userId);
+        
+        document.getElementById("editPendingProjectName").value = data.projectName || data.reportId || "";
+        document.getElementById("editPendingTimestamp").value = formatTimestamp(data.timestamp || data.createdAt);
+        document.getElementById("editPendingPosition").value = position;
+        document.getElementById("editPendingBarangay").value = data.barangay || "";
+        document.getElementById("editPendingDescription").value = data.description || "";
+        document.getElementById("editPendingWidth").value = data.width || "";
+        document.getElementById("editPendingHeight").value = data.height || "";
+        document.getElementById("editPendingLatitude").value = data.latitude || "";
+        document.getElementById("editPendingLongitude").value = data.longitude || "";
+        document.getElementById("editPendingProposedBudget").value = data.proposedBudget || "";
+        document.getElementById("editPendingStartDate").value = formatDateForInput(data.startDate);
+        document.getElementById("editPendingDeadline").value = formatDateForInput(data.endDate || data.deadline);
+        
+        const imagePath = data.incidentImage || data.imageUrl || data.image;
+        const imgPreview = document.getElementById("editPendingImage");
+        if(imagePath) {
+          const imgUrl = await getImageUrl(imagePath);
+          if(imgUrl) {
+            imgPreview.src = imgUrl;
+            imgPreview.style.display = "block";
+          } else {
+            imgPreview.style.display = "none";
+          }
+        } else {
+          imgPreview.style.display = "none";
+        }
+        
+        editPendingModal.style.display="flex";
+      } catch(err) {
+        alert("Error opening report: " + err.message);
+      }
+    }
+
+    async function openEditOngoingModal(e){
+      e.preventDefault();
+      const id=e.currentTarget.dataset.id;
+      currentDocId = id;
+      
+      try {
+        const snap = await getDoc(doc(db,"reports",id));
+        if(!snap.exists()) {
+          alert("Report not found");
+          return;
+        }
+        
+        const data = snap.data();
+        const position = await getReporterPosition(data.userId);
+        
+        document.getElementById("editOngoingProjectName").value = data.projectName || data.reportId || "";
+        document.getElementById("editOngoingTimestamp").value = formatTimestamp(data.timestamp || data.createdAt);
+        document.getElementById("editOngoingPosition").value = position;
+        document.getElementById("editOngoingBarangay").value = data.barangay || "";
+        document.getElementById("editOngoingDescription").value = data.description || "";
+        document.getElementById("editOngoingAllocatedBudget").value = data.allocatedBudget || "";
+        document.getElementById("editOngoingContractor").value = data.contractor || "";
+        document.getElementById("editOngoingSupplier").value = data.supplier || "";
+        document.getElementById("editOngoingProgressReport").value = data.progressReport || "";
+        document.getElementById("editOngoingInspectionDate").value = formatDateForInput(data.inspectionDate);
+        
+        editOngoingModal.style.display="flex";
+      } catch(err) {
+        alert("Error opening report: " + err.message);
+      }
+    }
+
+    async function openEditCompletedModal(e){
+      e.preventDefault();
+      const id=e.currentTarget.dataset.id;
+      currentDocId = id;
+      
+      try {
+        const snap = await getDoc(doc(db,"reports",id));
+        if(!snap.exists()) {
+          alert("Report not found");
+          return;
+        }
+        
+        const data = snap.data();
+        
+        document.getElementById("editCompletedProjectName").value = data.projectName || data.reportId || "";
+        document.getElementById("editCompletionDate").value = formatDateForInput(data.completionDate);
+        document.getElementById("editPenalties").value = data.penalties || "";
+        document.getElementById("viewProgressReport").value = data.progressReport || "No progress report available";
+        
+        editCompletedModal.style.display="flex";
+      } catch(err) {
+        alert("Error opening report: " + err.message);
+      }
+    }
+
+    async function buildTableRow(docSnap, tableType) {
+      const r = docSnap.data();
+      const tr = document.createElement("tr");
+      const addCell = (c, cls="")=>{
+        const td=document.createElement("td");
+        if(cls)td.className=cls;
+        if(typeof c==="string")td.textContent=c;else td.appendChild(c);
+        tr.appendChild(td);
+      };
+      
+      addCell(r.projectName || r.reportId || "Unnamed Project");
+      addCell(r.barangay||"");
+      
+      const desc=document.createElement("span");
+      desc.className="truncate";
+      desc.textContent=r.description||"";
+      desc.title=r.description||"";
+      addCell(desc);
+      
+      const dims=(r.width&&r.height)?`${r.width}×${r.height}`:(r.width||r.height||"");
+      addCell(dims);
+      
+      const imgSpan=document.createElement("span");
+      const imagePath = r.incidentImage || r.imageUrl || r.image;
+      if(imagePath){
+        const link=document.createElement("a");
+        link.href="#";
+        link.textContent="View";
+        link.onclick=async (e)=>{
+          e.preventDefault();
+          const imgUrl = await getImageUrl(imagePath);
+          if(!imgUrl) {
+            alert("Could not load image");
+            return;
+          }
+          const overlay=document.createElement("div");
+          overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
+          const img=document.createElement("img");
+          img.src=imgUrl;
+          img.style.cssText="max-width:90%;max-height:90%;border-radius:8px;";
+          overlay.appendChild(img);
+          overlay.onclick=()=>overlay.remove();
+          document.body.appendChild(overlay);
+        };
+        imgSpan.appendChild(link);
+      } else imgSpan.textContent="No";
+      addCell(imgSpan);
+      
+      const coordsDiv = document.createElement("div");
+      coordsDiv.className = "coords-vertical";
+      const latSpan = document.createElement("span");
+      latSpan.textContent = `Lat: ${r.latitude || "N/A"}`;
+      const lngSpan = document.createElement("span");
+      lngSpan.textContent = `Lng: ${r.longitude || "N/A"}`;
+      coordsDiv.appendChild(latSpan);
+      coordsDiv.appendChild(lngSpan);
+      addCell(coordsDiv);
+      
+      addCell(formatTimestamp(r.timestamp||r.createdAt));
+      
+      let proposedBudget = r.proposedBudget || "Not Set";
+      if(!r.proposedBudget && r.budgetMin && r.budgetMax) {
+        proposedBudget = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
+      }
+      addCell(proposedBudget);
+      
+      if (tableType === "ongoing" || tableType === "completed") {
+        let allocatedBudget = r.allocatedBudget || "Not Set";
+        addCell(allocatedBudget);
+      }
+      
+      const startDeadlineDiv = document.createElement("div");
+      startDeadlineDiv.style.cssText = "display:flex;gap:8px;align-items:center;white-space:nowrap";
+      const startSpan = document.createElement("span");
+      startSpan.textContent = formatDate(r.startDate);
+      const dashSpan = document.createElement("span");
+      dashSpan.textContent = "–";
+      const deadlineSpan = document.createElement("span");
+      deadlineSpan.textContent = formatDate(r.endDate || r.deadline);
+      startDeadlineDiv.appendChild(startSpan);
+      startDeadlineDiv.appendChild(dashSpan);
+      startDeadlineDiv.appendChild(deadlineSpan);
+      addCell(startDeadlineDiv);
+      
+      if (tableType === "ongoing") {
+        addCell(formatDate(r.inspectionDate));
+      }
+      
+      if (tableType === "ongoing" || tableType === "completed") {
+        const contractorSupplierDiv = document.createElement("div");
+        contractorSupplierDiv.style.cssText = "display:flex;flex-direction:column;gap:2px;font-size:0.8rem";
+        const contractorSpan = document.createElement("span");
+        contractorSpan.textContent = `C: ${r.contractor || "N/A"}`;
+        const supplierSpan = document.createElement("span");
+        supplierSpan.textContent = `S: ${r.supplier || "N/A"}`;
+        contractorSupplierDiv.appendChild(contractorSpan);
+        contractorSupplierDiv.appendChild(supplierSpan);
+        addCell(contractorSupplierDiv);
+      }
+      
+      if (tableType === "completed") {
+        addCell(formatDate(r.completionDate));
+        
+        const penaltiesSpan = document.createElement("span");
+        penaltiesSpan.className = "truncate";
+        penaltiesSpan.textContent = r.penalties || "None";
+        penaltiesSpan.title = r.penalties || "None";
+        addCell(penaltiesSpan);
+      }
+      
+      const reporterPosition = await getReporterPosition(r.userId);
+      addCell(reporterPosition);
+      
+      const status=document.createElement("span");
+      const s=(r.status||"Pending").toLowerCase();
+      status.className=`status ${s}`;
+      status.textContent=r.status||"Pending";
+      addCell(status);
+      
+      if(tableType === "declined") {
+        const reasonSpan = document.createElement("span");
+        reasonSpan.className = "truncate";
+        reasonSpan.textContent = r.declineReason || "No reason provided";
+        reasonSpan.title = r.declineReason || "No reason provided";
+        addCell(reasonSpan);
+      }
+      
+      if(tableType !== "declined") {
+        const action=document.createElement("span");
+        action.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;";
+        
+        if (tableType === "pending") {
+          const approveBtn=document.createElement("button");
+          approveBtn.className="btn-approve";
+          approveBtn.textContent="Approve";
+          approveBtn.dataset.id=docSnap.id;
+          approveBtn.onclick=approveReport;
+          
+          const declineBtn=document.createElement("button");
+          declineBtn.className="btn-decline";
+          declineBtn.textContent="Decline";
+          declineBtn.dataset.id=docSnap.id;
+          declineBtn.onclick=openDeclineModal;
+          
+          const editBtn=document.createElement("button");
+          editBtn.className="btn-edit";
+          editBtn.textContent="Edit";
+          editBtn.dataset.id=docSnap.id;
+          editBtn.onclick=openEditPendingModal;
+          
+          action.appendChild(approveBtn);
+          action.appendChild(declineBtn);
+          action.appendChild(editBtn);
+        }
+        
+        if (tableType === "ongoing") {
+          const editBtn=document.createElement("button");
+          editBtn.className="btn-edit";
+          editBtn.textContent="Edit";
+          editBtn.dataset.id=docSnap.id;
+          editBtn.onclick=openEditOngoingModal;
+          
+          const completeBtn=document.createElement("button");
+          completeBtn.className="btn-approve";
+          completeBtn.textContent="Repaired";
+          completeBtn.dataset.id=docSnap.id;
+          completeBtn.onclick=markAsCompleted;
+          
+          action.appendChild(editBtn);
+          action.appendChild(completeBtn);
+        }
+        
+        if (tableType === "completed") {
+          const viewBtn=document.createElement("button");
+          viewBtn.className="btn-edit";
+          viewBtn.textContent="View Details";
+          viewBtn.dataset.id=docSnap.id;
+          viewBtn.onclick=openEditCompletedModal;
+          
+          const editBtn=document.createElement("button");
+          editBtn.className="btn-edit";
+          editBtn.textContent="Edit";
+          editBtn.dataset.id=docSnap.id;
+          editBtn.onclick=openEditCompletedModal;
+          
+          action.appendChild(viewBtn);
+          action.appendChild(editBtn);
+        }
+        
+        addCell(action,"action");
+      }
+      
+      return tr;
+    }
+
+    attachSearch(searchPending, pendingBody);
+    attachSearch(searchOngoing, ongoingBody);
+    attachSearch(searchCompleted, completedBody);
+    attachSearch(searchDeclined, declinedBody);
+
+    async function confirmDecline(){
+      const reason = declineReason.value.trim();
+      
+      if(!reason) {
+        alert("Please provide a reason for declining this report.");
+        declineReason.focus();
+        return;
+      }
+      
+      if(!reportToDecline) return;
+      
+      try {
+        await updateDoc(doc(db, "reports", reportToDecline), {
+          status: "Declined",
+          declineReason: reason,
+          declinedAt: serverTimestamp()
+        });
+        
+        declineModal.style.display = "none";
+        reportToDecline = null;
+        alert("Report has been declined successfully.");
+      } catch(err) {
+        alert("Error declining report: " + err.message);
+      }
+    }
+
+    closePendingModal.onclick=()=>{
+      editPendingModal.style.display="none";
+      currentDocId = null;
+    };
+    cancelPendingEdit.onclick=()=>{
+      editPendingModal.style.display="none";
+      currentDocId = null;
+    };
+
+    closeOngoingModal.onclick=()=>{
+      editOngoingModal.style.display="none";
+      currentDocId = null;
+    };
+    cancelOngoingEdit.onclick=()=>{
+      editOngoingModal.style.display="none";
+      currentDocId = null;
+    };
+
+    closeCompletedModal.onclick=()=>{
+      editCompletedModal.style.display="none";
+      currentDocId = null;
+    };
+    cancelCompletedEdit.onclick=()=>{
+      editCompletedModal.style.display="none";
+      currentDocId = null;
+    };
+
+    cancelDeclineBtn.onclick=()=>{
+      declineModal.style.display="none";
+      reportToDecline = null;
+    };
+    confirmDeclineBtn.onclick=confirmDecline;
+
+    savePendingChanges.addEventListener("click", async () => {
+      if (!currentDocId) return;
+      
+      const projectName = document.getElementById("editPendingProjectName").value.trim();
+      const barangay = document.getElementById("editPendingBarangay").value.trim();
+      const description = document.getElementById("editPendingDescription").value.trim();
+      const width = document.getElementById("editPendingWidth").value;
+      const height = document.getElementById("editPendingHeight").value;
+      const latitude = document.getElementById("editPendingLatitude").value.trim();
+      const longitude = document.getElementById("editPendingLongitude").value.trim();
+      const proposedBudget = document.getElementById("editPendingProposedBudget").value.trim();
+      const startDate = document.getElementById("editPendingStartDate").value;
+      const deadline = document.getElementById("editPendingDeadline").value;
+      
+      if(!barangay || !description) {
+        alert("Barangay and Description are required fields.");
+        return;
+      }
+      
+      try {
+        const reportRef = doc(db,"reports",currentDocId);
+        const updateData = {
+          barangay,
+          description,
+          latitude,
+          longitude,
+          proposedBudget
+        };
+        
+        if(projectName) updateData.projectName = projectName;
+        if(width) updateData.width = parseFloat(width);
+        if(height) updateData.height = parseFloat(height);
+        if(startDate) updateData.startDate = new Date(startDate);
+        if(deadline) updateData.endDate = new Date(deadline);
+        
+        await updateDoc(reportRef, updateData);
+        
+        alert("Pending report updated successfully!");
+        editPendingModal.style.display="none";
+        currentDocId = null;
+      } catch (err) {
+        console.error(err);
+        alert("Save failed: " + err.message);
+      }
+    });
+
+    saveOngoingChanges.addEventListener("click", async () => {
+      if (!currentDocId) return;
+      
+      const allocatedBudget = document.getElementById("editOngoingAllocatedBudget").value.trim();
+      const contractor = document.getElementById("editOngoingContractor").value.trim();
+      const supplier = document.getElementById("editOngoingSupplier").value.trim();
+      const progressReport = document.getElementById("editOngoingProgressReport").value.trim();
+      const inspectionDate = document.getElementById("editOngoingInspectionDate").value;
+      
+      try {
+        const reportRef = doc(db,"reports",currentDocId);
+        const updateData = {
+          allocatedBudget,
+          contractor,
+          supplier,
+          progressReport
+        };
+        
+        if(inspectionDate) updateData.inspectionDate = new Date(inspectionDate);
+        
+        await updateDoc(reportRef, updateData);
+        
+        alert("Ongoing report updated successfully!");
+        editOngoingModal.style.display="none";
+        currentDocId = null;
+      } catch (err) {
+        console.error(err);
+        alert("Save failed: " + err.message);
+      }
+    });
+
+    saveCompletedChanges.addEventListener("click", async () => {
+      if (!currentDocId) return;
+      
+      const completionDate = document.getElementById("editCompletionDate").value;
+      const penalties = document.getElementById("editPenalties").value.trim();
+      
+      if(!completionDate) {
+        alert("Please select a completion date.");
+        return;
+      }
+      
+      try {
+        const reportRef = doc(db,"reports",currentDocId);
+        await updateDoc(reportRef, {
+          completionDate: new Date(completionDate),
+          penalties: penalties
+        });
+        
+        const reportSnap = await getDoc(reportRef);
+        if(reportSnap.exists()) {
+          const reportData = reportSnap.data();
+          
+          const bulletinData = {
+            barangay: reportData.barangay || "",
+            issue: reportData.description || "",
+            date: reportData.createdAt || new Date(),
+            completionDate: new Date(completionDate),
+            imageURL: reportData.imageUrl || reportData.incidentImage || "",
+            description: reportData.description || "",
+            affectedAgeGroups: reportData.affectedAgeGroups || "",
+            peopleInvolved: reportData.peopleInvolved || "",
+            latitude: reportData.latitude || "",
+            longitude: reportData.longitude || "",
+            status: reportData.status || "Repaired",
+            projectName: reportData.projectName || reportData.reportId || "",
+            penalties: penalties
+          };
+          
+          await setDoc(doc(db, "ad_bulletin", currentDocId), bulletinData);
+        }
+        
+        alert("Completion date and penalties saved and synced to bulletin!");
+        editCompletedModal.style.display="none";
+        currentDocId = null;
+      } catch (err) {
+        console.error(err);
+        alert("Save failed: " + err.message);
+      }
+    });
+
+    async function handleLogout() {
+      try {
+        await signOut(auth);
+        window.location.href = "logout.html";
+      } catch(err) {
+        alert("Error logging out: " + err.message);
+      }
+    }
+
+    sidebarLogoutBtn.addEventListener("click", handleLogout);
+
+    // ===== AUTHENTICATION & REAL-TIME PROFILE/NOTIFICATION SYSTEM =====
+    onAuthStateChanged(auth, async(user)=>{
+      if(!user) {
+        window.location.href="logout.html";
+        return;
+      }
+      
+      try {
+        const userDocRef = doc(db,"users",user.uid);
+        
+        // REAL-TIME PROFILE PICTURE & USERNAME SYNC
+        onSnapshot(userDocRef, async(docSnap)=>{
+          if(!docSnap.exists()) {
+            alert("User data not found! Redirecting...");
+            window.location.href="logout.html";
+            return;
+          }
+          
+          const d = docSnap.data();
+          
+          if(d.position!=="Admin") {
+            alert("Unauthorized access! Only Admins can access this page.");
+            window.location.href="logout.html";
+            return;
+          }
+          
+          // UPDATE PROFILE PICTURE AND USERNAME IN REAL-TIME
+          navUsername.textContent = d.name || d.firstName || "Admin";
+          const photoURL = d.photoURL || d.profilePic || "image.png";
+          navAvatar.src = photoURL;
+        });
+
+        // Load reports data with real-time updates
+        const q = query(collection(db,"reports"), orderBy("createdAt","desc"));
+        if(reportsUnsub) reportsUnsub();
+        
+        reportsUnsub = onSnapshot(q, async (snap)=>{
+          pendingBody.innerHTML="";
+          ongoingBody.innerHTML="";
+          completedBody.innerHTML="";
+          declinedBody.innerHTML="";
+          
+          for (const docSnap of snap.docs) {
+            const data=docSnap.data();
+            const status=(data.status||"pending").toLowerCase().trim();
+            
+            if(status==="pending") {
+              const row=await buildTableRow(docSnap, "pending");
+              pendingBody.appendChild(row);
+            }
+            else if(status==="ongoing") {
+              const row=await buildTableRow(docSnap, "ongoing");
+              ongoingBody.appendChild(row);
+            }
+            else if(status==="repaired" || status==="posted") {
+              const row=await buildTableRow(docSnap, "completed");
+              completedBody.appendChild(row);
+            }
+            else if(status==="declined") {
+              const row=await buildTableRow(docSnap, "declined");
+              declinedBody.appendChild(row);
+            }
+          }
+        });
+
+        // SETUP REAL-TIME NOTIFICATION SYSTEM
+        await setupRealtimeNotifications(db);
+
+      } catch(err) {
+        console.error("Error loading user data:", err);
+        alert("Error loading user data. Please try again.");
+        window.location.href="logout.html";
+      }
+    });
+  </script>
+  </body>
+</html>

@@ -692,14 +692,14 @@
     // ------------------ AUTH & USER INFO ------------------
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        window.location.href = "index.html";
+        window.location.href = "login.html";
         return;
       }
 
       try {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (!userDoc.exists()) {
-          window.location.href = "index.html";
+          window.location.href = "login.html";
           return;
         }
 
@@ -717,7 +717,7 @@
       } catch(err) {
         console.error("Error loading user data:", err);
         alert("Error loading user data. Please try again.");
-        window.location.href = "index.html";
+        window.location.href = "login.html";
       }
     });
 
@@ -851,7 +851,7 @@
     async function handleLogout() {
       try {
         await signOut(auth);
-        window.location.href = "index.html";
+        window.location.href = "login.html";
       } catch (error) {
         console.error("Logout failed:", error);
         alert("Error logging out. Please try again.");

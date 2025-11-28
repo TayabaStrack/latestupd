@@ -22,48 +22,43 @@
     .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2);margin-top:auto}
     .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
     .logout-btn:hover{background-color:#c9302c}
-    /* Submenu Styling - Add this to your existing CSS */
-.sidebar-submenu {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  background: rgba(0, 0, 0, 0.1);
-}
+    
+    /* Submenu Styling */
+    .sidebar-submenu {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .sidebar-submenu.open {
+      max-height: 500px;
+    }
+    .sidebar-submenu li {
+      margin: 0;
+    }
+    .sidebar-submenu a {
+      padding: 0.6rem 1.5rem 0.6rem 3rem !important;
+      font-size: 0.9rem;
+      border-left: 4px solid transparent;
+    }
+    .sidebar-submenu li.active a {
+      background: #042f68;
+      border-left: 4px solid #fff;
+    }
+    .has-submenu > a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .has-submenu > a .fa-chevron-down {
+      transition: transform 0.3s ease;
+      margin-left: auto;
+    }
 
-.sidebar-submenu.open {
-  max-height: 500px; /* Adjust based on number of items */
-}
-
-.sidebar-submenu li {
-  margin: 0;
-}
-
-.sidebar-submenu a {
-  padding: 0.6rem 1.5rem 0.6rem 3rem !important;
-  font-size: 0.9rem;
-  border-left: 4px solid transparent;
-}
-
-.sidebar-submenu li.active a {
-  background: #042f68;
-  border-left: 4px solid #fff;
-}
-
-.has-submenu > a {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.has-submenu > a .fa-chevron-down {
-  transition: transform 0.3s ease;
-  margin-left: auto;
-}
-
-    /* NAVBAR - IMPROVED VERSION */
+    /* NAVBAR */
     .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40;transition:left 0.3s ease}
     .navbar h1{font-size:1.4rem;color:#004aad;margin:0}
     .navbar-left{display:flex;align-items:center;gap:1rem}
@@ -119,8 +114,21 @@
     .main{margin-left:250px;margin-top:64px;flex:1;display:block;padding:20px 28px;height:calc(100vh - 64px);overflow-y:auto;overflow-x:hidden;transition:margin-left 0.3s ease}
     .reports-section{padding-bottom:40px;max-width:100%}
     .report-box{background:#fff;border-radius:10px;padding:16px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.04);overflow:visible}
-    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:12px}
     .report-box-header h2{color:#004aad;font-size:1.05rem}
+    
+    /* FILTER CONTROLS */
+    .filter-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding:12px;background:#f8f9fa;border-radius:8px}
+    .filter-group{display:flex;align-items:center;gap:8px}
+    .filter-group label{font-weight:600;color:#333;font-size:0.9rem;white-space:nowrap}
+    .filter-select{padding:0.5rem 0.8rem;border:1px solid #e0e0e0;border-radius:6px;font-size:0.9rem;background:#fff;cursor:pointer;min-width:160px}
+    .filter-select:focus{outline:none;border-color:#004aad}
+    .clear-filters-btn{padding:0.5rem 1rem;background:#d9534f;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:600;transition:background 0.3s}
+    .clear-filters-btn:hover{background:#c9302c}
+    .active-filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .filter-tag{background:#004aad;color:#fff;padding:4px 10px;border-radius:16px;font-size:0.8rem;display:inline-flex;align-items:center;gap:6px}
+    .filter-tag i{cursor:pointer;font-size:0.7rem}
+    
     .report-actions input{padding:.4rem .75rem;border:1px solid #e0e0e0;border-radius:18px;font-size:.9rem;width:260px}
     .scroll-hint{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:8px 12px;border-radius:6px;font-size:0.85rem;text-align:center;margin:10px 0 12px 0;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(0,74,173,0.2);flex-shrink:0}
     .scroll-hint i{animation:slideHint 2s ease-in-out infinite}
@@ -128,7 +136,7 @@
     .table-card{overflow-x:auto;overflow-y:hidden;border-radius:10px;background:#fff;padding:8px;box-shadow:0 2px 6px rgba(0,0,0,0.05);scroll-behavior:smooth;position:relative;margin-bottom:0;width:100%}
     .table-card::-webkit-scrollbar{height:10px}
     .table-card::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);border-radius:5px}
-    table{width:100%;border-collapse:collapse;table-layout:auto;min-width:2000px}
+    table{width:100%;border-collapse:collapse;table-layout:auto;min-width:2200px}
     thead{background:#f5f8fb;color:#333}
     thead th{font-weight:700;padding:0.7rem 0.75rem;text-align:left;border-bottom:2px solid #e0e0e0;white-space:nowrap}
     th,td{text-align:left;padding:0.6rem 0.8rem;font-size:0.85rem;border-bottom:1px solid #f0f2f5;overflow:visible;white-space:nowrap}
@@ -141,6 +149,12 @@
     .repaired{background:#1cc88a;color:#fff}
     .completed{background:#1cc88a;color:#fff}
     .declined{background:#d9534f;color:#fff}
+    
+    /* CATEGORY & ISSUE BADGES */
+    .category-badge, .issue-badge{display:inline-block;padding:0.3rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:600;white-space:nowrap}
+    .category-badge{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+    .issue-badge{background:#fff3e0;color:#e65100;border:1px solid #ffb74d}
+    
     .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
     .action a.decline{color:#d9534f}
     td button{padding:0.3rem 0.6rem;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;margin-right:4px}
@@ -150,33 +164,6 @@
     td button:disabled{background:#ccc;cursor:not-allowed;opacity:0.6}
     .coords-vertical{display:flex;flex-direction:column;gap:2px;font-size:0.8rem}
     .coords-vertical span{white-space:nowrap}
-    .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
-    .modal-content{background:#fff;width:100%;max-width:980px;border-radius:12px;padding:18px;max-height:92vh;overflow:auto}
-    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    .modal-header h2{color:#004aad;font-size:1.1rem;margin:0}
-    .close-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#444}
-    .modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .modal-row{display:flex;flex-direction:column}
-    .modal-row label{font-weight:700;font-size:.9rem;margin-bottom:6px;color:#333}
-    .modal-row input[type="text"],.modal-row input[type="number"],.modal-row input[type="date"],.modal-row textarea,.modal-row select{padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:.95rem}
-    .modal-row textarea{min-height:80px;resize:vertical}
-    .modal-row.full-width{grid-column:1 / -1}
-    .img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid #eee;margin-top:6px}
-    .modal-footer{text-align:right;margin-top:12px}
-    .btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;margin-left:8px}
-    .btn-save{background:#004aad;color:#fff}
-    .btn-cancel{background:#9e9e9e;color:#fff}
-    .btn-delete{background:#d9534f;color:#fff}
-    .decline-modal{display:none;position:fixed;z-index:3000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.5);justify-content:center;align-items:center;padding:18px}
-    .decline-modal-content{background:#fff;width:100%;max-width:600px;border-radius:12px;padding:24px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto}
-    .decline-modal-header{margin-bottom:20px}
-    .decline-modal-header h3{color:#d9534f;font-size:1.3rem;margin:0}
-    .decline-form-group{margin-bottom:18px}
-    .decline-form-group label{display:block;font-weight:600;margin-bottom:8px;color:#333;font-size:0.95rem}
-    .decline-form-group label .required{color:#d9534f;margin-left:3px}
-    .decline-form-group textarea{width:100%;min-height:100px;padding:10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.95rem;resize:vertical;font-family:inherit}
-    .decline-form-group input:focus,.decline-form-group textarea:focus{outline:none;border-color:#004aad;box-shadow:0 0 0 3px rgba(0,74,173,0.1)}
-    .decline-modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0}
     .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
     .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -189,8 +176,10 @@
       .main{margin-left:0}
       .mobile-menu-btn{display:block !important}
       .username{display:none}
-      .modal-grid{grid-template-columns:1fr}
       .report-actions input{width:100%}
+      .filter-controls{flex-direction:column;align-items:stretch}
+      .filter-group{flex-direction:column;align-items:stretch}
+      .filter-select{width:100%}
     }
   </style>
 </head>
@@ -220,6 +209,7 @@
         <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
         <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
         <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
+        <li><a href="ad_auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
       </ul>
     </div>
     <div class="sidebar-footer">
@@ -285,11 +275,45 @@
             <input id="searchDeclined" placeholder="Search declined...">
           </div>
         </div>
+        
+        <!-- FILTER CONTROLS -->
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label><i class="fa fa-filter"></i> Category:</label>
+            <select id="categoryFilter" class="filter-select">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label><i class="fa fa-exclamation-triangle"></i> Issue:</label>
+            <select id="issueFilter" class="filter-select">
+              <option value="">All Issues</option>
+            </select>
+          </div>
+          <button id="clearFiltersBtn" class="clear-filters-btn" style="display:none">
+            <i class="fa fa-times"></i> Clear Filters
+          </button>
+          <div class="active-filters" id="activeFilters"></div>
+        </div>
+        
         <div class="table-card">
           <table>
             <thead>
               <tr>
-                <th>Project Name</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Start Date & Deadline</th><th>Reporter Position</th><th>Status</th><th>Decline Reason</th>
+                <th>Project Name</th>
+                <th>Category</th>
+                <th>Issue</th>
+                <th>Barangay</th>
+                <th>Description</th>
+                <th>Dimensions (W×H)</th>
+                <th>Image</th>
+                <th>Coordinates</th>
+                <th>Timestamp</th>
+                <th>Proposed Budget</th>
+                <th>Start Date & Deadline</th>
+                <th>Reporter Position</th>
+                <th>Status</th>
+                <th>Decline Reason</th>
               </tr>
             </thead>
             <tbody id="declinedBody"></tbody>
@@ -298,6 +322,7 @@
       </div>
     </section>
   </main>
+  
   <script type="module">
   // ===== FIREBASE IMPORTS =====
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -323,6 +348,10 @@
   // ===== DOM ELEMENTS =====
   const declinedBody = document.getElementById("declinedBody");
   const searchDeclined = document.getElementById("searchDeclined");
+  const categoryFilter = document.getElementById("categoryFilter");
+  const issueFilter = document.getElementById("issueFilter");
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  const activeFilters = document.getElementById("activeFilters");
   const navUsername = document.getElementById("navUsername");
   const navAvatar = document.getElementById("navAvatar");
   const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
@@ -338,6 +367,7 @@
 
   // ===== GLOBAL VARIABLES =====
   let reportsUnsub = null;
+  let allReportsData = [];
   let notificationsList = [];
   let seenNotificationIds = new Set();
   let trackedUserStatuses = {};
@@ -349,7 +379,6 @@
     document.getElementById('sidebar').classList.toggle('mobile-open');
   };
 
-  // Close mobile menu when clicking outside
   document.addEventListener('click', function(e) {
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.querySelector('.mobile-menu-btn');
@@ -362,113 +391,100 @@
   });
 
   // ===== SUBMENU TOGGLE FUNCTION =====
-// ===== IMPROVED SUBMENU TOGGLE FUNCTION =====
-window.toggleSubmenu = function(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  
-  const parentLi = event.currentTarget.parentElement;
-  const submenu = parentLi.querySelector('.sidebar-submenu');
-  const chevron = event.currentTarget.querySelector('.fa-chevron-down');
-  
-  if (submenu) {
-    const isOpen = submenu.classList.contains('open');
+  window.toggleSubmenu = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
     
-    // Close all other submenus first
-    document.querySelectorAll('.sidebar-submenu').forEach(sub => {
-      if (sub !== submenu) {
-        sub.classList.remove('open');
-      }
-    });
-    
-    // Reset all chevrons
-    document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
-      if (chev !== chevron) {
-        chev.style.transform = 'rotate(0deg)';
-      }
-    });
-    
-    // Toggle current submenu
-    if (isOpen) {
-      submenu.classList.remove('open');
-      if (chevron) {
-        chevron.style.transform = 'rotate(0deg)';
-      }
-    } else {
-      submenu.classList.add('open');
-      if (chevron) {
-        chevron.style.transform = 'rotate(180deg)';
-      }
-    }
-  }
-};
-
-// ===== AUTO-OPEN SUBMENU FOR CURRENT PAGE =====
-window.addEventListener('DOMContentLoaded', function() {
-  const currentPage = window.location.pathname.split('/').pop();
-  
-  // Map of pages to their parent submenu
-  const submenuPages = {
-    'ad_repopend.html': 'manage-reports',
-    'ad_repon.html': 'manage-reports',
-    'ad_repcom.html': 'manage-reports',
-    'ad_repdec.html': 'manage-reports'
-  };
-  
-  // Check if current page is in a submenu
-  if (submenuPages[currentPage]) {
-    const submenu = document.querySelector('.sidebar-submenu');
-    const chevron = document.querySelector('.has-submenu > a .fa-chevron-down');
+    const parentLi = event.currentTarget.parentElement;
+    const submenu = parentLi.querySelector('.sidebar-submenu');
+    const chevron = event.currentTarget.querySelector('.fa-chevron-down');
     
     if (submenu) {
-      submenu.classList.add('open');
-      if (chevron) {
-        chevron.style.transform = 'rotate(180deg)';
+      const isOpen = submenu.classList.contains('open');
+      
+      document.querySelectorAll('.sidebar-submenu').forEach(sub => {
+        if (sub !== submenu) {
+          sub.classList.remove('open');
+        }
+      });
+      
+      document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
+        if (chev !== chevron) {
+          chev.style.transform = 'rotate(0deg)';
+        }
+      });
+      
+      if (isOpen) {
+        submenu.classList.remove('open');
+        if (chevron) {
+          chevron.style.transform = 'rotate(0deg)';
+        }
+      } else {
+        submenu.classList.add('open');
+        if (chevron) {
+          chevron.style.transform = 'rotate(180deg)';
+        }
       }
     }
+  };
+
+  window.addEventListener('DOMContentLoaded', function() {
+    const currentPage = window.location.pathname.split('/').pop();
     
-    // Add active class to current submenu item
-    document.querySelectorAll('.sidebar-submenu a').forEach(link => {
-      if (link.getAttribute('href') === currentPage) {
+    const submenuPages = {
+      'ad_repopend.html': 'manage-reports',
+      'ad_repon.html': 'manage-reports',
+      'ad_repcom.html': 'manage-reports',
+      'ad_repdec.html': 'manage-reports'
+    };
+    
+    if (submenuPages[currentPage]) {
+      const submenu = document.querySelector('.sidebar-submenu');
+      const chevron = document.querySelector('.has-submenu > a .fa-chevron-down');
+      
+      if (submenu) {
+        submenu.classList.add('open');
+        if (chevron) {
+          chevron.style.transform = 'rotate(180deg)';
+        }
+      }
+      
+      document.querySelectorAll('.sidebar-submenu a').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+          link.parentElement.classList.add('active');
+        }
+      });
+    }
+    
+    document.querySelectorAll('.sidebar-menu > li > a').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && href === currentPage) {
         link.parentElement.classList.add('active');
       }
     });
-  }
-  
-  // Add active class to main sidebar items
-  document.querySelectorAll('.sidebar-menu > li > a').forEach(link => {
-    const href = link.getAttribute('href');
-    if (href && href === currentPage) {
-      link.parentElement.classList.add('active');
+  });
+
+  document.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('sidebar');
+    
+    if (sidebar && !e.target.closest('.has-submenu > a')) {
+      const clickedInsideSidebar = sidebar.contains(e.target);
+      const clickedSubmenuLink = e.target.closest('.sidebar-submenu a');
+      
+      if (clickedSubmenuLink) {
+        return;
+      }
+      
+      if (!clickedInsideSidebar && window.innerWidth <= 980) {
+        document.querySelectorAll('.sidebar-submenu').forEach(sub => {
+          sub.classList.remove('open');
+        });
+        document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
+          chev.style.transform = 'rotate(0deg)';
+        });
+      }
     }
   });
-});
-
-// ===== CLOSE SUBMENU WHEN CLICKING OUTSIDE =====
-document.addEventListener('click', function(e) {
-  const sidebar = document.getElementById('sidebar');
-  
-  // Only handle submenu closing if click is outside the has-submenu link
-  if (sidebar && !e.target.closest('.has-submenu > a')) {
-    const clickedInsideSidebar = sidebar.contains(e.target);
-    const clickedSubmenuLink = e.target.closest('.sidebar-submenu a');
-    
-    // If clicked a submenu link, allow navigation but keep submenu open
-    if (clickedSubmenuLink) {
-      return;
-    }
-    
-    // If clicked outside sidebar on mobile, close everything
-    if (!clickedInsideSidebar && window.innerWidth <= 980) {
-      document.querySelectorAll('.sidebar-submenu').forEach(sub => {
-        sub.classList.remove('open');
-      });
-      document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
-        chev.style.transform = 'rotate(0deg)';
-      });
-    }
-  }
-});
 
   // ===== NOTIFICATION SYSTEM FUNCTIONS =====
   function normalizeStatus(status) { 
@@ -693,20 +709,117 @@ document.addEventListener('click', function(e) {
     return "Unknown";
   }
 
-  function attachSearch(inputElem, tableBody) {
-    inputElem.addEventListener("keyup", ()=>{
-      const val=inputElem.value.toLowerCase();
-      [...tableBody.rows].forEach(r=>{
-        const text=r.innerText.toLowerCase();
-        r.style.display=text.includes(val)?"":"none";
-      });
+  // ===== PREDEFINED CATEGORIES AND ISSUES =====
+  const CATEGORIES = [
+    "Daan (Road)",
+    "Tulay (Bridge)", 
+    "Ilaw (Street Light)",
+    "Kanal (Drainage)",
+    "Basketbol Court (Basketball Court)",
+    "Covered Court",
+    "Barangay Hall",
+    "Health Center",
+    "Day Care Center",
+    "Multi-Purpose Hall",
+    "Waiting Shed",
+    "Public Toilet",
+    "Water System",
+    "Others"
+  ];
+
+  const ISSUES = [
+    "Sira (Broken)",
+    "Butas (Has Holes)",
+    "Gumuho (Collapsed)",
+    "Hindi Gumagana (Not Working)",
+    "Kailangan ng Pagkukumpuni (Needs Repair)",
+    "Kailangan ng Pagpapalitan (Needs Replacement)",
+    "Kailangan Ayusin (Needs Fixing)",
+    "Walang (None/Missing)",
+    "Others"
+  ];
+
+  // ===== FILTER FUNCTIONS =====
+  function populateFilterDropdowns() {
+    // Populate Category Filter with predefined categories
+    categoryFilter.innerHTML = '<option value="">All Categories</option>';
+    CATEGORIES.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat;
+      option.textContent = cat;
+      categoryFilter.appendChild(option);
+    });
+    
+    // Populate Issue Filter with predefined issues
+    issueFilter.innerHTML = '<option value="">All Issues</option>';
+    ISSUES.forEach(iss => {
+      const option = document.createElement('option');
+      option.value = iss;
+      option.textContent = iss;
+      issueFilter.appendChild(option);
     });
   }
+
+  function applyFilters() {
+    const searchTerm = searchDeclined.value.toLowerCase();
+    const selectedCategory = categoryFilter.value;
+    const selectedIssue = issueFilter.value;
+    
+    let hasActiveFilters = selectedCategory || selectedIssue;
+    clearFiltersBtn.style.display = hasActiveFilters ? 'block' : 'none';
+    
+    activeFilters.innerHTML = '';
+    if (selectedCategory) {
+      const tag = document.createElement('span');
+      tag.className = 'filter-tag';
+      tag.innerHTML = `Category: ${selectedCategory} <i class="fa fa-times"></i>`;
+      tag.querySelector('i').addEventListener('click', () => {
+        categoryFilter.value = '';
+        applyFilters();
+      });
+      activeFilters.appendChild(tag);
+    }
+    if (selectedIssue) {
+      const tag = document.createElement('span');
+      tag.className = 'filter-tag';
+      tag.innerHTML = `Issue: ${selectedIssue} <i class="fa fa-times"></i>`;
+      tag.querySelector('i').addEventListener('click', () => {
+        issueFilter.value = '';
+        applyFilters();
+      });
+      activeFilters.appendChild(tag);
+    }
+    
+    [...declinedBody.rows].forEach(row => {
+      const rowData = row.dataset;
+      const text = row.innerText.toLowerCase();
+      
+      const matchesSearch = text.includes(searchTerm);
+      const matchesCategory = !selectedCategory || rowData.category === selectedCategory;
+      const matchesIssue = !selectedIssue || rowData.issue === selectedIssue;
+      
+      row.style.display = (matchesSearch && matchesCategory && matchesIssue) ? '' : 'none';
+    });
+  }
+
+  searchDeclined.addEventListener("keyup", applyFilters);
+  categoryFilter.addEventListener("change", applyFilters);
+  issueFilter.addEventListener("change", applyFilters);
+  clearFiltersBtn.addEventListener("click", () => {
+    categoryFilter.value = '';
+    issueFilter.value = '';
+    searchDeclined.value = '';
+    applyFilters();
+  });
 
   // ===== BUILD TABLE ROW FUNCTION =====
   async function buildTableRow(docSnap) {
     const r = docSnap.data();
     const tr = document.createElement("tr");
+    
+    tr.dataset.category = r.category || '';
+    tr.dataset.issue = r.issue || '';
+    
     const addCell = (c, cls="")=>{
       const td=document.createElement("td");
       if(cls)td.className=cls;
@@ -715,6 +828,17 @@ document.addEventListener('click', function(e) {
     };
     
     addCell(r.projectName || r.reportId || "Unnamed Project");
+    
+    const categoryBadge = document.createElement("span");
+    categoryBadge.className = "category-badge";
+    categoryBadge.textContent = r.category || "N/A";
+    addCell(categoryBadge);
+    
+    const issueBadge = document.createElement("span");
+    issueBadge.className = "issue-badge";
+    issueBadge.textContent = r.issue || "N/A";
+    addCell(issueBadge);
+    
     addCell(r.barangay||"");
     
     const desc=document.createElement("span");
@@ -801,14 +925,11 @@ document.addEventListener('click', function(e) {
     return tr;
   }
 
-  // ===== ATTACH SEARCH =====
-  attachSearch(searchDeclined, declinedBody);
-
   // ===== LOGOUT FUNCTION =====
   async function handleLogout() {
     try {
       await signOut(auth);
-      window.location.href = "logout.html";
+      window.location.href = "login.html";
     } catch(err) {
       alert("Error logging out: " + err.message);
     }
@@ -819,18 +940,17 @@ document.addEventListener('click', function(e) {
   // ===== AUTHENTICATION & REAL-TIME DATA LOADING =====
   onAuthStateChanged(auth, async(user)=>{
     if(!user) {
-      window.location.href="logout.html";
+      window.location.href="login.html";
       return;
     }
     
     try {
       const userDocRef = doc(db,"users",user.uid);
       
-      // REAL-TIME PROFILE PICTURE & USERNAME SYNC
       onSnapshot(userDocRef, async(docSnap)=>{
         if(!docSnap.exists()) {
           alert("User data not found! Redirecting...");
-          window.location.href="logout.html";
+          window.location.href="login.html";
           return;
         }
         
@@ -838,17 +958,15 @@ document.addEventListener('click', function(e) {
         
         if(d.position!=="Admin") {
           alert("Unauthorized access! Only Admins can access this page.");
-          window.location.href="logout.html";
+          window.location.href="login.html";
           return;
         }
         
-        // UPDATE PROFILE PICTURE AND USERNAME IN REAL-TIME
         navUsername.textContent = d.name || d.firstName || "Admin";
         const photoURL = d.photoURL || d.profilePic || "image.png";
         navAvatar.src = photoURL;
       });
 
-      // Load declined reports with real-time updates
       const q = query(
         collection(db,"reports"), 
         orderBy("createdAt","desc")
@@ -858,23 +976,25 @@ document.addEventListener('click', function(e) {
       
       reportsUnsub = onSnapshot(q, async (snap)=>{
         declinedBody.innerHTML="";
+        allReportsData = [];
         
         for (const docSnap of snap.docs) {
           const data = docSnap.data();
           const status = (data.status || "").toLowerCase().trim();
           
-          // Only show declined reports
           if(status === "declined") {
+            allReportsData.push(data);
             const row = await buildTableRow(docSnap);
             declinedBody.appendChild(row);
           }
         }
         
-        // Show message if no declined reports
+        populateFilterDropdowns();
+        
         if(declinedBody.children.length === 0) {
           const emptyRow = document.createElement("tr");
           const emptyCell = document.createElement("td");
-          emptyCell.colSpan = 12;
+          emptyCell.colSpan = 14;
           emptyCell.style.textAlign = "center";
           emptyCell.style.padding = "2rem";
           emptyCell.style.color = "#999";
@@ -884,14 +1004,14 @@ document.addEventListener('click', function(e) {
         }
       });
 
-      // SETUP REAL-TIME NOTIFICATION SYSTEM
       await setupRealtimeNotifications(db);
 
     } catch(err) {
       console.error("Error loading user data:", err);
       alert("Error loading user data. Please try again.");
-      window.location.href="logout.html";
+      window.location.href="login.html";
     }
   });
 </script>
 </body>
+</html>

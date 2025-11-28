@@ -1048,15 +1048,6 @@
       <div class="filters-section">
         <h3 class="filter-header">Maghanap ng Imprastraktura</h3>
         
-        <div class="filter-group">
-          <label class="filter-label">Pangalan ng Imprastraktura</label>
-          <input 
-            type="text" 
-            id="searchInput" 
-            placeholder="Maghanap ng pangalan ng proyekto, barangay, contractor..." 
-          />
-        </div>
-
         <div class="filters-row">
           <div class="filter-group">
             <label class="filter-label">Salain ayon sa Barangay</label>
@@ -1071,7 +1062,6 @@
               <option value="">Lahat ng Katayuan</option>
               <option value="ongoing">Kasalukuyang Ginagawa</option>
               <option value="completed">Natapos na</option>
-              <option value="reported">Naiulat</option>
             </select>
           </div>
 
@@ -1087,198 +1077,188 @@
       <!-- Right Side: Map -->
       <div class="map-section">
         <div class="map-section-title">Mapa ng mga Imprastraktura</div>
-        <div class="map-container">
-          <div class="map-wrapper">
-            <div id="projectMap"></div>
-          </div>
-          <div class="map-legend">
-            <div class="legend-title">Alamat:</div>
-            <div class="legend-item">
-              <div class="legend-marker completed"></div>
-              <span>Natapos na</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-marker ongoing"></div>
-              <span>Kasalukuyang Ginagawa</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-marker reported"></div>
-              <span>Naiulat</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="map-container">
+<div class="map-wrapper">
+<div id="projectMap"></div>
+</div>
+<div class="map-legend">
+<div class="legend-title">Alamat:</div>
+<div class="legend-item">
+<div class="legend-marker completed"></div>
+<span>Natapos na</span>
+</div>
+<div class="legend-item">
+<div class="legend-marker ongoing"></div>
+<span>Kasalukuyang Ginagawa</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="errorMessage" class="error" style="display:none;"></div>
 
-    <div id="errorMessage" class="error" style="display:none;"></div>
-
-    <!-- Ongoing Projects Carousel -->
-    <div class="carousel-section" id="ongoingSection" style="display:none;">
-      <div class="carousel-header">
-        <div class="carousel-title ongoing">Mga Kasalukuyang Ginagawa</div>
-        <div class="carousel-controls">
-          <button class="carousel-btn" id="ongoPrev">‹</button>
-          <button class="carousel-btn" id="ongoNext">›</button>
-        </div>
-      </div>
-      <div id="loadingOngoing" class="loading">Naglo-load ng kasalukuyang proyekto...</div>
-      <div id="noOngoing" class="no-data" style="display:none;">Walang kasalukuyang proyekto.</div>
-      <div class="carousel-wrapper">
-        <div class="carousel-container" id="ongoContainer">
-          <!-- Ongoing project cards -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Completed Projects Carousel -->
-    <div class="carousel-section" id="completedSection" style="display:none;">
-      <div class="carousel-header">
-        <div class="carousel-title completed">Mga Natapos na Imprastraktura</div>
-        <div class="carousel-controls">
-          <button class="carousel-btn" id="completedPrev">‹</button>
-          <button class="carousel-btn" id="completedNext">›</button>
-        </div>
-      </div>
-      <div id="loadingCompleted" class="loading">Naglo-load ng natapos na proyekto...</div>
-      <div id="noCompleted" class="no-data" style="display:none;">Walang natapos na proyekto.</div>
-      <div class="carousel-wrapper">
-        <div class="carousel-container" id="completedContainer">
-          <!-- Completed project cards -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Older Posts Grid -->
-    <div class="older-posts-section" id="olderPostsSection" style="display:none;">
-      <div class="older-posts-title">Mga Nakaraang Proyekto</div>
-      <div id="loadingOlder" class="loading">Naglo-load ng nakaraang proyekto...</div>
-      <div id="noDataOlder" class="no-data" style="display:none;">Walang makitang nakaraang proyekto.</div>
-      <div id="noSearchMessage" class="no-data" style="display:none;">Walang proyektong tumutugma sa inyong paghahanap.</div>
-      <div class="posts-grid" id="olderPostsContainer">
-        <!-- Older posts appear here -->
-      </div>
+<!-- Ongoing Projects Carousel -->
+<div class="carousel-section" id="ongoingSection" style="display:none;">
+  <div class="carousel-header">
+    <div class="carousel-title ongoing">Mga Kasalukuyang Ginagawa</div>
+    <div class="carousel-controls">
+      <button class="carousel-btn" id="ongoPrev">‹</button>
+      <button class="carousel-btn" id="ongoNext">›</button>
     </div>
   </div>
+  <div id="loadingOngoing" class="loading">Naglo-load ng kasalukuyang proyekto...</div>
+  <div id="noOngoing" class="no-data" style="display:none;">Walang kasalukuyang proyekto.</div>
+  <div class="carousel-wrapper">
+    <div class="carousel-container" id="ongoContainer">
+      <!-- Ongoing project cards -->
+    </div>
+  </div>
+</div>
 
+<!-- Completed Projects Carousel -->
+<div class="carousel-section" id="completedSection" style="display:none;">
+  <div class="carousel-header">
+    <div class="carousel-title completed">Mga Natapos na Imprastraktura</div>
+    <div class="carousel-controls">
+      <button class="carousel-btn" id="completedPrev">‹</button>
+      <button class="carousel-btn" id="completedNext">›</button>
+    </div>
+  </div>
+  <div id="loadingCompleted" class="loading">Naglo-load ng natapos na proyekto...</div>
+  <div id="noCompleted" class="no-data" style="display:none;">Walang natapos na proyekto.</div>
+  <div class="carousel-wrapper">
+    <div class="carousel-container" id="completedContainer">
+      <!-- Completed project cards -->
+    </div>
+  </div>
+</div>
+
+<!-- Older Posts Grid -->
+<div class="older-posts-section" id="olderPostsSection" style="display:none;">
+  <div class="older-posts-title">Mga Nakaraang Proyekto</div>
+  <div id="loadingOlder" class="loading">Naglo-load ng nakaraang proyekto...</div>
+  <div id="noDataOlder" class="no-data" style="display:none;">Walang makitang nakaraang proyekto.</div>
+  <div id="noSearchMessage" class="no-data" style="display:none;">Walang proyektong tumutugma sa inyong paghahanap.</div>
+  <div class="posts-grid" id="olderPostsContainer">
+    <!-- Older posts appear here -->
+  </div>
+</div>
+  </div>
   <!-- Main Modal -->
   <div id="bulletinModal" class="modal">
     <div class="modal-content">
       <span class="close-btn">&times;</span>
-      
-      <!-- Before/After Images -->
-      <div class="modal-images" id="modalImagesContainer">
-        <div class="modal-image-container">
-          <img id="modalBeforeImage" class="modal-image" src="" alt="Before" onclick="previewImage(this.src)">
-          <div class="image-label">BEFORE</div>
-        </div>
-        <div class="modal-image-container" id="modalAfterContainer">
-          <img id="modalAfterImage" class="modal-image" src="" alt="After" onclick="previewImage(this.src)">
-          <div class="image-label">AFTER</div>
-        </div>
-      </div>
+  <!-- Before/After Images -->
+  <div class="modal-images" id="modalImagesContainer">
+    <div class="modal-image-container">
+      <img id="modalBeforeImage" class="modal-image" src="" alt="Before" onclick="previewImage(this.src)">
+      <div class="image-label">BEFORE</div>
+    </div>
+    <div class="modal-image-container" id="modalAfterContainer">
+      <img id="modalAfterImage" class="modal-image" src="" alt="After" onclick="previewImage(this.src)">
+      <div class="image-label">AFTER</div>
+    </div>
+  </div>
 
-      <!-- Project Name and Dates -->
-      <div class="modal-header-section">
-        <div>
-          <div class="project-title" id="modalProjectName">Pangalan ng Proyekto</div>
-          <div class="info-item" style="margin-top: 10px;">
-            <span class="info-label">ID ng Proyekto</span>
-            <span class="info-value" id="modalProjectId">N/A</span>
-          </div>
-        </div>
-        <div class="project-dates">
-          <div class="date-item">
-            <span class="date-label">Petsa ng Pag-uulat:</span>
-            <span class="date-value" id="modalReportDate">N/A</span>
-          </div>
-          <div class="date-item">
-            <span class="date-label">Petsa ng Simula:</span>
-            <span class="date-value" id="modalStartDate">TBD</span>
-          </div>
-          <div class="date-item">
-            <span class="date-label">Petsa ng Pagtatapos:</span>
-            <span class="date-value" id="modalEndDate">TBD</span>
-          </div>
-          <div class="date-item" id="modalCompletionDateContainer">
-            <span class="date-label">Petsa ng Pagkakumpleto:</span>
-            <span class="date-value" id="modalCompletionDate">N/A</span>
-          </div>
-          <div class="date-item">
-            <span class="date-label">Katayuan:</span>
-            <span class="date-value">
-              <span class="status-badge" id="modalStatusBadge">N/A</span>
-            </span>
-          </div>
-        </div>
+  <!-- Project Name and Dates -->
+  <div class="modal-header-section">
+    <div>
+      <div class="project-title" id="modalProjectName">Pangalan ng Proyekto</div>
+      <div class="info-item" style="margin-top: 10px;">
+        <span class="info-label">ID ng Proyekto</span>
+        <span class="info-value" id="modalProjectId">N/A</span>
       </div>
-
-      <!-- Barangay, Contractor, Supplier -->
-      <div class="modal-info-grid">
-        <div class="info-item">
-          <span class="info-label">Barangay</span>
-          <span class="info-value" id="modalBarangay">N/A</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Kontratista</span>
-          <span class="info-value" id="modalContractor">N/A</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Supplier</span>
-          <span class="info-value" id="modalSupplier">N/A</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Uri ng Proyekto</span>
-          <span class="info-value" id="modalProjectType">N/A</span>
-        </div>
+    </div>
+    <div class="project-dates">
+      <div class="date-item">
+        <span class="date-label">Petsa ng Pag-uulat:</span>
+        <span class="date-value" id="modalReportDate">N/A</span>
       </div>
-
-      <!-- Progress Bar -->
-      <div class="progress-section">
-        <div class="progress-header">
-          <div class="section-title">Pag-unlad ng Proyekto</div>
-          <div class="progress-percentage" id="modalProgress">0%</div>
-        </div>
-        <div class="progress-bar-large">
-          <div class="progress-fill" id="modalProgressBar" style="width: 0%"></div>
-        </div>
+      <div class="date-item">
+        <span class="date-label">Petsa ng Simula:</span>
+        <span class="date-value" id="modalStartDate">TBD</span>
       </div>
-
-      <!-- Description -->
-      <div class="modal-section">
-        <div class="section-title">Paglalarawan ng Proyekto</div>
-        <p class="section-content" id="modalDescription">Walang paglalarawan</p>
+      <div class="date-item">
+        <span class="date-label">Petsa ng Pagtatapos:</span>
+        <span class="date-value" id="modalEndDate">TBD</span>
       </div>
-
-      <!-- Progress Report -->
-      <div class="modal-section">
-        <div class="section-title">Ulat ng Pag-unlad</div>
-        <p class="section-content" id="modalProgressReport">Walang ulat ng pag-unlad</p>
+      <div class="date-item" id="modalCompletionDateContainer">
+        <span class="date-label">Petsa ng Pagkakumpleto:</span>
+        <span class="date-value" id="modalCompletionDate">N/A</span>
       </div>
-
-      <!-- Coordinates -->
-      <div class="modal-section">
-        <div class="section-title">Lokasyon (Coordinates)</div>
-        <div class="coordinates-grid">
-          <div class="coordinate-item">
-            <strong>Latitude:</strong> <span id="modalLatitude">N/A</span>
-          </div>
-          <div class="coordinate-item">
-            <strong>Longitude:</strong> <span id="modalLongitude">N/A</span>
-          </div>
-        </div>
+      <div class="date-item">
+        <span class="date-label">Katayuan:</span>
+        <span class="date-value">
+          <span class="status-badge" id="modalStatusBadge">N/A</span>
+        </span>
       </div>
     </div>
   </div>
 
+  <!-- Barangay, Contractor, Supplier -->
+  <div class="modal-info-grid">
+    <div class="info-item">
+      <span class="info-label">Barangay</span>
+      <span class="info-value" id="modalBarangay">N/A</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Kontratista</span>
+      <span class="info-value" id="modalContractor">N/A</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Supplier</span>
+      <span class="info-value" id="modalSupplier">N/A</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Uri ng Proyekto</span>
+      <span class="info-value" id="modalProjectType">N/A</span>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-section">
+    <div class="progress-header">
+      <div class="section-title">Pag-unlad ng Proyekto</div>
+      <div class="progress-percentage" id="modalProgress">0%</div>
+    </div>
+    <div class="progress-bar-large">
+      <div class="progress-fill" id="modalProgressBar" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="modal-section">
+    <div class="section-title">Paglalarawan ng Proyekto</div>
+    <p class="section-content" id="modalDescription">Walang paglalarawan</p>
+  </div>
+
+  <!-- Progress Report -->
+  <div class="modal-section">
+    <div class="section-title">Ulat ng Pag-unlad</div>
+    <p class="section-content" id="modalProgressReport">Walang ulat ng pag-unlad</p>
+  </div>
+
+  <!-- Coordinates -->
+  <div class="modal-section">
+    <div class="section-title">Lokasyon (Coordinates)</div>
+    <div class="coordinates-grid">
+      <div class="coordinate-item">
+        <strong>Latitude:</strong> <span id="modalLatitude">N/A</span>
+      </div>
+      <div class="coordinate-item">
+        <strong>Longitude:</strong> <span id="modalLongitude">N/A</span>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
   <!-- Image Preview Modal -->
   <div id="imagePreviewModal" class="image-preview-modal">
     <span class="image-preview-close">&times;</span>
     <img id="imagePreviewContent" class="image-preview-content" src="" alt="Preview">
   </div>
-
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -1358,15 +1338,11 @@ function updateMapMarkers(bulletins) {
 }
 
 // --- UI & DOM References ---
-const carouselContainer = document.getElementById("carouselContainer");
 const olderPostsContainer = document.getElementById("olderPostsContainer");
-const loadingCarousel = document.getElementById("loadingCarousel");
 const loadingOlder = document.getElementById("loadingOlder");
 const errorMessage = document.getElementById("errorMessage");
-const noDataCarousel = document.getElementById("noDataCarousel");
 const noDataOlder = document.getElementById("noDataOlder");
 const noSearchMessage = document.getElementById("noSearchMessage");
-const searchInput = document.getElementById("searchInput");
 const barangayFilter = document.getElementById("barangayFilter");
 const statusFilter = document.getElementById("statusFilter");
 const yearFilter = document.getElementById("yearFilter");
@@ -1516,7 +1492,6 @@ window.previewImage = function(src) {
 
 // --- Filtering & Rendering ---
 function filterBulletins() {
-  const sTerm = searchInput.value.toLowerCase();
   const bSel = barangayFilter.value;
   const stSel = statusFilter.value;
   const ySel = yearFilter.value;
@@ -1526,12 +1501,8 @@ function filterBulletins() {
     if (!isValidStatus(d.status)) return false;
     
     const bar = (d.barangay || "").toLowerCase();
-    const prj = (d.projectName || d.issue || "").toLowerCase();
     const status = (d.status || "").toLowerCase();
-    const desc = (d.description || "").toLowerCase();
-    const contr = (d.contractor || "").toLowerCase();
     
-    const matchS = !sTerm || [bar, prj, desc, status, contr].some(x => x.includes(sTerm));
     const matchB = !bSel || bar === bSel.toLowerCase();
     const matchT = !stSel || status.includes(stSel);
     let matchY = true;
@@ -1540,7 +1511,7 @@ function filterBulletins() {
       const yr = dt.toDate ? dt.toDate().getFullYear() : new Date(dt).getFullYear();
       matchY = String(yr) === String(ySel);
     }
-    return matchS && matchB && matchT && matchY;
+    return matchB && matchT && matchY;
   });
   
   updateStatistics(f);
@@ -1707,7 +1678,6 @@ closeBtn.onclick = closeModal;
 modal.onclick = e => { if (e.target === modal) closeModal(); };
 imagePreviewClose.onclick = closeImagePreview;
 imagePreviewModal.onclick = e => { if (e.target === imagePreviewModal) closeImagePreview(); };
-searchInput.oninput = filterBulletins;
 barangayFilter.onchange = filterBulletins;
 statusFilter.onchange = filterBulletins;
 yearFilter.onchange = filterBulletins;
@@ -1721,6 +1691,5 @@ try {
   handleError(e);
 }
 </script>
-
 </body>
 </html>

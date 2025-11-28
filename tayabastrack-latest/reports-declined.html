@@ -220,10 +220,6 @@
             <input id="searchDeclined" placeholder="Search declined..." aria-label="Search declined reports">
           </div>
         </div>
-        <div class="scroll-hint">
-          <i class="fas fa-arrows-alt-h"></i>
-          <span>Scroll horizontally to view all columns</span>
-        </div>
         <div class="table-card" aria-live="polite">
           <table>
             <thead>
@@ -783,7 +779,7 @@
     async function handleLogout() {
       try {
         await signOut(auth);
-        window.location.href = "logout.html";
+        window.location.href = "login.html";
       } catch(err) {
         alert("Error logging out: " + err.message);
       }
@@ -797,20 +793,20 @@
 
     onAuthStateChanged(auth, async(user)=>{
       if(!user) {
-        window.location.href="logout.html";
+        window.location.href="login.html";
         return;
       }
       try {
         const userDocRef = doc(db,"users",user.uid);
         onSnapshot(userDocRef, async (docSnap) => {
           if(!docSnap.exists()) {
-            window.location.href="logout.html";
+            window.location.href="login.html";
             return;
           }
           const d=docSnap.data();
           if(d.position!=="Super Admin") {
             alert("Unauthorized. Only Super Admins can access this page.");
-            window.location.href="logout.html";
+            window.location.href="login.html";
             return;
           }
           let fullName = "Unknown";
@@ -849,12 +845,12 @@
           }
         }, (error) => {
           console.error("Error in user snapshot:", error);
-          window.location.href="logout.html";
+          window.location.href="login.html";
         });
       } catch(err) {
         console.error("Error loading user data:", err);
         alert("Error loading user data. Please try again.");
-        window.location.href="logout.html";
+        window.location.href="login.html";
       }
     });
   </script>

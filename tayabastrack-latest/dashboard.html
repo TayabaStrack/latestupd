@@ -528,7 +528,7 @@
   }
 
   onAuthStateChanged(auth, async (user) => {
-    if (!user) return (window.location.href = "logout.html");
+    if (!user) return (window.location.href = "login.html");
 
     const userDocRef = doc(db, "users", user.uid);
     
@@ -542,7 +542,7 @@
       
       if (data.position !== "Super Admin") {
         alert("Unauthorized access! Redirecting...");
-        window.location.href = "logout.html";
+        window.location.href = "login.html";
         return;
       }
 
@@ -571,7 +571,7 @@
 
   logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
-    window.location.href = "logout.html";
+    window.location.href = "login.html";
   });
 
   async function loadDashboardData() {
