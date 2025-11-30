@@ -22,47 +22,43 @@
     .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2);margin-top:auto}
     .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
     .logout-btn:hover{background-color:#c9302c}
-    /* Submenu Styling - Add this to your existing CSS */
-.sidebar-submenu {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-submenu.open {
-  max-height: 500px; /* Adjust based on number of items */
-}
-
-.sidebar-submenu li {
-  margin: 0;
-}
-
-.sidebar-submenu a {
-  padding: 0.6rem 1.5rem 0.6rem 3rem !important;
-  font-size: 0.9rem;
-  border-left: 4px solid transparent;
-}
-
-.sidebar-submenu li.active a {
-  background: #042f68;
-  border-left: 4px solid #fff;
-}
-
-.has-submenu > a {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.has-submenu > a .fa-chevron-down {
-  transition: transform 0.3s ease;
-  margin-left: auto;
-}
-    /* NAVBAR - IMPROVED VERSION */
+    
+    /* Submenu Styling */
+    .sidebar-submenu {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .sidebar-submenu.open {
+      max-height: 500px;
+    }
+    .sidebar-submenu li {
+      margin: 0;
+    }
+    .sidebar-submenu a {
+      padding: 0.6rem 1.5rem 0.6rem 3rem !important;
+      font-size: 0.9rem;
+      border-left: 4px solid transparent;
+    }
+    .sidebar-submenu li.active a {
+      background: #042f68;
+      border-left: 4px solid #fff;
+    }
+    .has-submenu > a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .has-submenu > a .fa-chevron-down {
+      transition: transform 0.3s ease;
+      margin-left: auto;
+    }
+    
+    /* NAVBAR */
     .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40;transition:left 0.3s ease}
     .navbar h1{font-size:1.4rem;color:#004aad;margin:0}
     .navbar-left{display:flex;align-items:center;gap:1rem}
@@ -118,8 +114,21 @@
     .main{margin-left:250px;margin-top:64px;flex:1;display:block;padding:20px 28px;height:calc(100vh - 64px);overflow-y:auto;overflow-x:hidden;transition:margin-left 0.3s ease}
     .reports-section{padding-bottom:40px;max-width:100%}
     .report-box{background:#fff;border-radius:10px;padding:16px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.04);overflow:visible}
-    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:12px}
     .report-box-header h2{color:#004aad;font-size:1.05rem}
+    
+    /* FILTER CONTROLS */
+    .filter-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding:12px;background:#f8f9fa;border-radius:8px}
+    .filter-group{display:flex;align-items:center;gap:8px}
+    .filter-group label{font-weight:600;color:#333;font-size:0.9rem;white-space:nowrap}
+    .filter-select{padding:0.5rem 0.8rem;border:1px solid #e0e0e0;border-radius:6px;font-size:0.9rem;background:#fff;cursor:pointer;min-width:160px}
+    .filter-select:focus{outline:none;border-color:#004aad}
+    .clear-filters-btn{padding:0.5rem 1rem;background:#d9534f;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:600;transition:background 0.3s}
+    .clear-filters-btn:hover{background:#c9302c}
+    .active-filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .filter-tag{background:#004aad;color:#fff;padding:4px 10px;border-radius:16px;font-size:0.8rem;display:inline-flex;align-items:center;gap:6px}
+    .filter-tag i{cursor:pointer;font-size:0.7rem}
+    
     .report-actions input{padding:.4rem .75rem;border:1px solid #e0e0e0;border-radius:18px;font-size:.9rem;width:260px}
     .scroll-hint{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:8px 12px;border-radius:6px;font-size:0.85rem;text-align:center;margin:10px 0 12px 0;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(0,74,173,0.2);flex-shrink:0}
     .scroll-hint i{animation:slideHint 2s ease-in-out infinite}
@@ -127,7 +136,7 @@
     .table-card{overflow-x:auto;overflow-y:hidden;border-radius:10px;background:#fff;padding:8px;box-shadow:0 2px 6px rgba(0,0,0,0.05);scroll-behavior:smooth;position:relative;margin-bottom:0;width:100%}
     .table-card::-webkit-scrollbar{height:10px}
     .table-card::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);border-radius:5px}
-    table{width:100%;border-collapse:collapse;table-layout:auto;min-width:2000px}
+    table{width:100%;border-collapse:collapse;table-layout:auto;min-width:2200px}
     thead{background:#f5f8fb;color:#333}
     thead th{font-weight:700;padding:0.7rem 0.75rem;text-align:left;border-bottom:2px solid #e0e0e0;white-space:nowrap}
     th,td{text-align:left;padding:0.6rem 0.8rem;font-size:0.85rem;border-bottom:1px solid #f0f2f5;overflow:visible;white-space:nowrap}
@@ -140,6 +149,12 @@
     .repaired{background:#1cc88a;color:#fff}
     .completed{background:#1cc88a;color:#fff}
     .declined{background:#d9534f;color:#fff}
+    
+    /* CATEGORY & ISSUE BADGES */
+    .category-badge, .issue-badge{display:inline-block;padding:0.3rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:600;white-space:nowrap}
+    .category-badge{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+    .issue-badge{background:#fff3e0;color:#e65100;border:1px solid #ffb74d}
+    
     .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
     .action a.decline{color:#d9534f}
     td button{padding:0.3rem 0.6rem;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;margin-right:4px}
@@ -149,6 +164,15 @@
     td button:disabled{background:#ccc;cursor:not-allowed;opacity:0.6}
     .coords-vertical{display:flex;flex-direction:column;gap:2px;font-size:0.8rem}
     .coords-vertical span{white-space:nowrap}
+    
+    /* PAGINATION STYLES */
+    .pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:12px}
+    .pagination button{padding:0.5rem 0.8rem;border:1px solid #ddd;background:#fff;color:#004aad;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all 0.2s}
+    .pagination button:hover:not(:disabled){background:#004aad;color:#fff}
+    .pagination button:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
+    .pagination button.active{background:#004aad;color:#fff;border-color:#004aad}
+    .pagination-info{color:#666;font-size:0.85rem;margin:0 8px}
+    
     .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
     .modal-content{background:#fff;width:100%;max-width:980px;border-radius:12px;padding:18px;max-height:92vh;overflow:auto}
     .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -190,6 +214,9 @@
       .username{display:none}
       .modal-grid{grid-template-columns:1fr}
       .report-actions input{width:100%}
+      .filter-controls{flex-direction:column;align-items:stretch}
+      .filter-group{flex-direction:column;align-items:stretch}
+      .filter-select{width:100%}
     }
   </style>
 </head>
@@ -271,7 +298,6 @@
     </div>
   </nav>
 
-
   <main class="main">
     <section class="reports-section">
       <div class="loading-overlay" id="loadingOverlay">
@@ -285,27 +311,51 @@
             <input id="searchPending" placeholder="Search pending...">
           </div>
         </div>
+        
+        <!-- FILTER CONTROLS -->
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label><i class="fa fa-filter"></i> Category:</label>
+            <select id="categoryFilter" class="filter-select">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label><i class="fa fa-exclamation-triangle"></i> Issue:</label>
+            <select id="issueFilter" class="filter-select">
+              <option value="">All Issues</option>
+            </select>
+          </div>
+          <button id="clearFiltersBtn" class="clear-filters-btn" style="display:none">
+            <i class="fa fa-times"></i> Clear Filters
+          </button>
+          <div class="active-filters" id="activeFilters"></div>
+        </div>
+        
         <div class="table-card">
           <table>
-<thead>
-  <tr>
-    <th>Project Name</th>
-    <th>Barangay</th>
-    <th>Description</th>
-    <th>Dimensions (W×H)</th>
-    <th>Image</th>
-    <th>Coordinates</th>
-    <th>Timestamp</th>
-    <th>Proposed Budget</th>
-    <th>Inspection Date</th>
-    <th>Reporter Position</th>
-    <th>Status</th>
-    <th>Action</th>
-  </tr>
-</thead>
-      <tbody id="pendingBody"></tbody>
+            <thead>
+              <tr>
+                <th>Project Name</th>
+                <th>Category</th>
+                <th>Issue</th>
+                <th>Barangay</th>
+                <th>Description</th>
+                <th>Dimensions (W×H)</th>
+                <th>Image</th>
+                <th>Coordinates</th>
+                <th>Timestamp</th>
+                <th>Proposed Budget</th>
+                <th>Inspection Date</th>
+                <th>Reporter Position</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="pendingBody"></tbody>
           </table>
         </div>
+        <div class="pagination" id="pendingPagination"></div>
       </div>
     </section>
   </main>
@@ -340,62 +390,58 @@
           </div>
           <div class="modal-row">
             <label for="editPendingWidth">Width (m)</label>
-            <input type="number" id="editPendingWidth" step="0.01">
-          </div>
-          <div class="modal-row">
-            <label for="editPendingHeight">Height (m)</label>
-            <input type="number" id="editPendingHeight" step="0.01">
-          </div>
-          <div class="modal-row">
-            <label for="editPendingLatitude">Latitude</label>
-            <input type="text" id="editPendingLatitude">
-          </div>
-          <div class="modal-row">
-            <label for="editPendingLongitude">Longitude</label>
-            <input type="text" id="editPendingLongitude">
-          </div>
-          <div class="modal-row">
-            <label for="editPendingProposedBudget">Proposed Budget</label>
-            <input type="text" id="editPendingProposedBudget" placeholder="e.g., ₱50,000 - ₱100,000">
-          </div>
-          <div class="modal-row">
-              <label for="editPendingInspectionDate">Inspection Date</label>
-              <input type="date" id="editPendingInspectionDate">
-            </div>
-          <div class="modal-row full-width">
-            <label>Image</label>
-            <img id="editPendingImage" class="img-preview" alt="Report image" style="display:none">
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-cancel" id="cancelPendingEdit">Cancel</button>
-        <button class="btn btn-save" id="savePendingChanges">Save Changes</button>
-      </div>
-    </div>
-  </div>
-
-<!-- DECLINE MODAL -->
-<div class="decline-modal" id="declineModal">
-  <div class="decline-modal-content">
-    <div class="decline-modal-header">
-      <h3>Decline Report</h3>
-    </div>
-    <div class="decline-form-group">
-      <label for="declineReason">Reason for Declining <span class="required">*</span></label>
-      <textarea id="declineReason" placeholder="Enter detailed reason for declining this report..." required></textarea>
-    </div>
-    <div class="decline-modal-footer">
-      <button class="btn btn-cancel" id="cancelDeclineBtn">Cancel</button>
-      <button class="btn btn-delete" id="confirmDeclineBtn">Confirm Decline</button>
-    </div>
-  </div>
+<input type="number" id="editPendingWidth" step="0.01">
 </div>
-
+<div class="modal-row">
+<label for="editPendingHeight">Height (m)</label>
+<input type="number" id="editPendingHeight" step="0.01">
+</div>
+<div class="modal-row">
+<label for="editPendingLatitude">Latitude</label>
+<input type="text" id="editPendingLatitude">
+</div>
+<div class="modal-row">
+<label for="editPendingLongitude">Longitude</label>
+<input type="text" id="editPendingLongitude">
+</div>
+<div class="modal-row">
+<label for="editPendingProposedBudget">Proposed Budget</label>
+<input type="text" id="editPendingProposedBudget" placeholder="e.g., ₱50,000 - ₱100,000">
+</div>
+<div class="modal-row">
+<label for="editPendingInspectionDate">Inspection Date</label>
+<input type="date" id="editPendingInspectionDate">
+</div>
+<div class="modal-row full-width">
+<label>Image</label>
+<img id="editPendingImage" class="img-preview" alt="Report image" style="display:none">
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-cancel" id="cancelPendingEdit">Cancel</button>
+<button class="btn btn-save" id="savePendingChanges">Save Changes</button>
+</div>
+</div>
+  </div>
+  <!-- DECLINE MODAL -->
+  <div class="decline-modal" id="declineModal">
+    <div class="decline-modal-content">
+      <div class="decline-modal-header">
+        <h3>Decline Report</h3>
+      </div>
+      <div class="decline-form-group">
+        <label for="declineReason">Reason for Declining <span class="required">*</span></label>
+        <textarea id="declineReason" placeholder="Enter detailed reason for declining this report..." required></textarea>
+      </div>
+      <div class="decline-modal-footer">
+        <button class="btn btn-cancel" id="cancelDeclineBtn">Cancel</button>
+        <button class="btn btn-delete" id="confirmDeclineBtn">Confirm Decline</button>
+      </div>
+    </div>
+  </div>
 <script type="module">
-  // ========================================
-  // FIREBASE CONFIGURATION & INITIALIZATION
-  // ========================================
+  // ===== FIREBASE IMPORTS =====
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, collection, query, where, orderBy, onSnapshot, getDoc, getDocs, doc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -415,11 +461,13 @@
   const db = getFirestore(app);
   const storage = getStorage(app);
 
-  // ========================================
-  // DOM ELEMENTS
-  // ========================================
+  // ===== DOM ELEMENTS =====
   const pendingBody = document.getElementById("pendingBody");
   const searchPending = document.getElementById("searchPending");
+  const categoryFilter = document.getElementById("categoryFilter");
+  const issueFilter = document.getElementById("issueFilter");
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  const activeFilters = document.getElementById("activeFilters");
   
   const editPendingModal = document.getElementById("editPendingModal");
   const closePendingModal = document.getElementById("closePendingModal");
@@ -446,28 +494,60 @@
   const dropdownMenu = document.getElementById('dropdownMenu');
   const profileToggle = document.getElementById('profileToggle');
 
-  // ========================================
-  // GLOBAL VARIABLES
-  // ========================================
+  // ===== GLOBAL VARIABLES =====
   let currentDocId = null;
   let reportToDecline = null;
   let reportsUnsub = null;
+  let allReportsData = [];
   
-  // Notification system variables
   let notificationsList = [];
   let seenNotificationIds = new Set();
   let trackedUserStatuses = {};
   let trackedReportIds = new Set();
   let currentFilter = "all";
+  let globalDb = null;
+  
+  // PAGINATION VARIABLES
+  let allPendingReports = [];
+  let filteredPendingReports = [];
+  let currentPendingPage = 1;
+  const itemsPerPage = 5;
 
-  // ========================================
-  // MOBILE MENU FUNCTIONS
-  // ========================================
+  // ===== PREDEFINED CATEGORIES AND ISSUES =====
+  const CATEGORIES = [
+    "Daan (Road)",
+    "Tulay (Bridge)", 
+    "Ilaw (Street Light)",
+    "Kanal (Drainage)",
+    "Basketbol Court (Basketball Court)",
+    "Covered Court",
+    "Barangay Hall",
+    "Health Center",
+    "Day Care Center",
+    "Multi-Purpose Hall",
+    "Waiting Shed",
+    "Public Toilet",
+    "Water System",
+    "Others"
+  ];
+
+  const ISSUES = [
+    "Sira (Broken)",
+    "Butas (Has Holes)",
+    "Gumuho (Collapsed)",
+    "Hindi Gumagana (Not Working)",
+    "Kailangan ng Pagkukumpuni (Needs Repair)",
+    "Kailangan ng Pagpapalitan (Needs Replacement)",
+    "Kailangan Ayusin (Needs Fixing)",
+    "Walang (None/Missing)",
+    "Others"
+  ];
+
+  // ===== MOBILE MENU FUNCTIONS =====
   window.toggleMobileMenu = function() {
     document.getElementById('sidebar').classList.toggle('mobile-open');
   };
 
-  // Close mobile menu when clicking outside
   document.addEventListener('click', function(e) {
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.querySelector('.mobile-menu-btn');
@@ -479,120 +559,103 @@
     }
   });
 
-  // ========================================
-  // SIDEBAR SUBMENU TOGGLE
-  // ========================================
-  // ===== IMPROVED SUBMENU TOGGLE FUNCTION =====
-window.toggleSubmenu = function(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  
-  const parentLi = event.currentTarget.parentElement;
-  const submenu = parentLi.querySelector('.sidebar-submenu');
-  const chevron = event.currentTarget.querySelector('.fa-chevron-down');
-  
-  if (submenu) {
-    const isOpen = submenu.classList.contains('open');
+  // ===== SUBMENU TOGGLE FUNCTION =====
+  window.toggleSubmenu = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
     
-    // Close all other submenus first
-    document.querySelectorAll('.sidebar-submenu').forEach(sub => {
-      if (sub !== submenu) {
-        sub.classList.remove('open');
-      }
-    });
-    
-    // Reset all chevrons
-    document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
-      if (chev !== chevron) {
-        chev.style.transform = 'rotate(0deg)';
-      }
-    });
-    
-    // Toggle current submenu
-    if (isOpen) {
-      submenu.classList.remove('open');
-      if (chevron) {
-        chevron.style.transform = 'rotate(0deg)';
-      }
-    } else {
-      submenu.classList.add('open');
-      if (chevron) {
-        chevron.style.transform = 'rotate(180deg)';
-      }
-    }
-  }
-};
-
-// ===== AUTO-OPEN SUBMENU FOR CURRENT PAGE =====
-window.addEventListener('DOMContentLoaded', function() {
-  const currentPage = window.location.pathname.split('/').pop();
-  
-  // Map of pages to their parent submenu
-  const submenuPages = {
-    'ad_repopend.html': 'manage-reports',
-    'ad_repon.html': 'manage-reports',
-    'ad_repcom.html': 'manage-reports',
-    'ad_repdec.html': 'manage-reports'
-  };
-  
-  // Check if current page is in a submenu
-  if (submenuPages[currentPage]) {
-    const submenu = document.querySelector('.sidebar-submenu');
-    const chevron = document.querySelector('.has-submenu > a .fa-chevron-down');
+    const parentLi = event.currentTarget.parentElement;
+    const submenu = parentLi.querySelector('.sidebar-submenu');
+    const chevron = event.currentTarget.querySelector('.fa-chevron-down');
     
     if (submenu) {
-      submenu.classList.add('open');
-      if (chevron) {
-        chevron.style.transform = 'rotate(180deg)';
+      const isOpen = submenu.classList.contains('open');
+      
+      document.querySelectorAll('.sidebar-submenu').forEach(sub => {
+        if (sub !== submenu) {
+          sub.classList.remove('open');
+        }
+      });
+      
+      document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
+        if (chev !== chevron) {
+          chev.style.transform = 'rotate(0deg)';
+        }
+      });
+      
+      if (isOpen) {
+        submenu.classList.remove('open');
+        if (chevron) {
+          chevron.style.transform = 'rotate(0deg)';
+        }
+      } else {
+        submenu.classList.add('open');
+        if (chevron) {
+          chevron.style.transform = 'rotate(180deg)';
+        }
       }
     }
+  };
+
+  window.addEventListener('DOMContentLoaded', function() {
+    const currentPage = window.location.pathname.split('/').pop();
     
-    // Add active class to current submenu item
-    document.querySelectorAll('.sidebar-submenu a').forEach(link => {
-      if (link.getAttribute('href') === currentPage) {
+    const submenuPages = {
+      'ad_repopend.html': 'manage-reports',
+      'ad_repon.html': 'manage-reports',
+      'ad_repcom.html': 'manage-reports',
+      'ad_repdec.html': 'manage-reports'
+    };
+    
+    if (submenuPages[currentPage]) {
+      const submenu = document.querySelector('.sidebar-submenu');
+      const chevron = document.querySelector('.has-submenu > a .fa-chevron-down');
+      
+      if (submenu) {
+        submenu.classList.add('open');
+        if (chevron) {
+          chevron.style.transform = 'rotate(180deg)';
+        }
+      }
+      
+      document.querySelectorAll('.sidebar-submenu a').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+          link.parentElement.classList.add('active');
+        }
+      });
+    }
+    
+    document.querySelectorAll('.sidebar-menu > li > a').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && href === currentPage) {
         link.parentElement.classList.add('active');
       }
     });
-  }
-  
-  // Add active class to main sidebar items
-  document.querySelectorAll('.sidebar-menu > li > a').forEach(link => {
-    const href = link.getAttribute('href');
-    if (href && href === currentPage) {
-      link.parentElement.classList.add('active');
+  });
+
+  document.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('sidebar');
+    
+    if (sidebar && !e.target.closest('.has-submenu > a')) {
+      const clickedInsideSidebar = sidebar.contains(e.target);
+      const clickedSubmenuLink = e.target.closest('.sidebar-submenu a');
+      
+      if (clickedSubmenuLink) {
+        return;
+      }
+      
+      if (!clickedInsideSidebar && window.innerWidth <= 980) {
+        document.querySelectorAll('.sidebar-submenu').forEach(sub => {
+          sub.classList.remove('open');
+        });
+        document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
+          chev.style.transform = 'rotate(0deg)';
+        });
+      }
     }
   });
-});
 
-// ===== CLOSE SUBMENU WHEN CLICKING OUTSIDE =====
-document.addEventListener('click', function(e) {
-  const sidebar = document.getElementById('sidebar');
-  
-  // Only handle submenu closing if click is outside the has-submenu link
-  if (sidebar && !e.target.closest('.has-submenu > a')) {
-    const clickedInsideSidebar = sidebar.contains(e.target);
-    const clickedSubmenuLink = e.target.closest('.sidebar-submenu a');
-    
-    // If clicked a submenu link, allow navigation but keep submenu open
-    if (clickedSubmenuLink) {
-      return;
-    }
-    
-    // If clicked outside sidebar on mobile, close everything
-    if (!clickedInsideSidebar && window.innerWidth <= 980) {
-      document.querySelectorAll('.sidebar-submenu').forEach(sub => {
-        sub.classList.remove('open');
-      });
-      document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
-        chev.style.transform = 'rotate(0deg)';
-      });
-    }
-  }
-});
-
-  // ========================================
-  // NOTIFICATION SYSTEM FUNCTIONS
-  // ========================================
+  // ===== NOTIFICATION SYSTEM FUNCTIONS =====
   function normalizeStatus(status) { 
     return (status || "").toLowerCase().trim(); 
   }
@@ -610,16 +673,18 @@ document.addEventListener('click', function(e) {
     const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
     
     if (seenNotificationIds.has(id)) return;
-    
     seenNotificationIds.add(id);
-    notificationsList.unshift({ 
-      id, 
-      type, 
-      message: cleanMsg, 
-      detail: cleanDetail, 
-      timestamp: timestamp, 
-      read: false 
-    });
+    
+    const notification = {
+      id,
+      type,
+      message: cleanMsg,
+      detail: cleanDetail,
+      timestamp: timestamp,
+      read: false
+    };
+    
+    notificationsList.unshift(notification);
     updateNotificationUI();
   }
 
@@ -638,7 +703,6 @@ document.addEventListener('click', function(e) {
     filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
     const unreadCount = notificationsList.filter(n => !n.read).length;
-    
     if (unreadCount > 0) {
       notificationBadge.textContent = unreadCount;
       notificationBadge.classList.add("show");
@@ -666,13 +730,22 @@ document.addEventListener('click', function(e) {
   }
 
   async function setupRealtimeNotifications(db) {
-    // Initialize tracked user statuses
+    globalDb = db;
+    
+    // Track existing users
     const userSnap = await getDocs(collection(db, "users"));
     userSnap.forEach((docSnap) => {
       const userId = docSnap.id;
       const data = docSnap.data();
       const status = normalizeStatus(data.status);
       trackedUserStatuses[userId] = status;
+      
+      // Add existing active users to notifications
+      if (status === "active") {
+        const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+        const position = data.position || "User";
+        addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
+      }
     });
     
     // Listen for user changes
@@ -686,14 +759,14 @@ document.addEventListener('click', function(e) {
         
         if (change.type === "added") {
           trackedUserStatuses[userId] = currentStatus;
-          if (currentStatus === "active" && isBarangayPosition(position)) {
+          if (currentStatus === "active") {
             addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
           }
         }
         
         if (change.type === "modified") {
           const oldStatus = trackedUserStatuses[userId];
-          if (oldStatus !== "active" && currentStatus === "active" && isBarangayPosition(position)) {
+          if (oldStatus !== "active" && currentStatus === "active") {
             addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
           }
           trackedUserStatuses[userId] = currentStatus;
@@ -701,10 +774,15 @@ document.addEventListener('click', function(e) {
       });
     });
     
-    // Initialize tracked report IDs
+    // Track existing reports
     const reportSnap = await getDocs(collection(db, "reports"));
     reportSnap.forEach((docSnap) => {
-      trackedReportIds.add(docSnap.id);
+      const id = docSnap.id;
+      trackedReportIds.add(id);
+      const data = docSnap.data();
+      const barangay = data.barangay || data.location || "Unknown location";
+      const type = data.reportType || data.type || data.projectName || "Report";
+      addNotification("report", "Report submitted", `${type} in ${barangay}`);
     });
     
     // Listen for new reports
@@ -712,7 +790,6 @@ document.addEventListener('click', function(e) {
       snapshot.docChanges().forEach((change) => {
         const id = change.doc.id;
         const data = change.doc.data();
-        
         if (change.type === "added" && !trackedReportIds.has(id)) {
           trackedReportIds.add(id);
           const barangay = data.barangay || data.location || "Unknown location";
@@ -723,29 +800,27 @@ document.addEventListener('click', function(e) {
     });
     
     updateNotificationUI();
+    console.log("✅ Notifications active");
   }
 
-  // Notification bell click handler
+  // ===== NOTIFICATION EVENT LISTENERS =====
   notificationBell.addEventListener("click", (e) => {
     e.stopPropagation();
     notificationMenu.classList.toggle("show");
     dropdownMenu.classList.remove("show");
   });
 
-  // Clear all notifications
   clearNotificationsBtn.addEventListener("click", () => {
     notificationsList = [];
     seenNotificationIds.clear();
     updateNotificationUI();
   });
 
-  // Mark all as read
   markAllReadBtn.addEventListener("click", () => {
     notificationsList.forEach(n => n.read = true);
     updateNotificationUI();
   });
 
-  // Filter buttons
   document.querySelectorAll(".filter-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
@@ -755,9 +830,7 @@ document.addEventListener('click', function(e) {
     });
   });
 
-  // ========================================
-  // PROFILE DROPDOWN HANDLERS
-  // ========================================
+  // ===== PROFILE DROPDOWN HANDLERS =====
   profileToggle.addEventListener("click", (e) => {
     e.stopPropagation();
     dropdownMenu.classList.toggle("show");
@@ -773,9 +846,7 @@ document.addEventListener('click', function(e) {
     }
   });
 
-  // ========================================
-  // UTILITY FUNCTIONS
-  // ========================================
+  // ===== UTILITY FUNCTIONS =====
   function formatTimestamp(timestamp) {
     if (!timestamp) return "";
     let date;
@@ -843,19 +914,158 @@ document.addEventListener('click', function(e) {
     return "Unknown";
   }
 
-  function attachSearch(inputElem, tableBody) {
-    inputElem.addEventListener("keyup", ()=>{
-      const val=inputElem.value.toLowerCase();
-      [...tableBody.rows].forEach(r=>{
-        const text=r.innerText.toLowerCase();
-        r.style.display=text.includes(val)?"":"none";
-      });
+  // ===== FILTER FUNCTIONS =====
+  function populateFilterDropdowns() {
+    categoryFilter.innerHTML = '<option value="">All Categories</option>';
+    CATEGORIES.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat;
+      option.textContent = cat;
+      categoryFilter.appendChild(option);
+    });
+    
+    issueFilter.innerHTML = '<option value="">All Issues</option>';
+    ISSUES.forEach(iss => {
+      const option = document.createElement('option');
+      option.value = iss;
+      option.textContent = iss;
+      issueFilter.appendChild(option);
     });
   }
 
-  // ========================================
-  // REPORT ACTION FUNCTIONS
-  // ========================================
+  function applyFilters() {
+    const searchTerm = searchPending.value.toLowerCase();
+    const selectedCategory = categoryFilter.value;
+    const selectedIssue = issueFilter.value;
+    
+    let hasActiveFilters = selectedCategory || selectedIssue;
+    clearFiltersBtn.style.display = hasActiveFilters ? 'block' : 'none';
+    
+    activeFilters.innerHTML = '';
+    if (selectedCategory) {
+      const tag = document.createElement('span');
+      tag.className = 'filter-tag';
+      tag.innerHTML = `Category: ${selectedCategory} <i class="fa fa-times"></i>`;
+      tag.querySelector('i').addEventListener('click', () => {
+        categoryFilter.value = '';
+        applyFilters();
+      });
+      activeFilters.appendChild(tag);
+    }
+    if (selectedIssue) {
+      const tag = document.createElement('span');
+      tag.className = 'filter-tag';
+      tag.innerHTML = `Issue: ${selectedIssue} <i class="fa fa-times"></i>`;
+      tag.querySelector('i').addEventListener('click', () => {
+        issueFilter.value = '';
+        applyFilters();
+      });
+      activeFilters.appendChild(tag);
+    }
+    
+    // Filter the reports
+    filteredPendingReports = allPendingReports.filter(item => {
+      const data = item.data;
+      const searchText = `${data.projectName || ''} ${data.barangay || ''} ${data.description || ''}`.toLowerCase();
+      
+      const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+      const matchesCategory = !selectedCategory || data.category === selectedCategory;
+      const matchesIssue = !selectedIssue || data.issue === selectedIssue;
+      
+      return matchesSearch && matchesCategory && matchesIssue;
+    });
+    
+    currentPendingPage = 1;
+    renderPendingTable();
+  }
+
+  searchPending.addEventListener("keyup", applyFilters);
+  categoryFilter.addEventListener("change", applyFilters);
+  issueFilter.addEventListener("change", applyFilters);
+  clearFiltersBtn.addEventListener("click", () => {
+    categoryFilter.value = '';
+    issueFilter.value = '';
+    searchPending.value = '';
+    applyFilters();
+  });
+
+  // ===== PAGINATION FUNCTIONS =====
+  function renderPagination(paginationContainer, currentPage, totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (totalPages <= 1) {
+      paginationContainer.innerHTML = '';
+      return;
+    }
+    let html = '';
+    html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="window.changePendingPage(${currentPage - 1})">
+      <i class="fa fa-chevron-left"></i> Previous
+    </button>`;
+    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+    html += `<span class="pagination-info">Showing ${startItem}-${endItem} of ${totalItems}</span>`;
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    if (startPage > 1) {
+      html += `<button onclick="window.changePendingPage(1)">1</button>`;
+      if (startPage > 2) {
+        html += `<span class="pagination-info">...</span>`;
+      }
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      html += `<button class="${i === currentPage ? 'active' : ''}" onclick="window.changePendingPage(${i})">${i}</button>`;
+    }
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        html += `<span class="pagination-info">...</span>`;
+      }
+      html += `<button onclick="window.changePendingPage(${totalPages})">${totalPages}</button>`;
+    }
+    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="window.changePendingPage(${currentPage + 1})">
+      Next <i class="fa fa-chevron-right"></i>
+    </button>`;
+    paginationContainer.innerHTML = html;
+  }
+
+  window.changePendingPage = function(newPage) {
+    currentPendingPage = newPage;
+    renderPendingTable();
+  };
+
+  async function renderPendingTable() {
+    pendingBody.innerHTML = "";
+    const pendingPagination = document.getElementById("pendingPagination");
+    
+    const startIndex = (currentPendingPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageItems = filteredPendingReports.slice(startIndex, endIndex);
+    
+    if (pageItems.length === 0 && filteredPendingReports.length === 0) {
+      const emptyRow = document.createElement("tr");
+      const emptyCell = document.createElement("td");
+      emptyCell.colSpan = 14;
+      emptyCell.style.textAlign = "center";
+      emptyCell.style.padding = "2rem";
+      emptyCell.style.color = "#999";
+      emptyCell.textContent = "No pending reports found";
+      emptyRow.appendChild(emptyCell);
+      pendingBody.appendChild(emptyRow);
+      pendingPagination.innerHTML = '';
+      return;
+    }
+    
+    for (const item of pageItems) {
+      const row = await buildTableRow(item.docSnap, "pending");
+      pendingBody.appendChild(row);
+    }
+    
+    renderPagination(pendingPagination, currentPendingPage, filteredPendingReports.length);
+  }
+
+  // ===== REPORT ACTION FUNCTIONS =====
   async function approveReport(e){
     e.preventDefault();
     const id=e.currentTarget.dataset.id;
@@ -908,382 +1118,310 @@ document.addEventListener('click', function(e) {
     }
   }
 
-  // ========================================
-// UPDATED openEditPendingModal FUNCTION
-// ========================================
-async function openEditPendingModal(e){
-  e.preventDefault();
-  const id = e.currentTarget.dataset.id;
-  currentDocId = id;
-  
-  try {
-    const snap = await getDoc(doc(db, "reports", id));
-    if(!snap.exists()) {
-      alert("Report not found");
-      return;
-    }
+  async function openEditPendingModal(e){
+    e.preventDefault();
+    const id = e.currentTarget.dataset.id;
+    currentDocId = id;
     
-    const data = snap.data();
-    const position = await getReporterPosition(data.userId);
-    
-    document.getElementById("editPendingProjectName").value = data.projectName || data.reportId || "";
-    document.getElementById("editPendingTimestamp").value = formatTimestamp(data.timestamp || data.createdAt);
-    document.getElementById("editPendingPosition").value = position;
-    document.getElementById("editPendingBarangay").value = data.barangay || "";
-    document.getElementById("editPendingDescription").value = data.description || "";
-    document.getElementById("editPendingWidth").value = data.width || "";
-    document.getElementById("editPendingHeight").value = data.height || "";
-    document.getElementById("editPendingLatitude").value = data.latitude || "";
-    document.getElementById("editPendingLongitude").value = data.longitude || "";
-    document.getElementById("editPendingProposedBudget").value = data.proposedBudget || "";
-    document.getElementById("editPendingInspectionDate").value = formatDateForInput(data.inspectionDate);
-    
-    const imagePath = data.incidentImage || data.imageUrl || data.image;
-    const imgPreview = document.getElementById("editPendingImage");
-    if(imagePath) {
-      const imgUrl = await getImageUrl(imagePath);
-      if(imgUrl) {
-        imgPreview.src = imgUrl;
-        imgPreview.style.display = "block";
+    try {
+      const snap = await getDoc(doc(db, "reports", id));
+      if(!snap.exists()) {
+        alert("Report not found");
+        return;
+      }
+      
+      const data = snap.data();
+      const position = await getReporterPosition(data.userId);
+      
+      document.getElementById("editPendingProjectName").value = data.projectName || data.reportId || "";
+      document.getElementById("editPendingTimestamp").value = formatTimestamp(data.timestamp || data.createdAt);
+      document.getElementById("editPendingPosition").value = position;
+      document.getElementById("editPendingBarangay").value = data.barangay || "";
+      document.getElementById("editPendingDescription").value = data.description || "";
+      document.getElementById("editPendingWidth").value = data.width || "";
+      document.getElementById("editPendingHeight").value = data.height || "";
+      document.getElementById("editPendingLatitude").value = data.latitude || "";
+      document.getElementById("editPendingLongitude").value = data.longitude || "";
+      document.getElementById("editPendingProposedBudget").value = data.proposedBudget || "";
+      document.getElementById("editPendingInspectionDate").value = formatDateForInput(data.inspectionDate);
+      
+      const imagePath = data.incidentImage || data.imageUrl || data.image;
+      const imgPreview = document.getElementById("editPendingImage");
+      if(imagePath) {
+        const imgUrl = await getImageUrl(imagePath);
+        if(imgUrl) {
+          imgPreview.src = imgUrl;
+          imgPreview.style.display = "block";
+        } else {
+          imgPreview.style.display = "none";
+        }
       } else {
         imgPreview.style.display = "none";
       }
-    } else {
-      imgPreview.style.display = "none";
+      
+      editPendingModal.style.display = "flex";
+    } catch(err) {
+      alert("Error opening report: " + err.message);
     }
-    
-    editPendingModal.style.display = "flex";
-  } catch(err) {
-    alert("Error opening report: " + err.message);
   }
+
+  // ===== BUILD TABLE ROW FUNCTION =====
+  async function buildTableRow(docSnap, tableType) {
+    const r = docSnap.data();
+    const tr = document.createElement("tr");
+    tr.dataset.category = r.category || '';
+    tr.dataset.issue = r.issue || '';
+
+    const addCell = (c, cls = "") => {
+      const td = document.createElement("td");
+      if(cls) td.className = cls;
+      if(typeof c === "string") td.textContent = c;
+      else td.appendChild(c);
+      tr.appendChild(td);
+    };
+
+    addCell(r.projectName || r.reportId || "Unnamed Project");
+
+    const categoryBadge = document.createElement("span");
+    categoryBadge.className = "category-badge";
+    categoryBadge.textContent = r.category || "N/A";
+    addCell(categoryBadge);
+
+    const issueBadge = document.createElement("span");
+    issueBadge.className = "issue-badge";
+    issueBadge.textContent = r.issue || "N/A";
+    addCell(issueBadge);
+
+    addCell(r.barangay || "");
+
+    const desc = document.createElement("span");
+    desc.className = "truncate";
+    desc.textContent = r.description || "";
+    desc.title = r.description || "";
+    addCell(desc);
+
+    const dims = (r.width && r.height) ? `${r.width}×${r.height}` : (r.width || r.height || "");
+    addCell(dims);
+
+    const imgSpan = document.createElement("span");
+    const imagePath = r.incidentImage || r.imageUrl || r.image
+if(imagePath) {
+  const link = document.createElement("a");
+  link.href = "#";
+  link.textContent = "View";
+  link.onclick = async (e) => {
+    e.preventDefault();
+    const imgUrl = await getImageUrl(imagePath);
+    if(!imgUrl) {
+      alert("Could not load image");
+      return;
+    }
+    const overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
+    const img = document.createElement("img");
+    img.src = imgUrl;
+    img.style.cssText = "max-width:90%;max-height:90%;border-radius:8px;";
+    overlay.appendChild(img);
+    overlay.onclick = () => overlay.remove();
+    document.body.appendChild(overlay);
+  };
+  imgSpan.appendChild(link);
+} else {
+  imgSpan.textContent = "No";
+}
+addCell(imgSpan);
+
+const coordsDiv = document.createElement("div");
+coordsDiv.className = "coords-vertical";
+const latSpan = document.createElement("span");
+latSpan.textContent = `Lat: ${r.latitude || "N/A"}`;
+const lngSpan = document.createElement("span");
+lngSpan.textContent = `Lng: ${r.longitude || "N/A"}`;
+coordsDiv.appendChild(latSpan);
+coordsDiv.appendChild(lngSpan);
+addCell(coordsDiv);
+
+addCell(formatTimestamp(r.timestamp || r.createdAt));
+
+let proposedBudget = r.proposedBudget || "Not Set";
+if(!r.proposedBudget && r.budgetMin && r.budgetMax) {
+  proposedBudget = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
+}
+addCell(proposedBudget);
+
+addCell(formatDate(r.inspectionDate));
+
+const reporterPosition = await getReporterPosition(r.userId);
+addCell(reporterPosition);
+
+const status = document.createElement("span");
+const s = (r.status || "Pending").toLowerCase();
+status.className = `status ${s}`;
+status.textContent = r.status || "Pending";
+addCell(status);
+
+if(tableType === "pending") {
+  const action = document.createElement("span");
+  action.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;";
+  
+  const approveBtn = document.createElement("button");
+  approveBtn.className = "btn-approve";
+  approveBtn.textContent = "Approve";
+  approveBtn.dataset.id = docSnap.id;
+  approveBtn.onclick = approveReport;
+  
+  const declineBtn = document.createElement("button");
+  declineBtn.className = "btn-decline";
+  declineBtn.textContent = "Decline";
+  declineBtn.dataset.id = docSnap.id;
+  declineBtn.onclick = openDeclineModal;
+  
+  const editBtn = document.createElement("button");
+  editBtn.className = "btn-edit";
+  editBtn.textContent = "Edit";
+  editBtn.dataset.id = docSnap.id;
+  editBtn.onclick = openEditPendingModal;
+  
+  action.appendChild(approveBtn);
+  action.appendChild(declineBtn);
+  action.appendChild(editBtn);
+  
+  addCell(action, "action");
 }
 
-// ========================================
-// UPDATED savePendingChanges FUNCTION
-// ========================================
+return tr;
+}
+// ===== MODAL HANDLERS =====
+closePendingModal.onclick=()=>{
+editPendingModal.style.display="none";
+currentDocId = null;
+};
+cancelPendingEdit.onclick=()=>{
+editPendingModal.style.display="none";
+currentDocId = null;
+};
+cancelDeclineBtn.onclick=()=>{
+declineModal.style.display="none";
+reportToDecline = null;
+};
+confirmDeclineBtn.onclick=confirmDecline;
 savePendingChanges.addEventListener("click", async () => {
-  if (!currentDocId) return;
-  
-  const projectName = document.getElementById("editPendingProjectName").value.trim();
-  const barangay = document.getElementById("editPendingBarangay").value.trim();
-  const description = document.getElementById("editPendingDescription").value.trim();
-  const width = document.getElementById("editPendingWidth").value;
-  const height = document.getElementById("editPendingHeight").value;
-  const latitude = document.getElementById("editPendingLatitude").value.trim();
-  const longitude = document.getElementById("editPendingLongitude").value.trim();
-  const proposedBudget = document.getElementById("editPendingProposedBudget").value.trim();
-  const inspectionDate = document.getElementById("editPendingInspectionDate").value;
-  
-  if(!barangay || !description) {
-    alert("Barangay and Description are required fields.");
-    return;
-  }
-  
-  try {
-    const reportRef = doc(db, "reports", currentDocId);
-    const updateData = {
-      barangay,
-      description,
-      latitude,
-      longitude,
-      proposedBudget
-    };
-    
-    if(projectName) updateData.projectName = projectName;
-    if(width) updateData.width = parseFloat(width);
-    if(height) updateData.height = parseFloat(height);
-    if(inspectionDate) updateData.inspectionDate = new Date(inspectionDate);
-    
-    await updateDoc(reportRef, updateData);
-    
-    alert("Pending report updated successfully!");
-    editPendingModal.style.display = "none";
-    currentDocId = null;
-  } catch (err) {
-    console.error(err);
-    alert("Save failed: " + err.message);
-  }
-});
+if (!currentDocId) return;
+const projectName = document.getElementById("editPendingProjectName").value.trim();
+const barangay = document.getElementById("editPendingBarangay").value.trim();
+const description = document.getElementById("editPendingDescription").value.trim();
+const width = document.getElementById("editPendingWidth").value;
+const height = document.getElementById("editPendingHeight").value;
+const latitude = document.getElementById("editPendingLatitude").value.trim();
+const longitude = document.getElementById("editPendingLongitude").value.trim();
+const proposedBudget = document.getElementById("editPendingProposedBudget").value.trim();
+const inspectionDate = document.getElementById("editPendingInspectionDate").value;
 
-// ========================================
-// UPDATED buildTableRow FUNCTION
-// ========================================
-async function buildTableRow(docSnap, tableType) {
-  const r = docSnap.data();
-  const tr = document.createElement("tr");
-  const addCell = (c, cls = "") => {
-    const td = document.createElement("td");
-    if(cls) td.className = cls;
-    if(typeof c === "string") td.textContent = c;
-    else td.appendChild(c);
-    tr.appendChild(td);
-  };
-  
-  addCell(r.projectName || r.reportId || "Unnamed Project");
-  addCell(r.barangay || "");
-  
-  const desc = document.createElement("span");
-  desc.className = "truncate";
-  desc.textContent = r.description || "";
-  desc.title = r.description || "";
-  addCell(desc);
-  
-  const dims = (r.width && r.height) ? `${r.width}×${r.height}` : (r.width || r.height || "");
-  addCell(dims);
-  
-  const imgSpan = document.createElement("span");
-  const imagePath = r.incidentImage || r.imageUrl || r.image;
-  if(imagePath) {
-    const link = document.createElement("a");
-    link.href = "#";
-    link.textContent = "View";
-    link.onclick = async (e) => {
-      e.preventDefault();
-      const imgUrl = await getImageUrl(imagePath);
-      if(!imgUrl) {
-        alert("Could not load image");
-        return;
-      }
-      const overlay = document.createElement("div");
-      overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
-      const img = document.createElement("img");
-      img.src = imgUrl;
-      img.style.cssText = "max-width:90%;max-height:90%;border-radius:8px;";
-      overlay.appendChild(img);
-      overlay.onclick = () => overlay.remove();
-      document.body.appendChild(overlay);
-    };
-    imgSpan.appendChild(link);
-  } else {
-    imgSpan.textContent = "No";
-  }
-  addCell(imgSpan);
-  
-  const coordsDiv = document.createElement("div");
-  coordsDiv.className = "coords-vertical";
-  const latSpan = document.createElement("span");
-  latSpan.textContent = `Lat: ${r.latitude || "N/A"}`;
-  const lngSpan = document.createElement("span");
-  lngSpan.textContent = `Lng: ${r.longitude || "N/A"}`;
-  coordsDiv.appendChild(latSpan);
-  coordsDiv.appendChild(lngSpan);
-  addCell(coordsDiv);
-  
-  addCell(formatTimestamp(r.timestamp || r.createdAt));
-  
-  let proposedBudget = r.proposedBudget || "Not Set";
-  if(!r.proposedBudget && r.budgetMin && r.budgetMax) {
-    proposedBudget = `₱${parseFloat(r.budgetMin).toLocaleString()} - ₱${parseFloat(r.budgetMax).toLocaleString()}`;
-  }
-  addCell(proposedBudget);
-  
-  // FOR PENDING: Show Inspection Date instead of Implementation dates
-  if(tableType === "pending") {
-    addCell(formatDate(r.inspectionDate));
-  } 
-  // FOR ONGOING: Show Implementation dates (Start - Deadline)
-  else if(tableType === "ongoing") {
-    const startDeadlineDiv = document.createElement("div");
-    startDeadlineDiv.style.cssText = "display:flex;gap:8px;align-items:center;white-space:nowrap";
-    const startSpan = document.createElement("span");
-    startSpan.textContent = formatDate(r.startDate);
-    const dashSpan = document.createElement("span");
-    dashSpan.textContent = "–";
-    const deadlineSpan = document.createElement("span");
-    deadlineSpan.textContent = formatDate(r.endDate || r.deadline);
-    startDeadlineDiv.appendChild(startSpan);
-    startDeadlineDiv.appendChild(dashSpan);
-    startDeadlineDiv.appendChild(deadlineSpan);
-    addCell(startDeadlineDiv);
-  }
-  
-  const reporterPosition = await getReporterPosition(r.userId);
-  addCell(reporterPosition);
-  
-  const status = document.createElement("span");
-  const s = (r.status || "Pending").toLowerCase();
-  status.className = `status ${s}`;
-  status.textContent = r.status || "Pending";
-  addCell(status);
-  
-  if(tableType === "pending") {
-    const action = document.createElement("span");
-    action.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;";
-    
-    const approveBtn = document.createElement("button");
-    approveBtn.className = "btn-approve";
-    approveBtn.textContent = "Approve";
-    approveBtn.dataset.id = docSnap.id;
-    approveBtn.onclick = approveReport;
-    
-    const declineBtn = document.createElement("button");
-    declineBtn.className = "btn-decline";
-    declineBtn.textContent = "Decline";
-    declineBtn.dataset.id = docSnap.id;
-    declineBtn.onclick = openDeclineModal;
-    
-    const editBtn = document.createElement("button");
-    editBtn.className = "btn-edit";
-    editBtn.textContent = "Edit";
-    editBtn.dataset.id = docSnap.id;
-    editBtn.onclick = openEditPendingModal;
-    
-    action.appendChild(approveBtn);
-    action.appendChild(declineBtn);
-    action.appendChild(editBtn);
-    
-    addCell(action, "action");
-  }
-  
-  return tr;
+if(!barangay || !description) {
+  alert("Barangay and Description are required fields.");
+  return;
 }
-  // ========================================
-  // MODAL HANDLERS
-  // ========================================
-  closePendingModal.onclick=()=>{
-    editPendingModal.style.display="none";
-    currentDocId = null;
+
+try {
+  const reportRef = doc(db,"reports",currentDocId);
+  const updateData = {
+    barangay,
+    description,
+    latitude,
+    longitude,
+    proposedBudget
   };
   
-  cancelPendingEdit.onclick=()=>{
-    editPendingModal.style.display="none";
-    currentDocId = null;
-  };
-
-  cancelDeclineBtn.onclick=()=>{
-    declineModal.style.display="none";
-    reportToDecline = null;
-  };
+  if(projectName) updateData.projectName = projectName;
+  if(width) updateData.width = parseFloat(width);
+  if(height) updateData.height = parseFloat(height);
+  if(inspectionDate) updateData.inspectionDate = new Date(inspectionDate);
   
-  confirmDeclineBtn.onclick=confirmDecline;
-
-  savePendingChanges.addEventListener("click", async () => {
-    if (!currentDocId) return;
-    
-    const projectName = document.getElementById("editPendingProjectName").value.trim();
-    const barangay = document.getElementById("editPendingBarangay").value.trim();
-    const description = document.getElementById("editPendingDescription").value.trim();
-    const width = document.getElementById("editPendingWidth").value;
-    const height = document.getElementById("editPendingHeight").value;
-    const latitude = document.getElementById("editPendingLatitude").value.trim();
-    const longitude = document.getElementById("editPendingLongitude").value.trim();
-    const proposedBudget = document.getElementById("editPendingProposedBudget").value.trim();
-    const startDate = document.getElementById("editPendingStartDate").value;
-    const deadline = document.getElementById("editPendingDeadline").value;
-    
-    if(!barangay || !description) {
-      alert("Barangay and Description are required fields.");
-      return;
-    }
-    
-    try {
-      const reportRef = doc(db,"reports",currentDocId);
-      const updateData = {
-        barangay,
-        description,
-        latitude,
-        longitude,
-        proposedBudget
-      };
-      
-      if(projectName) updateData.projectName = projectName;
-      if(width) updateData.width = parseFloat(width);
-      if(height) updateData.height = parseFloat(height);
-      if(startDate) updateData.startDate = new Date(startDate);
-      if(deadline) updateData.endDate = new Date(deadline);
-      
-      await updateDoc(reportRef, updateData);
-      
-      alert("Pending report updated successfully!");
-      editPendingModal.style.display="none";
-      currentDocId = null;
-    } catch (err) {
-      console.error(err);
-      alert("Save failed: " + err.message);
-    }
-  });
-
-  // ========================================
-  // LOGOUT HANDLER
-  // ========================================
-  async function handleLogout() {
-    try {
-      await signOut(auth);
-      window.location.href = "login.html";
-    } catch(err) {
-      alert("Error logging out: " + err.message);
-    }
-  }
-
-  sidebarLogoutBtn.addEventListener("click", handleLogout);
-
-  // ========================================
-  // SEARCH FUNCTIONALITY
-  // ========================================
-  attachSearch(searchPending, pendingBody);
-
-  // ========================================
-  // AUTHENTICATION & INITIALIZATION
-  // ========================================
-  onAuthStateChanged(auth, async(user)=>{
-    if(!user) {
+  await updateDoc(reportRef, updateData);
+  
+  alert("Pending report updated successfully!");
+  editPendingModal.style.display="none";
+  currentDocId = null;
+} catch (err) {
+  console.error(err);
+  alert("Save failed: " + err.message);
+}
+});
+// ===== LOGOUT HANDLER =====
+async function handleLogout() {
+try {
+await signOut(auth);
+window.location.href = "login.html";
+} catch(err) {
+alert("Error logging out: " + err.message);
+}
+}
+sidebarLogoutBtn.addEventListener("click", handleLogout);
+// ===== AUTHENTICATION & INITIALIZATION =====
+onAuthStateChanged(auth, async(user)=>{
+if(!user) {
+window.location.href="login.html";
+return;
+}
+try {
+  const userDocRef = doc(db,"users",user.uid);
+  
+  onSnapshot(userDocRef, async(docSnap)=>{
+    if(!docSnap.exists()) {
+      alert("User data not found! Redirecting...");
       window.location.href="login.html";
       return;
     }
     
-    try {
-      const userDocRef = doc(db,"users",user.uid);
-      
-      // REAL-TIME PROFILE PICTURE & USERNAME SYNC
-      onSnapshot(userDocRef, async(docSnap)=>{
-        if(!docSnap.exists()) {
-          alert("User data not found! Redirecting...");
-          window.location.href="login.html";
-          return;
-        }
-        
-        const d = docSnap.data();
-        
-        if(d.position!=="Admin") {
-          alert("Unauthorized access! Only Admins can access this page.");
-          window.location.href="login.html";
-          return;
-        }
-        
-        // UPDATE PROFILE PICTURE AND USERNAME IN REAL-TIME
-        navUsername.textContent = d.name || d.firstName || "Admin";
-        const photoURL = d.photoURL || d.profilePic || "image.png";
-        navAvatar.src = photoURL;
-      });
-
-      // Load reports data with real-time updates
-      const q = query(collection(db,"reports"), orderBy("createdAt","desc"));
-      if(reportsUnsub) reportsUnsub();
-      
-      reportsUnsub = onSnapshot(q, async (snap)=>{
-        pendingBody.innerHTML="";
-        
-        for (const docSnap of snap.docs) {
-          const data=docSnap.data();
-          const status=(data.status||"pending").toLowerCase().trim();
-          
-          if(status==="pending") {
-            const row=await buildTableRow(docSnap, "pending");
-            pendingBody.appendChild(row);
-          }
-        }
-      });
-
-      // SETUP REAL-TIME NOTIFICATION SYSTEM
-      await setupRealtimeNotifications(db);
-
-    } catch(err) {
-      console.error("Error loading user data:", err);
-      alert("Error loading user data. Please try again.");
+    const d = docSnap.data();
+    
+    if(d.position!=="Admin") {
+      alert("Unauthorized access! Only Admins can access this page.");
       window.location.href="login.html";
+      return;
     }
+    
+    navUsername.textContent = d.name || d.firstName || "Admin";
+    const photoURL = d.photoURL || d.profilePic || "image.png";
+    navAvatar.src = photoURL;
   });
+
+  const q = query(collection(db,"reports"), orderBy("createdAt","desc"));
+  if(reportsUnsub) reportsUnsub();
+  
+  reportsUnsub = onSnapshot(q, async (snap)=>{
+    allPendingReports = [];
+    
+    for (const docSnap of snap.docs) {
+      const data = docSnap.data();
+      const status = (data.status || "pending").toLowerCase().trim();
+      
+      if(status === "pending") {
+        allPendingReports.push({ docSnap, data });
+      }
+    }
+    
+    // Sort by barangay alphabetically
+    allPendingReports.sort((a, b) => {
+      const barangayA = (a.data.barangay || "").toLowerCase();
+      const barangayB = (b.data.barangay || "").toLowerCase();
+      return barangayA.localeCompare(barangayB);
+    });
+    
+    populateFilterDropdowns();
+    filteredPendingReports = [...allPendingReports];
+    currentPendingPage = 1;
+    await renderPendingTable();
+  });
+
+  await setupRealtimeNotifications(db);
+
+} catch(err) {
+  console.error("Error loading user data:", err);
+  alert("Error loading user data. Please try again.");
+  window.location.href="login.html";
+}
+});
 </script>
-
-  </body>
+</body>
 </html>

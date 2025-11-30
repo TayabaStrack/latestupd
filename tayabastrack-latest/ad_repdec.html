@@ -164,6 +164,15 @@
     td button:disabled{background:#ccc;cursor:not-allowed;opacity:0.6}
     .coords-vertical{display:flex;flex-direction:column;gap:2px;font-size:0.8rem}
     .coords-vertical span{white-space:nowrap}
+    
+    /* PAGINATION STYLES */
+    .pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:12px}
+    .pagination button{padding:0.5rem 0.8rem;border:1px solid #ddd;background:#fff;color:#004aad;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all 0.2s}
+    .pagination button:hover:not(:disabled){background:#004aad;color:#fff}
+    .pagination button:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
+    .pagination button.active{background:#004aad;color:#fff;border-color:#004aad}
+    .pagination-info{color:#666;font-size:0.85rem;margin:0 8px}
+    
     .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
     .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -319,6 +328,7 @@
             <tbody id="declinedBody"></tbody>
           </table>
         </div>
+        <div class="pagination" id="declinedPagination"></div>
       </div>
     </section>
   </main>
@@ -373,6 +383,43 @@
   let trackedUserStatuses = {};
   let trackedReportIds = new Set();
   let currentFilter = "all";
+  let globalDb = null;
+  
+  // PAGINATION VARIABLES
+  let allDeclinedReports = [];
+  let filteredDeclinedReports = [];
+  let currentDeclinedPage = 1;
+  const itemsPerPage = 5;
+
+  // ===== PREDEFINED CATEGORIES AND ISSUES =====
+  const CATEGORIES = [
+    "Daan (Road)",
+    "Tulay (Bridge)", 
+    "Ilaw (Street Light)",
+    "Kanal (Drainage)",
+    "Basketbol Court (Basketball Court)",
+    "Covered Court",
+    "Barangay Hall",
+    "Health Center",
+    "Day Care Center",
+    "Multi-Purpose Hall",
+    "Waiting Shed",
+    "Public Toilet",
+    "Water System",
+    "Others"
+  ];
+
+  const ISSUES = [
+    "Sira (Broken)",
+    "Butas (Has Holes)",
+    "Gumuho (Collapsed)",
+    "Hindi Gumagana (Not Working)",
+    "Kailangan ng Pagkukumpuni (Needs Repair)",
+    "Kailangan ng Pagpapalitan (Needs Replacement)",
+    "Kailangan Ayusin (Needs Fixing)",
+    "Walang (None/Missing)",
+    "Others"
+  ];
 
   // ===== MOBILE MENU FUNCTIONS =====
   window.toggleMobileMenu = function() {
@@ -502,21 +549,26 @@
     const cleanDetail = (detail || "").trim();
     const timestamp = new Date();
     const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
+    
     if (seenNotificationIds.has(id)) return;
     seenNotificationIds.add(id);
-    notificationsList.unshift({ 
-      id, 
-      type, 
-      message: cleanMsg, 
-      detail: cleanDetail, 
-      timestamp: timestamp, 
-      read: false 
-    });
+    
+    const notification = {
+      id,
+      type,
+      message: cleanMsg,
+      detail: cleanDetail,
+      timestamp: timestamp,
+      read: false
+    };
+    
+    notificationsList.unshift(notification);
     updateNotificationUI();
   }
 
   function updateNotificationUI() {
     let filtered = [...notificationsList];
+    
     if (currentFilter === "report") {
       filtered = filtered.filter((n) => n.type === "report");
     } else if (currentFilter === "user") {
@@ -525,6 +577,7 @@
       const ago = Date.now() - 24 * 60 * 60 * 1000;
       filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
     }
+    
     filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
     const unreadCount = notificationsList.filter(n => !n.read).length;
@@ -555,6 +608,8 @@
   }
 
   async function setupRealtimeNotifications(db) {
+    globalDb = db;
+    
     const userSnap = await getDocs(collection(db, "users"));
     userSnap.forEach((docSnap) => {
       const userId = docSnap.id;
@@ -597,6 +652,7 @@
       snapshot.docChanges().forEach((change) => {
         const id = change.doc.id;
         const data = change.doc.data();
+        
         if (change.type === "added" && !trackedReportIds.has(id)) {
           trackedReportIds.add(id);
           const barangay = data.barangay || data.location || "Unknown location";
@@ -709,39 +765,8 @@
     return "Unknown";
   }
 
-  // ===== PREDEFINED CATEGORIES AND ISSUES =====
-  const CATEGORIES = [
-    "Daan (Road)",
-    "Tulay (Bridge)", 
-    "Ilaw (Street Light)",
-    "Kanal (Drainage)",
-    "Basketbol Court (Basketball Court)",
-    "Covered Court",
-    "Barangay Hall",
-    "Health Center",
-    "Day Care Center",
-    "Multi-Purpose Hall",
-    "Waiting Shed",
-    "Public Toilet",
-    "Water System",
-    "Others"
-  ];
-
-  const ISSUES = [
-    "Sira (Broken)",
-    "Butas (Has Holes)",
-    "Gumuho (Collapsed)",
-    "Hindi Gumagana (Not Working)",
-    "Kailangan ng Pagkukumpuni (Needs Repair)",
-    "Kailangan ng Pagpapalitan (Needs Replacement)",
-    "Kailangan Ayusin (Needs Fixing)",
-    "Walang (None/Missing)",
-    "Others"
-  ];
-
   // ===== FILTER FUNCTIONS =====
   function populateFilterDropdowns() {
-    // Populate Category Filter with predefined categories
     categoryFilter.innerHTML = '<option value="">All Categories</option>';
     CATEGORIES.forEach(cat => {
       const option = document.createElement('option');
@@ -750,7 +775,6 @@
       categoryFilter.appendChild(option);
     });
     
-    // Populate Issue Filter with predefined issues
     issueFilter.innerHTML = '<option value="">All Issues</option>';
     ISSUES.forEach(iss => {
       const option = document.createElement('option');
@@ -790,16 +814,20 @@
       activeFilters.appendChild(tag);
     }
     
-    [...declinedBody.rows].forEach(row => {
-      const rowData = row.dataset;
-      const text = row.innerText.toLowerCase();
+    // Filter the reports
+    filteredDeclinedReports = allDeclinedReports.filter(item => {
+      const data = item.data;
+      const searchText = `${data.projectName || ''} ${data.barangay || ''} ${data.description || ''}`.toLowerCase();
       
-      const matchesSearch = text.includes(searchTerm);
-      const matchesCategory = !selectedCategory || rowData.category === selectedCategory;
-      const matchesIssue = !selectedIssue || rowData.issue === selectedIssue;
+      const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+      const matchesCategory = !selectedCategory || data.category === selectedCategory;
+      const matchesIssue = !selectedIssue || data.issue === selectedIssue;
       
-      row.style.display = (matchesSearch && matchesCategory && matchesIssue) ? '' : 'none';
+      return matchesSearch && matchesCategory && matchesIssue;
     });
+    
+    currentDeclinedPage = 1;
+    renderDeclinedTable();
   }
 
   searchDeclined.addEventListener("keyup", applyFilters);
@@ -811,6 +839,82 @@
     searchDeclined.value = '';
     applyFilters();
   });
+
+  // ===== PAGINATION FUNCTIONS =====
+  function renderPagination(paginationContainer, currentPage, totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (totalPages <= 1) {
+      paginationContainer.innerHTML = '';
+      return;
+    }
+    let html = '';
+    html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="window.changeDeclinedPage(${currentPage - 1})">
+      <i class="fa fa-chevron-left"></i> Previous
+    </button>`;
+    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+    html += `<span class="pagination-info">Showing ${startItem}-${endItem} of ${totalItems}</span>`;
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    if (startPage > 1) {
+      html += `<button onclick="window.changeDeclinedPage(1)">1</button>`;
+      if (startPage > 2) {
+        html += `<span class="pagination-info">...</span>`;
+      }
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      html += `<button class="${i === currentPage ? 'active' : ''}" onclick="window.changeDeclinedPage(${i})">${i}</button>`;
+    }
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        html += `<span class="pagination-info">...</span>`;
+      }
+      html += `<button onclick="window.changeDeclinedPage(${totalPages})">${totalPages}</button>`;
+    }
+    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="window.changeDeclinedPage(${currentPage + 1})">
+      Next <i class="fa fa-chevron-right"></i>
+    </button>`;
+    paginationContainer.innerHTML = html;
+  }
+
+  window.changeDeclinedPage = function(newPage) {
+    currentDeclinedPage = newPage;
+    renderDeclinedTable();
+  };
+
+  async function renderDeclinedTable() {
+    declinedBody.innerHTML = "";
+    const declinedPagination = document.getElementById("declinedPagination");
+    
+    const startIndex = (currentDeclinedPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageItems = filteredDeclinedReports.slice(startIndex, endIndex);
+    
+    if (pageItems.length === 0 && filteredDeclinedReports.length === 0) {
+      const emptyRow = document.createElement("tr");
+      const emptyCell = document.createElement("td");
+      emptyCell.colSpan = 14;
+      emptyCell.style.textAlign = "center";
+      emptyCell.style.padding = "2rem";
+      emptyCell.style.color = "#999";
+      emptyCell.textContent = "No declined reports found";
+      emptyRow.appendChild(emptyCell);
+      declinedBody.appendChild(emptyRow);
+      declinedPagination.innerHTML = '';
+      return;
+    }
+    
+    for (const item of pageItems) {
+      const row = await buildTableRow(item.docSnap);
+      declinedBody.appendChild(row);
+    }
+    
+    renderPagination(declinedPagination, currentDeclinedPage, filteredDeclinedReports.length);
+  }
 
   // ===== BUILD TABLE ROW FUNCTION =====
   async function buildTableRow(docSnap) {
@@ -975,33 +1079,28 @@
       if(reportsUnsub) reportsUnsub();
       
       reportsUnsub = onSnapshot(q, async (snap)=>{
-        declinedBody.innerHTML="";
-        allReportsData = [];
+        allDeclinedReports = [];
         
         for (const docSnap of snap.docs) {
           const data = docSnap.data();
           const status = (data.status || "").toLowerCase().trim();
           
           if(status === "declined") {
-            allReportsData.push(data);
-            const row = await buildTableRow(docSnap);
-            declinedBody.appendChild(row);
+            allDeclinedReports.push({ docSnap, data });
           }
         }
         
-        populateFilterDropdowns();
+        // Sort by barangay alphabetically
+        allDeclinedReports.sort((a, b) => {
+          const barangayA = (a.data.barangay || "").toLowerCase();
+          const barangayB = (b.data.barangay || "").toLowerCase();
+          return barangayA.localeCompare(barangayB);
+        });
         
-        if(declinedBody.children.length === 0) {
-          const emptyRow = document.createElement("tr");
-          const emptyCell = document.createElement("td");
-          emptyCell.colSpan = 14;
-          emptyCell.style.textAlign = "center";
-          emptyCell.style.padding = "2rem";
-          emptyCell.style.color = "#999";
-          emptyCell.textContent = "No declined reports found";
-          emptyRow.appendChild(emptyCell);
-          declinedBody.appendChild(emptyRow);
-        }
+        populateFilterDropdowns();
+        filteredDeclinedReports = [...allDeclinedReports];
+        currentDeclinedPage = 1;
+        await renderDeclinedTable();
       });
 
       await setupRealtimeNotifications(db);

@@ -18,14 +18,43 @@
         .sidebar-header h2 { font-size: 1.3rem; font-weight: 600; }
         .sidebar-menu { list-style: none; padding: 0; }
         .sidebar-menu li { margin: 0.5rem 0; }
-        .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
         .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
-        .sidebar-submenu { list-style: none; padding-left: 2rem; display: none; }
-        .sidebar-submenu.show { display: block; }
-        .sidebar-submenu a { padding: 0.6rem 1rem; font-size: 0.9rem; }
-        .sidebar-menu .has-submenu > a { justify-content: space-between; }
-        .sidebar-menu .has-submenu > a .fa-chevron-down { transition: transform 0.3s; font-size: 0.7rem; }
-        .sidebar-menu .has-submenu.open > a .fa-chevron-down { transform: rotate(180deg); }
+        
+        /* ✅ IMPROVED SUBMENU STYLING */
+        .sidebar-submenu {
+          list-style: none;
+          padding-left: 0;
+          margin: 0;
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease;
+          background: rgba(0, 0, 0, 0.1);
+        }
+        .sidebar-submenu.open {
+          max-height: 500px;
+        }
+        .sidebar-submenu li {
+          margin: 0;
+        }
+        .sidebar-submenu a {
+          padding: 0.6rem 1.5rem 0.6rem 3rem !important;
+          font-size: 0.9rem;
+          border-left: 4px solid transparent;
+        }
+        .sidebar-submenu li.active a {
+          background: #042f68;
+          border-left: 4px solid #fff;
+        }
+        .has-submenu > a {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .has-submenu > a .fa-chevron-down {
+          transition: transform 0.3s ease;
+          margin-left: auto;
+        }
 
         .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
         .logout-btn { background-color: #d9534f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -92,9 +121,9 @@
         .card p { font-size: 0.9rem; color: #666; }
         .card h2 { font-size: 1.5rem; font-weight: bold; }
 
-        .bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; padding: 1.5rem; }
-        .reports, .map { background: #fff; border-radius: 12px; padding: 1rem 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-        .reports h3, .map h3 { margin-bottom: 1rem; color: #004aad; }
+        .bottom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; padding: 1.5rem; }
+        .reports, .map, .barangay-chart { background: #fff; border-radius: 12px; padding: 1rem 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .reports h3, .map h3, .barangay-chart h3 { margin-bottom: 1rem; color: #004aad; }
         canvas { width: 100% !important; height: 250px !important; }
         #miniMap { height: 250px !important; border-radius: 10px; width: 100%; }
 
@@ -121,7 +150,8 @@
                 <img src="logo.png" alt="Logo" class="logo" />
                 <h2>TayabaStrack</h2>
             </div>
-           <ul class="sidebar-menu">
+            <!-- ✅ UPDATED SIDEBAR MENU WITH IMPROVED SUBMENU -->
+            <ul class="sidebar-menu">
                 <li class="active"><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
                 <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
                 <li class="has-submenu">
@@ -209,6 +239,11 @@
                 <canvas id="dashboardChart"></canvas>
             </div>
 
+            <div class="barangay-chart">
+                <h3>Barangay Reports</h3>
+                <canvas id="barangayChart"></canvas>
+            </div>
+
             <div class="map">
                 <h3>Map</h3>
                 <div id="miniMap"></div>
@@ -222,12 +257,20 @@
     </main>
 
     <script>
-        function toggleSubmenu(e) {
-            e.preventDefault();
-            const parent = e.currentTarget.parentElement;
-            parent.classList.toggle('open');
-            const submenu = parent.querySelector('.sidebar-submenu');
-            submenu.classList.toggle('show');
+        // ✅ IMPROVED SUBMENU TOGGLE FUNCTION
+        function toggleSubmenu(event) {
+            event.preventDefault();
+            const submenu = event.currentTarget.nextElementSibling;
+            const chevron = event.currentTarget.querySelector('.fa-chevron-down');
+
+            if (submenu) {
+                submenu.classList.toggle('open');
+            }
+            if (chevron) {
+                chevron.style.transform = submenu.classList.contains('open') 
+                    ? 'rotate(180deg)' 
+                    : 'rotate(0deg)';
+            }
         }
 
         function toggleMobileMenu() {
@@ -379,6 +422,7 @@
 
   clearNotificationsBtn.addEventListener("click", () => {
     notificationsList = [];
+    trackedIds.clear();
     saveNotificationsToLocalStorage();
     updateNotificationUI();
   });
@@ -508,144 +552,219 @@
           const type = data.reportType || data.type || data.projectName || "Report";
           const uniqueId = `report-${reportId}`;
           addNotification("report", "New report submitted", `${type} in ${barangay}`, uniqueId);
-        }
-      });
-    });
+        }});
+});
+updateNotificationUI();
+console.log("Notifications system active");
+}
+async function getImageUrl(imagePath) {
+try {
+if (!imagePath) return null;
+if (imagePath.startsWith("http")) return imagePath;
+return await getDownloadURL(ref(storage, imagePath));
+} catch (error) {
+console.error("Error getting image URL:", error);
+return null;
+}
+}
+onAuthStateChanged(auth, async (user) => {
+if (!user) return (window.location.href = "login.html");
+const userDocRef = doc(db, "users", user.uid);
 
-    updateNotificationUI();
-    console.log("Notifications system active");
+onSnapshot(userDocRef, (docSnap) => {
+  if (!docSnap.exists()) {
+    console.error("User document not found!");
+    return;
   }
 
-  async function getImageUrl(imagePath) {
-    try {
-      if (!imagePath) return null;
-      if (imagePath.startsWith("http")) return imagePath;
-      return await getDownloadURL(ref(storage, imagePath));
-    } catch (error) {
-      console.error("Error getting image URL:", error);
-      return null;
-    }
-  }
-
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return (window.location.href = "login.html");
-
-    const userDocRef = doc(db, "users", user.uid);
-    
-    onSnapshot(userDocRef, (docSnap) => {
-      if (!docSnap.exists()) {
-        console.error("User document not found!");
-        return;
-      }
-
-      const data = docSnap.data();
-      
-      if (data.position !== "Super Admin") {
-        alert("Unauthorized access! Redirecting...");
-        window.location.href = "login.html";
-        return;
-      }
-
-      let fullName = "Super Admin";
-      if (data.firstName && data.lastName) {
-        fullName = `${data.firstName} ${data.lastName}`;
-      } else if (data.name) {
-        fullName = data.name;
-      } else if (data.firstName) {
-        fullName = data.firstName;
-      }
-
-      navbarName.textContent = fullName;
-
-      const photoURL = data.photoURL || data.profilePic || "image.png";
-      updateAllProfilePhotos(photoURL);
-
-      console.log("User profile updated in real-time");
-    }, (error) => {
-      console.error("Error in user snapshot:", error);
-    });
-
-    await loadDashboardData();
-    await setupRealtimeNotifications();
-  });
-
-  logoutBtn.addEventListener("click", async () => {
-    await signOut(auth);
+  const data = docSnap.data();
+  
+  if (data.position !== "Super Admin") {
+    alert("Unauthorized access! Redirecting...");
     window.location.href = "login.html";
-  });
-
-  async function loadDashboardData() {
-    const snapshot = await getDocs(collection(db, "reports"));
-    let total = 0, pending = 0, ongoing = 0, completed = 0;
-    window.reportLocations = [];
-
-    snapshot.forEach((docSnap) => {
-      const report = docSnap.data();
-      total++;
-      const status = normalizeStatus(report.status);
-      if (status === "pending") pending++;
-      else if (status === "ongoing" || status === "in-progress") ongoing++;
-      else if (["resolved", "completed", "repaired", "posted"].includes(status)) completed++;
-
-      const lat = report.latitude || report.lat || report.location?.latitude;
-      const lng = report.longitude || report.lng || report.location?.longitude;
-      if (lat && lng) {
-        window.reportLocations.push({
-          lat: parseFloat(lat),
-          lng: parseFloat(lng),
-          type: report.reportType || report.type || "Unknown",
-          status: status || "pending"
-        });
-      }
-    });
-
-    totalReportsEl.textContent = total;
-    pendingEl.textContent = pending;
-    ongoingEl.textContent = ongoing;
-    completedEl.textContent = completed;
-    updateChart(completed, ongoing, pending);
-    if (window.miniMap) {
-      addReportMarkers();
-    }
-    loadReportImages();
+    return;
+  }
+  
+  let fullName = "Super Admin";
+  if (data.firstName && data.lastName) {
+    fullName = `${data.firstName} ${data.lastName}`;
+  } else if (data.name) {
+    fullName = data.name;
+  } else if (data.firstName) {
+    fullName = data.firstName;
   }
 
-  let chart;
-  function updateChart(completed, ongoing, pending) {
-    const ctx = document.getElementById("dashboardChart").getContext("2d");
-    if (chart) chart.destroy();
-    chart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: ["Completed", "Ongoing", "Pending"],
-        datasets: [{ label: "Reports", data: [completed, ongoing, pending], backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e"] }]
+  navbarName.textContent = fullName;
+
+  const photoURL = data.photoURL || data.profilePic || "image.png";
+  updateAllProfilePhotos(photoURL);
+
+  console.log("User profile updated in real-time");
+}, (error) => {
+  console.error("Error in user snapshot:", error);
+});
+
+await loadDashboardData();
+await setupRealtimeNotifications();
+});
+logoutBtn.addEventListener("click", async () => {
+await signOut(auth);
+window.location.href = "login.html";
+});
+async function loadDashboardData() {
+const snapshot = await getDocs(collection(db, "reports"));
+let total = 0, pending = 0, ongoing = 0, completed = 0;
+window.reportLocations = [];
+const barangayData = {};
+snapshot.forEach((docSnap) => {
+  const report = docSnap.data();
+  total++;
+  const status = normalizeStatus(report.status);
+  if (status === "pending") pending++;
+  else if (status === "ongoing" || status === "in-progress") ongoing++;
+  else if (["resolved", "completed", "repaired", "posted"].includes(status)) completed++;
+
+  const barangay = report.barangay || report.location || "Unknown";
+  barangayData[barangay] = (barangayData[barangay] || 0) + 1;
+
+  const lat = report.latitude || report.lat || report.location?.latitude;
+  const lng = report.longitude || report.lng || report.location?.longitude;
+  if (lat && lng) {
+    window.reportLocations.push({
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+      type: report.reportType || report.type || "Unknown",
+      status: status || "pending"
+    });
+  }
+});
+
+totalReportsEl.textContent = total;
+pendingEl.textContent = pending;
+ongoingEl.textContent = ongoing;
+completedEl.textContent = completed;
+
+updateChart(completed, ongoing, pending);
+updateBarangayChart(barangayData);
+
+if (window.miniMap) {
+  addReportMarkers();
+}
+
+loadReportImages();
+}
+let chart;
+function updateChart(completed, ongoing, pending) {
+const ctx = document.getElementById("dashboardChart").getContext("2d");
+if (chart) chart.destroy();
+chart = new Chart(ctx, {
+type: "bar",
+data: {
+labels: ["Completed", "Ongoing", "Pending"],
+datasets: [{
+label: "Reports",
+data: [completed, ongoing, pending],
+backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e"]
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: { legend: { display: false } }
+}
+});
+}
+let barangayChart;
+function updateBarangayChart(barangayData) {
+const ctx = document.getElementById("barangayChart").getContext("2d");
+if (barangayChart) barangayChart.destroy();
+const sortedBarangays = Object.entries(barangayData)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 10);
+
+const labels = sortedBarangays.map(item => item[0]);
+const data = sortedBarangays.map(item => item[1]);
+
+barangayChart = new Chart(ctx, {
+  type: "line",
+  data: {
+    labels: labels,
+    datasets: [{
+      label: "Number of Reports",
+      data: data,
+      borderColor: "#004aad",
+      backgroundColor: "rgba(0, 74, 173, 0.1)",
+      borderWidth: 2,
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: "#004aad",
+      pointBorderColor: "#fff",
+      pointBorderWidth: 2,
+      pointRadius: 4,
+      pointHoverRadius: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top'
       },
-      options: { responsive: true, plugins: { legend: { display: false } } }
-    });
-  }
-
-  async function loadReportImages() {
-    const gallery = document.getElementById("reportImages");
-    gallery.innerHTML = "";
-    const snapshot = await getDocs(collection(db, "reports"));
-    let count = 0;
-    for (const docSnap of snapshot.docs) {
-      if (count >= 6) break;
-      const report = docSnap.data();
-      const imagePath = report.incidentImage || report.imageUrl || report.image;
-      if (imagePath) {
-        const url = await getImageUrl(imagePath);
-        if (url) {
-          const img = document.createElement("img");
-          img.src = url;
-          img.onerror = () => (img.style.display = "none");
-          gallery.appendChild(img);
-          count++;
+      tooltip: {
+        enabled: true,
+        backgroundColor: 'rgba(0, 74, 173, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#004aad',
+        borderWidth: 1
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        }
+      },
+      x: {
+        grid: {
+          display: false
+        },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45
         }
       }
     }
   }
+});
+}
+async function loadReportImages() {
+const gallery = document.getElementById("reportImages");
+gallery.innerHTML = "";
+const snapshot = await getDocs(collection(db, "reports"));
+let count = 0;
+for (const docSnap of snapshot.docs) {
+  if (count >= 6) break;
+  const report = docSnap.data();
+  const imagePath = report.incidentImage || report.imageUrl || report.image;
+  if (imagePath) {
+    const url = await getImageUrl(imagePath);
+    if (url) {
+      const img = document.createElement("img");
+      img.src = url;
+      img.onerror = () => (img.style.display = "none");
+      gallery.appendChild(img);
+      count++;
+    }
+  }
+}
+}
 </script>
-
 </body>
 </html>

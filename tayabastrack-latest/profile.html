@@ -16,6 +16,42 @@
     .sidebar-menu li{margin:0.5rem 0}
     .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:0.8rem 1.5rem;color:#fff;text-decoration:none;transition:background .2s;border-left:4px solid transparent}
     .sidebar-menu a:hover,.sidebar-menu li.active a{background:#0756cc;border-left:4px solid #042f68}
+    
+    /* Submenu Styling */
+    .sidebar-submenu {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .sidebar-submenu.open {
+      max-height: 500px;
+    }
+    .sidebar-submenu li {
+      margin: 0;
+    }
+    .sidebar-submenu a {
+      padding: 0.6rem 1.5rem 0.6rem 3rem !important;
+      font-size: 0.9rem;
+      border-left: 4px solid transparent;
+    }
+    .sidebar-submenu li.active a {
+      background: #042f68;
+      border-left: 4px solid #fff;
+    }
+    .has-submenu > a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .has-submenu > a .fa-chevron-down {
+      transition: transform 0.3s ease;
+      margin-left: auto;
+    }
+    
     .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2)}
     .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
     .logout-btn:hover{background-color:#c9302c}
@@ -143,13 +179,6 @@
     .modal-close{position:absolute;top:20px;right:24px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
     .modal-close:hover{background:rgba(255,255,255,0.3)}
     .modal-body{padding:24px}
-    .photo-upload-section{text-align:center;margin-bottom:24px;padding:20px;background:linear-gradient(135deg,#f0f7ff 0%,#e3f2fd 100%);border-radius:10px;border:2px dashed #004aad}
-    .photo-upload-section .preview{display:block;margin:0 auto 16px;border-radius:50%;width:100px;height:100px;object-fit:cover;border:4px solid #004aad;box-shadow:0 4px 12px rgba(0,74,173,0.2)}
-    .upload-btn-wrapper{position:relative;display:inline-block}
-    .upload-btn-wrapper input[type=file]{display:none}
-    .upload-btn{background:#004aad;color:white;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:all 0.3s;border:none}
-    .upload-btn:hover{background:#00327a;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,74,173,0.3)}
-    .upload-hint{font-size:12px;color:#666;margin-top:10px}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     .form-field{display:flex;flex-direction:column}
     .form-field.full-width{grid-column:1 / -1}
@@ -183,15 +212,26 @@
   <aside class="sidebar">
     <div>
       <div class="sidebar-header">
-        <img src="logu.png" alt="Logo">
+        <img src="logo.png" alt="Logo">
         <h2>TayabaStrack</h2>
       </div>
-       <ul class="sidebar-menu">
-                <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
-                <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
-                <li><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
-                <li><a href="auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
-            </ul>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
+        <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
+        <li class="has-submenu">
+          <a href="#" onclick="toggleSubmenu(event)">
+            <span><i class="fa fa-tasks"></i>&nbsp; Manage Reports</span>
+            <i class="fa fa-chevron-down"></i>
+          </a>
+          <ul class="sidebar-submenu">
+            <li><a href="reports-pending.html"><i class="fa fa-clock"></i>&nbsp; Pending Reports</a></li>
+            <li><a href="reports-ongoing.html"><i class="fa fa-spinner"></i>&nbsp; Ongoing Reports</a></li>
+            <li><a href="reports-completed.html"><i class="fa fa-check-circle"></i>&nbsp; Completed Reports</a></li>
+            <li><a href="reports-declined.html"><i class="fa fa-times-circle"></i>&nbsp; Declined Reports</a></li>
+          </ul>
+        </li>
+        <li><a href="auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
+      </ul>
     </div>
     <div class="sidebar-footer">
       <button class="logout-btn" id="sidebarLogoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</button>
@@ -336,18 +376,6 @@
       </div>
       
       <div class="modal-body">
-        <div class="photo-upload-section">
-          <img id="previewImg" class="preview" src="image.png" alt="Profile Preview">
-          <div class="upload-btn-wrapper">
-            <label class="upload-btn">
-              <i class="fa fa-camera"></i>
-              <span>Choose Photo</span>
-              <input type="file" id="editPhoto" accept="image/*">
-            </label>
-          </div>
-          <div class="upload-hint">JPG, PNG • Max 5MB</div>
-        </div>
-
         <div class="form-grid">
           <div class="form-field full-width">
             <label><i class="fa fa-user"></i> Full Name</label>
@@ -393,8 +421,31 @@
   </div>
 
   <script>
+    // Submenu toggle function
+    function toggleSubmenu(event) {
+      event.preventDefault();
+      const submenu = event.currentTarget.nextElementSibling;
+      const chevron = event.currentTarget.querySelector('.fa-chevron-down');
+      if (submenu) {
+        submenu.classList.toggle('open');
+      }
+      if (chevron) {
+        chevron.style.transform = submenu.classList.contains('open') 
+          ? 'rotate(180deg)' 
+          : 'rotate(0deg)';
+      }
+    }
+
     function toggleMobileMenu(){document.querySelector('.sidebar').classList.toggle('mobile-open')}
-    document.addEventListener('click',function(e){const sidebar=document.querySelector('.sidebar');const menuBtn=document.querySelector('.mobile-menu-btn');if(window.innerWidth<=980&&!sidebar.contains(e.target)&&!menuBtn.contains(e.target)){sidebar.classList.remove('mobile-open')}});
+    
+    // Close mobile menu when clicking outside
+    document.addEventListener('click',function(e){
+      const sidebar=document.querySelector('.sidebar');
+      const menuBtn=document.querySelector('.mobile-menu-btn');
+      if(window.innerWidth<=980&&!sidebar.contains(e.target)&&!menuBtn.contains(e.target)){
+        sidebar.classList.remove('mobile-open')
+      }
+    });
 
     let currentUser=null;
     let ongoingReports=[];
@@ -813,54 +864,18 @@
     });
 
     const editModal=document.getElementById("editModal");
-    const editPhoto=document.getElementById("editPhoto");
-    const previewImg=document.getElementById("previewImg");
-
+    
     window.openEditModal=function(){editModal.style.display="flex"};
     window.closeEditModal=function(){editModal.style.display="none"};
 
-    editPhoto.addEventListener("change",e=>{
-      const file=e.target.files[0];
-      if(!file)return;
-      if(!file.type.startsWith('image/')){
-        alert('Please select an image file');
-        editPhoto.value='';
-        return;
-      }
-      if(file.size>5*1024*1024){
-        alert('Image size should be less than 5MB');
-        editPhoto.value='';
-        return;
-      }
-      const reader=new FileReader();
-      reader.onload=ev=>{
-        previewImg.src=ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    function updateAllProfilePhotos(photoURL) {
-      const photoElements = ["profilePic", "navAvatar", "previewImg"];
-      photoElements.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.src = photoURL;
-          el.onerror = function() {
-            this.src = "image.png";
-          };
-        }
-      });
-    }
-
+    // ✅ SAVE PROFILE WITH AUDIT LOGGING (WITHOUT PHOTO UPLOAD)
     window.saveEdit=async function(){
       if(!currentUser){
         alert("No user logged in");
         return;
       }
       
-      const{updateDoc,doc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      const{ref,uploadBytes,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
-      const{getStorage}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+      const{updateDoc,doc,getDoc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
       
       const uid=currentUser.uid;
       const userRef=doc(window.db,"users",uid);
@@ -880,29 +895,39 @@
         return;
       }
       
-      const file=editPhoto.files[0];
-      
       try{
+        // Get old data for audit log
+        const oldDoc = await getDoc(userRef);
+        const oldData = oldDoc.data();
+        
         saveBtn.disabled=true;
         saveBtn.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving...';
         
-        if(file){
-          const storage=getStorage();
-          const timestamp=Date.now();
-          const fileExt=file.name.split('.').pop();
-          const fileName=`profile_${timestamp}.${fileExt}`;
-          const storageRef=ref(storage,`user_images/${uid}/${fileName}`);
-          await uploadBytes(storageRef,file);
-          const url=await getDownloadURL(storageRef);
-          updated.photoURL=url;
-          console.log("Photo uploaded successfully:",url);
-          updateAllProfilePhotos(url);
-        }
-        
         await updateDoc(userRef,updated);
+        
+        // ✅ LOG PROFILE UPDATE
+        const changes = [];
+        if (oldData.name !== updated.name) changes.push(`Name: "${oldData.name}" → "${updated.name}"`);
+        if (oldData.ID !== updated.ID) changes.push(`ID: "${oldData.ID}" → "${updated.ID}"`);
+        if (oldData.email !== updated.email) changes.push(`Email: "${oldData.email}" → "${updated.email}"`);
+        if (oldData.phone !== updated.phone) changes.push(`Phone: "${oldData.phone}" → "${updated.phone}"`);
+        if (oldData.address !== updated.address) changes.push(`Address: "${oldData.address}" → "${updated.address}"`);
+        if (oldData.gender !== updated.gender) changes.push(`Gender: "${oldData.gender}" → "${updated.gender}"`);
+
+        await window.logAuditEvent(
+          "Profile Updated",
+          "edit",
+          "System",
+          `Updated own profile: ${changes.join(", ")}`,
+          {
+            changes: changes.join(", "),
+            beforeValue: JSON.stringify(oldData),
+            afterValue: JSON.stringify(updated)
+          }
+        );
+        
         alert("Profile updated successfully!");
         closeEditModal();
-        editPhoto.value='';
       }catch(err){
         console.error("Error details:",err);
         alert("Error updating profile: "+err.message);
@@ -920,7 +945,7 @@
   <script type="module">
     import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import{getFirestore,doc,onSnapshot,serverTimestamp,updateDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import{getFirestore,doc,onSnapshot,serverTimestamp,updateDoc,getDoc,collection,addDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig={apiKey:"AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",authDomain:"tayabastrack-23b95.firebaseapp.com",projectId:"tayabastrack-23b95",storageBucket:"tayabastrack-23b95.appspot.com",messagingSenderId:"674055915366",appId:"1:674055915366:web:aa560336c1f8b504eeaaa7"};
 
@@ -929,8 +954,56 @@
     const db=getFirestore(app);
     window.db=db;
 
+    // ✅ AUDIT LOGGING FUNCTION
+    window.logAuditEvent = async function(action, actionType, module, description, additionalData = {}) {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          console.warn("No authenticated user for audit log");
+          return;
+        }
+
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+          console.warn("User document not found for audit log");
+          return;
+        }
+        
+        const userData = userDoc.data();
+
+        const logData = {
+          timestamp: serverTimestamp(),
+          userId: user.uid,
+          userName: userData.name || `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unknown User",
+          userRole: userData.position || userData.role || "User",
+          action: action,
+          actionType: (actionType || 'edit').toLowerCase(),
+          module: module || 'System',
+          description: description || 'No description provided',
+          beforeValue: additionalData.beforeValue || null,
+          afterValue: additionalData.afterValue || null,
+          ...additionalData
+        };
+
+        await addDoc(collection(db, "auditLogs"), logData);
+        console.log("✅ Audit log created:", logData);
+
+      } catch (error) {
+        console.error("❌ Error logging audit event:", error);
+      }
+    };
+
+    // ✅ LOGOUT WITH AUDIT LOGGING
     async function handleLogout() {
       try {
+        // ✅ LOG LOGOUT
+        await window.logAuditEvent(
+          "Logged Out",
+          "logout",
+          "Authentication",
+          "User logged out from the system"
+        );
+        
         await signOut(auth);
         window.location.href = "login.html";
       } catch(err) {
@@ -995,8 +1068,18 @@
           if(el)el.textContent=elements[id];
         });
         
+        // ✅ UPDATE PROFILE PHOTOS (Function kept for displaying existing photos)
         const photoURL=data.photoURL||"image.png";
-        updateAllProfilePhotos(photoURL);
+        const photoElements = ["profilePic", "navAvatar"];
+        photoElements.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.src = photoURL;
+            el.onerror = function() {
+              this.src = "image.png";
+            };
+          }
+        });
         
         const fields={
           cardName:fullName,
@@ -1005,50 +1088,4 @@
           cardPhone:data.phone||"",
           cardAddress:data.address||data.barangay||"",
           cardGender:data.gender||"",
-          editName:fullName,
-          editID:data.ID||data.id||"",
-          editEmail:data.email||user.email,
-          editPhone:data.phone||"",
-          editAddress:data.address||data.barangay||"",
-          editGender:data.gender||""
-        };
-        
-        Object.keys(fields).forEach(id=>{
-          const el=document.getElementById(id);
-          if(el)el.value=fields[id];
-        });
-        
-        if(data.createdAt){
-          const date=data.createdAt.toDate?data.createdAt.toDate():new Date(data.createdAt);
-          const el=document.getElementById("registeredAt");
-          if(el)el.textContent=date.toLocaleDateString();
-        }
-        
-        if(data.lastLogin){
-          const date=data.lastLogin.toDate?data.lastLogin.toDate():new Date(data.lastLogin);
-          const el=document.getElementById("lastLogin");
-          if(el)el.textContent=date.toLocaleString();
-        }
-        
-        console.log("UI updated successfully");
-      },error=>{
-        console.error("Error in user snapshot:",error);
-      });
-      
-      try{
-        await setupRealtimeNotifications(db);
-        console.log("Notifications setup complete");
-      }catch(err){
-        console.error("Error setting up notifications:",err);
-      }
-      
-      try{
-        await loadOngoingReports(db);
-        console.log("Calendar loaded");
-      }catch(err){
-        console.error("Error loading calendar:",err);
-      }
-    });
-  </script>
-</body>
-</html>
+          editName:full

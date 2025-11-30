@@ -22,48 +22,43 @@
     .sidebar-footer{text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.2);margin-top:auto}
     .logout-btn{background-color:#d9534f;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-weight:500;transition:background 0.3s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
     .logout-btn:hover{background-color:#c9302c}
-    /* Submenu Styling - Add this to your existing CSS */
-.sidebar-submenu {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-submenu.open {
-  max-height: 500px; /* Adjust based on number of items */
-}
-
-.sidebar-submenu li {
-  margin: 0;
-}
-
-.sidebar-submenu a {
-  padding: 0.6rem 1.5rem 0.6rem 3rem !important;
-  font-size: 0.9rem;
-  border-left: 4px solid transparent;
-}
-
-.sidebar-submenu li.active a {
-  background: #042f68;
-  border-left: 4px solid #fff;
-}
-
-.has-submenu > a {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.has-submenu > a .fa-chevron-down {
-  transition: transform 0.3s ease;
-  margin-left: auto;
-}
     
-    /* NAVBAR - IMPROVED VERSION */
+    /* Submenu Styling */
+    .sidebar-submenu {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .sidebar-submenu.open {
+      max-height: 500px;
+    }
+    .sidebar-submenu li {
+      margin: 0;
+    }
+    .sidebar-submenu a {
+      padding: 0.6rem 1.5rem 0.6rem 3rem !important;
+      font-size: 0.9rem;
+      border-left: 4px solid transparent;
+    }
+    .sidebar-submenu li.active a {
+      background: #042f68;
+      border-left: 4px solid #fff;
+    }
+    .has-submenu > a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .has-submenu > a .fa-chevron-down {
+      transition: transform 0.3s ease;
+      margin-left: auto;
+    }
+    
+    /* NAVBAR */
     .navbar{position:fixed;top:0;left:250px;right:0;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:40;transition:left 0.3s ease}
     .navbar h1{font-size:1.4rem;color:#004aad;margin:0}
     .navbar-left{display:flex;align-items:center;gap:1rem}
@@ -119,8 +114,21 @@
     .main{margin-left:250px;margin-top:64px;flex:1;display:block;padding:20px 28px;height:calc(100vh - 64px);overflow-y:auto;overflow-x:hidden;transition:margin-left 0.3s ease}
     .reports-section{padding-bottom:40px;max-width:100%}
     .report-box{background:#fff;border-radius:10px;padding:16px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.04);overflow:visible}
-    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .report-box-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:12px}
     .report-box-header h2{color:#004aad;font-size:1.05rem}
+    
+    /* FILTER CONTROLS */
+    .filter-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding:12px;background:#f8f9fa;border-radius:8px}
+    .filter-group{display:flex;align-items:center;gap:8px}
+    .filter-group label{font-weight:600;color:#333;font-size:0.9rem;white-space:nowrap}
+    .filter-select{padding:0.5rem 0.8rem;border:1px solid #e0e0e0;border-radius:6px;font-size:0.9rem;background:#fff;cursor:pointer;min-width:160px}
+    .filter-select:focus{outline:none;border-color:#004aad}
+    .clear-filters-btn{padding:0.5rem 1rem;background:#d9534f;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:600;transition:background 0.3s}
+    .clear-filters-btn:hover{background:#c9302c}
+    .active-filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .filter-tag{background:#004aad;color:#fff;padding:4px 10px;border-radius:16px;font-size:0.8rem;display:inline-flex;align-items:center;gap:6px}
+    .filter-tag i{cursor:pointer;font-size:0.7rem}
+    
     .report-actions input{padding:.4rem .75rem;border:1px solid #e0e0e0;border-radius:18px;font-size:.9rem;width:260px}
     .scroll-hint{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);color:#fff;padding:8px 12px;border-radius:6px;font-size:0.85rem;text-align:center;margin:10px 0 12px 0;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(0,74,173,0.2);flex-shrink:0}
     .scroll-hint i{animation:slideHint 2s ease-in-out infinite}
@@ -128,7 +136,7 @@
     .table-card{overflow-x:auto;overflow-y:hidden;border-radius:10px;background:#fff;padding:8px;box-shadow:0 2px 6px rgba(0,0,0,0.05);scroll-behavior:smooth;position:relative;margin-bottom:0;width:100%}
     .table-card::-webkit-scrollbar{height:10px}
     .table-card::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);border-radius:5px}
-    table{width:100%;border-collapse:collapse;table-layout:auto;min-width:2000px}
+    table{width:100%;border-collapse:collapse;table-layout:auto;min-width:2200px}
     thead{background:#f5f8fb;color:#333}
     thead th{font-weight:700;padding:0.7rem 0.75rem;text-align:left;border-bottom:2px solid #e0e0e0;white-space:nowrap}
     th,td{text-align:left;padding:0.6rem 0.8rem;font-size:0.85rem;border-bottom:1px solid #f0f2f5;overflow:visible;white-space:nowrap}
@@ -141,6 +149,12 @@
     .repaired{background:#1cc88a;color:#fff}
     .completed{background:#1cc88a;color:#fff}
     .declined{background:#d9534f;color:#fff}
+    
+    /* CATEGORY & ISSUE BADGES */
+    .category-badge, .issue-badge{display:inline-block;padding:0.3rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:600;white-space:nowrap}
+    .category-badge{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+    .issue-badge{background:#fff3e0;color:#e65100;border:1px solid #ffb74d}
+    
     .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
     .action a.decline{color:#d9534f}
     td button{padding:0.3rem 0.6rem;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;margin-right:4px}
@@ -150,6 +164,15 @@
     td button:disabled{background:#ccc;cursor:not-allowed;opacity:0.6}
     .coords-vertical{display:flex;flex-direction:column;gap:2px;font-size:0.8rem}
     .coords-vertical span{white-space:nowrap}
+    
+    /* PAGINATION STYLES */
+    .pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:12px}
+    .pagination button{padding:0.5rem 0.8rem;border:1px solid #ddd;background:#fff;color:#004aad;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all 0.2s}
+    .pagination button:hover:not(:disabled){background:#004aad;color:#fff}
+    .pagination button:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
+    .pagination button.active{background:#004aad;color:#fff;border-color:#004aad}
+    .pagination-info{color:#666;font-size:0.85rem;margin:0 8px}
+    
     .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.45);justify-content:center;align-items:center;padding:18px}
     .modal-content{background:#fff;width:100%;max-width:980px;border-radius:12px;padding:18px;max-height:92vh;overflow:auto}
     .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -167,16 +190,6 @@
     .btn-save{background:#004aad;color:#fff}
     .btn-cancel{background:#9e9e9e;color:#fff}
     .btn-delete{background:#d9534f;color:#fff}
-    .decline-modal{display:none;position:fixed;z-index:3000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.5);justify-content:center;align-items:center;padding:18px}
-    .decline-modal-content{background:#fff;width:100%;max-width:600px;border-radius:12px;padding:24px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto}
-    .decline-modal-header{margin-bottom:20px}
-    .decline-modal-header h3{color:#d9534f;font-size:1.3rem;margin:0}
-    .decline-form-group{margin-bottom:18px}
-    .decline-form-group label{display:block;font-weight:600;margin-bottom:8px;color:#333;font-size:0.95rem}
-    .decline-form-group label .required{color:#d9534f;margin-left:3px}
-    .decline-form-group textarea{width:100%;min-height:100px;padding:10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.95rem;resize:vertical;font-family:inherit}
-    .decline-form-group input:focus,.decline-form-group textarea:focus{outline:none;border-color:#004aad;box-shadow:0 0 0 3px rgba(0,74,173,0.1)}
-    .decline-modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0}
     .loading-overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);z-index:3000;display:none}
     .spinner{width:56px;height:56px;border-radius:50%;border:6px solid #e9eef5;border-top-color:#004aad;animation:spin .9s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -191,6 +204,9 @@
       .username{display:none}
       .modal-grid{grid-template-columns:1fr}
       .report-actions input{width:100%}
+      .filter-controls{flex-direction:column;align-items:stretch}
+      .filter-group{flex-direction:column;align-items:stretch}
+      .filter-select{width:100%}
     }
   </style>
 </head>
@@ -285,11 +301,34 @@
           <input id="searchCompleted" placeholder="Search completed...">
         </div>
       </div>
+      
+      <!-- FILTER CONTROLS -->
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label><i class="fa fa-filter"></i> Category:</label>
+          <select id="categoryFilter" class="filter-select">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label><i class="fa fa-exclamation-triangle"></i> Issue:</label>
+          <select id="issueFilter" class="filter-select">
+            <option value="">All Issues</option>
+          </select>
+        </div>
+        <button id="clearFiltersBtn" class="clear-filters-btn" style="display:none">
+          <i class="fa fa-times"></i> Clear Filters
+        </button>
+        <div class="active-filters" id="activeFilters"></div>
+      </div>
+      
       <div class="table-card">
         <table>
           <thead>
             <tr>
               <th>Project Name</th>
+              <th>Category</th>
+              <th>Issue</th>
               <th>Barangay</th>
               <th>Description</th>
               <th>Dimensions (W×H)</th>
@@ -310,6 +349,9 @@
           <tbody id="completedBody"></tbody>
         </table>
       </div>
+      
+      <!-- PAGINATION -->
+      <div class="pagination" id="completedPagination"></div>
     </div>
   </section>
 </main>
@@ -366,7 +408,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, query, orderBy, onSnapshot, getDoc, doc, updateDoc, setDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, query, orderBy, onSnapshot, getDoc, doc, updateDoc, setDoc, getDocs, where, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
   const firebaseConfig = {
@@ -383,9 +425,53 @@
   const db = getFirestore(app);
   const storage = getStorage(app);
 
+  // ===== AUDIT LOGGING FUNCTION =====
+  async function logAuditEvent(action, actionType, module, description, additionalData = {}) {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.warn("No authenticated user for audit log");
+        return;
+      }
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        console.warn("User document not found for audit log");
+        return;
+      }
+      
+      const userData = userDoc.data();
+
+      const logData = {
+        timestamp: serverTimestamp(),
+        userId: user.uid,
+        userName: userData.name || `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unknown User",
+        userRole: userData.position || userData.role || "User",
+        action: action,
+        actionType: (actionType || 'edit').toLowerCase(),
+        module: module || 'System',
+        description: description || 'No description provided',
+        beforeValue: additionalData.beforeValue || null,
+        afterValue: additionalData.afterValue || null,
+        ...additionalData
+      };
+
+      await addDoc(collection(db, "auditLogs"), logData);
+      console.log("✅ Audit log created:", logData);
+
+    } catch (error) {
+      console.error("❌ Error logging audit event:", error);
+    }
+  }
+
   // DOM Elements
   const completedBody = document.getElementById("completedBody");
   const searchCompleted = document.getElementById("searchCompleted");
+  const categoryFilter = document.getElementById("categoryFilter");
+  const issueFilter = document.getElementById("issueFilter");
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  const activeFilters = document.getElementById("activeFilters");
+  const completedPagination = document.getElementById("completedPagination");
   const editCompletedModal = document.getElementById("editCompletedModal");
   const closeCompletedModal = document.getElementById("closeCompletedModal");
   const cancelCompletedEdit = document.getElementById("cancelCompletedEdit");
@@ -400,13 +486,326 @@
 
   let currentDocId = null;
   let reportsUnsub = null;
-  let notificationsUnsub = null;
   let currentFilter = 'all';
+  let allReportsData = [];
 
-  // ============================================
-  // UTILITY FUNCTIONS
-  // ============================================
+  // PAGINATION VARIABLES
+  let allCompletedReports = [];
+  let filteredCompletedReports = [];
+  let currentCompletedPage = 1;
+  const itemsPerPage = 10;
 
+  // Notification System Variables
+  let notificationsList = [];
+  let seenNotificationIds = new Set();
+  let trackedUserStatuses = {};
+  let trackedReportIds = new Set();
+
+  // ===== PREDEFINED CATEGORIES AND ISSUES =====
+  const CATEGORIES = [
+    "Daan (Road)",
+    "Tulay (Bridge)",
+    "Ilaw (Street Light)",
+    "Kanal (Drainage)",
+    "Basketbol Court (Basketball Court)",
+    "Covered Court",
+    "Barangay Hall",
+    "Health Center",
+    "Day Care Center",
+    "Multi-Purpose Hall",
+    "Waiting Shed",
+    "Public Toilet",
+    "Water System",
+    "Others"
+  ];
+
+  const ISSUES = [
+    "Sira (Broken)",
+    "Butas (Has Holes)",
+    "Gumuho (Collapsed)",
+    "Hindi Gumagana (Not Working)",
+    "Kailangan ng Pagkukumpuni (Needs Repair)",
+    "Kailangan ng Pagpapalitan (Needs Replacement)",
+    "Kailangan Ayusin (Needs Fixing)",
+    "Walang (None/Missing)",
+    "Others"
+  ];
+
+  // ===== NOTIFICATION SYSTEM FUNCTIONS =====
+  function normalizeStatus(status) {
+    return (status || "").toLowerCase().trim();
+  }
+
+  function saveNotificationsToLocalStorage() {
+    try {
+      localStorage.setItem('notifications', JSON.stringify(notificationsList));
+      localStorage.setItem('trackedIds', JSON.stringify([...seenNotificationIds]));
+    } catch (error) {
+      console.error("Error saving notifications:", error);
+    }
+  }
+
+  function loadNotificationsFromLocalStorage() {
+    try {
+      const savedNotifications = localStorage.getItem('notifications');
+      const savedTrackedIds = localStorage.getItem('trackedIds');
+      
+      if (savedNotifications) {
+        notificationsList = JSON.parse(savedNotifications).map(n => ({
+          ...n,
+          timestamp: new Date(n.timestamp)
+        }));
+      }
+      
+      if (savedTrackedIds) {
+        seenNotificationIds = new Set(JSON.parse(savedTrackedIds));
+      }
+    } catch (error) {
+      console.error("Error loading notifications:", error);
+    }
+  }
+
+  function addNotification(type, message, detail, uniqueId) {
+    if (seenNotificationIds.has(uniqueId)) return;
+    
+    seenNotificationIds.add(uniqueId);
+    
+    const timestamp = new Date();
+    const id = `${type}-${uniqueId}-${timestamp.getTime()}`;
+    
+    notificationsList.unshift({
+      id,
+      type,
+      message: message.trim(),
+      detail: detail.trim(),
+      timestamp: timestamp,
+      read: false
+    });
+    
+    saveNotificationsToLocalStorage();
+    updateNotificationUI();
+  }
+
+  function updateNotificationUI() {
+    let filtered = [...notificationsList];
+    
+    if (currentFilter === "report") {
+      filtered = filtered.filter((n) => n.type === "report");
+    } else if (currentFilter === "user") {
+      filtered = filtered.filter((n) => n.type === "user");
+    } else if (currentFilter === "24h") {
+      const ago = Date.now() - 24 * 60 * 60 * 1000;
+      filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+    }
+    
+    filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    
+    const unreadCount = notificationsList.filter(n => !n.read).length;
+    
+    if (unreadCount > 0) {
+      notificationBadge.textContent = unreadCount;
+      notificationBadge.classList.add("show");
+    } else {
+      notificationBadge.textContent = "";
+      notificationBadge.classList.remove("show");
+    }
+    
+    if (filtered.length === 0) {
+      notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
+    } else {
+      notificationList.innerHTML = filtered.map((n) => `
+        <div class="notification-item ${n.read ? '' : 'unread'}">
+          <div class="notification-icon ${n.type}">
+            ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
+          </div>
+          <div class="notification-content">
+            <p><strong>${n.message}</strong></p>
+            <p>${n.detail}</p>
+            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+  }
+
+  async function setupRealtimeNotifications(db) {
+    loadNotificationsFromLocalStorage();
+    
+    onSnapshot(collection(db, "users"), (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        const userId = change.doc.id;
+        const data = change.doc.data();
+        const currentStatus = normalizeStatus(data.status);
+        const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+        const position = data.position || "User";
+        
+        if (change.type === "modified") {
+          if (currentStatus === "active") {
+            const uniqueId = `user-${userId}-active`;
+            addNotification("user", `User approved: ${fullName}`, `Position: ${position}`, uniqueId);
+          }
+        }
+      });
+    });
+    
+    onSnapshot(collection(db, "reports"), (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        const reportId = change.doc.id;
+        const data = change.doc.data();
+        
+        if (change.type === "added") {
+          const barangay = data.barangay || data.location || "Unknown location";
+          const type = data.reportType || data.type || data.projectName || "Report";
+          const uniqueId = `report-${reportId}`;
+          addNotification("report", "New report submitted", `${type} in ${barangay}`, uniqueId);
+        }
+      });
+    });
+    
+    updateNotificationUI();
+    console.log("Notifications system active");
+  }
+
+  // ===== NOTIFICATION EVENT LISTENERS =====
+  notificationBell.addEventListener("click", (e) => {
+    e.stopPropagation();
+    notificationMenu.classList.toggle("show");
+    dropdownMenu.classList.remove("show");
+  });
+
+  document.getElementById("clearNotificationsBtn").addEventListener("click", () => {
+    notificationsList = [];
+    seenNotificationIds.clear();
+    saveNotificationsToLocalStorage();
+    updateNotificationUI();
+  });
+
+  document.getElementById("markAllReadBtn").addEventListener("click", () => {
+    notificationsList.forEach(n => n.read = true);
+    saveNotificationsToLocalStorage();
+    updateNotificationUI();
+  });
+
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+      e.target.classList.add("active");
+      currentFilter = e.target.dataset.filter;
+      updateNotificationUI();
+    });
+  });
+
+  // ===== MOBILE MENU & SUBMENU FUNCTIONS =====
+  window.toggleMobileMenu = function() {
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) {
+      sidebar.classList.toggle("mobile-open");
+    }
+  };
+
+  document.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('sidebar');
+    const menuBtn = document.querySelector('.mobile-menu-btn');
+    if (window.innerWidth <= 980 && 
+        !sidebar.contains(e.target) && 
+        !menuBtn.contains(e.target)) {
+      sidebar.classList.remove('mobile-open');
+    }
+  });
+
+  window.toggleSubmenu = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const parentLi = event.currentTarget.parentElement;
+    const submenu = parentLi.querySelector('.sidebar-submenu');
+    const chevron = event.currentTarget.querySelector('.fa-chevron-down');
+
+    if (submenu) {
+      const isOpen = submenu.classList.contains('open');
+      
+      document.querySelectorAll('.sidebar-submenu').forEach(sub => {
+        if (sub !== submenu) {
+          sub.classList.remove('open');
+        }
+      });
+      
+      document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
+        if (chev !== chevron) {
+          chev.style.transform = 'rotate(0deg)';
+        }
+      });
+      
+      if (isOpen) {
+        submenu.classList.remove('open');
+        if (chevron) {
+          chevron.style.transform = 'rotate(0deg)';
+        }
+      } else {
+        submenu.classList.add('open');
+        if (chevron) {
+          chevron.style.transform = 'rotate(180deg)';
+        }
+      }
+    }
+  };
+
+  window.addEventListener('DOMContentLoaded', function() {
+    const currentPage = window.location.pathname.split('/').pop();
+    const submenuPages = {
+      'ad_repopend.html': 'manage-reports',
+      'ad_repon.html': 'manage-reports',
+      'ad_repcom.html': 'manage-reports',
+      'ad_repdec.html': 'manage-reports'
+    };
+
+    if (submenuPages[currentPage]) {
+      const submenu = document.querySelector('.sidebar-submenu');
+      const chevron = document.querySelector('.has-submenu > a .fa-chevron-down');
+      
+      if (submenu) {
+        submenu.classList.add('open');
+        if (chevron) {
+          chevron.style.transform = 'rotate(180deg)';
+        }
+      }
+      
+      document.querySelectorAll('.sidebar-submenu a').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+          link.parentElement.classList.add('active');
+        }
+      });
+    }
+
+    document.querySelectorAll('.sidebar-menu > li > a').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && href === currentPage) {
+        link.parentElement.classList.add('active');
+      }
+    });
+  });
+
+  document.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && !e.target.closest('.has-submenu > a')) {
+      const clickedInsideSidebar = sidebar.contains(e.target);
+      const clickedSubmenuLink = e.target.closest('.sidebar-submenu a');
+      
+      if (clickedSubmenuLink) {
+        return;
+      }
+      
+      if (!clickedInsideSidebar && window.innerWidth <= 980) {
+        document.querySelectorAll('.sidebar-submenu').forEach(sub => {
+          sub.classList.remove('open');
+        });
+        document.querySelectorAll('.has-submenu > a .fa-chevron-down').forEach(chev => {
+          chev.style.transform = 'rotate(0deg)';
+        });
+      }
+    }
+  });
+
+  // ===== UTILITY FUNCTIONS =====
   function formatDateForInput(timestamp) {
     if (!timestamp) return "";
     let date;
@@ -414,7 +813,6 @@
     else if (typeof timestamp === 'string') date = new Date(timestamp);
     else if (timestamp instanceof Date) date = timestamp;
     else return "";
-    
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -428,7 +826,6 @@
     else if (typeof timestamp === 'string') date = new Date(timestamp);
     else if (timestamp instanceof Date) date = timestamp;
     else return "";
-    
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'short', 
@@ -443,7 +840,6 @@
     else if (typeof timestamp === 'string') date = new Date(timestamp);
     else if (timestamp instanceof Date) date = timestamp;
     else return "";
-
     const seconds = Math.floor((new Date() - date) / 1000);
     let interval = seconds / 31536000;
     if (interval > 1) return Math.floor(interval) + " years ago";
@@ -458,17 +854,143 @@
     return Math.floor(seconds) + " seconds ago";
   }
 
-  // ============================================
-  // PROJECT COST RETRIEVAL
-  // ============================================
+  // ===== PAGINATION FUNCTIONS =====
+  function renderPagination(paginationContainer, currentPage, totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (totalPages <= 1) {
+      paginationContainer.innerHTML = '';
+      return;
+    }
+    
+    let html = '';
+    
+    html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="window.changePage(${currentPage - 1})">
+      <i class="fa fa-chevron-left"></i> Previous
+    </button>`;
+    
+    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+    html += `<span class="pagination-info">Showing ${startItem}-${endItem} of ${totalItems}</span>`;
+    
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    if (startPage > 1) {
+      html += `<button onclick="window.changePage(1)">1</button>`;
+      if (startPage > 2) {
+        html += `<span class="pagination-info">...</span>`;
+      }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      html += `<button class="${i === currentPage ? 'active' : ''}" onclick="window.changePage(${i})">${i}</button>`;
+    }
+    
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        html += `<span class="pagination-info">...</span>`;
+      }
+      html += `<button onclick="window.changePage(${totalPages})">${totalPages}</button>`;
+    }
+    
+    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="window.changePage(${currentPage + 1})">
+      Next <i class="fa fa-chevron-right"></i>
+    </button>`;
+    
+    paginationContainer.innerHTML = html;
+  }
 
+  window.changePage = function(newPage) {
+    currentCompletedPage = newPage;
+    renderCompletedTable();
+  };
+
+  //===== FILTER FUNCTIONS =====
+  function populateFilterDropdowns() {
+    categoryFilter.innerHTML = '<option value="">All Categories</option>';
+    CATEGORIES.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat;
+      option.textContent = cat;
+      categoryFilter.appendChild(option);
+    });
+
+    issueFilter.innerHTML = '<option value="">All Issues</option>';
+    ISSUES.forEach(iss => {
+      const option = document.createElement('option');
+      option.value = iss;
+      option.textContent = iss;
+      issueFilter.appendChild(option);
+    });
+  }
+
+  function applyFilters() {
+    const searchTerm = searchCompleted.value.toLowerCase();
+    const selectedCategory = categoryFilter.value;
+    const selectedIssue = issueFilter.value;
+
+    let hasActiveFilters = selectedCategory || selectedIssue;
+    clearFiltersBtn.style.display = hasActiveFilters ? 'block' : 'none';
+
+    activeFilters.innerHTML = '';
+    if (selectedCategory) {
+      const tag = document.createElement('span');
+      tag.className = 'filter-tag';
+      tag.innerHTML = `Category: ${selectedCategory} <i class="fa fa-times"></i>`;
+      tag.querySelector('i').addEventListener('click', () => {
+        categoryFilter.value = '';
+        applyFilters();
+      });
+      activeFilters.appendChild(tag);
+    }
+    if (selectedIssue) {
+      const tag = document.createElement('span');
+      tag.className = 'filter-tag';
+      tag.innerHTML = `Issue: ${selectedIssue} <i class="fa fa-times"></i>`;
+      tag.querySelector('i').addEventListener('click', () => {
+        issueFilter.value = '';
+        applyFilters();
+      });
+      activeFilters.appendChild(tag);
+    }
+
+    filteredCompletedReports = allCompletedReports.filter(item => {
+      const data = item.data;
+      const searchText = `${data.projectName || ''} ${data.barangay || ''} ${data.description || ''}`.toLowerCase();
+      
+      const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+      const matchesCategory = !selectedCategory || data.category === selectedCategory;
+      const matchesIssue = !selectedIssue || data.issue === selectedIssue;
+      
+      return matchesSearch && matchesCategory && matchesIssue;
+    });
+
+    currentCompletedPage = 1;
+    renderCompletedTable();
+  }
+
+  searchCompleted.addEventListener("keyup", applyFilters);
+  categoryFilter.addEventListener("change", applyFilters);
+  issueFilter.addEventListener("change", applyFilters);
+  clearFiltersBtn.addEventListener("click", () => {
+    categoryFilter.value = '';
+    issueFilter.value = '';
+    searchCompleted.value = '';
+    applyFilters();
+  });
+
+  // ===== PROJECT COST RETRIEVAL =====
   async function getProjectCost(reportId) {
     try {
       const snap = await getDoc(doc(db, "reports", reportId));
       if (!snap.exists()) return 0;
       const data = snap.data();
-      
-      // Try to get allocated budget first, then proposed budget
+
       let cost = 0;
       if (data.allocatedBudget) {
         cost = parseFloat(data.allocatedBudget.replace(/[₱,]/g, ''));
@@ -483,27 +1005,21 @@
     }
   }
 
-  // ============================================
-  // LIQUIDATED DAMAGES CALCULATION
-  // ============================================
-
+  // ===== LIQUIDATED DAMAGES CALCULATION =====
   async function computeLiquidatedDamages(reportId, completionDate, targetDate, additionalExtension = 0, undeliveredPercent = 0) {
     try {
-      // Get project cost
       const projectCost = await getProjectCost(reportId);
       if (!projectCost || projectCost === 0) {
-        return { 
-          amount: 0, 
-          days: 0, 
-          details: "No project cost available" 
+        return {
+          amount: 0,
+          days: 0,
+          details: "No project cost available"
         };
       }
 
-      // Convert dates to Date objects
       const completedDate = completionDate instanceof Date ? completionDate : new Date(completionDate);
       const deadlineDate = targetDate instanceof Date ? targetDate : new Date(targetDate);
 
-      // Validate dates
       if (isNaN(completedDate.getTime()) || isNaN(deadlineDate.getTime())) {
         return {
           amount: 0,
@@ -512,15 +1028,12 @@
         };
       }
 
-      // Calculate adjusted deadline with extensions
       const adjustedDeadline = new Date(deadlineDate);
       adjustedDeadline.setDate(adjustedDeadline.getDate() + parseInt(additionalExtension || 0));
 
-      // Calculate days of delay
       const timeDiff = completedDate - adjustedDeadline;
       const daysOfDelay = Math.max(0, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
 
-      // If no delay, no liquidated damages
       if (daysOfDelay === 0) {
         return { 
           amount: 0, 
@@ -529,11 +1042,9 @@
         };
       }
 
-      // Calculate undelivered cost
       const undeliveredPercentValue = parseFloat(undeliveredPercent) || 0;
       const undeliveredCost = projectCost * (undeliveredPercentValue / 100);
 
-      // If 0% undelivered, no penalties
       if (undeliveredCost === 0) {
         return {
           amount: 0,
@@ -542,8 +1053,6 @@
         };
       }
 
-      // LD Formula: 0.1% (1/10 of 1%) per day of delay on undelivered cost
-      // LD = Undelivered Cost × 0.001 × Days of Delay
       const ldAmount = undeliveredCost * 0.001 * daysOfDelay;
 
       return {
@@ -564,10 +1073,7 @@
     }
   }
 
-  // ============================================
-  // AUTO-UPDATE LD DISPLAY
-  // ============================================
-
+  // ===== AUTO-UPDATE LD DISPLAY =====
   async function updateLiquidatedDamages() {
     if (!currentDocId) return;
 
@@ -581,7 +1087,6 @@
       return;
     }
 
-    // Show loading state
     document.getElementById("editPenalties").value = "Calculating...";
 
     const result = await computeLiquidatedDamages(
@@ -592,7 +1097,6 @@
       undeliveredPercent
     );
 
-    // Format the penalties display
     let penaltiesText = "";
     if (result.amount > 0) {
       penaltiesText = `₱${result.amount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}\n\n`;
@@ -604,10 +1108,7 @@
     document.getElementById("editPenalties").value = penaltiesText;
   }
 
-  // ============================================
-  // MODAL FUNCTIONS
-  // ============================================
-
+  // ===== MODAL FUNCTIONS WITH AUDIT LOGGING =====
   async function openEditCompletedModal(e) {
     e.preventDefault();
     const id = e.currentTarget.dataset.id;
@@ -621,7 +1122,6 @@
 
     const data = snap.data();
 
-    // Fill basic fields
     document.getElementById("editCompletedProjectName").value = data.projectName || "";
     document.getElementById("editCompletionDate").value = formatDateForInput(data.completionDate);
     document.getElementById("editTargetDate").value = formatDateForInput(data.endDate || data.targetDate);
@@ -629,7 +1129,6 @@
     document.getElementById("editUndeliveredPercent").value = data.undeliveredPercent || 0;
     document.getElementById("viewProgressReport").value = data.progressReport || "No progress report available";
 
-    // Calculate actual duration
     if (data.startDate && data.completionDate) {
       const start = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
       const completed = data.completionDate.toDate ? data.completionDate.toDate() : new Date(data.completionDate);
@@ -639,7 +1138,6 @@
       document.getElementById("editActualDuration").value = "N/A";
     }
 
-    // Calculate and display liquidated damages
     await updateLiquidatedDamages();
 
     editCompletedModal.style.display = "flex";
@@ -650,10 +1148,7 @@
     currentDocId = null;
   }
 
-  // ============================================
-  // SAVE CHANGES
-  // ============================================
-
+  // ===== SAVE CHANGES WITH AUDIT LOGGING =====
   async function saveChanges() {
     if (!currentDocId) return;
 
@@ -672,474 +1167,331 @@
       return;
     }
 
-    // Calculate actual duration
     let actualDuration = 0;
     const snap = await getDoc(doc(db, "reports", currentDocId));
     if (snap.exists()) {
       const data = snap.data();
-      if (data.startDate) {
-        const start = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
-        const completed = new Date(completionDate);
-        actualDuration = Math.ceil((completed - start) / (1000 * 60 * 60 * 24));
+      
+      // Get old data for audit log
+      const oldData = {
+        completionDate: formatDateForDisplay(data.completionDate),
+        targetDate: formatDateForDisplay(data.targetDate || data.endDate),
+        additionalExtension: data.additionalExtension || 0,undeliveredPercent: data.undeliveredPercent || 0,
+penalties: data.penalties || "None"
+};
+  if (data.startDate) {
+    const start = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
+    const completed = new Date(completionDate);
+    actualDuration = Math.ceil((completed - start) / (1000 * 60 * 60 * 24));
+  }
+
+  try {
+    const reportRef = doc(db, "reports", currentDocId);
+    await updateDoc(reportRef, {
+      completionDate: new Date(completionDate),
+      targetDate: new Date(targetDate),
+      additionalExtension: parseInt(additionalExtension),
+      undeliveredPercent: parseFloat(undeliveredPercent),
+      actualDuration: actualDuration,
+      penalties: penalties,
+      updatedAt: new Date()
+    });
+
+    // ✅ LOG COMPLETED REPORT UPDATE
+    const changes = [];
+    if (oldData.completionDate !== formatDateForDisplay(new Date(completionDate))) {
+      changes.push(`Completion Date: "${oldData.completionDate}" → "${formatDateForDisplay(new Date(completionDate))}"`);
+    }
+    if (oldData.targetDate !== formatDateForDisplay(new Date(targetDate))) {
+      changes.push(`Target Date: "${oldData.targetDate}" → "${formatDateForDisplay(new Date(targetDate))}"`);
+    }
+    if (oldData.additionalExtension !== parseInt(additionalExtension)) {
+      changes.push(`Extension: ${oldData.additionalExtension} days → ${additionalExtension} days`);
+    }
+    if (oldData.undeliveredPercent !== parseFloat(undeliveredPercent)) {
+      changes.push(`Undelivered: ${oldData.undeliveredPercent}% → ${undeliveredPercent}%`);
+    }
+    if (oldData.penalties !== penalties) {
+      changes.push("Penalties recalculated");
+    }
+
+    await logAuditEvent(
+      "Completed Report Updated",
+      "edit",
+      "Reports",
+      `Updated completion details for: ${data.projectName || "Unknown"} - ${changes.join(", ")}`,
+      {
+        reportId: currentDocId,
+        projectName: data.projectName,
+        barangay: data.barangay,
+        changes: changes.join(", "),
+        beforeValue: JSON.stringify(oldData),
+        afterValue: JSON.stringify({
+          completionDate: formatDateForDisplay(new Date(completionDate)),
+          targetDate: formatDateForDisplay(new Date(targetDate)),
+          additionalExtension: parseInt(additionalExtension),
+          undeliveredPercent: parseFloat(undeliveredPercent),
+          penalties: penalties
+        })
       }
-    }
+    );
 
-    try {
-      const reportRef = doc(db, "reports", currentDocId);
-      await updateDoc(reportRef, {
-        completionDate: new Date(completionDate),
-        targetDate: new Date(targetDate),
-        additionalExtension: parseInt(additionalExtension),
-        undeliveredPercent: parseFloat(undeliveredPercent),
-        actualDuration: actualDuration,
-        penalties: penalties,
-        updatedAt: new Date()
-      });
-
-      alert("Completion details and liquidated damages saved successfully!");
-      closeModal();
-    } catch (err) {
-      console.error("Save error:", err);
-      alert("Save failed: " + err.message);
-    }
+    alert("Completion details and liquidated damages saved successfully!");
+    closeModal();
+  } catch (err) {
+    console.error("Save error:", err);
+    alert("Save failed: " + err.message);
   }
-
-  // ============================================
-  // BUILD TABLE ROW
-  // ============================================
-
-  async function buildTableRow(docSnap) {
-    const r = docSnap.data();
-    const tr = document.createElement("tr");
-    
-    const addCell = (content) => {
-      const td = document.createElement("td");
-      if (typeof content === "string") {
-        td.textContent = content;
-      } else {
-        td.appendChild(content);
-      }
-      tr.appendChild(td);
-    };
-
-    // Project Name
-    addCell(r.projectName || "N/A");
-
-    // Barangay
-    addCell(r.barangay || "N/A");
-
-    // Description
-    const descCell = document.createElement("span");
-    descCell.className = "truncate";
-    descCell.textContent = r.description || "N/A";
-    descCell.title = r.description || "";
-    addCell(descCell);
-
-    // Dimensions
-    addCell(r.width && r.height ? `${r.width}×${r.height}` : "N/A");
-
-    // Image
-    const imgCell = document.createElement("a");
-    imgCell.href = "#";
-    imgCell.textContent = "View";
-    imgCell.style.color = "#004aad";
-    imgCell.onclick = async (e) => {
-      e.preventDefault();
-      if (r.imageUrl) {
-        window.open(r.imageUrl, '_blank');
-      } else {
-        alert("No image available");
-      }
-    };
-    addCell(imgCell);
-
-    // Coordinates
-    const coordDiv = document.createElement("div");
-    coordDiv.className = "coords-vertical";
-    const latSpan = document.createElement("span");
-    latSpan.textContent = `Lat: ${r.latitude || "N/A"}`;
-    const lngSpan = document.createElement("span");
-    lngSpan.textContent = `Lng: ${r.longitude || "N/A"}`;
-    coordDiv.appendChild(latSpan);
-    coordDiv.appendChild(lngSpan);
-    addCell(coordDiv);
-
-    // Timestamp
-    addCell(formatDateForDisplay(r.timestamp || r.createdAt));
-
-    // Proposed Budget
-    addCell(r.proposedBudget || "₱0");
-
-    // Allocated Budget
-    addCell(r.allocatedBudget || "₱0");
-
-    // Start Date & Deadline (with extension info)
-    let deadlineText = `${formatDateForDisplay(r.startDate) || "N/A"} – ${formatDateForDisplay(r.endDate || r.targetDate) || "N/A"}`;
-    if (r.additionalExtension && r.additionalExtension > 0) {
-      deadlineText += ` (+${r.additionalExtension}d ext)`;
-    }
-    addCell(deadlineText);
-
-    // Contractor & Supplier
-    addCell(`C: ${r.contractor || "N/A"}, S: ${r.supplier || "N/A"}`);
-
-    // Completion Date
-    addCell(formatDateForDisplay(r.completionDate) || "Not set");
-
-    // Penalties column - show calculated LD
-    const penaltiesText = r.penalties || "Not calculated";
-    addCell(penaltiesText);
-
-    // Reporter Position
-    addCell(r.reporterPosition || r.userId || "N/A");
-
-    // Status
-    const statusSpan = document.createElement("span");
-    statusSpan.className = `status ${(r.status || "").toLowerCase()}`;
-    statusSpan.textContent = r.status || "N/A";
-    addCell(statusSpan);
-
-    // Action
-    const actionCell = document.createElement("td");
-    actionCell.className = "action";
-    const editBtn = document.createElement("button");
-    editBtn.className = "btn-edit";
-    editBtn.textContent = "View/Edit";
-    editBtn.dataset.id = docSnap.id;
-    editBtn.onclick = openEditCompletedModal;
-    actionCell.appendChild(editBtn);
-    tr.appendChild(actionCell);
-
-    return tr;
+}
+}
+// ===== BUILD TABLE ROW =====
+async function buildTableRow(docSnap) {
+const r = docSnap.data();
+const tr = document.createElement("tr");
+tr.dataset.category = r.category || '';
+tr.dataset.issue = r.issue || '';
+const addCell = (content) => {
+  const td = document.createElement("td");
+  if (typeof content === "string") {
+    td.textContent = content;
+  } else {
+    td.appendChild(content);
   }
+  tr.appendChild(td);
+};
 
-  // ============================================
-  // NOTIFICATION SYSTEM
-  // ============================================
+addCell(r.projectName || "N/A");
 
-  async function setupNotifications() {
-    const notificationsRef = collection(db, "notifications");
-    const q = query(notificationsRef, orderBy("timestamp", "desc"));
+const categoryBadge = document.createElement("span");
+categoryBadge.className = "category-badge";
+categoryBadge.textContent = r.category || "N/A";
+addCell(categoryBadge);
 
-    notificationsUnsub = onSnapshot(q, (snapshot) => {
-      const notifications = [];
-      let unreadCount = 0;
+const issueBadge = document.createElement("span");
+issueBadge.className = "issue-badge";
+issueBadge.textContent = r.issue || "N/A";
+addCell(issueBadge);
 
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        notifications.push({ id: doc.id, ...data });
-        if (!data.read) unreadCount++;
-      });
+addCell(r.barangay || "N/A");
 
-      // Update badge
-      notificationBadge.textContent = unreadCount;
-      if (unreadCount > 0) {
-        notificationBadge.classList.add('show');
-      } else {
-        notificationBadge.classList.remove('show');
-      }
+const descCell = document.createElement("span");
+descCell.className = "truncate";
+descCell.textContent = r.description || "N/A";
+descCell.title = r.description || "";
+addCell(descCell);
 
-      // Render notifications
-      renderNotifications(notifications);
-    });
+addCell(r.width && r.height ? `${r.width}×${r.height}` : "N/A");
+
+const imgCell = document.createElement("a");
+imgCell.href = "#";
+imgCell.textContent = "View";
+imgCell.style.color = "#004aad";
+imgCell.onclick = async (e) => {
+  e.preventDefault();
+  if (r.imageUrl) {
+    window.open(r.imageUrl, '_blank');
+  } else {
+    alert("No image available");
   }
+};
+addCell(imgCell);
 
-  function renderNotifications(notifications) {
-    notificationList.innerHTML = '';
+const coordDiv = document.createElement("div");
+coordDiv.className = "coords-vertical";
+const latSpan = document.createElement("span");
+latSpan.textContent = `Lat: ${r.latitude || "N/A"}`;
+const lngSpan = document.createElement("span");
+lngSpan.textContent = `Lng: ${r.longitude || "N/A"}`;
+coordDiv.appendChild(latSpan);
+coordDiv.appendChild(lngSpan);
+addCell(coordDiv);
 
-    if (notifications.length === 0) {
-      notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
-      return;
-    }
+addCell(formatDateForDisplay(r.timestamp || r.createdAt));
 
-    // Filter notifications based on current filter
-    let filtered = notifications;
-    const now = new Date();
-    const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+addCell(r.proposedBudget || "₱0");
 
-    if (currentFilter === 'report') {
-      filtered = notifications.filter(n => n.type === 'report');
-    } else if (currentFilter === 'user') {
-      filtered = notifications.filter(n => n.type === 'user');
-    } else if (currentFilter === '24h') {
-      filtered = notifications.filter(n => {
-        const timestamp = n.timestamp?.toDate() || new Date(n.timestamp);
-        return timestamp >= oneDayAgo;
-      });
-    }
+addCell(r.allocatedBudget || "₱0");
 
-    if (filtered.length === 0) {
-      notificationList.innerHTML = '<div class="notification-empty">No notifications for this filter</div>';
-      return;
-    }
+let deadlineText = `${formatDateForDisplay(r.startDate) || "N/A"} – ${formatDateForDisplay(r.endDate || r.targetDate) || "N/A"}`;
+if (r.additionalExtension && r.additionalExtension > 0) {
+  deadlineText += ` (+${r.additionalExtension}d ext)`;
+}
+addCell(deadlineText);
 
-    filtered.forEach(notif => {
-      const item = document.createElement('div');
-      item.className = `notification-item ${!notif.read ? 'unread' : ''}`;
-      
-      const iconType = notif.type === 'user' ? 'user' : 'report';
-      const iconClass = notif.type === 'user' ? 'fa-user' : 'fa-file-alt';
-      
-      item.innerHTML = `
-        <div class="notification-icon ${iconType}">
-          <i class="fa ${iconClass}"></i>
-        </div>
-        <div class="notification-content">
-          <p>${notif.message}</p>
-          <span class="time">${timeAgo(notif.timestamp)}</span>
-        </div>
-      `;
-      
-      item.onclick = async () => {
-        if (!notif.read) {
-          await updateDoc(doc(db, "notifications", notif.id), { read: true });
-        }
-        if (notif.link) {
-          window.location.href = notif.link;
-        }
-      };
-      
-      notificationList.appendChild(item);
-    });
-  }
+addCell(`C: ${r.contractor || "N/A"}, S: ${r.supplier || "N/A"}`);
 
-  // Notification bell click
-  if (notificationBell) {
-    notificationBell.addEventListener('click', (e) => {
-      e.stopPropagation();
-      notificationMenu.classList.toggle('show');
-    });
-  }
+addCell(formatDateForDisplay(r.completionDate) || "Not set");
 
-  // Close notification menu when clicking outside
-  document.addEventListener('click', (e) => {
-    if (notificationMenu && !notificationMenu.contains(e.target) && e.target !== notificationBell) {
-      notificationMenu.classList.remove('show');
-    }
-  });
+const penaltiesText = r.penalties || "Not calculated";
+addCell(penaltiesText);
 
-  // Filter buttons
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      currentFilter = this.dataset.filter;
-      
-      // Re-fetch and render with new filter
-      const notificationsRef = collection(db, "notifications");
-      const q = query(notificationsRef, orderBy("timestamp", "desc"));
-      getDocs(q).then(snapshot => {
-        const notifications = [];
-        snapshot.forEach(doc => {
-          notifications.push({ id: doc.id, ...doc.data() });
-        });
-        renderNotifications(notifications);
-      });
-    });
-  });
+addCell(r.reporterPosition || r.userId || "N/A");
 
-  // Mark all as read
-  const markAllReadBtn = document.getElementById('markAllReadBtn');
-  if (markAllReadBtn) {
-    markAllReadBtn.addEventListener('click', async () => {
-      const notificationsRef = collection(db, "notifications");
-      const q = query(notificationsRef, where("read", "==", false));
-      const snapshot = await getDocs(q);
-      
-      const promises = [];
-      snapshot.forEach(doc => {
-        promises.push(updateDoc(doc.ref, { read: true }));
-      });
-      
-      await Promise.all(promises);
-    });
-  }
+const statusSpan = document.createElement("span");
+statusSpan.className = `status ${(r.status || "").toLowerCase()}`;
+statusSpan.textContent = r.status || "N/A";
+addCell(statusSpan);
 
-  // Clear all notifications
-  const clearNotificationsBtn = document.getElementById('clearNotificationsBtn');
-  if (clearNotificationsBtn) {
-    clearNotificationsBtn.addEventListener('click', async () => {
-      if (confirm('Are you sure you want to clear all notifications?')) {
-        const notificationsRef = collection(db, "notifications");
-        const snapshot = await getDocs(notificationsRef);
-        
-        const promises = [];
-        snapshot.forEach(doc => {
-          promises.push(updateDoc(doc.ref, { read: true }));
-        });
-        
-        await Promise.all(promises);
-      }
-    });
-  }
+const actionCell = document.createElement("td");
+actionCell.className = "action";
+const editBtn = document.createElement("button");
+editBtn.className = "btn-edit";
+editBtn.textContent = "View/Edit";
+editBtn.dataset.id = docSnap.id;
+editBtn.onclick = openEditCompletedModal;
+actionCell.appendChild(editBtn);
+tr.appendChild(actionCell);
 
-  // ============================================
-  // SEARCH FUNCTIONALITY
-  // ============================================
+return tr;
+}
+// ===== RENDER TABLE WITH PAGINATION =====
+async function renderCompletedTable() {
+completedBody.innerHTML = "";
+const startIndex = (currentCompletedPage - 1) * itemsPerPage;
+const endIndex = startIndex + itemsPerPage;
+const pageItems = filteredCompletedReports.slice(startIndex, endIndex);
 
-  searchCompleted.addEventListener("keyup", () => {
-    const val = searchCompleted.value.toLowerCase();
-    [...completedBody.rows].forEach(row => {
-      const text = row.innerText.toLowerCase();
-      row.style.display = text.includes(val) ? "" : "none";
-    });
-  });
+if (pageItems.length === 0 && filteredCompletedReports.length === 0) {
+  const emptyRow = document.createElement("tr");
+  const emptyCell = document.createElement("td");
+  emptyCell.colSpan = 18;
+  emptyCell.style.textAlign = "center";
+  emptyCell.style.padding = "2rem";
+  emptyCell.style.color = "#999";
+  emptyCell.textContent = "No completed reports found";
+  emptyRow.appendChild(emptyCell);
+  completedBody.appendChild(emptyRow);
+  completedPagination.innerHTML = '';
+  return;
+}
 
-  // ============================================
-  // EVENT LISTENERS
-  // ============================================
+for (const item of pageItems) {
+  const row = await buildTableRow(item.docSnap);
+  completedBody.appendChild(row);
+}
 
-  closeCompletedModal.onclick = closeModal;
-  cancelCompletedEdit.onclick = closeModal;
-  saveCompletedChanges.onclick = saveChanges;
-
-  // Auto-calculate LD when fields change
-  document.getElementById("editCompletionDate").addEventListener("change", updateLiquidatedDamages);
-  document.getElementById("editTargetDate").addEventListener("change", updateLiquidatedDamages);
-  document.getElementById("editAdditionalExtension").addEventListener("input", updateLiquidatedDamages);
-  document.getElementById("editUndeliveredPercent").addEventListener("input", updateLiquidatedDamages);
-
-  // Logout functionality
-  if (sidebarLogoutBtn) {
-    sidebarLogoutBtn.addEventListener("click", async () => {
-      if (confirm("Are you sure you want to logout?")) {
-        try {
-          await signOut(auth);
-          window.location.href = "login.html";
-        } catch (err) {
-          console.error("Logout error:", err);
-          alert("Error logging out: " + err.message);
-        }
-      }
-    });
-  }
-
-  // Profile dropdown toggle
-  if (profileToggle && dropdownMenu) {
-    profileToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      dropdownMenu.classList.toggle("show");
-    });
-
-    document.addEventListener("click", () => {
-      dropdownMenu.classList.remove("show");
-    });
-  }
-
-  // Mobile menu toggle
-  window.toggleMobileMenu = function() {
-    const sidebar = document.getElementById("sidebar");
-    if (sidebar) {
-      sidebar.classList.toggle("mobile-open");
-    }
-  };
-
-  // Submenu toggle
-  window.toggleSubmenu = function(event) {
-    event.preventDefault();
-    const submenu = event.currentTarget.nextElementSibling;
-    const chevron = event.currentTarget.querySelector('.fa-chevron-down');
-
-    if (submenu) {
-      submenu.classList.toggle('open');
-    }
-    if (chevron) {
-      chevron.style.transform = submenu.classList.contains('open') 
-        ? 'rotate(180deg)' 
-        : 'rotate(0deg)';
-    }
-  };
-
-  // ============================================
-  // AUTHENTICATION & DATA LOADING
-  // ============================================
-
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
+renderPagination(completedPagination, currentCompletedPage, filteredCompletedReports.length);
+}
+// ===== EVENT LISTENERS =====
+closeCompletedModal.onclick = closeModal;
+cancelCompletedEdit.onclick = closeModal;
+saveCompletedChanges.onclick = saveChanges;
+document.getElementById("editCompletionDate").addEventListener("change", updateLiquidatedDamages);
+document.getElementById("editTargetDate").addEventListener("change", updateLiquidatedDamages);
+document.getElementById("editAdditionalExtension").addEventListener("input", updateLiquidatedDamages);
+document.getElementById("editUndeliveredPercent").addEventListener("input", updateLiquidatedDamages);
+// ===== LOGOUT WITH AUDIT LOGGING =====
+if (sidebarLogoutBtn) {
+sidebarLogoutBtn.addEventListener("click", async () => {
+if (confirm("Are you sure you want to logout?")) {
+try {
+// ✅ LOG LOGOUT
+await logAuditEvent(
+"Logged Out",
+"logout",
+"Authentication",
+"Admin logged out from the system"
+);
+      await signOut(auth);
       window.location.href = "login.html";
-      return;
-    }
-
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userDocRef);
-
-      if (!userSnap.exists()) {
-        alert("User data not found! Redirecting...");
-        window.location.href = "login.html";
-        return;
-      }
-
-      const userData = userSnap.data();
-
-      // Check if user is Admin
-      if (userData.position !== "Admin") {
-        alert("Unauthorized access! Only Admins can access this page.");
-        window.location.href = "login.html";
-        return;
-      }
-
-      // Update navbar profile info
-      const navUsername = document.getElementById("navUsername");
-      const navAvatar = document.getElementById("navAvatar");
-
-      if (navUsername) {
-        navUsername.textContent = userData.name || userData.firstName || "Admin";
-      }
-      if (navAvatar) {
-        navAvatar.src = userData.photoURL || userData.profilePic || "image.png";
-      }
-
-      // Setup real-time profile updates
-      onSnapshot(userDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const d = docSnap.data();
-          if (navUsername) navUsername.textContent = d.name || d.firstName || "Admin";
-          if (navAvatar) navAvatar.src = d.photoURL || d.profilePic || "image.png";
-        }
-      });
-
-      // Setup notifications
-      await setupNotifications();
-
-      // Load completed reports with real-time updates
-      const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
-
-      if (reportsUnsub) reportsUnsub();
-
-      reportsUnsub = onSnapshot(q, async (snap) => {
-        completedBody.innerHTML = "";
-
-        for (const docSnap of snap.docs) {
-          const data = docSnap.data();
-          const status = (data.status || "").toLowerCase().trim();
-
-          // Only show completed/repaired reports
-          if (status === "repaired" || status === "posted" || status === "completed") {
-            const row = await buildTableRow(docSnap);
-            completedBody.appendChild(row);
-          }
-        }
-
-        // Show message if no completed reports
-        if (completedBody.children.length === 0) {
-          const emptyRow = document.createElement("tr");
-          const emptyCell = document.createElement("td");
-          emptyCell.colSpan = 16;
-          emptyCell.style.textAlign = "center";
-          emptyCell.style.padding = "2rem";
-          emptyCell.style.color = "#999";
-          emptyCell.textContent = "No completed reports found";
-          emptyRow.appendChild(emptyCell);
-          completedBody.appendChild(emptyRow);
-        }
-      });
-
     } catch (err) {
-      console.error("Error loading user data:", err);
-      alert("Error loading user data: " + err.message);
+      console.error("Logout error:", err);
+      alert("Error logging out: " + err.message);
+    }
+  }
+});
+}
+// Profile dropdown toggle
+if (profileToggle && dropdownMenu) {
+profileToggle.addEventListener("click", (e) => {
+e.stopPropagation();
+dropdownMenu.classList.toggle("show");
+notificationMenu.classList.remove("show");
+});
+}
+window.addEventListener('click', (e) => {
+if (!e.target.closest('.profile-dropdown')) {
+dropdownMenu.classList.remove("show");
+}
+if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
+notificationMenu.classList.remove("show");
+}
+});
+// ===== AUTHENTICATION & DATA LOADING =====
+onAuthStateChanged(auth, async (user) => {
+if (!user) {
+window.location.href = "login.html";
+return;
+}
+try {
+  const userDocRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userDocRef);
+
+  if (!userSnap.exists()) {
+    alert("User data not found! Redirecting...");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const userData = userSnap.data();
+
+  if (userData.position !== "Admin") {
+    alert("Unauthorized access! Only Admins can access this page.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const navUsername = document.getElementById("navUsername");
+  const navAvatar = document.getElementById("navAvatar");
+
+  if (navUsername) {
+    navUsername.textContent = userData.name || userData.firstName || "Admin";
+  }
+  if (navAvatar) {
+    navAvatar.src = userData.photoURL || userData.profilePic || "image.png";
+  }
+
+  onSnapshot(userDocRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const d = docSnap.data();
+      if (navUsername) navUsername.textContent = d.name || d.firstName || "Admin";
+      if (navAvatar) navAvatar.src = d.photoURL || d.profilePic || "image.png";
     }
   });
+
+  await setupRealtimeNotifications(db);
+
+  const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
+
+  if (reportsUnsub) reportsUnsub();
+
+  reportsUnsub = onSnapshot(q, async (snap) => {
+    allCompletedReports = [];
+
+    for (const docSnap of snap.docs) {
+      const data = docSnap.data();
+      const status = (data.status || "").toLowerCase().trim();
+
+      if (status === "repaired" || status === "posted" || status === "completed") {
+        allCompletedReports.push({ docSnap, data });
+      }
+    }
+
+    populateFilterDropdowns();
+    filteredCompletedReports = [...allCompletedReports];
+    currentCompletedPage = 1;
+    await renderCompletedTable();
+  });
+
+} catch (err) {
+  console.error("Error loading user data:", err);
+  alert("Error loading user data: " + err.message);
+}
+});
 </script>
+</body>
+</html>
+
+
 </body>
 </html>
