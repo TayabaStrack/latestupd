@@ -10,7 +10,20 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow: hidden; }
+        
+        /* ✅ HIDE BODY UNTIL AUTH CHECK */
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            display: flex; 
+            min-height: 100vh; 
+            background: #f5f7fb; 
+            color: #333; 
+            overflow: hidden;
+            visibility: hidden; /* Hide until auth verified */
+        }
+        body.auth-checked {
+            visibility: visible; /* Show after auth check */
+        }
 
         /* SIDEBAR - IMPROVED VERSION */
         .sidebar {
@@ -284,7 +297,6 @@
                 <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
                 <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
                 <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
-                <li><a href="ad_auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
             </ul>
         </div>
 
@@ -574,13 +586,6 @@
             const data = docSnap.data();
             const status = normalizeStatus(data.status);
             trackedUserStatuses[userId] = status;
-            
-            // Add existing active users to notifications
-            if (status === "active") {
-                const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-                const position = data.position || "User";
-                addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
-            }
         });
         
         // Listen for user changes
@@ -612,31 +617,35 @@
         // Track existing reports
         const reportSnap = await getDocs(collection(db, "reports"));
         reportSnap.forEach((docSnap) => {
-            const id = docSnap.id;
-            trackedReportIds.add(id);
-            const data = docSnap.data();
-            const barangay = data.barangay || data.location || "Unknown location";
-            const type = data.reportType || data.type || data.projectName || "Report"; addNotification("report", "Report submitted", `${type} in ${barangay}`);
-    });
-    
-    // Listen for new reports
-    onSnapshot(collection(db, "reports"), (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-            const id = change.doc.id;
-            const data = change.doc.data();
-            if (change.type === "added" && !trackedReportIds.has(id)) {
-                trackedReportIds.add(id);
-                const barangay = data.barangay || data.location || "Unknown location";
-                const type = data.reportType || data.type || data.projectName || "Report";
-                addNotification("report", "New report submitted", `${type} in ${barangay}`);
-            }
+            trackedReportIds.add(docSnap.id);
         });
-    });
-    
-    updateNotificationUI();
-    console.log("✅ Notifications active");
-}
+        
+// Listen for new reports
+onSnapshot(collection(db, "reports"), (snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+        const id = change.doc.id;
+        const data = change.doc.data();
 
+        if (change.type === "added" && !trackedReportIds.has(id)) {
+            trackedReportIds.add(id);
+
+            const barangay = data.barangay || data.location || "Unknown location";
+            const type = data.reportType || data.type || data.projectName || "Report";
+
+            addNotification(
+                "report",
+                "New report submitted",
+                `${type} in ${barangay}`,   // ✔ fixed template string
+                id                          // optional unique ID if needed
+            );
+        }
+    });
+});
+
+updateNotificationUI();
+console.log("✅ Notifications active");
+
+    }
 const dropdownMenu = document.getElementById('dropdownMenu');
 const profileToggle = document.getElementById('profileToggle');
 
@@ -660,7 +669,7 @@ window.addEventListener('click', (e) => {
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, collection, getDocs, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -683,6 +692,12 @@ window.addEventListener('click', (e) => {
     const ongoingEl = document.getElementById("ongoingReports");
     const completedEl = document.getElementById("completedReports");
 
+    // ✅ Helper function to normalize position
+    function normalizePosition(position) {
+        if (!position) return "";
+        return position.toString().toLowerCase().trim();
+    }
+
     async function getImageUrl(imagePath) {
         try {
             if (!imagePath) return null;
@@ -695,22 +710,57 @@ window.addEventListener('click', (e) => {
         }
     }
 
+    // ✅ ENHANCED AUTH CHECK with instant redirect
     onAuthStateChanged(auth, async (user) => {
-        if (!user) return (window.location.href = "login.html");
+        if (!user) {
+            console.log("❌ No user logged in, redirecting to login");
+            window.location.replace("login.html");
+            return;
+        }
 
-        const { onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
         const userDocRef = doc(db, "users", user.uid);
+        const userDocSnapshot = await getDoc(userDocRef);
+        
+        if (!userDocSnapshot.exists()) {
+            console.log("❌ User document not found, redirecting to login");
+            await signOut(auth);
+            window.location.replace("login.html");
+            return;
+        }
+
+        const userData = userDocSnapshot.data();
+        const normalizedPosition = normalizePosition(userData.position);
+        
+        console.log("🔍 Admin Dashboard Auth Check:");
+        console.log("   User Position:", userData.position);
+        console.log("   Normalized Position:", normalizedPosition);
+
+        if (normalizedPosition !== "admin") {
+            console.log("❌ Unauthorized access - User is not an Admin");
+            await signOut(auth);
+            window.location.replace("login.html");
+            return;
+        }
+
+        console.log("✅ Admin access granted");
+        document.body.classList.add('auth-checked'); // ✅ Show page now
+        
+        // ✅ Setup realtime listener for user data updates
         onSnapshot(userDocRef, async (userDoc) => {
             if (!userDoc.exists()) {
-                alert("User data not found! Redirecting...");
-                return (window.location.href = "login.html");
+                await signOut(auth);
+                window.location.replace("login.html");
+                return;
             }
 
             const data = userDoc.data();
+            const currentPosition = normalizePosition(data.position);
             
-            if (data.position !== "Admin") {
-                alert("Unauthorized access! Redirecting...");
-                return (window.location.href = "login.html");
+            // ✅ Recheck if user is still Admin
+            if (currentPosition !== "admin") {
+                await signOut(auth);
+                window.location.replace("login.html");
+                return;
             }
 
             document.getElementById("navUsername").textContent = data.name || data.firstName || "Admin";
@@ -725,7 +775,7 @@ window.addEventListener('click', (e) => {
     document.getElementById("logoutBtn").addEventListener("click", async () => {
         if (confirm("Are you sure you want to logout?")) {
             await signOut(auth);
-            window.location.href = "login.html";
+            window.location.replace("login.html");
         }
     });
 

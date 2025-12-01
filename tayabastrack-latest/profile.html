@@ -1088,4 +1088,49 @@
           cardPhone:data.phone||"",
           cardAddress:data.address||data.barangay||"",
           cardGender:data.gender||"",
-          editName:full
+          editName:fullName,
+editID:data.ID||data.id||"",
+editEmail:data.email||user.email,
+editPhone:data.phone||"",
+editAddress:data.address||data.barangay||"",
+editGender:data.gender||""
+};
+    Object.keys(fields).forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.value=fields[id];
+    });
+    
+    if(data.createdAt){
+      const date=data.createdAt.toDate?data.createdAt.toDate():new Date(data.createdAt);
+      const el=document.getElementById("registeredAt");
+      if(el)el.textContent=date.toLocaleDateString();
+    }
+    
+    if(data.lastLogin){
+      const date=data.lastLogin.toDate?data.lastLogin.toDate():new Date(data.lastLogin);
+      const el=document.getElementById("lastLogin");
+      if(el)el.textContent=date.toLocaleString();
+    }
+    
+    console.log("UI updated successfully");
+  },error=>{
+    console.error("Error in user snapshot:",error);
+  });
+  
+  try{
+    await setupRealtimeNotifications(db);
+    console.log("Notifications setup complete");
+  }catch(err){
+    console.error("Error setting up notifications:",err);
+  }
+  
+  try{
+    await loadOngoingReports(db); 
+    console.log("Calendar loaded");
+  }catch(err){
+    console.error("Error loading calendar:",err);
+  }
+});
+  </script>
+</body>
+</html>

@@ -126,7 +126,7 @@
     .table-card{overflow-x:auto;overflow-y:hidden;border-radius:10px;background:#fff;padding:8px;box-shadow:0 2px 6px rgba(0,0,0,0.05);scroll-behavior:smooth;position:relative;margin-bottom:0;width:100%}
     .table-card::-webkit-scrollbar{height:10px}
     .table-card::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#004aad 0%,#0066cc 100%);border-radius:5px}
-    table{width:100%;border-collapse:collapse;table-layout:auto;min-width:2200px}
+    table{width:100%;border-collapse:collapse;table-layout:auto;min-width:2000px}
     thead{background:#f5f8fb;color:#333}
     thead th{font-weight:700;padding:0.7rem 0.75rem;text-align:left;border-bottom:2px solid #e0e0e0;white-space:nowrap}
     th,td{text-align:left;padding:0.6rem 0.8rem;font-size:0.85rem;border-bottom:1px solid #f0f2f5;overflow:visible;white-space:nowrap}
@@ -295,7 +295,7 @@
           <table>
             <thead>
               <tr>
-                <th>Project Name</th><th>Category</th><th>Issue</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Start Date & Deadline</th><th>Reporter Position</th><th>Status</th><th>Action</th>
+                <th>Project Name</th><th>Category</th><th>Issue</th><th>Barangay</th><th>Description</th><th>Dimensions (W×H)</th><th>Image</th><th>Coordinates</th><th>Timestamp</th><th>Proposed Budget</th><th>Inspection Date</th><th>Reporter Position</th><th>Status</th><th>Action</th>
               </tr>
             </thead>
             <tbody id="pendingBody"></tbody>
@@ -388,9 +388,10 @@
     const searchPending = document.getElementById("searchPending");
     const categoryFilter = document.getElementById("categoryFilter");
     const issueFilter = document.getElementById("issueFilter");
-    const clearFiltersBtn = document.getElementById("clearFiltersBtn");const activeFilters = document.getElementById("activeFilters");
-const pendingPagination = document.getElementById("pendingPagination");
-const viewModal = document.getElementById("viewModal");
+    const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+    const activeFilters = document.getElementById("activeFilters");
+    const pendingPagination = document.getElementById("pendingPagination");
+    const viewModal = document.getElementById("viewModal");
 const viewModalGrid = document.getElementById("viewModalGrid");
 const closeViewModal = document.getElementById("closeViewModal");
 const closeViewBtn = document.getElementById("closeViewBtn");
@@ -414,25 +415,23 @@ let allPendingReports = [];
 let filteredPendingReports = [];
 let currentPendingPage = 1;
 const itemsPerPage = 5;
-
 // ===== PREDEFINED CATEGORIES AND ISSUES =====
 const CATEGORIES = [
-  "Daan (Road)",
-  "Tulay (Bridge)",
-  "Ilaw (Street Light)",
-  "Kanal (Drainage)",
-  "Basketbol Court (Basketball Court)",
-  "Covered Court",
-  "Barangay Hall",
-  "Health Center",
-  "Day Care Center",
-  "Multi-Purpose Hall",
-  "Waiting Shed",
-  "Public Toilet",
-  "Water System",
-  "Others"
+"Daan (Road)",
+"Tulay (Bridge)",
+"Ilaw (Street Light)",
+"Kanal (Drainage)",
+"Basketbol Court (Basketball Court)",
+"Covered Court",
+"Barangay Hall",
+"Health Center",
+"Day Care Center",
+"Multi-Purpose Hall",
+"Waiting Shed",
+"Public Toilet",
+"Water System",
+"Others"
 ];
-
 const ISSUES = [
   "Sira (Broken)",
   "Butas (Has Holes)",
@@ -817,8 +816,7 @@ async function openViewModal(e){
       {label: 'Latitude', value: data.latitude || ""},
       {label: 'Longitude', value: data.longitude || ""},
       {label: 'Proposed Budget', value: data.proposedBudget || "Not Set"},
-      {label: 'Start Date', value: formatDate(data.startDate)},
-      {label: 'Deadline', value: formatDate(data.endDate || data.deadline)},
+      {label: 'Inspection Date', value: formatDate(data.inspectionDate)},
       {label: 'Progress Report', value: data.progressReport || "No progress report", fullWidth: true, textarea: true}
     ];
     fields.forEach(field => {
@@ -918,7 +916,7 @@ async function buildTableRow(docSnap) {
       overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
       const img=document.createElement("img");
       img.src=imgUrl;
-      img.style.cssText="max-width:90%;max-height:90%;border-radius:8px;";
+      img.style.cssText="width:min(800px, 90vw);height:min(600px, 80vh);object-fit:contain;border-radius:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.3);";
       overlay.appendChild(img);
       overlay.onclick=()=>overlay.remove();
       document.body.appendChild(overlay);
@@ -945,18 +943,7 @@ async function buildTableRow(docSnap) {
   }
   addCell(proposedBudget);
   
-  const startDeadlineDiv = document.createElement("div");
-  startDeadlineDiv.style.cssText = "display:flex;gap:8px;align-items:center;white-space:nowrap";
-  const startSpan = document.createElement("span");
-  startSpan.textContent = formatDate(r.startDate);
-  const dashSpan = document.createElement("span");
-  dashSpan.textContent = "–";
-  const deadlineSpan = document.createElement("span");
-  deadlineSpan.textContent = formatDate(r.endDate || r.deadline);
-  startDeadlineDiv.appendChild(startSpan);
-  startDeadlineDiv.appendChild(dashSpan);
-  startDeadlineDiv.appendChild(deadlineSpan);
-  addCell(startDeadlineDiv);
+  addCell(formatDate(r.inspectionDate));
   
   const reporterPosition = await getReporterPosition(r.userId);
   addCell(reporterPosition);

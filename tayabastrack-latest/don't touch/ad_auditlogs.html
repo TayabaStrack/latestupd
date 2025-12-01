@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audit Logs | TayabaStrack</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; min-height: 100vh; background: #f5f7fb; color: #333; overflow-x: hidden; }
+
+        .sidebar { width: 240px; background: #004aad; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; height: 100vh; overflow-y: auto; transition: left 0.3s; }
+        .sidebar-header { display: flex; align-items: center; justify-content: flex-start; gap: 12px; margin-bottom: 2rem; padding: 0 1rem; }
+        .sidebar-header img { width: 50px; height: 50px; object-fit: contain; }
+        .sidebar-header h2 { font-size: 1.3rem; font-weight: 600; }
+        .sidebar-menu { list-style: none; padding: 0; }
+        .sidebar-menu li { margin: 0.5rem 0; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
+        .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
+        .sidebar-submenu { list-style: none; padding-left: 2rem; display: none; }
+        .sidebar-submenu.show { display: block; }
+        .sidebar-submenu a { padding: 0.6rem 1rem; font-size: 0.9rem; }
+        .sidebar-menu .has-submenu > a { justify-content: space-between; }
+        .sidebar-menu .has-submenu > a .fa-chevron-down { transition: transform 0.3s; font-size: 0.7rem; }
+        .sidebar-menu .has-submenu.open > a .fa-chevron-down { transform: rotate(180deg); }
+
+        .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
+        .logout-btn { background-color: #d9534f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .logout-btn:hover { background-color: #c9302c; }
+
+        .main { flex: 1; display: flex; flex-direction: column; margin-left: 240px; transition: margin-left 0.3s; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 10; }
+        .navbar h1 { font-size: 1.4rem; color: #004aad; }
+        .navbar-left { display: flex; align-items: center; gap: 1rem; }
+        .mobile-menu-btn { display: none; background: none; border: none; color: #004aad; font-size: 1.5rem; cursor: pointer; padding: 0.5rem; }
+        
+        .profile { display: flex; align-items: center; gap: 1rem; }
+        .fa-bell { font-size: 1.2rem; position: relative; cursor: pointer; color: #333; }
+        .badge { background: red; color: #fff; font-size: 0.7rem; border-radius: 50%; padding: 3px 6px; position: absolute; top: -8px; right: -8px; display: none; min-width: 18px; text-align: center; }
+        .badge.show { display: flex; align-items: center; justify-content: center; }
+
+        .profile-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: background 0.2s; }
+        .profile-dropdown:hover { background: #f5f7fb; }
+        .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid #004aad; }
+        .username { font-weight: 500; color: #333; }
+        
+        .notification-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); width: 340px; max-height: 420px; overflow: hidden; z-index: 1000; font-family: "Segoe UI", Tahoma, sans-serif; animation: fadeIn 0.2s ease-in-out; }
+        .notification-menu.show { display: block; }
+
+        .notification-header { padding: 0.9rem 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; }
+        .notification-header h3 { font-size: 1rem; color: #333; margin: 0; font-weight: 600; }
+        .notification-actions { display: flex; gap: 0.5rem; align-items: center; }
+        .action-icon-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1rem; padding: 0.3rem; transition: color 0.2s ease; display: flex; align-items: center; justify-content: center; }
+        .action-icon-btn:hover { color: #004aad; }
+        .action-icon-btn i { font-size: 0.95rem; }
+
+        .notification-filters { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid #eee; background: #fafafa; }
+        .filter-btn-notif { flex: 1; padding: 0.4rem 0.6rem; font-size: 0.8rem; background: #f2f2f2; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.25s ease; color: #333; }
+        .filter-btn-notif:hover { background: #004aad; color: #fff; }
+        .filter-btn-notif.active { background: #004aad; color: #fff; border-color: #004aad; }
+
+        .notification-list { max-height: 300px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #ccc transparent; }
+        .notification-list::-webkit-scrollbar { width: 6px; }
+        .notification-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        .notification-list::-webkit-scrollbar-track { background: transparent; }
+
+        .notification-item { padding: 0.8rem 1rem; border-bottom: 1px solid #f0f0f0; display: flex; gap: 0.8rem; align-items: flex-start; transition: background 0.2s; position: relative; }
+        .notification-item:hover { background: #f5f7ff; }
+        .notification-item.unread { background: #f0f7ff; }
+        .notification-item.unread::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 60%; background: #004aad; border-radius: 0 4px 4px 0; }
+        .notification-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+        .notification-icon.user { background: #e3f2fd; color: #1976d2; }
+        .notification-icon.report { background: #fff3e0; color: #f57c00; }
+        .notification-content { flex: 1; }
+        .notification-content p { margin: 0; font-size: 0.86rem; color: #333; line-height: 1.3; }
+        .notification-content .time { color: #999; font-size: 0.75rem; margin-top: 0.25rem; }
+        .notification-empty { padding: 2rem; text-align: center; color: #999; font-size: 0.9rem; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .dropdown-menu { display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); min-width: 160px; z-index: 1000; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a { display: block; padding: 0.6rem 1rem; text-decoration: none; color: #333; font-size: 0.85rem; transition: background 0.2s; }
+        .dropdown-menu a:hover { background: #f0f0f0; color: #004aad; }
+        .dropdown-menu a i { margin-right: 8px; width: 20px; text-align: center; }
+
+        .content { flex: 1; padding: 2rem; overflow-y: auto; background: #f5f7fb; }
+        
+        .top-section { background: #fff; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        
+        .filter-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .filter-item { position: relative; }
+        .filter-label { font-size: 0.9rem; font-weight: 600; color: #666; margin-right: 0.5rem; }
+        .date-filter { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; cursor: pointer; }
+        .date-filter i { color: #999; }
+        .date-filter input { border: none; outline: none; font-size: 0.9rem; color: #333; background: transparent; }
+        .dropdown-filter { position: relative; }
+        .dropdown-filter select { padding: 0.5rem 2.5rem 0.5rem 1rem; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 0.9rem; background: #fff; cursor: pointer; appearance: none; color: #666; }
+        .dropdown-filter::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none; color: #999; font-size: 0.7rem; }
+        .action-btn { padding: 0.6rem 1.2rem; background: #4a90e2; color: #fff; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-left: auto; }
+        .action-btn:hover { background: #357abd; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3); }
+        .action-btn i { margin-right: 0.5rem; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-circle { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .circle-wrapper { position: relative; width: 120px; height: 120px; }
+        .circle-bg { width: 120px; height: 120px; border-radius: 50%; background: #f0f3f7; display: flex; align-items: center; justify-content: center; position: relative; }
+        .circle-progress { position: absolute; top: 0; left: 0; width: 120px; height: 120px; }
+        .circle-number { font-size: 2rem; font-weight: 700; color: #333; position: relative; z-index: 2; }
+        .circle-label { margin-top: 0.75rem; font-size: 0.9rem; color: #666; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+        .circle-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .logs-section { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        
+        .search-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e0e0e0; }
+        .search-input-wrapper { flex: 1; position: relative; }
+        .search-input-wrapper i { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #999; }
+        .search-input-wrapper input { width: 100%; padding: 0.7rem 1rem 0.7rem 2.5rem; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 0.9rem; }
+        .search-input-wrapper input:focus { outline: none; border-color: #4a90e2; }
+        .pagination-text { font-size: 0.9rem; color: #666; white-space: nowrap; }
+
+        .logs-table-wrapper { overflow-x: auto; }
+        .logs-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .logs-table thead th { background: transparent; padding: 0.75rem 1rem; text-align: left; font-size: 0.85rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e0e0e0; }
+        .logs-table thead th:first-child { padding-left: 1.5rem; }
+        .logs-table tbody tr { transition: background 0.2s; border-bottom: 1px solid #f0f0f0; }
+        .logs-table tbody tr:hover { background: #f8f9fb; }
+        .logs-table tbody td { padding: 1rem; font-size: 0.9rem; vertical-align: middle; }
+        .logs-table tbody td:first-child { padding-left: 1.5rem; }
+        
+        .checkbox-cell { width: 40px; }
+        .checkbox-cell input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #4a90e2; }
+        
+        .date-cell { color: #333; font-weight: 500; white-space: nowrap; }
+        .time-cell { color: #999; font-size: 0.85rem; }
+        
+        .user-cell { display: flex; align-items: center; gap: 0.75rem; }
+        .user-email { color: #333; font-weight: 500; }
+        
+        .to-cell { display: flex; align-items: center; gap: 0.5rem; }
+        .avatar-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 0.85rem; }
+        
+        .title-cell { color: #333; max-width: 400px; }
+        .title-main { font-weight: 600; margin-bottom: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .title-sub { color: #999; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .actions-cell { display: flex; align-items: center; gap: 0.75rem; }
+        .action-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; transition: all 0.2s; background: transparent; }
+        .action-icon:hover { background: #f0f3f7; transform: scale(1.1); }
+        .action-icon i { font-size: 1rem; color: #999; }
+        .action-icon.active i { color: #4a90e2; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .action-menu-btn { background: none; border: none; cursor: pointer; color: #999; font-size: 1.2rem; padding: 0.25rem; }
+        .action-menu-btn:hover { color: #333; }
+
+        .empty-state { text-align: center; padding: 4rem 2rem; color: #999; }
+        .empty-state i { font-size: 4rem; margin-bottom: 1rem; color: #ddd; }
+        .empty-state p { font-size: 1.1rem; }
+        
+        @media print {
+            .sidebar, .navbar, .filter-bar, .search-bar, .actions-cell { display: none !important; }
+            .main { margin-left: 0; }
+            .content { padding: 1rem; }
+        }
+        
+        @media (max-width: 980px) {
+            .sidebar { left: -240px; }
+            .sidebar.mobile-open { left: 0; }
+            .main { margin-left: 0; }
+            .mobile-menu-btn { display: block !important; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="logo.png" alt="Logo" class="logo" />
+                <h2>TayabaStrack</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
+                <li><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
+                <li class="has-submenu">
+                  <a href="#" onclick="toggleSubmenu(event)">
+                    <span><i class="fa fa-tasks"></i>&nbsp; Manage Reports</span>
+                    <i class="fa fa-chevron-down"></i>
+                  </a>
+                  <ul class="sidebar-submenu">
+                    <li><a href="reports-pending.html"><i class="fa fa-clock"></i>&nbsp; Pending Reports</a></li>
+                    <li><a href="reports-ongoing.html"><i class="fa fa-spinner"></i>&nbsp; Ongoing Reports</a></li>
+                    <li><a href="reports-completed.html"><i class="fa fa-check-circle"></i>&nbsp; Completed Reports</a></li>
+                    <li><a href="reports-declined.html"><i class="fa fa-times-circle"></i>&nbsp; Declined Reports</a></li>
+                  </ul>
+                </li>
+                <li class="active"><a href="auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fa fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <nav class="navbar">
+            <div class="navbar-left">
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <h1>My Audit Logs</h1>
+            </div>
+            <div class="profile">
+                <div style="position: relative;">
+                    <i class="fa fa-bell" id="notificationBell"></i>
+                    <span class="badge" id="notificationBadge">0</span>
+
+                    <div class="notification-menu" id="notificationMenu">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                            <div class="notification-actions">
+                                <button class="action-icon-btn" id="markAllReadBtn" title="Mark all as read">
+                                    <i class="fa fa-check-double"></i>
+                                </button>
+                                <button class="action-icon-btn" id="clearNotificationsBtn" title="Clear all">
+                                    <i class="fa fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="notification-filters">
+                            <button class="filter-btn-notif active" data-filter="all">All</button>
+                            <button class="filter-btn-notif" data-filter="report">Reports</button>
+                            <button class="filter-btn-notif" data-filter="user">Users</button>
+                            <button class="filter-btn-notif" data-filter="24h">Last 24h</button>
+                        </div>
+
+                        <div class="notification-list" id="notificationList">
+                            <div class="notification-empty">No new notifications</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-dropdown" id="profileToggle">
+                    <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar" />
+                    <span class="username" id="navbarName">---</span>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="top-section">
+                <div class="filter-bar">
+                    <span class="filter-label">Filters</span>
+                    <div class="date-filter">
+                        <i class="fa fa-search"></i>
+                        <input type="text" id="dateRange" placeholder="Select date range" readonly style="cursor: pointer; width: 150px;" />
+                    </div>
+                    <div class="dropdown-filter">
+                        <select id="actionFilter">
+                            <option value="">All Actions</option>
+                            <option value="login">Login</option>
+                            <option value="logout">Logout</option>
+                            <option value="add">Add</option>
+                            <option value="edit">Edit</option>
+                            <option value="update">Update</option>
+                            <option value="delete">Delete</option>
+                            <option value="status">Status Change</option>
+                            <option value="upload">Upload</option>
+                            <option value="approve">Approve</option>
+                            <option value="decline">Decline</option>
+                        </select>
+                    </div>
+                    <div class="dropdown-filter">
+                        <select id="moduleFilter">
+                            <option value="">All Modules</option>
+                            <option value="Authentication">Authentication</option>
+                            <option value="Reports">Reports</option>
+                            <option value="Users">Users</option>
+                            <option value="System">System</option>
+                        </select>
+                    </div>
+                    <button class="action-btn" onclick="exportToCSV()">
+                        <i class="fa fa-download"></i> Export
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-circle">
+                        <div class="circle-wrapper">
+                            <div class="circle-bg">
+                                <span class="circle-number" id="totalActions">0</span>
+                            </div>
+                            <svg class="circle-progress" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+                                <circle id="actionsCircle" cx="60" cy="60" r="54" fill="none" stroke="#4a90e2" stroke-width="8" 
+                                    stroke-dasharray="339.292" stroke-dashoffset="84.823" 
+                                    stroke-linecap="round" transform="rotate(-90 60 60)" 
+                                    style="transition: stroke-dashoffset 0.5s ease;"/>
+                            </svg>
+                        </div>
+                        <div class="circle-label">
+                            <span class="circle-dot" style="background: #4a90e2;"></span>
+                            Total My Actions
+                        </div>
+                    </div>
+
+                    <div class="stat-circle">
+                        <div class="circle-wrapper">
+                            <div class="circle-bg">
+                                <span class="circle-number" id="totalAdded">0</span>
+                            </div>
+                            <svg class="circle-progress" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+                                <circle id="addCircle" cx="60" cy="60" r="54" fill="none" stroke="#5cb85c" stroke-width="8" 
+                                    stroke-dasharray="339.292" stroke-dashoffset="84.823" 
+                                    stroke-linecap="round" transform="rotate(-90 60 60)"
+                                    style="transition: stroke-dashoffset 0.5s ease;"/>
+                            </svg>
+                        </div>
+                        <div class="circle-label">
+                            <span class="circle-dot" style="background: #5cb85c;"></span>
+                            Records Added
+                        </div>
+                    </div>
+
+                    <div class="stat-circle">
+                        <div class="circle-wrapper">
+                            <div class="circle-bg">
+                                <span class="circle-number" id="totalEdited">0</span>
+                            </div>
+                            <svg class="circle-progress" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+                                <circle id="editCircle" cx="60" cy="60" r="54" fill="none" stroke="#f0ad4e" stroke-width="8" 
+                                    stroke-dasharray="339.292" stroke-dashoffset="169.646" 
+                                    stroke-linecap="round" transform="rotate(-90 60 60)"
+                                    style="transition: stroke-dashoffset 0.5s ease;"/>
+                            </svg>
+                        </div>
+                        <div class="circle-label">
+                            <span class="circle-dot" style="background: #f0ad4e;"></span>
+                            Records Edited
+                        </div>
+                    </div>
+
+                    <div class="stat-circle">
+                        <div class="circle-wrapper">
+                            <div class="circle-bg">
+                                <span class="circle-number" id="totalDeleted">0</span>
+                            </div>
+                            <svg class="circle-progress" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+                                <circle id="deleteCircle" cx="60" cy="60" r="54" fill="none" stroke="#d9534f" stroke-width="8" 
+                                    stroke-dasharray="339.292" stroke-dashoffset="254.469" 
+                                    stroke-linecap="round" transform="rotate(-90 60 60)"
+                                    style="transition: stroke-dashoffset 0.5s ease;"/>
+                            </svg>
+                        </div>
+                        <div class="circle-label">
+                            <span class="circle-dot" style="background: #d9534f;"></span>
+                            Records Deleted
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="logs-section">
+                <div class="search-bar">
+                    <div class="search-input-wrapper">
+                        <i class="fa fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search by action, module or description" />
+                    </div>
+                    <button class="action-icon" onclick="loadAuditLogs()">
+                        <i class="fa fa-sync-alt"></i>
+                    </button>
+                    <span class="pagination-text" id="paginationText">0 out of 0</span>
+                    <button class="action-icon" onclick="previousPage()">
+                        <i class="fa fa-chevron-left"></i>
+                    </button>
+                    <button class="action-icon" onclick="nextPage()">
+                        <i class="fa fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="logs-table-wrapper">
+                    <table class="logs-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAll" /></th>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Action</th><th>Module</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <i class="fa fa-clipboard-list"></i>
+                                    <p>Loading audit logs...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+<script>
+    function toggleSubmenu(e) {
+        e.preventDefault();
+        const parent = e.currentTarget.parentElement;
+        parent.classList.toggle('open');
+        const submenu = parent.querySelector('.sidebar-submenu');
+        submenu.classList.toggle('show');
+    }
+
+    function toggleMobileMenu() {
+        document.querySelector('.sidebar').classList.toggle('mobile-open');
+    }
+
+    document.addEventListener('click', function(e) {
+        const sidebar = document.querySelector('.sidebar');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        if (window.innerWidth <= 980 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+            sidebar.classList.remove('mobile-open');
+        }
+    });
+
+    function updateAllProfilePhotos(photoURL) {
+        const photoElements = ["navbarAvatar"];
+        photoElements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.src = photoURL;
+                el.onerror = function() {
+                    this.src = "image.png";
+                };
+            }
+        });
+    }
+
+    let allLogs = [];
+    let filteredLogs = [];
+    let currentPage = 1;
+    const logsPerPage = 8;
+    let currentUserId = null;
+
+    function updateCircleProgress(circleId, value, maxValue) {
+        const circle = document.getElementById(circleId);
+        const circumference = 339.292;
+        const percent = Math.min(value / maxValue, 1);
+        const offset = circumference - (percent * circumference);
+        circle.style.strokeDashoffset = offset;
+    }
+
+    function updateStats() {
+        const totalActions = allLogs.length;
+        
+        const adds = allLogs.filter(log => {
+            const type = (log.actionType || '').toLowerCase();
+            return type === 'add' || type === 'approve';
+        }).length;
+        
+        const edits = allLogs.filter(log => {
+            const type = (log.actionType || '').toLowerCase();
+            return type === 'edit' || type === 'update' || type === 'status';
+        }).length;
+        
+        const deletes = allLogs.filter(log => {
+            const type = (log.actionType || '').toLowerCase();
+            return type === 'delete' || type === 'decline';
+        }).length;
+
+        document.getElementById('totalActions').textContent = totalActions;
+        document.getElementById('totalAdded').textContent = adds;
+        document.getElementById('totalEdited').textContent = edits;
+        document.getElementById('totalDeleted').textContent = deletes;
+
+        const maxValue = Math.max(totalActions, adds, edits, deletes, 100);
+        updateCircleProgress('actionsCircle', totalActions, maxValue);
+        updateCircleProgress('addCircle', adds, maxValue);
+        updateCircleProgress('editCircle', edits, maxValue);
+        updateCircleProgress('deleteCircle', deletes, maxValue);
+    }
+
+    function applyFilters() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const actionFilter = document.getElementById('actionFilter').value.toLowerCase();
+        const moduleFilter = document.getElementById('moduleFilter').value;
+
+        filteredLogs = allLogs.filter(log => {
+            const matchesSearch = !searchTerm || 
+                log.userName.toLowerCase().includes(searchTerm) ||
+                log.description.toLowerCase().includes(searchTerm) ||
+                log.userRole.toLowerCase().includes(searchTerm) ||
+                log.action.toLowerCase().includes(searchTerm);
+            
+            const matchesAction = !actionFilter || (log.actionType || '').toLowerCase() === actionFilter;
+            const matchesModule = !moduleFilter || log.module === moduleFilter;
+
+            return matchesSearch && matchesAction && matchesModule;
+        });
+
+        currentPage = 1;
+        renderLogs();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('actionFilter').addEventListener('change', applyFilters);
+    document.getElementById('moduleFilter').addEventListener('change', applyFilters);
+
+    function getAvatarColor(name) {
+        const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22'];
+        const index = name.charCodeAt(0) % colors.length;
+        return colors[index];
+    }
+
+    function getInitials(name) {
+        const parts = name.split(' ');
+        if (parts.length >= 2) {
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    }
+
+    function getActionColor(actionType) {
+        const type = (actionType || 'edit').toLowerCase();
+        const actionColors = {
+            'add': '#5cb85c',
+            'approve': '#5cb85c',
+            'edit': '#f0ad4e',
+            'update': '#f0ad4e',
+            'status': '#f0ad4e',
+            'delete': '#d9534f',
+            'decline': '#d9534f',
+            'login': '#5bc0de',
+            'logout': '#999',
+            'upload': '#9b59b6'
+        };
+        return actionColors[type] || '#999';
+    }
+
+    function renderLogs() {
+        const tbody = document.getElementById('logsTableBody');
+        const start = (currentPage - 1) * logsPerPage;
+        const end = start + logsPerPage;
+        const paginatedLogs = filteredLogs.slice(start, end);
+
+        if (filteredLogs.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        <i class="fa fa-clipboard-list"></i>
+                        <p>No audit logs found for your account</p>
+                    </td>
+                </tr>
+            `;
+            updatePagination();
+            return;
+        }
+
+        tbody.innerHTML = paginatedLogs.map((log) => {
+            const date = new Date(log.timestamp);
+            const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const initials = getInitials(log.userName);
+            const avatarColor = getAvatarColor(log.userName);
+            const actionColor = getActionColor(log.actionType);
+            
+            return `
+                <tr>
+                    <td class="checkbox-cell">
+                        <input type="checkbox" />
+                    </td>
+                    <td>
+                        <div class="date-cell">${timeStr}</div>
+                        <div class="time-cell">${dateStr}</div>
+                    </td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar-circle" style="background: ${avatarColor}">
+                                ${initials}
+                            </div>
+                            <div>
+                                <div class="user-email">${escapeHtml(log.userName)}</div>
+                                <div class="time-cell">${escapeHtml(log.userRole)}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="to-cell">
+                            <div class="status-dot" style="background: ${actionColor}"></div>
+                            <span>${escapeHtml(log.action)}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="color: #666;">${escapeHtml(log.module)}</span>
+                    </td>
+                    <td>
+                        <div class="title-cell">
+                            <div class="title-main">${escapeHtml(log.description)}</div>
+                            ${log.beforeValue || log.afterValue ? 
+                                `<div class="title-sub">Changed from "${escapeHtml(log.beforeValue || 'N/A')}" to "${escapeHtml(log.afterValue || 'N/A')}"</div>` 
+                                : ''}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="action-icon" title="View details">
+                                <i class="fa fa-lock"></i>
+                            </button>
+                            <button class="action-icon" title="Archive">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                            <button class="action-icon" title="Link">
+                                <i class="fa fa-link"></i>
+                            </button>
+                            <button class="action-icon active" title="Important">
+                                <i class="fa fa-circle" style="font-size: 0.7rem;"></i>
+                            </button>
+                            <button class="action-menu-btn">
+                                <i class="fa fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        updatePagination();
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function updatePagination() {
+        const total = filteredLogs.length;
+        const start = (currentPage - 1) * logsPerPage + 1;
+        const end = Math.min(currentPage * logsPerPage, total);
+
+        document.getElementById('paginationText').textContent = 
+            total > 0 ? `${start}-${end} out of ${total}` : '0 out of 0';
+    }
+
+    function previousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderLogs();
+        }
+    }
+
+    function nextPage() {
+        const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderLogs();
+        }
+    }
+
+    function exportToCSV() {
+        const headers = ['Timestamp', 'User Name', 'User Role', 'Action', 'Module', 'Description', 'Before Value', 'After Value'];
+        const rows = filteredLogs.map(log => [
+            new Date(log.timestamp).toLocaleString(),
+            log.userName,
+            log.userRole,
+            log.action,
+            log.module,
+            log.description,
+            log.beforeValue || '',
+            log.afterValue || ''
+        ]);
+
+        let csvContent = headers.join(',') + '\n';
+        rows.forEach(row => {
+            csvContent += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.download = `my-audit-logs-${Date.now()}.csv`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+    }
+
+    document.getElementById('selectAll').addEventListener('change', function(e) {
+        const checkboxes = document.querySelectorAll('.logs-table tbody input[type="checkbox"]');
+        checkboxes.forEach(checkbox => checkbox.checked = e.target.checked);
+    });
+</script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+        getFirestore, doc, getDoc, collection, addDoc, getDocs, onSnapshot, query, orderBy, where, serverTimestamp, limit
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+        authDomain: "tayabastrack-23b95.firebaseapp.com",
+        projectId: "tayabastrack-23b95",
+        storageBucket: "tayabastrack-23b95.firebasestorage.app",
+        messagingSenderId: "674055915366",
+        appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    const navbarName = document.getElementById("navbarName");
+    const notificationBell = document.getElementById("notificationBell");
+    const notificationBadge = document.getElementById("notificationBadge");
+    const notificationMenu = document.getElementById("notificationMenu");
+    const notificationList = document.getElementById("notificationList");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+    const markAllReadBtn = document.getElementById("markAllReadBtn");
+    const profileToggle = document.getElementById("profileToggle");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+
+    let notificationsList = [];
+    let trackedIds = new Set();
+    let currentFilter = "all";
+
+    function normalizeStatus(status) {
+        return (status || "").toLowerCase().trim();
+    }
+
+    function saveNotificationsToLocalStorage() {
+        try {
+            localStorage.setItem('notifications', JSON.stringify(notificationsList));
+            localStorage.setItem('trackedIds', JSON.stringify([...trackedIds]));
+        } catch (error) {
+            console.error("Error saving notifications:", error);
+        }
+    }
+
+    function loadNotificationsFromLocalStorage() {
+        try {
+            const savedNotifications = localStorage.getItem('notifications');
+            const savedTrackedIds = localStorage.getItem('trackedIds');
+            
+            if (savedNotifications) {
+                notificationsList = JSON.parse(savedNotifications).map(n => ({
+                    ...n,
+                    timestamp: new Date(n.timestamp)
+                }));
+            }
+            
+            if (savedTrackedIds) {
+                trackedIds = new Set(JSON.parse(savedTrackedIds));
+            }
+        } catch (error) {
+            console.error("Error loading notifications:", error);
+        }
+    }
+
+    notificationBell.addEventListener("click", (e) => {
+        e.stopPropagation();
+        notificationMenu.classList.toggle("show");
+        dropdownMenu.classList.remove("show");
+    });
+
+    clearNotificationsBtn.addEventListener("click", () => {
+        notificationsList = [];
+        saveNotificationsToLocalStorage();
+        updateNotificationUI();
+    });
+
+    markAllReadBtn.addEventListener("click", () => {
+        notificationsList.forEach(n => n.read = true);
+        saveNotificationsToLocalStorage();
+        updateNotificationUI();
+    });
+
+    profileToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle("show");
+        notificationMenu.classList.remove("show");
+    });
+
+    window.addEventListener("click", (e) => {
+        if (!e.target.closest(".profile-dropdown")) {
+            dropdownMenu.classList.remove("show");
+        }
+        if (!e.target.closest(".notification-menu") && e.target !== notificationBell) {
+            notificationMenu.classList.remove("show");
+        }
+    });
+
+    document.querySelectorAll(".filter-btn-notif").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+            document.querySelectorAll(".filter-btn-notif").forEach((b) => b.classList.remove("active"));
+            e.target.classList.add("active");
+            currentFilter = e.target.dataset.filter;
+            updateNotificationUI();
+        });
+    });
+
+    function addNotification(type, message, detail, uniqueId) {
+        if (trackedIds.has(uniqueId)) return;
+        
+        trackedIds.add(uniqueId);
+        
+        const timestamp = new Date();
+        const id = `${type}-${uniqueId}-${timestamp.getTime()}`;
+        
+        notificationsList.unshift({
+            id,
+            type,
+            message: message.trim(),
+            detail: detail.trim(),
+            timestamp: timestamp,
+            read: false
+        });
+        
+        saveNotificationsToLocalStorage();
+        updateNotificationUI();
+    }
+
+    function updateNotificationUI() {
+        let filtered = [...notificationsList];
+        
+        if (currentFilter === "report") {
+            filtered = filtered.filter((n) => n.type === "report");
+        } else if (currentFilter === "user") {
+            filtered = filtered.filter((n) => n.type === "user");
+        } else if (currentFilter === "24h") {
+            const ago = Date.now() - 24 * 60 * 60 * 1000;
+            filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+        }
+
+        filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+        const unreadCount = notificationsList.filter(n => !n.read).length;
+        if (unreadCount > 0) {
+            notificationBadge.textContent = unreadCount;
+            notificationBadge.classList.add("show");
+        } else {
+            notificationBadge.textContent = "";
+            notificationBadge.classList.remove("show");
+        }
+
+        if (filtered.length === 0) {
+            notificationList.innerHTML = `<div class="notification-empty">No notifications</div>`;
+        } else {
+            notificationList.innerHTML = filtered
+                .map(
+                    (n) => `
+                <div class="notification-item ${n.read ? '' : 'unread'}">
+                    <div class="notification-icon ${n.type}">
+                        ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+                    </div>
+                    <div class="notification-content">
+                        <p><strong>${n.message}</strong></p>
+                        <p>${n.detail}</p>
+                        <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+                </div>`
+                )
+                .join("");
+        }
+    }
+
+    async function setupRealtimeNotifications() {
+        loadNotificationsFromLocalStorage();
+
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const userId = change.doc.id;
+                const data = change.doc.data();
+                const currentStatus = normalizeStatus(data.status);
+                const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+                const position = data.position || "User";
+
+                if (change.type === "added" || change.type === "modified") {
+                    if (currentStatus === "active") {
+                        const uniqueId = `user-${userId}-active`;
+                        addNotification("user", `User approved: ${fullName}`, `Position: ${position}`, uniqueId);
+                    }
+                }
+            });
+        });
+
+        onSnapshot(collection(db, "reports"), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const reportId = change.doc.id;
+                const data = change.doc.data();
+                
+                if (change.type === "added") {
+                    const barangay = data.barangay || data.location || "Unknown location";
+                    const type = data.reportType || data.type || data.projectName || "Report";
+                    const uniqueId = `report-${reportId}`;
+                    addNotification("report", "New report submitted", `${type} in ${barangay}`, uniqueId);
+                }
+            });
+        });
+
+        updateNotificationUI();
+        console.log("Notifications system active");
+    }
+
+    window.logAuditEvent = async function(action, actionType, module, description, additionalData = {}) {
+        try {
+            const user = auth.currentUser;
+            if (!user) {
+                console.warn("No authenticated user for audit log");
+                return;
+            }
+
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (!userDoc.exists()) {
+                console.warn("User document not found for audit log");
+                return;
+            }
+            
+            const userData = userDoc.data();
+
+            const logData = {
+                timestamp: serverTimestamp(),
+                userId: user.uid,
+                userName: userData.name || `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unknown User",
+                userRole: userData.position || userData.role || "User",
+                action: action,
+                actionType: (actionType || 'edit').toLowerCase(),
+                module: module || 'System',
+                description: description || 'No description provided',
+                beforeValue: additionalData.beforeValue || null,
+                afterValue: additionalData.afterValue || null,
+                ...additionalData
+            };
+
+            await addDoc(collection(db, "auditLogs"), logData);
+            console.log("Audit log created:", logData);
+
+        } catch (error) {
+            console.error("Error logging audit event:", error);
+        }
+    };
+
+    function isPageViewAction(action) {
+        if (!action) return false;
+        const actionLower = action.toLowerCase();
+        const viewKeywords = ['viewed', 'view', 'navigated', 'accessed', 'opened'];
+        const hasViewKeyword = viewKeywords.some(keyword => actionLower.includes(keyword));
+        const isLoginLogout = actionLower.includes('login') || actionLower.includes('logout');
+        return hasViewKeyword && !isLoginLogout;
+    }
+
+    window.loadAuditLogs = async function() {
+        try {
+            if (!currentUserId) {
+                console.error("No current user ID available");
+                return;
+            }
+
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            
+            console.log("Loading audit logs for user:", currentUserId);
+            console.log("From:", oneMonthAgo.toLocaleString());
+            
+            // Query only logs for the current admin user
+            const logsQuery = query(
+                collection(db, "auditLogs"),
+                where("userId", "==", currentUserId),
+                orderBy("timestamp", "desc"),
+                limit(1000)
+            );
+
+            onSnapshot(logsQuery, 
+                (snapshot) => {
+                    console.log("Snapshot received. Total documents for this user:", snapshot.size);
+                    
+                    allLogs = [];
+                    
+                    snapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        
+                        let logTimestamp;
+                        if (data.timestamp && data.timestamp.toDate) {
+                            logTimestamp = data.timestamp.toDate();
+                        } else if (data.timestamp) {
+                            logTimestamp = new Date(data.timestamp);
+                        } else {
+                            logTimestamp = new Date();
+                        }
+                        
+                        if (logTimestamp < oneMonthAgo) {
+                            return;
+                        }
+                        
+                        if (isPageViewAction(data.action)) {
+                            return;
+                        }
+                        
+                        const logEntry = {
+                            id: docSnap.id,
+                            timestamp: logTimestamp,
+                            userId: data.userId || "",
+                            userName: data.userName || "Unknown User",
+                            userRole: data.userRole || "User",
+                            action: data.action || "Unknown Action",
+                            actionType: (data.actionType || "edit").toLowerCase(),
+                            module: data.module || "System",
+                            description: data.description || "",
+                            beforeValue: data.beforeValue || "",
+                            afterValue: data.afterValue || "",
+                            barangay: data.barangay || ""
+                        };
+                        
+                        allLogs.push(logEntry);
+                    });
+
+                    console.log("Filtered logs for this admin (past 30 days, no page views):", allLogs.length);
+                    console.log("Sample logs:", allLogs.slice(0, 3));
+
+                    filteredLogs = [...allLogs];
+                    currentPage = 1;
+                    renderLogs();
+                    updateStats();
+                },
+                (error) => {
+                    console.error("Error loading audit logs:", error);
+                    document.getElementById('logsTableBody').innerHTML = `
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                <p>Error loading audit logs: ${error.message}</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            );
+        } catch (error) {
+            console.error("Error setting up audit logs:", error);
+            document.getElementById('logsTableBody').innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        <p>Error setting up audit logs: ${error.message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+    };
+
+    logoutBtn.addEventListener("click", async () => {
+        try {
+            await window.logAuditEvent(
+                "Logged Out",
+                "logout",
+                "Authentication",
+                "User logged out from the system"
+            );
+        } catch (error) {
+            console.error("Error logging logout:", error);
+        }
+        
+        await signOut(auth);
+        window.location.href = "login.html";
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        try {
+            currentUserId = user.uid;
+            const userDocRef = doc(db, "users", user.uid);
+            
+            onSnapshot(userDocRef, (docSnap) => {
+                if (!docSnap.exists()) {
+                    console.error("User document not found!");
+                    return;
+                }
+
+                const data = docSnap.data();
+                
+                // Allow both Admin and Super Admin to access this page
+                if (data.position !== "Admin" && data.position !== "Super Admin") {
+                    alert("Unauthorized access! Redirecting...");
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                let fullName = data.position || "Admin";
+                if (data.firstName && data.lastName) {
+                    fullName = `${data.firstName} ${data.lastName}`;
+                } else if (data.name) {
+                    fullName = data.name;
+                } else if (data.firstName) {
+                    fullName = data.firstName;
+                }
+
+                navbarName.textContent = fullName;
+
+                const photoURL = data.photoURL || data.profilePic || "image.png";
+                updateAllProfilePhotos(photoURL);
+
+                console.log("User profile updated in real-time");
+            }, (error) => {
+                console.error("Error in user snapshot:", error);
+            });
+
+            console.log("Starting to load audit logs and notifications...");
+            await loadAuditLogs();
+            await setupRealtimeNotifications();
+            console.log("All systems initialized");
+
+        } catch (error) {
+            console.error("Error in auth state:", error);
+            alert("Error loading user data. Please refresh the page.");
+        }
+    });
+</script>
+</body>
+</html>

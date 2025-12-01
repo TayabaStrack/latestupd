@@ -241,7 +241,6 @@
                 <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
                 <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
                 <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
-                <li><a href="ad_auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
             </ul>
         </div>
         <div class="sidebar-footer">
@@ -422,8 +421,7 @@
   </div>
 </div>
   </div>
-
- <script>
+<script>
     function toggleMobileMenu(){document.querySelector('.sidebar').classList.toggle('mobile-open')}
     
     // Submenu toggle function
@@ -862,7 +860,19 @@
 
     const editModal=document.getElementById("editModal");
     
-    window.openEditModal=function(){editModal.style.display="flex"};
+    window.openEditModal=function(){
+      // 🔥 LOG EDIT MODAL OPEN
+      if (window.logAuditEvent) {
+        window.logAuditEvent(
+          "Opened Profile Edit Modal",
+          "view",
+          "System",
+          "Opened profile edit modal to update personal information"
+        );
+      }
+      editModal.style.display="flex";
+    };
+    
     window.closeEditModal=function(){editModal.style.display="none"};
 
     // ✅ SAVE PROFILE WITHOUT PHOTO UPLOAD
@@ -911,7 +921,7 @@
         if (oldData.address !== updated.address) changes.push(`Address: "${oldData.address}" → "${updated.address}"`);
         if (oldData.gender !== updated.gender) changes.push(`Gender: "${oldData.gender}" → "${updated.gender}"`);
 
-        if (window.logAuditEvent) {
+        if (window.logAuditEvent && changes.length > 0) {
           await window.logAuditEvent(
             "Profile Updated",
             "edit",
@@ -1001,12 +1011,12 @@
             "Logged Out",
             "logout",
             "Authentication",
-            "User logged out from the system"
+            "Admin logged out from the system"
           );
         }
         
         await signOut(auth);
-        window.location.href = "logout.html";
+        window.location.href = "login.html";
       } catch(err) {
         alert("Error logging out: " + err.message);
       }
@@ -1017,7 +1027,7 @@
     onAuthStateChanged(auth, async(user)=>{
       if(!user) {
         console.warn("No user logged in.");
-        window.location.href="logout.html";
+        window.location.href="login.html";
         return;
       }
       
@@ -1029,6 +1039,19 @@
         const userRef=doc(db,'users',user.uid);
         await updateDoc(userRef,{lastLogin:serverTimestamp()});
         console.log("Last login updated");
+        
+        // 🔥 LOG PAGE VIEW (only once per session)
+        if (!window.dashboardPageLogged) {
+          window.dashboardPageLogged = true;
+          if (window.logAuditEvent) {
+            await window.logAuditEvent(
+              "Viewed Dashboard",
+              "view",
+              "System",
+              "Accessed admin dashboard page"
+            );
+          }
+        }
       }catch(err){
         console.error("Error updating last login:",err);
       }

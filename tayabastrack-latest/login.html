@@ -359,6 +359,15 @@
       }
     }
   </style>
+  <style>
+  /* Hide page content until auth check is complete */
+  body {
+    visibility: hidden;
+  }
+  body.auth-checked {
+    visibility: visible;
+  }
+</style>
 </head>
 <body>
 
@@ -425,7 +434,7 @@
     
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -440,6 +449,37 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
+    // ✅ CHECK IF USER IS ALREADY LOGGED IN - Redirect IMMEDIATELY
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log("🔍 User already logged in, checking role...");
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const normalizedPosition = normalizePosition(userData.position);
+            
+            // Redirect based on role - NO DELAY
+            if (normalizedPosition === "super admin") {
+              console.log("➡️ Redirecting logged-in Super Admin to dashboard");
+              window.location.replace("dashboard.html"); // use replace instead of href
+              return; // Stop execution
+            } else if (normalizedPosition === "admin") {
+              console.log("➡️ Redirecting logged-in Admin to dashboard");
+              window.location.replace("ad_dash.html"); // use replace instead of href
+              return; // Stop execution
+            }
+          }
+        } catch (error) {
+          console.error("Error checking user role:", error);
+        }
+      }
+      
+      // ✅ No logged-in user, show the login page
+      document.body.classList.add('auth-checked');
+      console.log("✅ No user logged in, showing login page");
+    });
 
     // ✅ AUDIT LOGGING FUNCTION
     async function logAuditEvent(action, actionType, module, description, additionalData = {}) {
@@ -657,10 +697,10 @@
         
         if (normalizedPosition === "super admin") {
           console.log("➡️ Redirecting to Super Admin dashboard");
-          window.location.href = "dashboard.html";
+          window.location.replace("dashboard.html"); // use replace
         } else if (normalizedPosition === "admin") {
           console.log("➡️ Redirecting to Admin dashboard");
-          window.location.href = "ad_dash.html";
+          window.location.replace("ad_dash.html"); // use replace
         }
 
       } catch (error) {

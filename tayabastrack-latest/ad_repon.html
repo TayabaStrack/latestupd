@@ -236,7 +236,6 @@
         <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
         <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
         <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
-        <li><a href="ad_auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>    
       </ul>
     </div>
     <div class="sidebar-footer">
@@ -1081,41 +1080,68 @@
 
   // ===== REPORT ACTION FUNCTIONS WITH AUDIT LOGGING =====
   async function markAsCompleted(e){
-    e.preventDefault();
-    const id=e.currentTarget.dataset.id;
+  e.preventDefault();
+  const id=e.currentTarget.dataset.id;
+  
+  try {
+    // Get report data to validate
+    const reportDoc = await getDoc(doc(db, "reports", id));
+    if (!reportDoc.exists()) {
+      alert("Report not found!");
+      return;
+    }
+    
+    const reportData = reportDoc.data();
+    
+    // Validate all required fields are filled
+    const requiredFields = {
+      'Allocated Budget': reportData.allocatedBudget,
+      'Contractor': reportData.contractor,
+      'Supplier': reportData.supplier,
+      'Inspection Date': reportData.inspectionDate,
+      'Start Date': reportData.startDate,
+      'Deadline': reportData.endDate || reportData.deadline
+    };
+    
+    const missingFields = [];
+    for (const [fieldName, fieldValue] of Object.entries(requiredFields)) {
+      if (!fieldValue || (typeof fieldValue === 'string' && fieldValue.trim() === '')) {
+        missingFields.push(fieldName);
+      }
+    }
+    
+    if (missingFields.length > 0) {
+      alert(`Cannot mark as repaired. Please fill in the following required fields:\n\n• ${missingFields.join('\n• ')}\n\nUse the Edit button to complete these fields.`);
+      return;
+    }
     
     if(!confirm("Mark this report as Completed (Repaired)?")) return;
     
-    try {
-      // Get report data for audit log
-      const reportDoc = await getDoc(doc(db, "reports", id));
-      const reportData = reportDoc.data();
-      
-      await updateDoc(doc(db, "reports", id), {
-        status: "Repaired",
-        completedAt: serverTimestamp()
-      });
+    await updateDoc(doc(db, "reports", id), {
+      status: "Repaired",
+      completedAt: serverTimestamp()
+    });
 
-      // ✅ LOG REPORT STATUS CHANGE
-      await logAuditEvent(
-        "Report Marked as Completed",
-        "status",
-        "Reports",
-        `Marked report as completed: ${reportData.projectName || "Unknown"} in ${reportData.barangay || "Unknown"}`,
-        {
-          beforeValue: "Ongoing",
-          afterValue: "Repaired",
-          reportId: id,
-          projectName: reportData.projectName,
-          barangay: reportData.barangay
-        }
-      );
-      
-      alert("Report marked as completed and moved to Completed Reports!");
-    } catch(err) {
-      alert("Error marking report as completed: " + err.message);
-    }
+    // ✅ LOG REPORT STATUS CHANGE
+    await logAuditEvent(
+      "Report Marked as Completed",
+      "status",
+      "Reports",
+      `Marked report as completed: ${reportData.projectName || "Unknown"} in ${reportData.barangay || "Unknown"}`,
+      {
+        beforeValue: "Ongoing",
+        afterValue: "Repaired",
+        reportId: id,
+        projectName: reportData.projectName,
+        barangay: reportData.barangay
+      }
+    );
+    
+    alert("Report marked as completed and moved to Completed Reports!");
+  } catch(err) {
+    alert("Error marking report as completed: " + err.message);
   }
+}
 
   async function openEditOngoingModal(e){
     e.preventDefault();
@@ -1205,7 +1231,7 @@ if(imagePath){
     overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
     const img=document.createElement("img");
     img.src=imgUrl;
-    img.style.cssText="max-width:90%;max-height:90%;border-radius:8px;";
+    img.style.cssText="width:min(800px, 90vw);height:min(600px, 80vh);object-fit:contain;border-radius:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.3);";
     overlay.appendChild(img);
     overlay.onclick=()=>overlay.remove();
     document.body.appendChild(overlay);

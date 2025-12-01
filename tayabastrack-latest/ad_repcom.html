@@ -236,7 +236,6 @@
         <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
         <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
         <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
-        <li><a href="ad_auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
       </ul>
     </div>
     <div class="sidebar-footer">
@@ -567,12 +566,11 @@
 
   function addNotification(type, message, detail, uniqueId) {
     if (seenNotificationIds.has(uniqueId)) return;
-    
     seenNotificationIds.add(uniqueId);
-    
+
     const timestamp = new Date();
     const id = `${type}-${uniqueId}-${timestamp.getTime()}`;
-    
+
     notificationsList.unshift({
       id,
       type,
@@ -581,14 +579,13 @@
       timestamp: timestamp,
       read: false
     });
-    
+
     saveNotificationsToLocalStorage();
     updateNotificationUI();
   }
 
   function updateNotificationUI() {
     let filtered = [...notificationsList];
-    
     if (currentFilter === "report") {
       filtered = filtered.filter((n) => n.type === "report");
     } else if (currentFilter === "user") {
@@ -597,11 +594,11 @@
       const ago = Date.now() - 24 * 60 * 60 * 1000;
       filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
     }
-    
+
     filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-    
+
     const unreadCount = notificationsList.filter(n => !n.read).length;
-    
+
     if (unreadCount > 0) {
       notificationBadge.textContent = unreadCount;
       notificationBadge.classList.add("show");
@@ -609,7 +606,7 @@
       notificationBadge.textContent = "";
       notificationBadge.classList.remove("show");
     }
-    
+
     if (filtered.length === 0) {
       notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
     } else {
@@ -647,7 +644,7 @@
         }
       });
     });
-    
+
     onSnapshot(collection(db, "reports"), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         const reportId = change.doc.id;
@@ -661,7 +658,7 @@
         }
       });
     });
-    
+
     updateNotificationUI();
     console.log("Notifications system active");
   }
@@ -706,8 +703,8 @@
   document.addEventListener('click', function(e) {
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.querySelector('.mobile-menu-btn');
-    if (window.innerWidth <= 980 && 
-        !sidebar.contains(e.target) && 
+    if (window.innerWidth <= 980 &&
+        !sidebar.contains(e.target) &&
         !menuBtn.contains(e.target)) {
       sidebar.classList.remove('mobile-open');
     }
@@ -719,7 +716,7 @@
     const parentLi = event.currentTarget.parentElement;
     const submenu = parentLi.querySelector('.sidebar-submenu');
     const chevron = event.currentTarget.querySelector('.fa-chevron-down');
-
+    
     if (submenu) {
       const isOpen = submenu.classList.contains('open');
       
@@ -757,7 +754,7 @@
       'ad_repcom.html': 'manage-reports',
       'ad_repdec.html': 'manage-reports'
     };
-
+    
     if (submenuPages[currentPage]) {
       const submenu = document.querySelector('.sidebar-submenu');
       const chevron = document.querySelector('.has-submenu > a .fa-chevron-down');
@@ -809,13 +806,16 @@
   function formatDateForInput(timestamp) {
     if (!timestamp) return "";
     let date;
+
     if (timestamp.toDate) date = timestamp.toDate();
     else if (typeof timestamp === 'string') date = new Date(timestamp);
     else if (timestamp instanceof Date) date = timestamp;
     else return "";
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
+
     return `${year}-${month}-${day}`;
   }
 
@@ -826,10 +826,10 @@
     else if (typeof timestamp === 'string') date = new Date(timestamp);
     else if (timestamp instanceof Date) date = timestamp;
     else return "";
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   }
 
@@ -854,6 +854,169 @@
     return Math.floor(seconds) + " seconds ago";
   }
 
+  // ===== IMAGE VIEWING FUNCTION =====
+  async function getImageUrl(imagePath) {
+    try {
+      if (!imagePath) return null;
+      
+      // If it's already a full URL, return it
+      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+      }
+      
+      // Otherwise, get it from Firebase Storage
+      const imageRef = ref(storage, imagePath);
+      return await getDownloadURL(imageRef);
+    } catch (error) {
+      console.error("Error getting image URL:", error);
+      return null;
+    }
+  }
+
+  function createImageViewer(imagePath, reportData = {}) {
+    const imgSpan = document.createElement("span");
+    
+    if (imagePath) {
+      const link = document.createElement("a");
+      link.href = "#";
+      link.textContent = "View";
+      link.style.color = "#004aad";
+      link.style.textDecoration = "none";
+      link.style.fontWeight = "500";
+      
+      link.onclick = async (e) => {
+        e.preventDefault();
+        
+        try {
+          const imgUrl = await getImageUrl(imagePath);
+          if (!imgUrl) {
+            alert("Could not load image");
+            return;
+          }
+          
+          // 🔥 LOG IMAGE VIEW
+          if (reportData.reportId) {
+            await logAuditEvent(
+              "Viewed Report Image",
+              "view",
+              "Reports",
+              `Viewed image for completed report: ${reportData.projectName || reportData.reportId}`,
+              {
+                reportId: reportData.reportId,
+                barangay: reportData.barangay,
+                projectName: reportData.projectName
+              }
+            );
+          }
+          
+          // Create overlay
+          const overlay = document.createElement("div");
+          overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            animation: fadeIn 0.2s ease;
+          `;
+          
+          // Create image container
+          const imgContainer = document.createElement("div");
+          imgContainer.style.cssText = `
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+          `;
+          
+          // Create image
+          const img = document.createElement("img");
+          img.src = imgUrl;
+          img.alt = "Report Image";
+        img.style.cssText="width:min(800px, 90vw);height:min(600px, 80vh);object-fit:contain;border-radius:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.3);";
+          
+          // Create close button
+          const closeBtn = document.createElement("button");
+          closeBtn.innerHTML = "×";
+          closeBtn.style.cssText = `
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #fff;
+            border: none;
+            font-size: 28px;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+            z-index: 10000;
+          `;
+          
+          closeBtn.onmouseover = () => {
+            closeBtn.style.background = "#f44336";
+            closeBtn.style.color = "#fff";
+          };
+          closeBtn.onmouseout = () => {
+            closeBtn.style.background = "#fff";
+            closeBtn.style.color = "#000";
+          };
+          
+          // Assembly
+          imgContainer.appendChild(img);
+          imgContainer.appendChild(closeBtn);
+          overlay.appendChild(imgContainer);
+          
+          // Close handlers
+          const closeOverlay = () => {
+            overlay.remove();
+            document.removeEventListener("keydown", escHandler);
+          };
+          
+          overlay.onclick = (e) => {
+            if (e.target === overlay) closeOverlay();
+          };
+          
+          closeBtn.onclick = (e) => {
+            e.stopPropagation();
+            closeOverlay();
+          };
+          
+          // ESC key to close
+          const escHandler = (e) => {
+            if (e.key === "Escape") {
+              closeOverlay();
+            }
+          };
+          document.addEventListener("keydown", escHandler);
+          
+          // Prevent image drag
+          img.ondragstart = () => false;
+          
+          document.body.appendChild(overlay);
+          
+        } catch (error) {
+          console.error("Error viewing image:", error);
+          alert("Error loading image. Please try again.");
+        }
+      };
+      
+      imgSpan.appendChild(link);
+    } else {
+      imgSpan.textContent = "No";
+      imgSpan.style.color = "#999";
+    }
+    
+    return imgSpan;
+  }
+
   // ===== PAGINATION FUNCTIONS =====
   function renderPagination(paginationContainer, currentPage, totalItems) {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -861,47 +1024,46 @@
       paginationContainer.innerHTML = '';
       return;
     }
-    
     let html = '';
-    
+
     html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="window.changePage(${currentPage - 1})">
       <i class="fa fa-chevron-left"></i> Previous
     </button>`;
-    
+
     const startItem = (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, totalItems);
     html += `<span class="pagination-info">Showing ${startItem}-${endItem} of ${totalItems}</span>`;
-    
+
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage < maxVisiblePages - 1) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
+
     if (startPage > 1) {
       html += `<button onclick="window.changePage(1)">1</button>`;
       if (startPage > 2) {
         html += `<span class="pagination-info">...</span>`;
       }
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       html += `<button class="${i === currentPage ? 'active' : ''}" onclick="window.changePage(${i})">${i}</button>`;
     }
-    
+
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         html += `<span class="pagination-info">...</span>`;
       }
       html += `<button onclick="window.changePage(${totalPages})">${totalPages}</button>`;
     }
-    
+
     html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="window.changePage(${currentPage + 1})">
       Next <i class="fa fa-chevron-right"></i>
     </button>`;
-    
+
     paginationContainer.innerHTML = html;
   }
 
@@ -919,7 +1081,7 @@
       option.textContent = cat;
       categoryFilter.appendChild(option);
     });
-
+    
     issueFilter.innerHTML = '<option value="">All Issues</option>';
     ISSUES.forEach(iss => {
       const option = document.createElement('option');
@@ -933,7 +1095,6 @@
     const searchTerm = searchCompleted.value.toLowerCase();
     const selectedCategory = categoryFilter.value;
     const selectedIssue = issueFilter.value;
-
     let hasActiveFilters = selectedCategory || selectedIssue;
     clearFiltersBtn.style.display = hasActiveFilters ? 'block' : 'none';
 
@@ -990,7 +1151,7 @@
       const snap = await getDoc(doc(db, "reports", reportId));
       if (!snap.exists()) return 0;
       const data = snap.data();
-
+      
       let cost = 0;
       if (data.allocatedBudget) {
         cost = parseFloat(data.allocatedBudget.replace(/[₱,]/g, ''));
@@ -1006,179 +1167,188 @@
   }
 
   // ===== LIQUIDATED DAMAGES CALCULATION =====
-  async function computeLiquidatedDamages(reportId, completionDate, targetDate, additionalExtension = 0, undeliveredPercent = 0) {
-    try {
-      const projectCost = await getProjectCost(reportId);
-      if (!projectCost || projectCost === 0) {
-        return {
-          amount: 0,
-          days: 0,
-          details: "No project cost available"
-        };
-      }
+async function computeLiquidatedDamages(
+  reportId, 
+  completionDate, 
+  targetDate, 
+  additionalExtension = 0, 
+  undeliveredPercent = 0
+) {
+  try {
+    const projectCost = await getProjectCost(reportId);
 
-      const completedDate = completionDate instanceof Date ? completionDate : new Date(completionDate);
-      const deadlineDate = targetDate instanceof Date ? targetDate : new Date(targetDate);
-
-      if (isNaN(completedDate.getTime()) || isNaN(deadlineDate.getTime())) {
-        return {
-          amount: 0,
-          days: 0,
-          details: "Invalid dates provided"
-        };
-      }
-
-      const adjustedDeadline = new Date(deadlineDate);
-      adjustedDeadline.setDate(adjustedDeadline.getDate() + parseInt(additionalExtension || 0));
-
-      const timeDiff = completedDate - adjustedDeadline;
-      const daysOfDelay = Math.max(0, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
-
-      if (daysOfDelay === 0) {
-        return { 
-          amount: 0, 
-          days: 0, 
-          details: "Completed on time - No penalties" 
-        };
-      }
-
-      const undeliveredPercentValue = parseFloat(undeliveredPercent) || 0;
-      const undeliveredCost = projectCost * (undeliveredPercentValue / 100);
-
-      if (undeliveredCost === 0) {
-        return {
-          amount: 0,
-          days: daysOfDelay,
-          details: `${daysOfDelay} day(s) delay but 0% undelivered - No penalties`
-        };
-      }
-
-      const ldAmount = undeliveredCost * 0.001 * daysOfDelay;
-
+    if (!projectCost || projectCost === 0) {
       return {
-        amount: ldAmount,
-        days: daysOfDelay,
-        undeliveredCost: undeliveredCost,
-        projectCost: projectCost,
-        details: `${daysOfDelay} day(s) × ₱${undeliveredCost.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${undeliveredPercentValue}% undelivered) × 0.1%`
+        amount: 0,
+        days: 0,
+        details: "No project cost available"
       };
+    }
 
-    } catch (err) {
-      console.error("Error computing LD:", err);
+    const completedDate = completionDate instanceof Date ? completionDate : new Date(completionDate);
+    const deadlineDate = targetDate instanceof Date ? targetDate : new Date(targetDate);
+
+    if (isNaN(completedDate.getTime()) || isNaN(deadlineDate.getTime())) {
+      return {
+        amount: 0,
+        days: 0,
+        details: "Invalid dates provided"
+      };
+    }
+
+    // Apply extension
+    const adjustedDeadline = new Date(deadlineDate);
+    adjustedDeadline.setDate(adjustedDeadline.getDate() + parseInt(additionalExtension || 0));
+
+    // Compute delay
+    const timeDiff = completedDate - adjustedDeadline;
+    const daysOfDelay = Math.max(0, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
+
+    if (daysOfDelay === 0) {
       return { 
         amount: 0, 
         days: 0, 
-        details: "Calculation error: " + err.message 
+        details: "Completed on time - No penalties" 
       };
     }
+
+    const undeliveredPercentValue = parseFloat(undeliveredPercent) || 0;
+    const undeliveredCost = projectCost * (undeliveredPercentValue / 100);
+
+    // No penalties if 0% undelivered
+    if (undeliveredCost === 0) {
+      return {
+        amount: 0,
+        days: daysOfDelay,
+        details: `${daysOfDelay} day(s) delay but 0% undelivered - No penalties`
+      };
+    }
+
+    // LD formula
+    const ldAmount = undeliveredCost * 0.001 * daysOfDelay;
+
+    return {
+      amount: ldAmount,
+      days: daysOfDelay,
+      undeliveredCost: undeliveredCost,
+      projectCost: projectCost,
+      details: `${daysOfDelay} day(s) × ₱${undeliveredCost.toLocaleString(
+        'en-PH',
+        { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+      )} (${undeliveredPercentValue}% undelivered) × 0.1%`
+    };
+
+  } catch (err) {
+    console.error("Error computing LD:", err);
+    return { 
+      amount: 0, 
+      days: 0, 
+      details: "Calculation error: " + err.message 
+    };
   }
+}
 
-  // ===== AUTO-UPDATE LD DISPLAY =====
-  async function updateLiquidatedDamages() {
-    if (!currentDocId) return;
+// ===== AUTO-UPDATE LD DISPLAY =====
+async function updateLiquidatedDamages() {
+if (!currentDocId) return;
+const completionDate = document.getElementById("editCompletionDate").value;
+const targetDate = document.getElementById("editTargetDate").value;
+const additionalExtension = document.getElementById("editAdditionalExtension").value || 0;
+const undeliveredPercent = document.getElementById("editUndeliveredPercent").value || 0;
 
-    const completionDate = document.getElementById("editCompletionDate").value;
-    const targetDate = document.getElementById("editTargetDate").value;
-    const additionalExtension = document.getElementById("editAdditionalExtension").value || 0;
-    const undeliveredPercent = document.getElementById("editUndeliveredPercent").value || 0;
+if (!completionDate || !targetDate) {
+  document.getElementById("editPenalties").value = "Please enter both completion and target dates";
+  return;
+}
 
-    if (!completionDate || !targetDate) {
-      document.getElementById("editPenalties").value = "Please enter both completion and target dates";
-      return;
-    }
+document.getElementById("editPenalties").value = "Calculating...";
 
-    document.getElementById("editPenalties").value = "Calculating...";
+const result = await computeLiquidatedDamages(
+  currentDocId,
+  completionDate,
+  targetDate,
+  additionalExtension,
+  undeliveredPercent
+);
 
-    const result = await computeLiquidatedDamages(
-      currentDocId,
-      completionDate,
-      targetDate,
-      additionalExtension,
-      undeliveredPercent
-    );
+let penaltiesText = "";
+if (result.amount > 0) {
+  penaltiesText = `₱${result.amount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}\n\n`;
+  penaltiesText += `Details: ${result.details}`;
+} else {
+  penaltiesText = result.details;
+}
 
-    let penaltiesText = "";
-    if (result.amount > 0) {
-      penaltiesText = `₱${result.amount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}\n\n`;
-      penaltiesText += `Details: ${result.details}`;
-    } else {
-      penaltiesText = result.details;
-    }
+document.getElementById("editPenalties").value = penaltiesText;
+}
+// ===== MODAL FUNCTIONS WITH AUDIT LOGGING =====
+async function openEditCompletedModal(e) {
+e.preventDefault();
+const id = e.currentTarget.dataset.id;
+currentDocId = id;
+const snap = await getDoc(doc(db, "reports", id));
+if (!snap.exists()) {
+alert("Report not found");
+return;
+}
+const data = snap.data();
 
-    document.getElementById("editPenalties").value = penaltiesText;
-  }
+document.getElementById("editCompletedProjectName").value = data.projectName || "";
+document.getElementById("editCompletionDate").value = formatDateForInput(data.completionDate);
+document.getElementById("editTargetDate").value = formatDateForInput(data.endDate || data.targetDate);
+document.getElementById("editAdditionalExtension").value = data.additionalExtension || 0;
+document.getElementById("editUndeliveredPercent").value = data.undeliveredPercent || 0;
+document.getElementById("viewProgressReport").value = data.progressReport || "No progress report available";
 
-  // ===== MODAL FUNCTIONS WITH AUDIT LOGGING =====
-  async function openEditCompletedModal(e) {
-    e.preventDefault();
-    const id = e.currentTarget.dataset.id;
-    currentDocId = id;
+if (data.startDate && data.completionDate) {
+  const start = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
+  const completed = data.completionDate.toDate ? data.completionDate.toDate() : new Date(data.completionDate);
+  const duration = Math.ceil((completed - start) / (1000 * 60 * 60 * 24));
+  document.getElementById("editActualDuration").value = `${duration} days`;
+} else {
+  document.getElementById("editActualDuration").value = "N/A";
+}
 
-    const snap = await getDoc(doc(db, "reports", id));
-    if (!snap.exists()) {
-      alert("Report not found");
-      return;
-    }
+await updateLiquidatedDamages();
 
-    const data = snap.data();
+editCompletedModal.style.display = "flex";
+}
+function closeModal() {
+editCompletedModal.style.display = "none";
+currentDocId = null;
+}
+// ===== SAVE CHANGES WITH AUDIT LOGGING =====
+async function saveChanges() {
+if (!currentDocId) return;
+const completionDate = document.getElementById("editCompletionDate").value;
+const targetDate = document.getElementById("editTargetDate").value;
+const additionalExtension = document.getElementById("editAdditionalExtension").value || 0;
+const undeliveredPercent = document.getElementById("editUndeliveredPercent").value || 0;
+const penalties = document.getElementById("editPenalties").value;
 
-    document.getElementById("editCompletedProjectName").value = data.projectName || "";
-    document.getElementById("editCompletionDate").value = formatDateForInput(data.completionDate);
-    document.getElementById("editTargetDate").value = formatDateForInput(data.endDate || data.targetDate);
-    document.getElementById("editAdditionalExtension").value = data.additionalExtension || 0;
-    document.getElementById("editUndeliveredPercent").value = data.undeliveredPercent || 0;
-    document.getElementById("viewProgressReport").value = data.progressReport || "No progress report available";
+if (!completionDate) {
+  alert("Please select a completion date.");
+  return;
+}
+if (!targetDate) {
+  alert("Please select a target/deadline date.");
+  return;
+}
 
-    if (data.startDate && data.completionDate) {
-      const start = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
-      const completed = data.completionDate.toDate ? data.completionDate.toDate() : new Date(data.completionDate);
-      const duration = Math.ceil((completed - start) / (1000 * 60 * 60 * 24));
-      document.getElementById("editActualDuration").value = `${duration} days`;
-    } else {
-      document.getElementById("editActualDuration").value = "N/A";
-    }
+let actualDuration = 0;
+const snap = await getDoc(doc(db, "reports", currentDocId));
+if (snap.exists()) {
+  const data = snap.data();
+  
+  // Get old data for audit log
+  const oldData = {
+    completionDate: formatDateForDisplay(data.completionDate),
+    targetDate: formatDateForDisplay(data.targetDate || data.endDate),
+    additionalExtension: data.additionalExtension || 0,
+    undeliveredPercent: data.undeliveredPercent || 0,
+    penalties: data.penalties || "None"
+  };
 
-    await updateLiquidatedDamages();
-
-    editCompletedModal.style.display = "flex";
-  }
-
-  function closeModal() {
-    editCompletedModal.style.display = "none";
-    currentDocId = null;
-  }
-
-  // ===== SAVE CHANGES WITH AUDIT LOGGING =====
-  async function saveChanges() {
-    if (!currentDocId) return;
-
-    const completionDate = document.getElementById("editCompletionDate").value;
-    const targetDate = document.getElementById("editTargetDate").value;
-    const additionalExtension = document.getElementById("editAdditionalExtension").value || 0;
-    const undeliveredPercent = document.getElementById("editUndeliveredPercent").value || 0;
-    const penalties = document.getElementById("editPenalties").value;
-
-    if (!completionDate) {
-      alert("Please select a completion date.");
-      return;
-    }
-    if (!targetDate) {
-      alert("Please select a target/deadline date.");
-      return;
-    }
-
-    let actualDuration = 0;
-    const snap = await getDoc(doc(db, "reports", currentDocId));
-    if (snap.exists()) {
-      const data = snap.data();
-      
-      // Get old data for audit log
-      const oldData = {
-        completionDate: formatDateForDisplay(data.completionDate),
-        targetDate: formatDateForDisplay(data.targetDate || data.endDate),
-        additionalExtension: data.additionalExtension || 0,undeliveredPercent: data.undeliveredPercent || 0,
-penalties: data.penalties || "None"
-};
   if (data.startDate) {
     const start = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
     const completed = new Date(completionDate);
@@ -1244,7 +1414,7 @@ penalties: data.penalties || "None"
   }
 }
 }
-// ===== BUILD TABLE ROW =====
+// ===== BUILD TABLE ROW WITH IMAGE VIEWER =====
 async function buildTableRow(docSnap) {
 const r = docSnap.data();
 const tr = document.createElement("tr");
@@ -1282,19 +1452,14 @@ addCell(descCell);
 
 addCell(r.width && r.height ? `${r.width}×${r.height}` : "N/A");
 
-const imgCell = document.createElement("a");
-imgCell.href = "#";
-imgCell.textContent = "View";
-imgCell.style.color = "#004aad";
-imgCell.onclick = async (e) => {
-  e.preventDefault();
-  if (r.imageUrl) {
-    window.open(r.imageUrl, '_blank');
-  } else {
-    alert("No image available");
-  }
-};
-addCell(imgCell);
+// ===== REPLACED IMAGE CELL WITH IMAGE VIEWER =====
+const imagePath = r.incidentImage || r.imageUrl || r.image;
+const imgSpan = createImageViewer(imagePath, {
+  reportId: docSnap.id,
+  barangay: r.barangay,
+  projectName: r.projectName
+});
+addCell(imgSpan);
 
 const coordDiv = document.createElement("div");
 coordDiv.className = "coords-vertical";
@@ -1325,7 +1490,23 @@ addCell(formatDateForDisplay(r.completionDate) || "Not set");
 const penaltiesText = r.penalties || "Not calculated";
 addCell(penaltiesText);
 
-addCell(r.reporterPosition || r.userId || "N/A");
+// ===== FIXED REPORTER POSITION =====
+let reporterPositionText = "N/A";
+if (r.reporterPosition && typeof r.reporterPosition === 'string') {
+  reporterPositionText = r.reporterPosition;
+} else if (r.userId) {
+  try {
+    const userDoc = await getDoc(doc(db, "users", r.userId));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      reporterPositionText = userData.position || userData.role || "Citizen";
+    }
+  } catch (err) {
+    console.error("Error fetching reporter position:", err);
+    reporterPositionText = "Unknown";
+  }
+}
+addCell(reporterPositionText);
 
 const statusSpan = document.createElement("span");
 statusSpan.className = `status ${(r.status || "").toLowerCase()}`;
@@ -1350,7 +1531,6 @@ completedBody.innerHTML = "";
 const startIndex = (currentCompletedPage - 1) * itemsPerPage;
 const endIndex = startIndex + itemsPerPage;
 const pageItems = filteredCompletedReports.slice(startIndex, endIndex);
-
 if (pageItems.length === 0 && filteredCompletedReports.length === 0) {
   const emptyRow = document.createElement("tr");
   const emptyCell = document.createElement("td");
@@ -1489,9 +1669,5 @@ try {
 }
 });
 </script>
-</body>
-</html>
-
-
 </body>
 </html>

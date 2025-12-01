@@ -246,7 +246,6 @@
         <li><a href="ad_map.html"><i class="fa fa-map-marker-alt"></i> Map</a></li>
         <li><a href="ad_usermanagement.html"><i class="fa fa-users"></i> User Management</a></li>
         <li><a href="ad_bulletin.html"><i class="fa fa-bullhorn"></i> Report Bulletin</a></li>
-        <li><a href="ad_auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
       </ul>
     </div>
     <div class="sidebar-footer">
@@ -440,11 +439,12 @@
       </div>
     </div>
   </div>
+  
 <script type="module">
   // ===== FIREBASE IMPORTS =====
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, query, where, orderBy, onSnapshot, getDoc, getDocs, doc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, query, where, orderBy, onSnapshot, getDoc, getDocs, doc, updateDoc, setDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
   const firebaseConfig = {
@@ -497,6 +497,7 @@
   // ===== GLOBAL VARIABLES =====
   let currentDocId = null;
   let reportToDecline = null;
+  let reportToDeclineData = null;
   let reportsUnsub = null;
   let allReportsData = [];
   
@@ -542,6 +543,49 @@
     "Walang (None/Missing)",
     "Others"
   ];
+
+  // ===== AUDIT LOGGING FUNCTION =====
+  async function logAuditEvent(action, actionType, module, description, additionalData = {}) {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.warn("No authenticated user for audit log");
+        return;
+      }
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        console.warn("User document not found for audit log");
+        return;
+      }
+      
+      const userData = userDoc.data();
+      const userName = userData.name || `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unknown User";
+
+      const logData = {
+        timestamp: new Date(),
+        userId: user.uid,
+        userName: userName,
+        userRole: userData.position || userData.role || "User",
+        action: action,
+        actionType: (actionType || 'edit').toLowerCase(),
+        module: module || 'Reports',
+        description: description || 'No description provided',
+        beforeValue: additionalData.beforeValue || null,
+        afterValue: additionalData.afterValue || null,
+        barangay: additionalData.barangay || null,
+        reportId: additionalData.reportId || null,
+        ...additionalData
+      };
+
+      // Add to Firestore
+      await addDoc(collection(db, "auditLogs"), logData);
+      console.log("✅ Audit log created:", logData);
+
+    } catch (error) {
+      console.error("❌ Error logging audit event:", error);
+    }
+  }
 
   // ===== MOBILE MENU FUNCTIONS =====
   window.toggleMobileMenu = function() {
@@ -997,36 +1041,52 @@
       return;
     }
     let html = '';
+    
+    // Previous button
     html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="window.changePendingPage(${currentPage - 1})">
       <i class="fa fa-chevron-left"></i> Previous
     </button>`;
+    
+    // Showing X-Y of Z text
     const startItem = (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, totalItems);
     html += `<span class="pagination-info">Showing ${startItem}-${endItem} of ${totalItems}</span>`;
+    
+    // Page numbers with ellipsis
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
     if (endPage - startPage < maxVisiblePages - 1) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
+    
+    // First page + ellipsis
     if (startPage > 1) {
       html += `<button onclick="window.changePendingPage(1)">1</button>`;
       if (startPage > 2) {
         html += `<span class="pagination-info">...</span>`;
       }
     }
+    
+    // Page number buttons
     for (let i = startPage; i <= endPage; i++) {
       html += `<button class="${i === currentPage ? 'active' : ''}" onclick="window.changePendingPage(${i})">${i}</button>`;
     }
+    
+    // Last page + ellipsis
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         html += `<span class="pagination-info">...</span>`;
       }
       html += `<button onclick="window.changePendingPage(${totalPages})">${totalPages}</button>`;
     }
+    
+    // Next button
     html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="window.changePendingPage(${currentPage + 1})">
       Next <i class="fa fa-chevron-right"></i>
     </button>`;
+    
     paginationContainer.innerHTML = html;
   }
 
@@ -1073,20 +1133,58 @@
     if(!confirm("Approve this report and change status to Ongoing?")) return;
     
     try {
+      // Get report data before updating
+      const reportDoc = await getDoc(doc(db, "reports", id));
+      if (!reportDoc.exists()) {
+        alert("Report not found");
+        return;
+      }
+      
+      const reportData = reportDoc.data();
+      
+      // Update report status
       await updateDoc(doc(db, "reports", id), {
         status: "Ongoing",
         approvedAt: serverTimestamp()
       });
+      
+      // 🔥 LOG APPROVE ACTION
+      await logAuditEvent(
+        "Report Approved",
+        "approve",
+        "Reports",
+        `Approved ${reportData.category || 'report'} in ${reportData.barangay}`,
+        {
+          reportId: id,
+          barangay: reportData.barangay,
+          projectName: reportData.projectName,
+          category: reportData.category,
+          beforeValue: "Pending",
+          afterValue: "Ongoing"
+        }
+      );
+      
       alert("Report approved and moved to Ongoing!");
     } catch(err) {
+      console.error("Error approving report:", err);
       alert("Error approving report: " + err.message);
     }
   }
 
-  function openDeclineModal(e){
+  async function openDeclineModal(e){
     e.preventDefault();
     const id=e.currentTarget.dataset.id;
     reportToDecline = id;
+    
+    // Get report data for logging
+    try {
+      const reportDoc = await getDoc(doc(db, "reports", id));
+      if (reportDoc.exists()) {
+        reportToDeclineData = reportDoc.data();
+      }
+    } catch (err) {
+      console.error("Error getting report data:", err);
+    }
     
     declineReason.value = "";
     declineModal.style.display="flex";
@@ -1110,101 +1208,130 @@
         declinedAt: serverTimestamp()
       });
       
+      // 🔥 LOG DECLINE ACTION
+      await logAuditEvent(
+        "Report Declined",
+        "decline",
+        "Reports",
+        `Declined ${reportToDeclineData?.category || 'report'} in ${reportToDeclineData?.barangay || 'Unknown'}`,
+        {
+          reportId: reportToDecline,
+          barangay: reportToDeclineData?.barangay,
+          projectName: reportToDeclineData?.projectName,
+          category: reportToDeclineData?.category,
+          beforeValue: "Pending",
+          afterValue: "Declined",
+          declineReason: reason
+        }
+      );
+      
       declineModal.style.display = "none";
       reportToDecline = null;
+      reportToDeclineData = null;
       alert("Report has been declined successfully.");
     } catch(err) {
-      alert("Error declining report: " + err.message);
-    }
+      console.error("Error declining report:", err);
+      alert("Error declining report: " +err.message);
+}
+}
+async function openEditPendingModal(e){
+e.preventDefault();
+const id = e.currentTarget.dataset.id;
+currentDocId = id;
+try {
+  const snap = await getDoc(doc(db, "reports", id));
+  if(!snap.exists()) {
+    alert("Report not found");
+    return;
   }
-
-  async function openEditPendingModal(e){
-    e.preventDefault();
-    const id = e.currentTarget.dataset.id;
-    currentDocId = id;
-    
-    try {
-      const snap = await getDoc(doc(db, "reports", id));
-      if(!snap.exists()) {
-        alert("Report not found");
-        return;
-      }
-      
-      const data = snap.data();
-      const position = await getReporterPosition(data.userId);
-      
-      document.getElementById("editPendingProjectName").value = data.projectName || data.reportId || "";
-      document.getElementById("editPendingTimestamp").value = formatTimestamp(data.timestamp || data.createdAt);
-      document.getElementById("editPendingPosition").value = position;
-      document.getElementById("editPendingBarangay").value = data.barangay || "";
-      document.getElementById("editPendingDescription").value = data.description || "";
-      document.getElementById("editPendingWidth").value = data.width || "";
-      document.getElementById("editPendingHeight").value = data.height || "";
-      document.getElementById("editPendingLatitude").value = data.latitude || "";
-      document.getElementById("editPendingLongitude").value = data.longitude || "";
-      document.getElementById("editPendingProposedBudget").value = data.proposedBudget || "";
-      document.getElementById("editPendingInspectionDate").value = formatDateForInput(data.inspectionDate);
-      
-      const imagePath = data.incidentImage || data.imageUrl || data.image;
-      const imgPreview = document.getElementById("editPendingImage");
-      if(imagePath) {
-        const imgUrl = await getImageUrl(imagePath);
-        if(imgUrl) {
-          imgPreview.src = imgUrl;
-          imgPreview.style.display = "block";
-        } else {
-          imgPreview.style.display = "none";
-        }
-      } else {
-        imgPreview.style.display = "none";
-      }
-      
-      editPendingModal.style.display = "flex";
-    } catch(err) {
-      alert("Error opening report: " + err.message);
+  
+  const data = snap.data();
+  const position = await getReporterPosition(data.userId);
+  
+  // 🔥 LOG VIEW/EDIT MODAL OPEN
+  await logAuditEvent(
+    "Opened Edit Modal",
+    "view",
+    "Reports",
+    `Opened edit modal for pending report: ${data.projectName || data.reportId}`,
+    {
+      reportId: id,
+      barangay: data.barangay,
+      projectName: data.projectName
     }
+  );
+  
+  document.getElementById("editPendingProjectName").value = data.projectName || data.reportId || "";
+  document.getElementById("editPendingTimestamp").value = formatTimestamp(data.timestamp || data.createdAt);
+  document.getElementById("editPendingPosition").value = position;
+  document.getElementById("editPendingBarangay").value = data.barangay || "";
+  document.getElementById("editPendingDescription").value = data.description || "";
+  document.getElementById("editPendingWidth").value = data.width || "";
+  document.getElementById("editPendingHeight").value = data.height || "";
+  document.getElementById("editPendingLatitude").value = data.latitude || "";
+  document.getElementById("editPendingLongitude").value = data.longitude || "";
+  document.getElementById("editPendingProposedBudget").value = data.proposedBudget || "";
+  document.getElementById("editPendingInspectionDate").value = formatDateForInput(data.inspectionDate);
+  
+  const imagePath = data.incidentImage || data.imageUrl || data.image;
+  const imgPreview = document.getElementById("editPendingImage");
+  if(imagePath) {
+    const imgUrl = await getImageUrl(imagePath);
+    if(imgUrl) {
+      imgPreview.src = imgUrl;
+      imgPreview.style.display = "block";
+    } else {
+      imgPreview.style.display = "none";
+    }
+  } else {
+    imgPreview.style.display = "none";
   }
+  
+  editPendingModal.style.display = "flex";
+} catch(err) {
+  console.error("Error opening report:", err);
+  alert("Error opening report: " + err.message);
+}
+}
+// ===== BUILD TABLE ROW FUNCTION =====
+async function buildTableRow(docSnap, tableType) {
+const r = docSnap.data();
+const tr = document.createElement("tr");
+tr.dataset.category = r.category || '';
+tr.dataset.issue = r.issue || '';
+const addCell = (c, cls = "") => {
+  const td = document.createElement("td");
+  if(cls) td.className = cls;
+  if(typeof c === "string") td.textContent = c;
+  else td.appendChild(c);
+  tr.appendChild(td);
+};
 
-  // ===== BUILD TABLE ROW FUNCTION =====
-  async function buildTableRow(docSnap, tableType) {
-    const r = docSnap.data();
-    const tr = document.createElement("tr");
-    tr.dataset.category = r.category || '';
-    tr.dataset.issue = r.issue || '';
+addCell(r.projectName || r.reportId || "Unnamed Project");
 
-    const addCell = (c, cls = "") => {
-      const td = document.createElement("td");
-      if(cls) td.className = cls;
-      if(typeof c === "string") td.textContent = c;
-      else td.appendChild(c);
-      tr.appendChild(td);
-    };
+const categoryBadge = document.createElement("span");
+categoryBadge.className = "category-badge";
+categoryBadge.textContent = r.category || "N/A";
+addCell(categoryBadge);
 
-    addCell(r.projectName || r.reportId || "Unnamed Project");
+const issueBadge = document.createElement("span");
+issueBadge.className = "issue-badge";
+issueBadge.textContent = r.issue || "N/A";
+addCell(issueBadge);
 
-    const categoryBadge = document.createElement("span");
-    categoryBadge.className = "category-badge";
-    categoryBadge.textContent = r.category || "N/A";
-    addCell(categoryBadge);
+addCell(r.barangay || "");
 
-    const issueBadge = document.createElement("span");
-    issueBadge.className = "issue-badge";
-    issueBadge.textContent = r.issue || "N/A";
-    addCell(issueBadge);
+const desc = document.createElement("span");
+desc.className = "truncate";
+desc.textContent = r.description || "";
+desc.title = r.description || "";
+addCell(desc);
 
-    addCell(r.barangay || "");
+const dims = (r.width && r.height) ? `${r.width}×${r.height}` : (r.width || r.height || "");
+addCell(dims);
 
-    const desc = document.createElement("span");
-    desc.className = "truncate";
-    desc.textContent = r.description || "";
-    desc.title = r.description || "";
-    addCell(desc);
-
-    const dims = (r.width && r.height) ? `${r.width}×${r.height}` : (r.width || r.height || "");
-    addCell(dims);
-
-    const imgSpan = document.createElement("span");
-    const imagePath = r.incidentImage || r.imageUrl || r.image
+const imgSpan = document.createElement("span");
+const imagePath = r.incidentImage || r.imageUrl || r.image;
 if(imagePath) {
   const link = document.createElement("a");
   link.href = "#";
@@ -1216,11 +1343,25 @@ if(imagePath) {
       alert("Could not load image");
       return;
     }
+    
+    // 🔥 LOG IMAGE VIEW
+    await logAuditEvent(
+      "Viewed Report Image",
+      "view",
+      "Reports",
+      `Viewed image for pending report: ${r.projectName || r.reportId}`,
+      {
+        reportId: docSnap.id,
+        barangay: r.barangay,
+        projectName: r.projectName
+      }
+    );
+    
     const overlay = document.createElement("div");
     overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
     const img = document.createElement("img");
     img.src = imgUrl;
-    img.style.cssText = "max-width:90%;max-height:90%;border-radius:8px;";
+    img.style.cssText="width:min(800px, 90vw);height:min(600px, 80vh);object-fit:contain;border-radius:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.3);";
     overlay.appendChild(img);
     overlay.onclick = () => overlay.remove();
     document.body.appendChild(overlay);
@@ -1303,6 +1444,7 @@ currentDocId = null;
 cancelDeclineBtn.onclick=()=>{
 declineModal.style.display="none";
 reportToDecline = null;
+reportToDeclineData = null;
 };
 confirmDeclineBtn.onclick=confirmDecline;
 savePendingChanges.addEventListener("click", async () => {
@@ -1323,6 +1465,10 @@ if(!barangay || !description) {
 }
 
 try {
+  // Get old data for logging
+  const oldDoc = await getDoc(doc(db, "reports", currentDocId));
+  const oldData = oldDoc.exists() ? oldDoc.data() : {};
+  
   const reportRef = doc(db,"reports",currentDocId);
   const updateData = {
     barangay,
@@ -1339,6 +1485,29 @@ try {
   
   await updateDoc(reportRef, updateData);
   
+  // 🔥 LOG EDIT ACTION
+  await logAuditEvent(
+    "Pending Report Edited",
+    "edit",
+    "Reports",
+    `Edited pending report: ${projectName || oldData.projectName}`,
+    {
+      reportId: currentDocId,
+      barangay: barangay,
+      projectName: projectName || oldData.projectName,
+      beforeValue: JSON.stringify({
+        barangay: oldData.barangay,
+        description: oldData.description,
+        proposedBudget: oldData.proposedBudget
+      }),
+      afterValue: JSON.stringify({
+        barangay,
+        description,
+        proposedBudget
+      })
+    }
+  );
+  
   alert("Pending report updated successfully!");
   editPendingModal.style.display="none";
   currentDocId = null;
@@ -1350,10 +1519,17 @@ try {
 // ===== LOGOUT HANDLER =====
 async function handleLogout() {
 try {
-await signOut(auth);
-window.location.href = "login.html";
+// 🔥 LOG LOGOUT ACTION
+await logAuditEvent(
+"Logged Out",
+"logout",
+"Authentication",
+"Admin logged out from the system"
+);
+  await signOut(auth);
+  window.location.href = "login.html";
 } catch(err) {
-alert("Error logging out: " + err.message);
+  alert("Error logging out: " + err.message);
 }
 }
 sidebarLogoutBtn.addEventListener("click", handleLogout);
@@ -1364,8 +1540,7 @@ window.location.href="login.html";
 return;
 }
 try {
-  const userDocRef = doc(db,"users",user.uid);
-  
+const userDocRef = doc(db,"users",user.uid);
   onSnapshot(userDocRef, async(docSnap)=>{
     if(!docSnap.exists()) {
       alert("User data not found! Redirecting...");
@@ -1412,6 +1587,17 @@ try {
     filteredPendingReports = [...allPendingReports];
     currentPendingPage = 1;
     await renderPendingTable();
+    
+    // 🔥 LOG PAGE VIEW (only log once when page loads)
+    if (!window.pendingPageLogged) {
+      window.pendingPageLogged = true;
+      await logAuditEvent(
+        "Viewed Pending Reports Page",
+        "view",
+        "Reports",
+        `Accessed pending reports page (${allPendingReports.length} pending reports)`
+      );
+    }
   });
 
   await setupRealtimeNotifications(db);

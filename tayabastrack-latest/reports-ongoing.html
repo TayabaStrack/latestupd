@@ -923,7 +923,7 @@ async function buildTableRow(docSnap) {
       overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;";
       const img=document.createElement("img");
       img.src=imgUrl;
-      img.style.cssText="max-width:90%;max-height:90%;border-radius:8px;";
+      img.style.cssText="width:min(800px, 90vw);height:min(600px, 80vh);object-fit:contain;border-radius:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.3);";
       overlay.appendChild(img);
       overlay.onclick=()=>overlay.remove();
       document.body.appendChild(overlay);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0"/>
-  <title>User Management</title>
+  <title>Super Admin User Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
@@ -16,8 +16,43 @@
     .sidebar-header h2 { font-size: 1.3rem; font-weight: 600; margin: 0; }
     .sidebar-menu { list-style: none; }
     .sidebar-menu li { margin: 0.5rem 0; }
-    .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
+    .sidebar-menu a { display: flex; align-items: center; gap: 10px; padding: 0.8rem 1.5rem; text-decoration: none; color: #fff; transition: background 0.3s; border-left: 4px solid transparent; }
     .sidebar-menu li.active a, .sidebar-menu a:hover { background: #0756cc; border-left: 4px solid #042f68; }
+    
+    .sidebar-submenu {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .sidebar-submenu.open {
+      max-height: 500px;
+    }
+    .sidebar-submenu li {
+      margin: 0;
+    }
+    .sidebar-submenu a {
+      padding: 0.6rem 1.5rem 0.6rem 3rem !important;
+      font-size: 0.9rem;
+      border-left: 4px solid transparent;
+    }
+    .sidebar-submenu li.active a {
+      background: #042f68;
+      border-left: 4px solid #fff;
+    }
+    .has-submenu > a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .has-submenu > a .fa-chevron-down {
+      transition: transform 0.3s ease;
+      margin-left: auto;
+    }
+    
     .sidebar-footer { text-align: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
     .logout-btn { background-color: #d9534f; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .logout-btn:hover { background-color: #c9302c; }
@@ -91,10 +126,6 @@
     .view-toggle-btn i { font-size: 1rem; }
     .slider-bg { position: absolute; top: 4px; left: 4px; height: calc(100% - 8px); background: linear-gradient(135deg, #004aad 0%, #0066cc 100%); border-radius: 50px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 10px rgba(0, 74, 173, 0.4); z-index: 1; }
 
-    .scroll-hint { background: linear-gradient(135deg, #004aad 0%, #0066cc 100%); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; text-align: center; margin: 10px 0 12px 0; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(0, 74, 173, 0.2); flex-shrink: 0; }
-    .scroll-hint i { animation: slideHint 2s ease-in-out infinite; }
-    @keyframes slideHint { 0%, 100% { transform: translateX(-4px); } 50% { transform: translateX(4px); } }
-
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 5000; padding: 1rem; }
     .modal-content { background: #fff; padding: 1.5rem; border-radius: 12px; border: 3px solid #004aad; width: 520px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
     .modal-content h2 { margin-bottom: 1.2rem; color: #004aad; text-align: center; font-size: 1.4rem; }
@@ -147,7 +178,7 @@
     .save-btn:hover { background: linear-gradient(135deg, #003d8f 0%, #0052a3 100%); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 74, 173, 0.5); }
 
     .table-wrapper { margin-top: 1rem; }
-    .table-card { overflow-x: auto; overflow-y: hidden; border-radius: 10px; background: #fff; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); scroll-behavior: smooth; position: relative; margin-bottom: 1.5rem; }
+    .table-card { overflow-x: auto; overflow-y: hidden; border-radius: 10px; background: #fff; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); scroll-behavior: smooth; position: relative; }
     .table-card::-webkit-scrollbar { height: 10px; }
     .table-card::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #004aad 0%, #0066cc 100%); border-radius: 5px; }
 
@@ -187,6 +218,17 @@
 
     .view-only-cell { color: #17a2b8; font-weight: 600; font-size: 0.85rem; }
 
+    /* Pagination styles */
+    .pagination-wrapper { margin-top: 1rem; }
+    .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f9f9f9; border-radius: 8px; flex-wrap: wrap; gap: 1rem; }
+    .pagination-controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .pagination-btn { padding: 0.5rem 0.8rem; border: 1px solid #ccc; background: #fff; border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; font-weight: 500; }
+    .pagination-btn:hover:not(:disabled) { background: #004aad; color: #fff; border-color: #004aad; }
+    .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pagination-btn.active { background: #004aad; color: #fff; border-color: #004aad; }
+    .pagination-info { font-size: 0.85rem; color: #666; white-space: nowrap; }
+    .page-size-select { padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; background: #fff; cursor: pointer; font-size: 0.85rem; }
+
     @media (max-width: 980px) {
       .sidebar { left: -240px; }
       .sidebar.mobile-open { left: 0; }
@@ -209,11 +251,22 @@
         <h2>TayabaStrack</h2>
       </div>
       <ul class="sidebar-menu">
-                <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
-                <li class="active"><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
-                <li><a href="reports.html"><i class="fa fa-tasks"></i>&nbsp; Manage Reports</a></li>
-                <li><a href="auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
-            </ul>
+        <li><a href="dashboard.html"><i class="fa fa-home"></i>&nbsp; Dashboard</a></li>
+        <li class="active"><a href="usermanagement.html"><i class="fa fa-users"></i>&nbsp; User Management</a></li>
+        <li class="has-submenu">
+          <a href="#" onclick="toggleSubmenu(event)">
+            <span><i class="fa fa-tasks"></i>&nbsp; Manage Reports</span>
+            <i class="fa fa-chevron-down"></i>
+          </a>
+          <ul class="sidebar-submenu">
+            <li><a href="reports-pending.html"><i class="fa fa-clock"></i>&nbsp; Pending Reports</a></li>
+            <li><a href="reports-ongoing.html"><i class="fa fa-spinner"></i>&nbsp; Ongoing Reports</a></li>
+            <li><a href="reports-completed.html"><i class="fa fa-check-circle"></i>&nbsp; Completed Reports</a></li>
+            <li><a href="reports-declined.html"><i class="fa fa-times-circle"></i>&nbsp; Declined Reports</a></li>
+          </ul>
+        </li>
+        <li><a href="auditlogs.html"><i class="fa fa-clipboard-list"></i>&nbsp; Audit Logs</a></li>
+      </ul>
     </div>  
     <div class="sidebar-footer">
       <button class="logout-btn" id="sidebarLogoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</button>
@@ -226,13 +279,12 @@
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
           <i class="fa fa-bars"></i>
         </button>
-        <h1>User Management</h1>
+        <h1>Super Admin - User Management</h1>
       </div>
       <div class="profile">
         <div style="position: relative;">
           <i class="fa fa-bell" id="notificationBell"></i>
           <span class="badge" id="notificationBadge">0</span>
-
           <div class="notification-menu" id="notificationMenu">
             <div class="notification-header">
               <h3>Notifications</h3>
@@ -245,20 +297,17 @@
                 </button>
               </div>
             </div>
-
             <div class="notification-filters">
               <button class="filter-btn active" data-filter="all">All</button>
               <button class="filter-btn" data-filter="report">Reports</button>
               <button class="filter-btn" data-filter="user">Users</button>
               <button class="filter-btn" data-filter="24h">Last 24h</button>
             </div>
-
             <div class="notification-list" id="notificationList">
               <div class="notification-empty">No new notifications</div>
             </div>
           </div>
         </div>
-
         <div class="profile-dropdown" id="profileToggle">
           <img src="image.png" alt="Profile" class="avatar" id="navbarAvatar" />
           <span class="username" id="navUsername">---</span>
@@ -292,11 +341,6 @@
         </div>
       </div>
 
-      <div class="scroll-hint">
-        <i class="fas fa-arrows-alt-h"></i>
-        <span>Scroll horizontally to view all columns</span>
-      </div>
-
       <div id="adminsView" class="view-section active">
         <h3><i class="fa fa-clock"></i> Pending Admins</h3>
         <div class="table-wrapper">
@@ -315,6 +359,18 @@
               </thead>
               <tbody id="pendingAdmins"></tbody>
             </table>
+          </div>
+          <div class="pagination-wrapper">
+            <div class="pagination-container" id="paginationPending">
+              <div class="pagination-info" id="infoPending"></div>
+              <div class="pagination-controls" id="controlsPending"></div>
+              <select class="page-size-select" onchange="setPageSize('pending', this.value)">
+                <option value="5">5 per page</option>
+                <option value="10" selected>10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -336,6 +392,18 @@
               <tbody id="activeAdmins"></tbody>
             </table>
           </div>
+          <div class="pagination-wrapper">
+            <div class="pagination-container" id="paginationActive">
+              <div class="pagination-info" id="infoActive"></div>
+              <div class="pagination-controls" id="controlsActive"></div>
+              <select class="page-size-select" onchange="setPageSize('active', this.value)">
+                <option value="5">5 per page</option>
+                <option value="10" selected>10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <h3><i class="fa fa-times-circle"></i> Inactive Admins</h3>
@@ -355,6 +423,18 @@
               </thead>
               <tbody id="inactiveAdmins"></tbody>
             </table>
+          </div>
+          <div class="pagination-wrapper">
+            <div class="pagination-container" id="paginationInactive">
+              <div class="pagination-info" id="infoInactive"></div>
+              <div class="pagination-controls" id="controlsInactive"></div>
+              <select class="page-size-select" onchange="setPageSize('inactive', this.value)">
+                <option value="5">5 per page</option>
+                <option value="10" selected>10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -379,6 +459,18 @@
               <tbody id="activeOfficials"></tbody>
             </table>
           </div>
+          <div class="pagination-wrapper">
+            <div class="pagination-container" id="paginationActiveOfficials">
+              <div class="pagination-info" id="infoActiveOfficials"></div>
+              <div class="pagination-controls" id="controlsActiveOfficials"></div>
+              <select class="page-size-select" onchange="setPageSize('activeOfficials', this.value)">
+                <option value="5">5 per page</option>
+                <option value="10" selected>10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <h3><i class="fa fa-times-circle"></i> Inactive Barangay Officials</h3>
@@ -399,6 +491,18 @@
               </thead>
               <tbody id="inactiveOfficials"></tbody>
             </table>
+          </div>
+          <div class="pagination-wrapper">
+            <div class="pagination-container" id="paginationInactiveOfficials">
+              <div class="pagination-info" id="infoInactiveOfficials"></div>
+              <div class="pagination-controls" id="controlsInactiveOfficials"></div>
+              <select class="page-size-select" onchange="setPageSize('inactiveOfficials', this.value)">
+                <option value="5">5 per page</option>
+                <option value="10" selected>10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -516,7 +620,6 @@
             <option>Other</option>
           </select>
         </div>
-        
         <div class="password-section" id="passwordSection">
           <div class="password-header">
             <label><i class="fa fa-lock"></i> Password Generator</label>
@@ -686,7 +789,6 @@
             <option>Admin</option>
           </select>
         </div>
-        
         <div class="modal-actions">
           <button type="button" class="cancel-btn" onclick="closeEditModal()">
             <i class="fa fa-times"></i> Cancel
@@ -699,1020 +801,1078 @@
     </div>
   </div>
 
-<script>
-  function toggleMobileMenu() {
-    document.querySelector('.sidebar').classList.toggle('mobile-open');
-  }
-
-  document.addEventListener('click', function(e) {
-    const sidebar = document.querySelector('.sidebar');
-    const menuBtn = document.querySelector('.mobile-menu-btn');
-    if (window.innerWidth <= 980 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-      sidebar.classList.remove('mobile-open');
+  <script>
+    function toggleSubmenu(event) {
+      event.preventDefault();
+      const submenu = event.currentTarget.nextElementSibling;
+      const chevron = event.currentTarget.querySelector('.fa-chevron-down');
+      if (submenu) {
+        submenu.classList.toggle('open');
+      }
+      if (chevron) {
+        chevron.style.transform = submenu.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+      }
     }
-  });
 
-  function updateAllProfilePhotos(photoURL) {
-    const photoElements = ["navbarAvatar"];
-    photoElements.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.src = photoURL;
-        el.onerror = function() {
-          this.src = "image.png";
-        };
+    function toggleMobileMenu() {
+      document.querySelector('.sidebar').classList.toggle('mobile-open');
+    }
+
+    document.addEventListener('click', function(e) {
+      const sidebar = document.querySelector('.sidebar');
+      const menuBtn = document.querySelector('.mobile-menu-btn');
+      if (window.innerWidth <= 980 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.remove('mobile-open');
       }
     });
-  }
 
-  let currentView = 'admin';
-
-  function switchView(view) {
-    currentView = view;
-    const adminBtn = document.getElementById('adminBtn');
-    const officialBtn = document.getElementById('officialBtn');
-    const sliderBg = document.getElementById('sliderBg');
-    const adminsView = document.getElementById('adminsView');
-    const officialsView = document.getElementById('officialsView');
-
-    if (view === 'admin') {
-      adminBtn.classList.add('active');
-      officialBtn.classList.remove('active');
-      adminsView.classList.add('active');
-      officialsView.classList.remove('active');
-      
-      const btnWidth = adminBtn.offsetWidth;
-      sliderBg.style.width = btnWidth + 'px';
-      sliderBg.style.transform = 'translateX(0)';
-    } else {
-      officialBtn.classList.add('active');
-      adminBtn.classList.remove('active');
-      officialsView.classList.add('active');
-      adminsView.classList.remove('active');
-      
-      const btnWidth = officialBtn.offsetWidth;
-      const adminWidth = adminBtn.offsetWidth;
-      sliderBg.style.width = btnWidth + 'px';
-      sliderBg.style.transform = `translateX(${adminWidth}px)`;
+    function updateAllProfilePhotos(photoURL) {
+      const photoElements = ["navbarAvatar"];
+      photoElements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.src = photoURL;
+          el.onerror = function() {
+            this.src = "image.png";
+          };
+        }
+      });
     }
-  }
 
-  window.addEventListener('load', function() {
-    const adminBtn = document.getElementById('adminBtn');
-    const sliderBg = document.getElementById('sliderBg');
-    sliderBg.style.width = adminBtn.offsetWidth + 'px';
-  });
+    let currentView = 'admin';
 
-  window.addEventListener('resize', function() {
-    if (currentView === 'admin') {
+    function switchView(view) {
+      currentView = view;
       const adminBtn = document.getElementById('adminBtn');
-      document.getElementById('sliderBg').style.width = adminBtn.offsetWidth + 'px';
-    } else {
       const officialBtn = document.getElementById('officialBtn');
+      const sliderBg = document.getElementById('sliderBg');
+      const adminsView = document.getElementById('adminsView');
+      const officialsView = document.getElementById('officialsView');
+
+      if (view === 'admin') {
+        adminBtn.classList.add('active');
+        officialBtn.classList.remove('active');
+        adminsView.classList.add('active');
+        officialsView.classList.remove('active');
+        
+        const btnWidth = adminBtn.offsetWidth;
+        sliderBg.style.width = btnWidth + 'px';
+        sliderBg.style.transform = 'translateX(0)';
+      } else {
+        officialBtn.classList.add('active');
+        adminBtn.classList.remove('active');
+        officialsView.classList.add('active');
+        adminsView.classList.remove('active');
+        
+        const btnWidth = officialBtn.offsetWidth;
+        const adminWidth = adminBtn.offsetWidth;
+        sliderBg.style.width = btnWidth + 'px';
+        sliderBg.style.transform = `translateX(${adminWidth}px)`;
+      }
+    }
+
+    window.addEventListener('load', function() {
       const adminBtn = document.getElementById('adminBtn');
       const sliderBg = document.getElementById('sliderBg');
-      sliderBg.style.width = officialBtn.offsetWidth + 'px';
-      sliderBg.style.transform = `translateX(${adminBtn.offsetWidth}px)`;
-    }
-  });
+      sliderBg.style.width = adminBtn.offsetWidth + 'px';
+    });
 
-  function updateLengthValue() {
-    const length = document.getElementById('passwordLength').value;
-    document.getElementById('lengthValue').textContent = length;
-  }
-
-  function togglePasswordVisibility() {
-    const passwordInput = document.getElementById('password');
-    const icon = document.getElementById('togglePasswordIcon').querySelector('i');
-    
-    if (passwordInput.type === 'password') {
-      passwordInput.type = 'text';
-      icon.classList.remove('fa-eye');
-      icon.classList.add('fa-eye-slash');
-    } else {
-      passwordInput.type = 'password';
-      icon.classList.remove('fa-eye-slash');
-      icon.classList.add('fa-eye');
-    }
-  }
-
-  function generatePassword() {
-    const length = parseInt(document.getElementById('passwordLength').value);
-    const includeUppercase = document.getElementById('includeUppercase').checked;
-    const includeLowercase = document.getElementById('includeLowercase').checked;
-    const includeNumbers = document.getElementById('includeNumbers').checked;
-    const includeSymbols = document.getElementById('includeSymbols').checked;
-
-    if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
-      alert('Please select at least one character type!');
-      return;
-    }
-
-    let charset = '';
-    if (includeUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    if (includeLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
-    if (includeNumbers) charset += '0123456789';
-    if (includeSymbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-
-    let password = '';
-    const randomValues = new Uint32Array(length);
-    window.crypto.getRandomValues(randomValues);
-    
-    for (let i = 0; i < length; i++) {
-      password += charset[randomValues[i] % charset.length];
-    }
-
-    document.getElementById('password').value = password;
-    calculatePasswordStrength(password, 'strengthFill', 'strengthText');
-  }
-
-  function calculatePasswordStrength(password, fillId, textId) {
-    let strength = 0;
-    const strengthFill = document.getElementById(fillId);
-    const strengthText = document.getElementById(textId);
-
-    if (password.length >= 8) strength += 20;
-    if (password.length >= 12) strength += 20;
-    if (password.length >= 16) strength += 10;
-    if (/[a-z]/.test(password)) strength += 10;
-    if (/[A-Z]/.test(password)) strength += 10;
-    if (/[0-9]/.test(password)) strength += 15;
-    if (/[^a-zA-Z0-9]/.test(password)) strength += 15;
-
-    strengthFill.style.width = strength + '%';
-
-    if (strength < 40) {
-      strengthFill.style.background = '#dc3545';
-      strengthText.textContent = 'Weak';
-      strengthText.style.color = '#dc3545';
-    } else if (strength < 70) {
-      strengthFill.style.background = '#ffc107';
-      strengthText.textContent = 'Medium';
-      strengthText.style.color = '#ffc107';
-    } else {
-      strengthFill.style.background = '#28a745';
-      strengthText.textContent = 'Strong';
-      strengthText.style.color = '#28a745';
-    }
-  }
-
-  function updatePositionOptions() {
-    const position = document.getElementById('position').value;
-    const passwordSection = document.getElementById('passwordSection');
-    
-    const isAdminPosition = position === 'Super Admin' || position === 'Admin';
-    
-    if (isAdminPosition) {
-      passwordSection.style.display = 'block';
-    } else {
-      passwordSection.style.display = 'none';
-    }
-  }
-
-  window.openAddModal = () => {
-    document.getElementById("modalTitle").innerHTML = '<i class="fa fa-user-plus"></i> Add User';
-    document.getElementById("submitBtn").innerHTML = '<i class="fa fa-save"></i> Save User';
-    document.getElementById("userModal").style.display = "flex";
-    document.getElementById("position").value = "";
-    updatePositionOptions();
-    generatePassword();
-  };
-  
-  window.closeModal = () => {
-    document.getElementById("userModal").style.display = "none";
-    document.getElementById("addUserForm").reset();
-    document.getElementById('strengthFill').style.width = '0%';
-    document.getElementById('strengthText').textContent = 'Not Generated';
-    document.getElementById('strengthText').style.color = '#666';
-    document.getElementById('passwordSection').style.display = 'block';
-  };
-
-  window.openEditModal = (userId, userData) => {
-    document.getElementById("editModal").style.display = "flex";
-    document.getElementById("editUserId").value = userId;
-    document.getElementById("editFirstName").value = userData.firstName || "";
-    document.getElementById("editLastName").value = userData.lastName || "";
-    document.getElementById("editName").value = userData.name || "";
-    document.getElementById("editEmail").value = userData.email || "";
-    document.getElementById("editBarangay").value = userData.barangay || "";
-    document.getElementById("editPosition").value = userData.position || "";
-  };
-
-  window.closeEditModal = () => {
-    document.getElementById("editModal").style.display = "none";
-    document.getElementById("editUserForm").reset();
-  };
-</script>
-
-<script type="module">
-  import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  import { 
-    getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut
-  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-  import { 
-    getFirestore, collection, doc, setDoc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, getDoc, addDoc
-  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
-    authDomain: "tayabastrack-23b95.firebaseapp.com",
-    projectId: "tayabastrack-23b95",
-    storageBucket: "tayabastrack-23b95.appspot.com",
-    messagingSenderId: "674055915366",
-    appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  let superAdminData = null;
-
-  // ✅ AUDIT LOGGING FUNCTION
-  async function logAuditEvent(action, actionType, module, description, additionalData = {}) {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        console.warn("No authenticated user for audit log");
-        return;
+    window.addEventListener('resize', function() {
+      if (currentView === 'admin') {
+        const adminBtn = document.getElementById('adminBtn');
+        document.getElementById('sliderBg').style.width = adminBtn.offsetWidth + 'px';
+      } else {
+        const officialBtn = document.getElementById('officialBtn');
+        const adminBtn = document.getElementById('adminBtn');
+        const sliderBg = document.getElementById('sliderBg');
+        sliderBg.style.width = officialBtn.offsetWidth + 'px';
+        sliderBg.style.transform = `translateX(${adminBtn.offsetWidth}px)`;
       }
+    });
 
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        console.warn("User document not found for audit log");
-        return;
-      }
+    function updateLengthValue() {
+      const length = document.getElementById('passwordLength').value;
+      document.getElementById('lengthValue').textContent = length;
+    }
+
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById('password');
+      const icon = document.getElementById('togglePasswordIcon').querySelector('i');
       
-      const userData = userDoc.data();
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
 
-      const logData = {
-        timestamp: serverTimestamp(),
-        userId: user.uid,
-        userName: userData.name || `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unknown User",
-        userRole: userData.position || userData.role || "User",
-        action: action,
-        actionType: (actionType || 'edit').toLowerCase(),
-        module: module || 'System',
-        description: description || 'No description provided',
-        beforeValue: additionalData.beforeValue || null,
-        afterValue: additionalData.afterValue || null,
-        ...additionalData
+    function generatePassword() {
+      const length = parseInt(document.getElementById('passwordLength').value);
+      const includeUppercase = document.getElementById('includeUppercase').checked;
+      const includeLowercase = document.getElementById('includeLowercase').checked;
+      const includeNumbers = document.getElementById('includeNumbers').checked;
+      const includeSymbols = document.getElementById('includeSymbols').checked;
+
+      if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
+        alert('Please select at least one character type!');
+        return;
+      }
+
+      let charset = '';
+      if (includeUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      if (includeLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
+      if (includeNumbers) charset += '0123456789';
+      if (includeSymbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+      let password = '';
+      const randomValues = new Uint32Array(length);
+      window.crypto.getRandomValues(randomValues);
+      
+      for (let i = 0; i < length; i++) {
+        password += charset[randomValues[i] % charset.length];
+      }
+
+      document.getElementById('password').value = password;
+      calculatePasswordStrength(password, 'strengthFill', 'strengthText');
+    }
+
+    function calculatePasswordStrength(password, fillId, textId) {
+      let strength = 0;
+      const strengthFill = document.getElementById(fillId);
+      const strengthText = document.getElementById(textId);
+
+      if (password.length >= 8) strength += 20;
+      if (password.length >= 12) strength += 20;
+      if (password.length >= 16) strength += 10;
+      if (/[a-z]/.test(password)) strength += 10;
+      if (/[A-Z]/.test(password)) strength += 10;
+      if (/[0-9]/.test(password)) strength += 15;
+      if (/[^a-zA-Z0-9]/.test(password)) strength += 15;
+
+      strengthFill.style.width = strength + '%';
+
+      if (strength < 40) {
+        strengthFill.style.background = '#dc3545';
+        strengthText.textContent = 'Weak';
+        strengthText.style.color = '#dc3545';
+      } else if (strength < 70) {
+        strengthFill.style.background = '#ffc107';
+        strengthText.textContent = 'Medium';
+        strengthText.style.color = '#ffc107';
+      } else {
+        strengthFill.style.background = '#28a745';
+        strengthText.textContent = 'Strong';
+        strengthText.style.color = '#28a745';
+      }
+    }
+
+    function updatePositionOptions() {
+      const position = document.getElementById('position').value;
+      const passwordSection = document.getElementById('passwordSection');
+      const isAdminPosition = position === 'Super Admin' || position === 'Admin';
+      if (isAdminPosition) {
+        passwordSection.style.display = 'block';
+      } else {
+        passwordSection.style.display = 'none';
+      }
+    }
+
+    window.openAddModal = () => {
+      document.getElementById("modalTitle").innerHTML = '<i class="fa fa-user-plus"></i> Add User';
+      document.getElementById("submitBtn").innerHTML = '<i class="fa fa-save"></i> Save User';
+      document.getElementById("userModal").style.display = "flex";
+      document.getElementById("position").value = "";
+      updatePositionOptions();
+      generatePassword();
+    };
+    
+    window.closeModal = () => {
+      document.getElementById("userModal").style.display = "none";
+      document.getElementById("addUserForm").reset();
+      document.getElementById('strengthFill').style.width = '0%';
+      document.getElementById('strengthText').textContent = 'Not Generated';
+      document.getElementById('strengthText').style.color = '#666';
+      document.getElementById('passwordSection').style.display = 'block';
+    };
+    
+    window.openEditModal = (userId, userData) => {
+      document.getElementById("editModal").style.display = "flex";
+      document.getElementById("editUserId").value = userId;
+      document.getElementById("editFirstName").value = userData.firstName || "";
+      document.getElementById("editLastName").value = userData.lastName || "";
+      document.getElementById("editName").value = userData.name || "";
+      document.getElementById("editEmail").value = userData.email || "";
+      document.getElementById("editBarangay").value = userData.barangay || "";
+      document.getElementById("editPosition").value = userData.position || "";
+    };
+    
+    window.closeEditModal = () => {
+      document.getElementById("editModal").style.display = "none";
+      document.getElementById("editUserForm").reset();
+    };
+
+  </script>
+
+  <script type="module">
+    import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { 
+      getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+    import { 
+      getFirestore, collection, doc, setDoc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, getDoc, addDoc
+    } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+      authDomain: "tayabastrack-23b95.firebaseapp.com",
+      projectId: "tayabastrack-23b95",
+      storageBucket: "tayabastrack-23b95.appspot.com",
+      messagingSenderId: "674055915366",
+      appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let superAdminData = null;
+
+    const paginationState = {
+      pending: { currentPage: 1, pageSize: 10, data: [] },
+      active: { currentPage: 1, pageSize: 10, data: [] },
+      inactive: { currentPage: 1, pageSize: 10, data: [] },
+      activeOfficials: { currentPage: 1, pageSize: 10, data: [] },
+      inactiveOfficials: { currentPage: 1, pageSize: 10, data: [] }
+    };
+
+    function updatePagination(tableType) {
+      const state = paginationState[tableType];
+      const totalPages = Math.ceil(state.data.length / state.pageSize);
+      const start = (state.currentPage - 1) * state.pageSize;
+      const end = start + state.pageSize;
+      const paginatedData = state.data.slice(start, end);
+      
+      const tbody = document.getElementById({
+        pending: 'pendingAdmins', active: 'activeAdmins', inactive: 'inactiveAdmins',
+        activeOfficials: 'activeOfficials', inactiveOfficials: 'inactiveOfficials'
+      }[tableType]);
+
+      tbody.innerHTML = '';
+      paginatedData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = row.html;
+        tbody.appendChild(tr);
+      });
+
+      const infoEl = document.getElementById({
+        pending: 'infoPending', active: 'infoActive', inactive: 'infoInactive',
+        activeOfficials: 'infoActiveOfficials', inactiveOfficials: 'infoInactiveOfficials'
+      }[tableType]);
+
+      if (state.data.length === 0) {
+        infoEl.textContent = 'No records found';
+        document.getElementById({
+          pending: 'controlsPending', active: 'controlsActive', inactive: 'controlsInactive',
+          activeOfficials: 'controlsActiveOfficials', inactiveOfficials: 'controlsInactiveOfficials'
+        }[tableType]).innerHTML = '';
+      } else {
+        const displayStart = state.data.length === 0 ? 0 : start + 1;
+        const displayEnd = Math.min(end, state.data.length);
+        infoEl.textContent = `Showing ${displayStart} to ${displayEnd} of ${state.data.length}`;
+        renderPaginationButtons(tableType, totalPages);
+      }
+    }
+
+    function renderPaginationButtons(tableType, totalPages) {
+      const state = paginationState[tableType];
+      const controlsId = {
+        pending: 'controlsPending', active: 'controlsActive', inactive: 'controlsInactive',
+        activeOfficials: 'controlsActiveOfficials', inactiveOfficials: 'controlsInactiveOfficials'
+      }[tableType];
+
+      const controlsEl = document.getElementById(controlsId);
+      controlsEl.innerHTML = '';
+
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'pagination-btn';
+      prevBtn.textContent = 'Previous';
+      prevBtn.disabled = state.currentPage === 1;
+      prevBtn.onclick = () => {
+        state.currentPage--;
+        updatePagination(tableType);
       };
+      controlsEl.appendChild(prevBtn);
 
-      await addDoc(collection(db, "auditLogs"), logData);
-      console.log("✅ Audit log created:", logData);
-
-    } catch (error) {
-      console.error("❌ Error logging audit event:", error);
-    }
-  }
-
-  const notificationBell = document.getElementById("notificationBell");
-  const notificationBadge = document.getElementById("notificationBadge");
-  const notificationMenu = document.getElementById("notificationMenu");
-  const notificationList = document.getElementById("notificationList");
-  const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
-  const markAllReadBtn = document.getElementById("markAllReadBtn");
-
-  let notificationsList = [];
-  let trackedIds = new Set();
-  let currentFilter = "all";
-
-  function normalizeStatus(status) {
-    return (status || "").toLowerCase().trim();
-  }
-
-  function isBarangayPosition(position) {
-    if (!position) return false;
-    const pos = position.toLowerCase().trim();
-    const barangayPositions = [
-      'barangay captain',
-      'barangay kagawad', 
-      'barangay secretary',
-      'barangay treasurer',
-      'sk chairperson',
-      'sk kagawad',
-      'barangay health worker',
-      'barangay tanod',
-      'barangay nutritionist',
-      'day care worker',
-      'other'
-    ];
-    
-    return barangayPositions.some(p => pos.includes(p)) || 
-           pos.includes("barangay") || 
-           pos.includes("brgy") || 
-           pos.includes("brgy.") || 
-           pos.includes("kagawad") ||
-           pos.includes("captain") ||
-           pos.includes("secretary") ||
-           pos.includes("treasurer");
-  }
-
-  function saveNotificationsToLocalStorage() {
-    try {
-      localStorage.setItem('notifications', JSON.stringify(notificationsList));
-      localStorage.setItem('trackedIds', JSON.stringify([...trackedIds]));
-    } catch (error) {
-      console.error("Error saving notifications:", error);
-    }
-  }
-
-  function loadNotificationsFromLocalStorage() {
-    try {
-      const savedNotifications = localStorage.getItem('notifications');
-      const savedTrackedIds = localStorage.getItem('trackedIds');
-      
-      if (savedNotifications) {
-        notificationsList = JSON.parse(savedNotifications).map(n => ({
-          ...n,
-          timestamp: new Date(n.timestamp)
-        }));
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= state.currentPage - 1 && i <= state.currentPage + 1)) {
+          const pageBtn = document.createElement('button');
+          pageBtn.className = `pagination-btn ${i === state.currentPage ? 'active' : ''}`;
+          pageBtn.textContent = i;
+          pageBtn.onclick = () => {
+            state.currentPage = i;
+            updatePagination(tableType);
+          };
+          controlsEl.appendChild(pageBtn);
+        } else if (i === 2 && state.currentPage > 3) {
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '...';
+          ellipsis.style.padding = '0.5rem 0.3rem';
+          controlsEl.appendChild(ellipsis);
+        } else if (i === totalPages - 1 && state.currentPage < totalPages - 2) {
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '...';
+          ellipsis.style.padding = '0.5rem 0.3rem';
+          controlsEl.appendChild(ellipsis);
+        }
       }
-      
-      if (savedTrackedIds) {
-        trackedIds = new Set(JSON.parse(savedTrackedIds));
+
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'pagination-btn';
+      nextBtn.textContent = 'Next';
+      nextBtn.disabled = state.currentPage === totalPages;
+      nextBtn.onclick = () => {
+        state.currentPage++;
+        updatePagination(tableType);
+      };
+      controlsEl.appendChild(nextBtn);
+    }
+
+    window.setPageSize = (tableType, size) => {
+      paginationState[tableType].pageSize = parseInt(size);
+      paginationState[tableType].currentPage = 1;
+      updatePagination(tableType);
+    };
+
+    async function logAuditEvent(action, actionType, module, description, additionalData = {}) {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          console.warn("No authenticated user for audit log");
+          return;
+        }
+
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+          console.warn("User document not found for audit log");
+          return;
+        }
+        
+        const userData = userDoc.data();
+
+        const logData = {
+          timestamp: serverTimestamp(),
+          userId: user.uid,
+          userName: userData.name || `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unknown User",
+          userRole: userData.position || userData.role || "User",
+          action: action,
+          actionType: (actionType || 'edit').toLowerCase(),
+          module: module || 'System',
+          description: description || 'No description provided',
+          beforeValue: additionalData.beforeValue || null,
+          afterValue: additionalData.afterValue || null,
+          ...additionalData
+        };
+
+        await addDoc(collection(db, "auditLogs"), logData);
+        console.log("✅ Audit log created:", logData);
+
+      } catch (error) {
+        console.error("❌ Error logging audit event:", error);
       }
-    } catch (error) {
-      console.error("Error loading notifications:", error);
     }
-  }
 
-  notificationBell.addEventListener("click", (e) => {
-    e.stopPropagation();
-    notificationMenu.classList.toggle("show");
-    const dropdown = document.getElementById("dropdownMenu");
-    if (dropdown) dropdown.classList.remove("show");
-  });
+    const notificationBell = document.getElementById("notificationBell");
+    const notificationBadge = document.getElementById("notificationBadge");
+    const notificationMenu = document.getElementById("notificationMenu");
+    const notificationList = document.getElementById("notificationList");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+    const markAllReadBtn = document.getElementById("markAllReadBtn");
 
-  clearNotificationsBtn.addEventListener("click", () => {
-    notificationsList = [];
-    trackedIds.clear();
-    saveNotificationsToLocalStorage();
-    updateNotificationUI();
-  });
+    let notificationsList = [];
+    let trackedIds = new Set();
+    let currentFilter = "all";
 
-  markAllReadBtn.addEventListener("click", () => {
-    notificationsList.forEach(n => n.read = true);
-    saveNotificationsToLocalStorage();
-    updateNotificationUI();
-  });
-
-  const profileToggle = document.getElementById("profileToggle");
-  const dropdownMenu = document.getElementById("dropdownMenu");
-
-  profileToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    dropdownMenu.classList.toggle("show");
-    notificationMenu.classList.remove("show");
-  });
-
-  window.addEventListener("click", (e) => {
-    if (!e.target.closest(".profile-dropdown")) {
-      dropdownMenu.classList.remove("show");
+    function normalizeStatus(status) {
+      return (status || "").toLowerCase().trim();
     }
-    if (!e.target.closest(".notification-menu") && e.target !== notificationBell) {
-      notificationMenu.classList.remove("show");
-    }
-  });
 
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
-      e.target.classList.add("active");
-      currentFilter = e.target.dataset.filter;
+    function isBarangayPosition(position) {
+      if (!position) return false;
+      const pos = position.toLowerCase().trim();
+      const barangayPositions = [
+        'barangay captain',
+        'barangay kagawad', 
+        'barangay secretary',
+        'barangay treasurer',
+        'sk chairperson',
+        'sk kagawad',
+        'barangay health worker',
+        'barangay tanod',
+        'barangay nutritionist',
+        'day care worker',
+        'other'
+      ];
+      
+      return barangayPositions.some(p => pos.includes(p)) || 
+             pos.includes("barangay") || 
+             pos.includes("brgy") || 
+             pos.includes("brgy.") || 
+             pos.includes("kagawad") ||
+             pos.includes("captain") ||
+             pos.includes("secretary") ||
+             pos.includes("treasurer");
+    }
+
+    function saveNotificationsToLocalStorage() {
+      try {
+        localStorage.setItem('notifications', JSON.stringify(notificationsList));
+        localStorage.setItem('trackedIds', JSON.stringify([...trackedIds]));
+      } catch (error) {
+        console.error("Error saving notifications:", error);
+      }
+    }
+
+    function loadNotificationsFromLocalStorage() {
+      try {
+        const savedNotifications = localStorage.getItem('notifications');
+        const savedTrackedIds = localStorage.getItem('trackedIds');
+        
+        if (savedNotifications) {
+          notificationsList = JSON.parse(savedNotifications).map(n => ({
+            ...n,
+            timestamp: new Date(n.timestamp)
+          }));
+        }
+        
+        if (savedTrackedIds) {
+          trackedIds = new Set(JSON.parse(savedTrackedIds));
+        }
+      } catch (error) {
+        console.error("Error loading notifications:", error);
+      }
+    }
+
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notificationMenu.classList.toggle("show");
+      const dropdown = document.getElementById("dropdownMenu");
+      if (dropdown) dropdown.classList.remove("show");
+    });
+
+    clearNotificationsBtn.addEventListener("click", () => {
+      notificationsList = [];
+      trackedIds.clear();
+      saveNotificationsToLocalStorage();
       updateNotificationUI();
     });
-  });
 
-  function addNotification(type, message, detail, uniqueId) {
-    if (trackedIds.has(uniqueId)) return;
-    
-    trackedIds.add(uniqueId);
-    
-    const timestamp = new Date();
-    const id = `${type}-${uniqueId}-${timestamp.getTime()}`;
-    
-    notificationsList.unshift({
-      id,
-      type,
-      message: message.trim(),
-      detail: detail.trim(),
-      timestamp: timestamp,
-      read: false
+    markAllReadBtn.addEventListener("click", () => {
+      notificationsList.forEach(n => n.read = true);
+      saveNotificationsToLocalStorage();
+      updateNotificationUI();
     });
-    
-    saveNotificationsToLocalStorage();
-    updateNotificationUI();
-  }
 
-  function updateNotificationUI() {
-    let filtered = [...notificationsList];
-    
-    if (currentFilter === "report") {
-      filtered = filtered.filter((n) => n.type === "report");
-    } else if (currentFilter === "user") {
-      filtered = filtered.filter((n) => n.type === "user");
-    } else if (currentFilter === "24h") {
-      const ago = Date.now() - 24 * 60 * 60 * 1000;
-      filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+    const profileToggle = document.getElementById("profileToggle");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle("show");
+      notificationMenu.classList.remove("show");
+    });
+
+    window.addEventListener("click", (e) => {
+      if (!e.target.closest(".profile-dropdown")) {
+        dropdownMenu.classList.remove("show");
+      }
+      if (!e.target.closest(".notification-menu") && e.target !== notificationBell) {
+        notificationMenu.classList.remove("show");
+      }
+    });
+
+    document.querySelectorAll(".filter-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+        e.target.classList.add("active");
+        currentFilter = e.target.dataset.filter;
+        updateNotificationUI();
+      });
+    });
+
+    function addNotification(type, message, detail, uniqueId) {
+      if (trackedIds.has(uniqueId)) return;
+      
+      trackedIds.add(uniqueId);
+      
+      const timestamp = new Date();
+      const id = `${type}-${uniqueId}-${timestamp.getTime()}`;
+      
+      notificationsList.unshift({
+        id,
+        type,
+        message: message.trim(),
+        detail: detail.trim(),
+        timestamp: timestamp,
+        read: false
+      });
+      
+      saveNotificationsToLocalStorage();
+      updateNotificationUI();
     }
 
-    filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    function updateNotificationUI() {
+      let filtered = [...notificationsList];
+      
+      if (currentFilter === "report") {
+        filtered = filtered.filter((n) => n.type === "report");
+      } else if (currentFilter === "user") {
+        filtered = filtered.filter((n) => n.type === "user");
+      } else if (currentFilter === "24h") {
+        const ago = Date.now() - 24 * 60 * 60 * 1000;
+        filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+      }
 
-    const unreadCount = notificationsList.filter(n => !n.read).length;
-    if (unreadCount > 0) {
-      notificationBadge.textContent = unreadCount;
-      notificationBadge.classList.add("show");
-    } else {
-      notificationBadge.textContent = "";
-      notificationBadge.classList.remove("show");
+      filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+      const unreadCount = notificationsList.filter(n => !n.read).length;
+      if (unreadCount > 0) {
+        notificationBadge.textContent = unreadCount;
+        notificationBadge.classList.add("show");
+      } else {
+        notificationBadge.textContent = "";
+        notificationBadge.classList.remove("show");
+      }
+
+      if (filtered.length === 0) {
+        notificationList.innerHTML = `<div class="notification-empty">No notifications</div>`;
+      } else {
+        notificationList.innerHTML = filtered
+          .map(
+            (n) => `
+          <div class="notification-item ${n.read ? '' : 'unread'}">
+            <div class="notification-icon ${n.type}">
+              ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
+            </div>
+            <div class="notification-content">
+              <p><strong>${n.message}</strong></p>
+              <p>${n.detail}</p>
+              <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            </div>
+          </div>`
+          )
+          .join("");
+      }
     }
 
-    if (filtered.length === 0) {
-      notificationList.innerHTML = `<div class="notification-empty">No notifications</div>`;
-    } else {
-      notificationList.innerHTML = filtered
-        .map(
-          (n) => `
-        <div class="notification-item ${n.read ? '' : 'unread'}">
-          <div class="notification-icon ${n.type}">
-            ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
-          </div>
-          <div class="notification-content">
-            <p><strong>${n.message}</strong></p>
-            <p>${n.detail}</p>
-            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-          </div>
-        </div>`
-        )
-        .join("");
-    }
-  }
+    async function setupRealtimeNotifications() {
+      loadNotificationsFromLocalStorage();
 
-  async function setupRealtimeNotifications() {
-    loadNotificationsFromLocalStorage();
+      onSnapshot(collection(db, "users"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const userId = change.doc.id;
+          const data = change.doc.data();
+          const currentStatus = normalizeStatus(data.status);
+          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
+          const position = data.position || "User";
 
-    onSnapshot(collection(db, "users"), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const userId = change.doc.id;
-        const data = change.doc.data();
-        const currentStatus = normalizeStatus(data.status);
-        const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-        const position = data.position || "User";
-
-        if (change.type === "modified") {
-          if (currentStatus === "active") {
-            const uniqueId = `user-${userId}-active`;
-            if (!trackedIds.has(uniqueId)) {
-              addNotification("user", `User approved: ${fullName}`, `Position: ${position}`, uniqueId);
+          if (change.type === "modified") {
+            if (currentStatus === "active") {
+              const uniqueId = `user-${userId}-active`;
+              if (!trackedIds.has(uniqueId)) {
+                addNotification("user", `User approved: ${fullName}`, `Position: ${position}`, uniqueId);
+              }
             }
+          }
+        });
+      });
+
+      onSnapshot(collection(db, "reports"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const reportId = change.doc.id;
+          const data = change.doc.data();
+          
+          if (change.type === "added") {
+            const barangay = data.barangay || data.location || "Unknown location";
+            const type = data.reportType || data.type || data.projectName || "Report";
+            const uniqueId = `report-${reportId}`;
+            addNotification("report", "New report submitted", `${type} in ${barangay}`, uniqueId);
+          }
+        });
+      });
+
+      updateNotificationUI();
+      console.log("Notifications system active");
+    }
+
+    document.getElementById("addUserForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const barangay = document.getElementById("barangay").value.trim();
+      const position = document.getElementById("position").value;
+      const password = document.getElementById("password").value;
+
+      const isAdminPosition = position === "Super Admin" || position === "Admin";
+      const hashedPassword = isAdminPosition ? CryptoJS.SHA256(password).toString() : null;
+
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        alert("You must be logged in to add users");
+        return;
+      }
+
+      try {
+        const userRef = doc(collection(db, "users"));
+        const userData = {
+          firstName,
+          lastName,
+          name,
+          email,
+          barangay,
+          position,
+          createdAt: serverTimestamp()
+        };
+
+        if (isAdminPosition) {
+          userData.password = password;
+          userData.hashedPassword = hashedPassword;
+          userData.status = "Pending";
+          userData.role = "Admin";
+        } else {
+          userData.status = "Active";
+          userData.role = "Official";
+        }
+
+        await setDoc(userRef, userData);
+
+        await logAuditEvent(
+          "User Added",
+          "add",
+          "Users",
+          `Added new user: ${name}`,
+          {
+            targetUserEmail: email,
+            targetUserPosition: position,
+            targetUserId: userRef.id,
+            barangay: barangay
+          }
+        );
+
+        closeModal();
+        document.getElementById("addUserForm").reset();
+        
+        if (isAdminPosition) {
+          alert("Admin user added successfully (Pending approval)!");
+        } else {
+          alert("Barangay Official added successfully!");
+        }
+      } catch (err) {
+        console.error("Error adding user:", err);
+        alert("Error: " + err.message);
+      }
+    });
+
+    document.getElementById("editUserForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById("editUserId").value;
+      const firstName = document.getElementById("editFirstName").value.trim();
+      const lastName = document.getElementById("editLastName").value.trim();
+      const name = document.getElementById("editName").value.trim();
+      const email = document.getElementById("editEmail").value.trim();
+      const barangay = document.getElementById("editBarangay").value.trim();
+      const position = document.getElementById("editPosition").value;
+
+      try {
+        const userRef = doc(db, "users", userId);
+        const oldDoc = await getDoc(userRef);
+        const oldData = oldDoc.data();
+
+        await updateDoc(userRef, {
+          firstName,
+          lastName,
+          name,
+          email,
+          barangay,
+          position,
+          updatedAt: serverTimestamp()
+        });
+
+        const changes = [];
+        if (oldData.firstName !== firstName) changes.push(`First Name: "${oldData.firstName}" → "${firstName}"`);
+        if (oldData.lastName !== lastName) changes.push(`Last Name: "${oldData.lastName}" → "${lastName}"`);
+        if (oldData.name !== name) changes.push(`Name: "${oldData.name}" → "${name}"`);
+        if (oldData.email !== email) changes.push(`Email: "${oldData.email}" → "${email}"`);
+        if (oldData.barangay !== barangay) changes.push(`Barangay: "${oldData.barangay}" → "${barangay}"`);
+        if (oldData.position !== position) changes.push(`Position: "${oldData.position}" → "${position}"`);
+
+        await logAuditEvent(
+          "User Updated",
+          "edit",
+          "Users",
+          `Updated user: ${name}`,
+          {
+            targetUserId: userId,
+            targetUserEmail: email,
+            changes: changes.join(", "),
+            beforeValue: JSON.stringify(oldData),
+            afterValue: JSON.stringify({ firstName, lastName, name, email, barangay, position })
+          }
+        );
+
+        closeEditModal();
+        alert("User updated successfully!");
+      } catch (err) {
+        console.error("Error updating user:", err);
+        alert("Error: " + err.message);
+      }
+    });
+
+    const q = query(collection(db, "users"));
+    onSnapshot(q, (snap) => {
+      paginationState.pending.data = [];
+      paginationState.active.data = [];
+      paginationState.inactive.data = [];
+      paginationState.activeOfficials.data = [];
+      paginationState.inactiveOfficials.data = [];
+
+      const activeOfficialsData = [];
+      const inactiveOfficialsData = [];
+
+      snap.forEach(docSnap => {
+        const u = docSnap.data();
+        const rawStatus = u.status || "";
+        const status = normalizeStatus(rawStatus);
+        
+        let statusBadge = '';
+        if (status === "pending") statusBadge = '<span class="status-badge status-pending">Pending</span>';
+        else if (status === "active") statusBadge = '<span class="status-badge status-active">Active</span>';
+        else if (status === "inactive") statusBadge = '<span class="status-badge status-inactive">Inactive</span>';
+        else statusBadge = '<span class="status-badge" style="background:#999;color:#fff;">Unknown</span>';
+
+        const isAdmin = u.position === "Admin" || u.position === "Super Admin";
+        const isBrgyOfficial = isBarangayPosition(u.position);
+
+        if (isAdmin) {
+          const userDataStr = JSON.stringify(u).replace(/"/g, '&quot;');
+          const rowHtml = `
+            <td>${u.firstName || ""}</td>
+            <td>${u.lastName || ""}</td>
+            <td>${u.email || ""}</td>
+            <td>${u.barangay || ""}</td>
+            <td>${u.position || ""}</td>
+            <td>${statusBadge}</td>
+            <td>
+              ${status === "pending" ? `<button onclick="approveUser('${docSnap.id}')">Approve</button>` : ''}
+              ${status === "active" || status === "inactive" ? `<button onclick="openEditModal('${docSnap.id}', ${userDataStr})">Edit</button>` : ''}
+              ${status === "active" ? `<button onclick="deactivateUser('${docSnap.id}')">Deactivate</button>` : ''}
+              ${status === "inactive" ? `<button onclick="activateUser('${docSnap.id}')">Activate</button>` : ''}
+              <button onclick="deleteUser('${docSnap.id}')">Delete</button>
+            </td>
+          `;
+
+          if (status === "pending") {
+            paginationState.pending.data.push({ html: rowHtml });
+          } else if (status === "active") {
+            paginationState.active.data.push({ html: rowHtml });
+          } else if (status === "inactive") {
+            paginationState.inactive.data.push({ html: rowHtml });
+          }
+        }
+
+        if (isBrgyOfficial) {
+          const contactDisplay = u.phoneNumber || u.contact || "—";
+          const rowHtml = `
+            <td>${u.firstName || ""}</td>
+            <td>${u.lastName || u.surname || ""}</td>
+            <td>${u.email || ""}</td>
+            <td>${u.barangay || ""}</td>
+            <td>${u.position || ""}</td>
+            <td>${contactDisplay}</td>
+            <td>${statusBadge}</td>
+            <td><span class="view-only-cell"><i class="fa fa-eye"></i> View Only</span></td>
+          `;
+
+          if (status === "active") {
+            activeOfficialsData.push({ html: rowHtml, barangay: u.barangay || "" });
+          } else if (status === "inactive") {
+            inactiveOfficialsData.push({ html: rowHtml, barangay: u.barangay || "" });
           }
         }
       });
+
+      activeOfficialsData.sort((a, b) => a.barangay.localeCompare(b.barangay));
+      inactiveOfficialsData.sort((a, b) => a.barangay.localeCompare(b.barangay));
+
+      paginationState.activeOfficials.data = activeOfficialsData.map(o => ({ html: o.html }));
+      paginationState.inactiveOfficials.data = inactiveOfficialsData.map(o => ({ html: o.html }));
+
+      ['pending', 'active', 'inactive', 'activeOfficials', 'inactiveOfficials'].forEach(tableType => {
+        paginationState[tableType].currentPage = 1;
+        updatePagination(tableType);
+      });
     });
 
-    onSnapshot(collection(db, "reports"), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const reportId = change.doc.id;
-        const data = change.doc.data();
+    window.approveUser = async (oldDocId) => {
+      if (!confirm("Approve this user and create their login credentials?")) return;
+      
+      try {
+        console.log("🔄 Starting approval process for document ID:", oldDocId);
         
-        if (change.type === "added") {
-          const barangay = data.barangay || data.location || "Unknown location";
-          const type = data.reportType || data.type || data.projectName || "Report";
-          const uniqueId = `report-${reportId}`;
-          addNotification("report", "New report submitted", `${type} in ${barangay}`, uniqueId);
+        const oldDocRef = doc(db, "users", oldDocId);
+        const oldDocSnap = await getDoc(oldDocRef);
+        
+        if (!oldDocSnap.exists()) {
+          alert("User not found.");
+          return;
         }
-      });
-    });
+        
+        const userData = oldDocSnap.data();
+        console.log("User data retrieved:", userData);
 
-    updateNotificationUI();
-    console.log("Notifications system active");
-  }
+        const secondaryApp = initializeApp(firebaseConfig, "Secondary-" + Date.now());
+        const secondaryAuth = getAuth(secondaryApp);
 
-  // ✅ ADD USER WITH AUDIT LOGGING
-  document.getElementById("addUserForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const firstName = document.getElementById("firstName").value.trim();
-    const lastName = document.getElementById("lastName").value.trim();
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const barangay = document.getElementById("barangay").value.trim();
-    const position = document.getElementById("position").value;
-    const password = document.getElementById("password").value;
-
-    const isAdminPosition = position === "Super Admin" || position === "Admin";
-    const hashedPassword = isAdminPosition ? CryptoJS.SHA256(password).toString() : null;
-
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      alert("You must be logged in to add users");
-      return;
-    }
-
-    try {
-      const userRef = doc(collection(db, "users"));
-      const userData = {
-        firstName,
-        lastName,
-        name,
-        email,
-        barangay,
-        position,
-        createdAt: serverTimestamp()
-      };
-
-      if (isAdminPosition) {
-        userData.password = password;
-        userData.hashedPassword = hashedPassword;
-        userData.status = "Pending";
-        userData.role = "Admin";
-      } else {
-        userData.status = "Active";
-        userData.role = "Official";
-      }
-
-      await setDoc(userRef, userData);
-
-      // ✅ LOG USER ADDITION
-      await logAuditEvent(
-        "User Added",
-        "add",
-        "Users",
-        `Added new user: ${name}`,
-        {
-          targetUserEmail: email,
-          targetUserPosition: position,
-          targetUserId: userRef.id,
-          barangay: barangay
-        }
-      );
-
-      closeModal();
-      document.getElementById("addUserForm").reset();
-      
-      if (isAdminPosition) {
-        alert("Admin user added successfully (Pending approval)!");
-      } else {
-        alert("Barangay Official added successfully!");
-      }
-    } catch (err) {
-      console.error("Error adding user:", err);
-      alert("Error: " + err.message);
-    }
-  });
-
-  // ✅ EDIT USER WITH AUDIT LOGGING
-  document.getElementById("editUserForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const userId = document.getElementById("editUserId").value;
-    const firstName = document.getElementById("editFirstName").value.trim();
-    const lastName = document.getElementById("editLastName").value.trim();
-    const name = document.getElementById("editName").value.trim();
-    const email = document.getElementById("editEmail").value.trim();
-    const barangay = document.getElementById("editBarangay").value.trim();
-    const position = document.getElementById("editPosition").value;
-
-    try {
-      // Get old data for audit log
-      const userRef = doc(db, "users", userId);
-      const oldDoc = await getDoc(userRef);
-      const oldData = oldDoc.data();
-
-      await updateDoc(userRef, {
-        firstName,
-        lastName,
-        name,
-        email,
-        barangay,
-        position,
-        updatedAt: serverTimestamp()
-      });
-
-      // ✅ LOG USER UPDATE
-      const changes = [];
-      if (oldData.firstName !== firstName) changes.push(`First Name: "${oldData.firstName}" → "${firstName}"`);
-      if (oldData.lastName !== lastName) changes.push(`Last Name: "${oldData.lastName}" → "${lastName}"`);
-      if (oldData.name !== name) changes.push(`Name: "${oldData.name}" → "${name}"`);
-      if (oldData.email !== email) changes.push(`Email: "${oldData.email}" → "${email}"`);
-      if (oldData.barangay !== barangay) changes.push(`Barangay: "${oldData.barangay}" → "${barangay}"`);
-      if (oldData.position !== position) changes.push(`Position: "${oldData.position}" → "${position}"`);
-
-      await logAuditEvent(
-        "User Updated",
-        "edit",
-        "Users",
-        `Updated user: ${name}`,
-        {
-          targetUserId: userId,
-          targetUserEmail: email,
-          changes: changes.join(", "),
-          beforeValue: JSON.stringify(oldData),
-          afterValue: JSON.stringify({ firstName, lastName, name, email, barangay, position })
-        }
-      );
-
-      closeEditModal();
-      alert("User updated successfully!");
-    } catch (err) {
-      console.error("Error updating user:", err);
-      alert("Error: " + err.message);
-    }
-  });
-
-  const pendingTable = document.getElementById("pendingAdmins");
-  const activeTable = document.getElementById("activeAdmins");
-  const inactiveTable = document.getElementById("inactiveAdmins");
-  const activeOfficialsTable = document.getElementById("activeOfficials");
-  const inactiveOfficialsTable = document.getElementById("inactiveOfficials");
-
-  const q = query(collection(db, "users"));
-  onSnapshot(q, (snap) => {
-    pendingTable.innerHTML = "";
-    activeTable.innerHTML = "";
-    inactiveTable.innerHTML = "";
-    activeOfficialsTable.innerHTML = "";
-    inactiveOfficialsTable.innerHTML = "";
-
-    const activeOfficialsData = [];
-    const inactiveOfficialsData = [];
-
-    snap.forEach(docSnap => {
-      const u = docSnap.data();
-      const rawStatus = u.status || "";
-      const status = normalizeStatus(rawStatus);
-      
-      let statusBadge = '';
-      if (status === "pending") statusBadge = '<span class="status-badge status-pending">Pending</span>';
-      else if (status === "active") statusBadge = '<span class="status-badge status-active">Active</span>';
-      else if (status === "inactive") statusBadge = '<span class="status-badge status-inactive">Inactive</span>';
-      else statusBadge = '<span class="status-badge" style="background:#999;color:#fff;">Unknown</span>';
-
-      const isAdmin = u.position === "Admin" || u.position === "Super Admin";
-      const isBrgyOfficial = isBarangayPosition(u.position);
-
-      if (isAdmin) {
-        const tr = document.createElement("tr");
-        const userDataStr = JSON.stringify(u).replace(/"/g, '&quot;');
-        tr.innerHTML = `
-          <td>${u.firstName || ""}</td>
-          <td>${u.lastName || ""}</td>
-          <td>${u.email || ""}</td>
-          <td>${u.barangay || ""}</td>
-          <td>${u.position || ""}</td>
-          <td>${statusBadge}</td>
-          <td>
-            ${status === "pending" ? `<button onclick="approveUser('${docSnap.id}')">Approve</button>` : ''}
-            ${status === "active" || status === "inactive" ? `<button onclick="openEditModal('${docSnap.id}', ${userDataStr})">Edit</button>` : ''}
-            ${status === "active" ? `<button onclick="deactivateUser('${docSnap.id}')">Deactivate</button>` : ''}
-            ${status === "inactive" ? `<button onclick="activateUser('${docSnap.id}')">Activate</button>` : ''}
-            <button onclick="deleteUser('${docSnap.id}')">Delete</button>
-          </td>
-        `;
-
-        if (status === "pending") pendingTable.appendChild(tr);
-        else if (status === "active") activeTable.appendChild(tr);
-        else if (status === "inactive") inactiveTable.appendChild(tr);
-      }
-
-      if (isBrgyOfficial) {
-        const contactDisplay = u.phoneNumber || u.contact || "—";
-        const officialData = {
-          firstName: u.firstName || "",
-          lastName: u.lastName || u.surname || "",
-          email: u.email || "",
-          barangay: u.barangay || "",
-          position: u.position || "",
-          contact: contactDisplay,
-          statusBadge: statusBadge
-        };
-
-        if (status === "active") {
-          activeOfficialsData.push(officialData);
-        } else if (status === "inactive") {
-          inactiveOfficialsData.push(officialData);
-        }
-      }
-    });
-
-    activeOfficialsData.sort((a, b) => a.barangay.localeCompare(b.barangay));
-    inactiveOfficialsData.sort((a, b) => a.barangay.localeCompare(b.barangay));
-
-    activeOfficialsData.forEach(official => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${official.firstName}</td>
-        <td>${official.lastName}</td>
-        <td>${official.email}</td>
-        <td>${official.barangay}</td>
-        <td>${official.position}</td>
-        <td>${official.contact}</td>
-        <td>${official.statusBadge}</td>
-        <td><span class="view-only-cell"><i class="fa fa-eye"></i> View Only</span></td>
-      `;
-      activeOfficialsTable.appendChild(tr);
-    });
-
-    inactiveOfficialsData.forEach(official => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${official.firstName}</td>
-        <td>${official.lastName}</td>
-        <td>${official.email}</td>
-        <td>${official.barangay}</td>
-        <td>${official.position}</td>
-        <td>${official.contact}</td>
-        <td>${official.statusBadge}</td>
-        <td><span class="view-only-cell"><i class="fa fa-eye"></i> View Only</span></td>
-      `;
-      inactiveOfficialsTable.appendChild(tr);
-    });
-
-    if (pendingTable.innerHTML === "") {
-      pendingTable.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#777;padding:1rem">No pending admins found.</td></tr>';
-    }
-    if (activeTable.innerHTML === "") {
-      activeTable.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#777;padding:1rem">No active admins found.</td></tr>';
-    }
-    if (inactiveTable.innerHTML === "") {
-      inactiveTable.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#777;padding:1rem">No inactive admins found.</td></tr>';
-    }
-    if (activeOfficialsTable.innerHTML === "") {
-      activeOfficialsTable.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777;padding:1rem">No active barangay officials found.</td></tr>';
-    }
-    if (inactiveOfficialsTable.innerHTML === "") {
-      inactiveOfficialsTable.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#777;padding:1rem">No inactive barangay officials found.</td></tr>';
-    }
-  });
-
-  // ✅ APPROVE USER WITH AUDIT LOGGING
-  window.approveUser = async (oldDocId) => {
-    if (!confirm("Approve this user and create their login credentials?")) return;
+        console.log("Creating Firebase Auth account...");
+        const userCredential = await createUserWithEmailAndPassword(
+          secondaryAuth, 
+          userData.email, 
+          userData.password
+        );
     
-    try {
-      console.log("🔄 Starting approval process for document ID:", oldDocId);
-      
-      const oldDocRef = doc(db, "users", oldDocId);
-      const oldDocSnap = await getDoc(oldDocRef);
-      
-      if (!oldDocSnap.exists()) {
-        alert("User not found.");
-        return;
+        const newUid = userCredential.user.uid;
+        console.log("Auth account created with UID:", newUid);
+
+        const newDocRef = doc(db, "users", newUid);
+        console.log("Creating new Firestore document with ID:", newUid);
+        
+        await setDoc(newDocRef, {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          name: userData.name,
+          email: userData.email,
+          barangay: userData.barangay,
+          position: userData.position,
+          password: userData.password,
+          hashedPassword: userData.hashedPassword,
+          status: "Active",
+          role: userData.role || (userData.position === "Barangay Official" ? "Official" : "Admin"),
+          createdAt: userData.createdAt || serverTimestamp(),
+          approvedAt: serverTimestamp()
+        });
+        
+        console.log("New document created successfully");
+
+        console.log("Deleting old pending document:", oldDocId);
+        await deleteDoc(oldDocRef);
+        console.log("Old document deleted");
+
+        await signOut(secondaryAuth);
+        await deleteApp(secondaryApp);
+        console.log("Secondary app cleaned up");
+
+        await logAuditEvent(
+          "User Approved",
+          "approve",
+          "Users",
+          `Approved user: ${userData.name}`,
+          {
+            beforeValue: "Pending",
+            afterValue: "Active",
+            targetUserId: newUid,
+            targetUserEmail: userData.email,
+            targetUserPosition: userData.position
+          }
+        );
+
+        alert(`✅ ${userData.name} has been approved successfully!\n\nThey can now login with:\nEmail: ${userData.email}\nPassword: (the one you set)`);
+        
+      } catch (err) {
+        console.error("Error approving user:", err);
+        console.error("Error code:", err.code);
+        console.error("Error message:", err.message);
+        
+        if (err.code === 'auth/email-already-in-use') {
+          alert("Error: This email is already registered in Firebase Authentication. The user may have already been approved or registered separately.");
+        } else if (err.code === 'auth/weak-password') {
+          alert("Error: The password is too weak. Please use a stronger password.");
+        } else if (err.code === 'auth/invalid-email') {
+          alert("Error: Invalid email format.");
+        } else {
+          alert("Error approving user: " + err.message);
+        }
       }
-      
-      const userData = oldDocSnap.data();
-      console.log("User data retrieved:", userData);
-
-      const secondaryApp = initializeApp(firebaseConfig, "Secondary-" + Date.now());
-      const secondaryAuth = getAuth(secondaryApp);
-
-      console.log("Creating Firebase Auth account...");
-      const userCredential = await createUserWithEmailAndPassword(
-        secondaryAuth, 
-        userData.email, 
-        userData.password );
-  
-  const newUid = userCredential.user.uid;
-  console.log("Auth account created with UID:", newUid);
-
-  const newDocRef = doc(db, "users", newUid);
-  console.log("Creating new Firestore document with ID:", newUid);
-  
-  await setDoc(newDocRef, {
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    name: userData.name,
-    email: userData.email,
-    barangay: userData.barangay,
-    position: userData.position,
-    password: userData.password,
-    hashedPassword: userData.hashedPassword,
-    status: "Active",
-    role: userData.role || (userData.position === "Barangay Official" ? "Official" : "Admin"),
-    createdAt: userData.createdAt || serverTimestamp(),
-    approvedAt: serverTimestamp()
-  });
-  
-  console.log("New document created successfully");
-
-  console.log("Deleting old pending document:", oldDocId);
-  await deleteDoc(oldDocRef);
-  console.log("Old document deleted");
-
-  await signOut(secondaryAuth);
-  await deleteApp(secondaryApp);
-  console.log("Secondary app cleaned up");
-
-  // ✅ LOG USER APPROVAL
-  await logAuditEvent(
-    "User Approved",
-    "approve",
-    "Users",
-    `Approved user: ${userData.name}`,
-    {
-      beforeValue: "Pending",
-      afterValue: "Active",
-      targetUserId: newUid,
-      targetUserEmail: userData.email,
-      targetUserPosition: userData.position
-    }
-  );
-
-  alert(`✅ ${userData.name} has been approved successfully!\n\nThey can now login with:\nEmail: ${userData.email}\nPassword: (the one you set)`);
-  
-} catch (err) {
-  console.error("Error approving user:", err);
-  console.error("Error code:", err.code);
-  console.error("Error message:", err.message);
-  
-  if (err.code === 'auth/email-already-in-use') {
-    alert("Error: This email is already registered in Firebase Authentication. The user may have already been approved or registered separately.");
-  } else if (err.code === 'auth/weak-password') {
-    alert("Error: The password is too weak. Please use a stronger password.");
-  } else if (err.code === 'auth/invalid-email') {
-    alert("Error: Invalid email format.");
-  } else {
-    alert("Error approving user: " + err.message);
-  }
-}
-};
-
-/// ✅ DEACTIVATE USER WITH AUDIT LOGGING
-window.deactivateUser = async (id) => {
-  if (confirm("Deactivate this user? They will not be able to login.")) {
-    try {
-      const userRef = doc(db, "users", id);
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
-      const userName = userData.name || `${userData.firstName} ${userData.lastName}`;
-
-      await updateDoc(userRef, { status: "Inactive" });
-
-      // ✅ LOG USER DEACTIVATION
-      await logAuditEvent(
-        "User Deactivated",
-        "status",
-        "Users",
-        `Deactivated user: ${userName}`,
-        {
-          beforeValue: "Active",
-          afterValue: "Inactive",
-          targetUserId: id,
-          targetUserEmail: userData.email
-        }
-      );
-
-      alert("User deactivated successfully!");
-    } catch (err) {
-      console.error("Error deactivating user:", err);
-      alert("Error: " + err.message);
-    }
-  }
-};
-
-// ✅ ACTIVATE USER WITH AUDIT LOGGING
-window.activateUser = async (id) => {
-  if (confirm("Activate this user? They will be able to login again.")) {
-    try {
-      const userRef = doc(db, "users", id);
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
-      const userName = userData.name || `${userData.firstName} ${userData.lastName}`;
-
-      await updateDoc(userRef, { status: "Active" });
-
-      // ✅ LOG USER ACTIVATION
-      await logAuditEvent(
-        "User Activated",
-        "status",
-        "Users",
-        `Activated user: ${userName}`,
-        {
-          beforeValue: "Inactive",
-          afterValue: "Active",
-          targetUserId: id,
-          targetUserEmail: userData.email
-        }
-      );
-
-      alert("User activated successfully!");
-    } catch (err) {
-      console.error("Error activating user:", err);
-      alert("Error: " + err.message);
-    }
-  }
-};
-
-// ✅ DELETE USER WITH AUDIT LOGGING
-window.deleteUser = async (id) => {
-  if (confirm("Are you sure you want to permanently delete this user?\n\nThis action cannot be undone!")) {
-    try {
-      const userRef = doc(db, "users", id);
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
-      const userName = userData.name || `${userData.firstName} ${userData.lastName}`;
-
-      await deleteDoc(userRef);
-
-      // ✅ LOG USER DELETION
-      await logAuditEvent(
-        "User Deleted",
-        "delete",
-        "Users",
-        `Deleted user: ${userName}`,
-        {
-          targetUserId: id,
-          targetUserEmail: userData.email,
-          targetUserPosition: userData.position,
-          deletedUserData: JSON.stringify(userData)
-        }
-      );
-
-      alert("User deleted successfully!");
-    } catch (err) {
-      console.error("Error deleting user:", err);
-      alert("Error: " + err.message);
-    }
-  }
-};
-window.searchUser = () => {
-const input = document.getElementById("searchInput").value.toLowerCase();
-[pendingTable, activeTable, inactiveTable, activeOfficialsTable, inactiveOfficialsTable].forEach(table => {
-[...table.querySelectorAll("tr")].forEach(row => {
-if (row.cells.length > 0) {
-const firstName = row.cells[0].textContent.toLowerCase();
-const lastName = row.cells[1].textContent.toLowerCase();
-const email = row.cells[2].textContent.toLowerCase();
-const barangay = row.cells[3].textContent.toLowerCase();
-row.style.display = firstName.includes(input) || lastName.includes(input) || email.includes(input) || barangay.includes(input) ? "" : "none";
-}
-});
-});
-};
-// ✅ LOGOUT WITH AUDIT LOGGING
-const handleLogout = async (e) => {
-e.preventDefault();
-if (confirm("Are you sure you want to logout?")) {
-// ✅ LOG LOGOUT
-await logAuditEvent(
-"Logged Out",
-"logout",
-"Authentication",
-"User logged out from the system"
-);
-  await signOut(auth);
-  window.location.href = "login.html";
-}
-};
-document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
-document.getElementById("dropdownLogoutBtn").addEventListener("click", handleLogout);
-onAuthStateChanged(auth, async (user) => {
-if (user) {
-const userDocRef = doc(db, "users", user.uid);
-  onSnapshot(userDocRef, (docSnap) => {
-    if (!docSnap.exists()) {
-      console.error("User document not found!");
-      return;
-    }
-
-    const data = docSnap.data();
-
-    let fullName = "Unknown";
-    if (data.firstName && data.lastName) {
-      fullName = `${data.firstName} ${data.lastName}`;
-    } else if (data.name) {
-      fullName = data.name;
-    } else if (data.firstName) {
-      fullName = data.firstName;
-    }
-
-    document.getElementById("navUsername").textContent = fullName;
-
-    const photoURL = data.photoURL || data.profilePic || "image.png";
-    updateAllProfilePhotos(photoURL);
-
-    superAdminData = {
-      uid: user.uid,
-      email: user.email,
-      position: data.position
     };
 
-    if (data.position !== "Super Admin") {
-      alert("Access denied. Only Super Admins can manage users.");
-      window.location.href = "dashboard.html";
-      return;
-    }
+    window.deactivateUser = async (id) => {
+      if (confirm("Deactivate this user? They will not be able to login.")) {
+        try {
+          const userRef = doc(db, "users", id);
+          const userDoc = await getDoc(userRef);
+          const userData = userDoc.data();
+          const userName = userData.name || `${userData.firstName} ${userData.lastName}`;
 
-    console.log("Super Admin authenticated and authorized");
-  }, (error) => {
-    console.error("Error in user snapshot:", error);
-  });
+          await updateDoc(userRef, { status: "Inactive" });
 
-  await setupRealtimeNotifications();
-} else {
-  window.location.href = "login.html";
-}
-});
-</script>
+          await logAuditEvent(
+            "User Deactivated",
+            "status",
+            "Users",
+            `Deactivated user: ${userName}`,
+            {
+              beforeValue: "Active",
+              afterValue: "Inactive",
+              targetUserId: id,
+              targetUserEmail: userData.email
+            }
+          );
+
+          alert("User deactivated successfully!");
+        } catch (err) {
+          console.error("Error deactivating user:", err);
+          alert("Error: " + err.message);
+        }
+      }
+    };
+
+    window.activateUser = async (id) => {
+      if (confirm("Activate this user? They will be able to login again.")) {
+        try {
+          const userRef = doc(db, "users", id);
+          const userDoc = await getDoc(userRef);
+          const userData = userDoc.data();
+          const userName = userData.name || `${userData.firstName} ${userData.lastName}`;
+
+          await updateDoc(userRef, { status: "Active" });
+
+          await logAuditEvent(
+            "User Activated",
+            "status",
+            "Users",
+            `Activated user: ${userName}`,
+            {
+              beforeValue: "Inactive",
+              afterValue: "Active",
+              targetUserId: id,
+              targetUserEmail: userData.email
+            }
+          );
+
+          alert("User activated successfully!");
+        } catch (err) {
+          console.error("Error activating user:", err);
+          alert("Error: " + err.message);
+        }
+      }
+    };
+
+    window.deleteUser = async (id) => {
+      if (confirm("Are you sure you want to permanently delete this user?\n\nThis action cannot be undone!")) {
+        try {
+          const userRef = doc(db, "users", id);
+          const userDoc = await getDoc(userRef);
+          const userData = userDoc.data();
+          const userName = userData.name || `${userData.firstName} ${userData.lastName}`;
+
+          await deleteDoc(userRef);
+
+          await logAuditEvent(
+            "User Deleted",
+            "delete",
+            "Users",
+            `Deleted user: ${userName}`,
+            {
+              targetUserId: id,
+              targetUserEmail: userData.email,
+              targetUserPosition: userData.position,
+              deletedUserData: JSON.stringify(userData)
+            }
+          );
+
+          alert("User deleted successfully!");
+        } catch (err) {
+          console.error("Error deleting user:", err);
+          alert("Error: " + err.message);
+        }
+      }
+    };
+
+    window.searchUser = () => {
+      const input = document.getElementById("searchInput").value.toLowerCase();
+      ['pending', 'active', 'inactive', 'activeOfficials', 'inactiveOfficials'].forEach(tableType => {
+        const state = paginationState[tableType];
+        const filtered = state.data.filter(row => {
+          const html = row.html.toLowerCase();
+          return html.includes(input);
+        });
+        state.data = filtered;
+        state.currentPage = 1;
+        updatePagination(tableType);
+      });
+    };
+
+    const handleLogout = async (e) => {
+      e.preventDefault();
+      if (confirm("Are you sure you want to logout?")) {
+        await logAuditEvent(
+          "Logged Out",
+          "logout",
+          "Authentication",
+          "User logged out from the system"
+        );
+
+        await signOut(auth);
+        window.location.href = "login.html";
+      }
+    };
+
+    document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
+    document.getElementById("dropdownLogoutBtn").addEventListener("click", handleLogout);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        onSnapshot(userDocRef, (docSnap) => {
+          if (!docSnap.exists()) {
+            console.error("User document not found!");
+            return;
+          }    
+          const data = docSnap.data();    
+          let fullName = "Unknown";
+          if (data.firstName && data.lastName) {
+            fullName = `${data.firstName} ${data.lastName}`;
+          } else if (data.name) {
+            fullName = data.name;
+          } else if (data.firstName) {
+            fullName = data.firstName;
+          }    
+          document.getElementById("navUsername").textContent = fullName;    
+          const photoURL = data.photoURL || data.profilePic || "image.png";
+          updateAllProfilePhotos(photoURL);    
+          superAdminData = {
+            uid: user.uid,
+            email: user.email,
+            position: data.position
+          };    
+          if (data.position !== "Super Admin") {
+            alert("Access denied. Only Super Admins can manage users.");
+            window.location.href = "dashboard.html";
+            return;
+          }    
+          console.log("Super Admin authenticated and authorized");
+        }, (error) => {
+          console.error("Error in user snapshot:", error);
+        });  
+        await setupRealtimeNotifications();
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+  </script>
 </body>
 </html>

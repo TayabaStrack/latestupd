@@ -337,7 +337,7 @@
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJkfi59FibsnD-dxAdyYUohj36N_bOtfE&callback=initMiniMap"></script>
 
-   <script type="module">
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { 
@@ -380,6 +380,12 @@
   let notificationsList = [];
   let trackedIds = new Set();
   let currentFilter = "all";
+
+  // ✅ Helper function to normalize position
+  function normalizePosition(position) {
+    if (!position) return "";
+    return position.toString().toLowerCase().trim();
+  }
 
   function normalizeStatus(status) {
     return (status || "").toLowerCase().trim();
@@ -552,219 +558,268 @@
           const type = data.reportType || data.type || data.projectName || "Report";
           const uniqueId = `report-${reportId}`;
           addNotification("report", "New report submitted", `${type} in ${barangay}`, uniqueId);
-        }});
-});
-updateNotificationUI();
-console.log("Notifications system active");
-}
-async function getImageUrl(imagePath) {
-try {
-if (!imagePath) return null;
-if (imagePath.startsWith("http")) return imagePath;
-return await getDownloadURL(ref(storage, imagePath));
-} catch (error) {
-console.error("Error getting image URL:", error);
-return null;
-}
-}
-onAuthStateChanged(auth, async (user) => {
-if (!user) return (window.location.href = "login.html");
-const userDocRef = doc(db, "users", user.uid);
-
-onSnapshot(userDocRef, (docSnap) => {
-  if (!docSnap.exists()) {
-    console.error("User document not found!");
-    return;
+        }
+      });
+    });
+    
+    updateNotificationUI();
+    console.log("Notifications system active");
   }
 
-  const data = docSnap.data();
-  
-  if (data.position !== "Super Admin") {
-    alert("Unauthorized access! Redirecting...");
+  async function getImageUrl(imagePath) {
+    try {
+      if (!imagePath) return null;
+      if (imagePath.startsWith("http")) return imagePath;
+      return await getDownloadURL(ref(storage, imagePath));
+    } catch (error) {
+      console.error("Error getting image URL:", error);
+      return null;
+    }
+  }
+
+  // ✅ ENHANCED AUTH CHECK - Redirects to login if not logged in OR not a Super Admin
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      console.log("❌ No user logged in, redirecting to login");
+      return (window.location.href = "login.html");
+    }
+
+    const userDocRef = doc(db, "users", user.uid);
+    
+    // ✅ Get user document first to check role before setting up snapshot
+    const userDocSnapshot = await getDoc(userDocRef);
+    
+    if (!userDocSnapshot.exists()) {
+      console.log("❌ User document not found, redirecting to login");
+      alert("User data not found! Redirecting...");
+      await signOut(auth);
+      return (window.location.href = "login.html");
+    }
+
+    const userData = userDocSnapshot.data();
+    const normalizedPosition = normalizePosition(userData.position);
+    
+    console.log("🔍 Super Admin Dashboard Auth Check:");
+    console.log("   User Position:", userData.position);
+    console.log("   Normalized Position:", normalizedPosition);
+
+    // ✅ Check if user is Super Admin (case-insensitive)
+    if (normalizedPosition !== "super admin") {
+      console.log("❌ Unauthorized access - User is not a Super Admin");
+      alert("Unauthorized access! This dashboard is for Super Admins only.");
+      await signOut(auth);
+      return (window.location.href = "login.html");
+    }
+
+    console.log("✅ Super Admin access granted");
+
+    // ✅ Setup realtime listener for user data updates
+    onSnapshot(userDocRef, (docSnap) => {
+      if (!docSnap.exists()) {
+        console.error("User document not found!");
+        alert("User data not found! Redirecting...");
+        signOut(auth);
+        window.location.href = "login.html";
+        return;
+      }
+
+      const data = docSnap.data();
+      const currentPosition = normalizePosition(data.position);
+      
+      // ✅ Recheck if user is still Super Admin
+      if (currentPosition !== "super admin") {
+        alert("Your role has been changed. Redirecting...");
+        signOut(auth);
+        window.location.href = "login.html";
+        return;
+      }
+      
+      let fullName = "Super Admin";
+      if (data.firstName && data.lastName) {
+        fullName = `${data.firstName} ${data.lastName}`;
+      } else if (data.name) {
+        fullName = data.name;
+      } else if (data.firstName) {
+        fullName = data.firstName;
+      }
+
+      navbarName.textContent = fullName;
+
+      const photoURL = data.photoURL || data.profilePic || "image.png";
+      updateAllProfilePhotos(photoURL);
+
+      console.log("User profile updated in real-time");
+    }, (error) => {
+      console.error("Error in user snapshot:", error);
+    });
+
+    await loadDashboardData();
+    await setupRealtimeNotifications();
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    await signOut(auth);
     window.location.href = "login.html";
-    return;
+  });
+
+  async function loadDashboardData() {
+    const snapshot = await getDocs(collection(db, "reports"));
+    let total = 0, pending = 0, ongoing = 0, completed = 0;
+    window.reportLocations = [];
+    const barangayData = {};
+    
+    snapshot.forEach((docSnap) => {
+      const report = docSnap.data();
+      total++;
+      const status = normalizeStatus(report.status);
+      if (status === "pending") pending++;
+      else if (status === "ongoing" || status === "in-progress") ongoing++;
+      else if (["resolved", "completed", "repaired", "posted"].includes(status)) completed++;
+
+      const barangay = report.barangay || report.location || "Unknown";
+      barangayData[barangay] = (barangayData[barangay] || 0) + 1;
+
+      const lat = report.latitude || report.lat || report.location?.latitude;
+      const lng = report.longitude || report.lng || report.location?.longitude;
+      if (lat && lng) {
+        window.reportLocations.push({
+          lat: parseFloat(lat),
+          lng: parseFloat(lng),
+          type: report.reportType || report.type || "Unknown",
+          status: status || "pending"
+        });
+      }
+    });
+
+    totalReportsEl.textContent = total;
+    pendingEl.textContent = pending;
+    ongoingEl.textContent = ongoing;
+    completedEl.textContent = completed;
+
+    updateChart(completed, ongoing, pending);
+    updateBarangayChart(barangayData);
+
+    if (window.miniMap) {
+      addReportMarkers();
+    }
+
+    loadReportImages();
   }
-  
-  let fullName = "Super Admin";
-  if (data.firstName && data.lastName) {
-    fullName = `${data.firstName} ${data.lastName}`;
-  } else if (data.name) {
-    fullName = data.name;
-  } else if (data.firstName) {
-    fullName = data.firstName;
-  }
 
-  navbarName.textContent = fullName;
-
-  const photoURL = data.photoURL || data.profilePic || "image.png";
-  updateAllProfilePhotos(photoURL);
-
-  console.log("User profile updated in real-time");
-}, (error) => {
-  console.error("Error in user snapshot:", error);
-});
-
-await loadDashboardData();
-await setupRealtimeNotifications();
-});
-logoutBtn.addEventListener("click", async () => {
-await signOut(auth);
-window.location.href = "login.html";
-});
-async function loadDashboardData() {
-const snapshot = await getDocs(collection(db, "reports"));
-let total = 0, pending = 0, ongoing = 0, completed = 0;
-window.reportLocations = [];
-const barangayData = {};
-snapshot.forEach((docSnap) => {
-  const report = docSnap.data();
-  total++;
-  const status = normalizeStatus(report.status);
-  if (status === "pending") pending++;
-  else if (status === "ongoing" || status === "in-progress") ongoing++;
-  else if (["resolved", "completed", "repaired", "posted"].includes(status)) completed++;
-
-  const barangay = report.barangay || report.location || "Unknown";
-  barangayData[barangay] = (barangayData[barangay] || 0) + 1;
-
-  const lat = report.latitude || report.lat || report.location?.latitude;
-  const lng = report.longitude || report.lng || report.location?.longitude;
-  if (lat && lng) {
-    window.reportLocations.push({
-      lat: parseFloat(lat),
-      lng: parseFloat(lng),
-      type: report.reportType || report.type || "Unknown",
-      status: status || "pending"
+  let chart;
+  function updateChart(completed, ongoing, pending) {
+    const ctx = document.getElementById("dashboardChart").getContext("2d");
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Completed", "Ongoing", "Pending"],
+        datasets: [{
+          label: "Reports",
+          data: [completed, ongoing, pending],
+          backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e"]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+      }
     });
   }
-});
 
-totalReportsEl.textContent = total;
-pendingEl.textContent = pending;
-ongoingEl.textContent = ongoing;
-completedEl.textContent = completed;
+  let barangayChart;
+  function updateBarangayChart(barangayData) {
+    const ctx = document.getElementById("barangayChart").getContext("2d");
+    if (barangayChart) barangayChart.destroy();
+    const sortedBarangays = Object.entries(barangayData)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
 
-updateChart(completed, ongoing, pending);
-updateBarangayChart(barangayData);
+    const labels = sortedBarangays.map(item => item[0]);
+    const data = sortedBarangays.map(item => item[1]);
 
-if (window.miniMap) {
-  addReportMarkers();
-}
-
-loadReportImages();
-}
-let chart;
-function updateChart(completed, ongoing, pending) {
-const ctx = document.getElementById("dashboardChart").getContext("2d");
-if (chart) chart.destroy();
-chart = new Chart(ctx, {
-type: "bar",
-data: {
-labels: ["Completed", "Ongoing", "Pending"],
-datasets: [{
-label: "Reports",
-data: [completed, ongoing, pending],
-backgroundColor: ["#1cc88a", "#36b9cc", "#f6c23e"]
-}]
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: { legend: { display: false } }
-}
-});
-}
-let barangayChart;
-function updateBarangayChart(barangayData) {
-const ctx = document.getElementById("barangayChart").getContext("2d");
-if (barangayChart) barangayChart.destroy();
-const sortedBarangays = Object.entries(barangayData)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 10);
-
-const labels = sortedBarangays.map(item => item[0]);
-const data = sortedBarangays.map(item => item[1]);
-
-barangayChart = new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: labels,
-    datasets: [{
-      label: "Number of Reports",
-      data: data,
-      borderColor: "#004aad",
-      backgroundColor: "rgba(0, 74, 173, 0.1)",
-      borderWidth: 2,
-      fill: true,
-      tension: 0.4,
-      pointBackgroundColor: "#004aad",
-      pointBorderColor: "#fff",
-      pointBorderWidth: 2,
-      pointRadius: 4,
-      pointHoverRadius: 6
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top'
+    barangayChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Number of Reports",
+          data: data,
+          borderColor: "#004aad",
+          backgroundColor: "rgba(0, 74, 173, 0.1)",
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: "#004aad",
+          pointBorderColor: "#fff",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
       },
-      tooltip: {
-        enabled: true,
-        backgroundColor: 'rgba(0, 74, 173, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: '#004aad',
-        borderWidth: 1
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          stepSize: 1
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          },
+          tooltip: {
+            enabled: true,
+            backgroundColor: 'rgba(0, 74, 173, 0.8)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: '#004aad',
+            borderWidth: 1
+          }
         },
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)'
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45
+            }
+          }
         }
-      },
-      x: {
-        grid: {
-          display: false
-        },
-        ticks: {
-          maxRotation: 45,
-          minRotation: 45
+      }
+    });
+  }
+
+  async function loadReportImages() {
+    const gallery = document.getElementById("reportImages");
+    gallery.innerHTML = "";
+    const snapshot = await getDocs(collection(db, "reports"));
+    let count = 0;
+    for (const docSnap of snapshot.docs) {
+      if (count >= 6) break;
+      const report = docSnap.data();
+      const imagePath = report.incidentImage || report.imageUrl || report.image;
+      if (imagePath) {
+        const url = await getImageUrl(imagePath);
+        if (url) {
+          const img = document.createElement("img");
+          img.src = url;
+          img.onerror = () => (img.style.display = "none");
+          gallery.appendChild(img);
+          count++;
         }
       }
     }
   }
-});
-}
-async function loadReportImages() {
-const gallery = document.getElementById("reportImages");
-gallery.innerHTML = "";
-const snapshot = await getDocs(collection(db, "reports"));
-let count = 0;
-for (const docSnap of snapshot.docs) {
-  if (count >= 6) break;
-  const report = docSnap.data();
-  const imagePath = report.incidentImage || report.imageUrl || report.image;
-  if (imagePath) {
-    const url = await getImageUrl(imagePath);
-    if (url) {
-      const img = document.createElement("img");
-      img.src = url;
-      img.onerror = () => (img.style.display = "none");
-      gallery.appendChild(img);
-      count++;
-    }
-  }
-}
-}
 </script>
 </body>
 </html>
