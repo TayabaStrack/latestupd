@@ -143,6 +143,17 @@
     .category-badge{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
     .issue-badge{background:#fff3e0;color:#e65100;border:1px solid #ffb74d}
     
+/* REMARKS STYLES */
+    .remarks-section{margin-top:20px;padding:15px;background:#f8f9fa;border-radius:8px;border:1px solid #e0e0e0}
+    .remarks-section h3{color:#004aad;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .remarks-list{max-height:300px;overflow-y:auto;margin-bottom:15px}
+    .remark-item{background:#fff;padding:12px;margin-bottom:10px;border-radius:6px;border-left:4px solid #004aad;box-shadow:0 2px 4px rgba(0,0,0,0.05)}
+    .remark-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    .remark-author{font-weight:600;color:#004aad;font-size:0.9rem}
+    .remark-time{font-size:0.75rem;color:#999}
+    .remark-text{color:#333;font-size:0.9rem;line-height:1.5}
+    .no-remarks{text-align:center;padding:20px;color:#999;font-style:italic}
+
     .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
     .action a.decline{color:#d9534f}
     td button{padding:0.3rem 0.6rem;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;margin-right:4px}
@@ -319,6 +330,28 @@
     </div>
   </div>
 
+   <!-- REMARKS MODAL -->
+  <div class="modal" id="remarksModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="remarksModalTitle">
+      <div class="modal-header">
+        <h2 id="remarksModalTitle"><i class="fa fa-comments"></i> Remarks & Updates</h2>
+        <button class="close-btn" id="closeRemarksModal" title="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="remarks-section">
+          <h3><i class="fa fa-history"></i> Remarks History</h3>
+          <div class="remarks-list" id="remarksList">
+            <div class="no-remarks">No remarks yet</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-cancel" id="closeRemarksBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+
   <script>
     // Submenu toggle function
     function toggleSubmenu(event) {
@@ -382,6 +415,86 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
+   let isInternalNavigation = false;
+let isLoggingOut = false;
+let autoLogoutInitialized = false;
+
+function setupAutoLogout(auth) {
+  if (autoLogoutInitialized) {
+    console.log("⚠️ Auto-logout already initialized");
+    return;
+  }
+  autoLogoutInitialized = true;
+
+  // ✅ Track ALL link clicks (including profile links)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href) {
+      try {
+        const linkUrl = new URL(link.href, window.location.href);
+        const currentOrigin = window.location.origin;
+        
+        // Check if it's an internal link
+        if (linkUrl.origin === currentOrigin) {
+          isInternalNavigation = true;
+          console.log("🔗 Internal navigation detected:", link.href);
+          
+          // ✅ LONGER timeout - 3 seconds to ensure navigation completes
+          setTimeout(() => {
+            isInternalNavigation = false;
+          }, 3000);
+        }
+      } catch (err) {
+        // If URL parsing fails, treat as internal navigation to be safe
+        isInternalNavigation = true;
+        setTimeout(() => {
+          isInternalNavigation = false;
+        }, 3000);
+      }
+    }
+  }, true); // ✅ Use capture phase to catch all clicks
+
+  // ✅ IMPROVED: Only logout on actual page close, not navigation
+  window.addEventListener('beforeunload', (e) => {
+    // Don't logout if it's internal navigation
+    if (isInternalNavigation) {
+      console.log("✅ Internal navigation - NOT logging out");
+      return;
+    }
+    
+    // Only logout on actual tab/browser close
+    if (!isLoggingOut) {
+      console.log("🚪 Tab/browser closing - logging out");
+      isLoggingOut = true;
+      
+      // Use synchronous approach for reliable logout on page close
+      try {
+        signOut(auth);
+        sessionStorage.clear();
+      } catch (error) {
+        console.error("❌ Error during auto logout:", error);
+      }
+    }
+  });
+
+  // ✅ Handle browser back/forward button
+  window.addEventListener('popstate', async (e) => {
+    if (!isInternalNavigation && !isLoggingOut) {
+      console.log("⬅️ Browser back button detected - logging out");
+      isLoggingOut = true;
+      try {
+        await signOut(auth);
+        sessionStorage.clear();
+        window.location.replace("login.html");
+      } catch (error) {
+        console.error("❌ Error during back navigation logout:", error);
+      }
+    }
+  });
+
+  console.log("✅ Auto-logout functionality initialized");
+}
+
 const declinedBody = document.getElementById("declinedBody");
 const searchDeclined = document.getElementById("searchDeclined");
 const categoryFilter = document.getElementById("categoryFilter");
@@ -393,6 +506,10 @@ const viewModal = document.getElementById("viewModal");
 const viewModalGrid = document.getElementById("viewModalGrid");
 const closeViewModal = document.getElementById("closeViewModal");
 const closeViewBtn = document.getElementById("closeViewBtn");
+const remarksModal = document.getElementById("remarksModal");
+const remarksList = document.getElementById("remarksList");
+const closeRemarksModal = document.getElementById("closeRemarksModal");    
+const closeRemarksBtn = document.getElementById("closeRemarksBtn");
 const dropdownMenu = document.getElementById("dropdownMenu");
 const profileToggle = document.getElementById("profileToggle");
 const navUsername = document.getElementById("navUsername");
@@ -867,6 +984,39 @@ async function openViewModal(e){
   }
 }
 
+  async function openRemarksModal(e) {
+      e.preventDefault();
+      const reportId = e.currentTarget.dataset.id;
+      
+      try {
+        const snap = await getDoc(doc(db, "reports", reportId));
+        if (!snap.exists()) {
+          alert("Report not found");
+          return;
+        }
+        
+        const data = snap.data();
+        const remarks = data.remarks || [];
+        
+        if (remarks.length === 0) {
+          remarksList.innerHTML = '<div class="no-remarks">No remarks yet</div>';
+        } else {
+          remarksList.innerHTML = remarks.map(remark => `
+            <div class="remark-item">
+              <div class="remark-header">
+                <span class="remark-author">${remark.author || 'Unknown'}</span>
+                <span class="remark-time">${formatTimestamp(remark.timestamp)}</span>
+              </div>
+              <div class="remark-text">${remark.text || ''}</div>
+            </div>
+          `).reverse().join('');
+        }
+        
+        remarksModal.style.display = "flex";
+      } catch (err) {
+        alert("Error loading remarks: " + err.message);
+      }
+    }
 async function buildTableRow(docSnap) {
   const r = docSnap.data();
   const tr = document.createElement("tr");
@@ -950,6 +1100,20 @@ async function buildTableRow(docSnap) {
   
   const reporterPosition = await getReporterPosition(r.userId);
   addCell(reporterPosition);
+
+   const remarks = r.remarks || [];
+      const latestRemarkSpan = document.createElement("span");
+      latestRemarkSpan.className = "truncate";
+      if (remarks.length > 0) {
+        const latestRemark = remarks[remarks.length - 1];
+        latestRemarkSpan.textContent = latestRemark.text || "No remark";
+        latestRemarkSpan.title = latestRemark.text || "";
+      } else {
+        latestRemarkSpan.textContent = "No remarks";
+        latestRemarkSpan.style.fontStyle = "italic";
+        latestRemarkSpan.style.color = "#999";
+      }
+      addCell(latestRemarkSpan);
   
   const reasonSpan = document.createElement("span");
   reasonSpan.className = "truncate";
@@ -1013,6 +1177,8 @@ onAuthStateChanged(auth, async(user)=>{
     window.location.href="login.html";
     return;
   }
+      setupAutoLogout(auth);
+
   try {
     const userDocRef = doc(db,"users",user.uid);
     onSnapshot(userDocRef, async (docSnap) => {
@@ -1071,6 +1237,7 @@ onAuthStateChanged(auth, async(user)=>{
     window.location.href="login.html";
   }
 });
-  </script>
+
+</script>
 </body>
 </html>

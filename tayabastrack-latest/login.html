@@ -27,19 +27,46 @@
       transition: background 0.3s ease;
     }
 
-    .logo-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: -0.5rem;
-    }
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: -0.5rem;
+}
 
-    .logo-container img {
-      width: 400px;
-      height: auto;
-      max-width: 90%;
-      object-fit: contain;
-    }
+.logo-circle {
+  width: 100px;                       /* Circle size */
+  height: 100px;                      /* Same as width */
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logo-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .logo-circle {
+    width: 140px;
+    height: 140px;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-circle {
+    width: 110px;
+    height: 110px;
+    padding: 12px;
+  }
+}
 
     .left-panel h1 {
       font-size: 1.8rem;
@@ -374,8 +401,9 @@
   <!-- Left Panel -->
   <div class="left-panel">
     <div class="logo-container">
-      <img src="last.png" alt="TayabasTrack Logo"/>
-    </div>
+      <div class="logo-circle">
+      <img src="logo.png" alt="TayabasTrack Logo"/>
+    </div></div>
 
     <h1>Welcome to TayabasTrack</h1>
     <p>Access Portal</p>
@@ -432,9 +460,9 @@
     </div>
   </div>
     
-  <script type="module">
+ <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -450,29 +478,93 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ✅ CHECK IF USER IS ALREADY LOGGED IN - Redirect IMMEDIATELY
+    // 🔒 SET SESSION-ONLY PERSISTENCE - Logs out when tab closes
+    setPersistence(auth, browserSessionPersistence)
+      .then(() => {
+        console.log("✅ Auth persistence set to SESSION (logout on tab close)");
+      })
+      .catch((error) => {
+        console.error("❌ Error setting persistence:", error);
+      });
+
+    // ✅ Helper function to normalize status - case insensitive
+    function normalizeStatus(status) {
+      if (!status) return "";
+      return status.toString().toLowerCase().trim();
+    }
+
+    // ✅ Helper function to normalize position - case insensitive
+    function normalizePosition(position) {
+      if (!position) return "";
+      return position.toString().toLowerCase().trim();
+    }
+
+    // ✅ CHECK IF USER IS ALREADY LOGGED IN AND THEIR STATUS
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        console.log("🔍 User already logged in, checking role...");
+        console.log("🔍 User already logged in, checking role and status...");
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            const normalizedPosition = normalizePosition(userData.position);
-            
-            // Redirect based on role - NO DELAY
-            if (normalizedPosition === "super admin") {
-              console.log("➡️ Redirecting logged-in Super Admin to dashboard");
-              window.location.replace("dashboard.html"); // use replace instead of href
-              return; // Stop execution
-            } else if (normalizedPosition === "admin") {
-              console.log("➡️ Redirecting logged-in Admin to dashboard");
-              window.location.replace("ad_dash.html"); // use replace instead of href
-              return; // Stop execution
-            }
+          
+          if (!userDoc.exists()) {
+            console.warn("⚠️ User document not found, logging out...");
+            await signOut(auth);
+            document.body.classList.add('auth-checked');
+            return;
           }
+
+          const userData = userDoc.data();
+          const normalizedPosition = normalizePosition(userData.position);
+          const normalizedStatus = normalizeStatus(userData.status);
+          
+          console.log("📋 User Status Check:");
+          console.log("   Position:", normalizedPosition);
+          console.log("   Status:", normalizedStatus);
+          
+          // 🔒 CHECK IF ACCOUNT IS INACTIVE OR DELETED - BLOCK BEFORE REDIRECT
+          if (normalizedStatus === "inactive" || normalizedStatus === "deleted") {
+            console.warn("⚠️ Account is inactive or deleted, logging out...");
+            await signOut(auth);
+            alert("Your account has been deactivated or deleted. You cannot access the system.");
+            document.body.classList.add('auth-checked');
+            return;
+          }
+
+          // Check for pending status (admins only)
+          if (normalizedPosition === "admin" && normalizedStatus === "pending") {
+            console.warn("⚠️ Admin account pending approval, logging out...");
+            await signOut(auth);
+            alert("Your account is pending approval. Please wait for the Super Admin to approve your account.");
+            document.body.classList.add('auth-checked');
+            return;
+          }
+
+          // Check if user has valid admin role
+          if (normalizedPosition !== "super admin" && normalizedPosition !== "admin") {
+            console.warn("⚠️ User does not have admin privileges, logging out...");
+            await signOut(auth);
+            alert("You are not authorized to access this system.");
+            document.body.classList.add('auth-checked');
+            return;
+          }
+          
+          // ✅ ALL CHECKS PASSED - Redirect based on role
+          console.log("✅ User is valid and active, redirecting...");
+          if (normalizedPosition === "super admin") {
+            console.log("➡️ Redirecting logged-in Super Admin to dashboard");
+            window.location.replace("dashboard.html");
+            return;
+          } else if (normalizedPosition === "admin") {
+            console.log("➡️ Redirecting logged-in Admin to dashboard");
+            window.location.replace("ad_dash.html");
+            return;
+          }
+
         } catch (error) {
-          console.error("Error checking user role:", error);
+          console.error("❌ Error checking user status:", error);
+          await signOut(auth);
+          document.body.classList.add('auth-checked');
+          return;
         }
       }
       
@@ -520,18 +612,6 @@
         }
     }
 
-    // ✅ Helper function to normalize status - case insensitive
-    function normalizeStatus(status) {
-      if (!status) return "";
-      return status.toString().toLowerCase().trim();
-    }
-
-    // ✅ Helper function to normalize position - case insensitive
-    function normalizePosition(position) {
-      if (!position) return "";
-      return position.toString().toLowerCase().trim();
-    }
-
     // ✅ Password Toggle Function
     window.togglePassword = function(inputId, button) {
       const input = document.getElementById(inputId);
@@ -572,7 +652,7 @@
       }
     }
 
-    // ✅ UNIFIED Login Function - Auto-detects role from Firestore
+    // ✅ UNIFIED Login Function - CHECKS STATUS BEFORE ALLOWING LOGIN
     window.loginUser = async function() {
       const emailInput = document.getElementById("login-email");
       const passwordInput = document.getElementById("login-password");
@@ -592,6 +672,9 @@
 
       try {
         console.log("🔐 Attempting unified login for:", email);
+        
+        // 🔒 IMPORTANT: Set session persistence BEFORE login
+        await setPersistence(auth, browserSessionPersistence);
         
         // Step 1: Authenticate with Firebase Auth
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -639,6 +722,25 @@
           return;
         }
 
+        // 🔒 CRITICAL: Check if account is DELETED or INACTIVE FIRST
+        if (normalizedStatus === "deleted") {
+          console.warn("⚠️ Account has been deleted");
+          alert("Your account has been deleted. You cannot access the system.");
+          await signOut(auth);
+          loginButton.disabled = false;
+          loginButton.textContent = "Login";
+          return;
+        }
+
+        if (normalizedStatus === "inactive") {
+          console.warn("⚠️ Account is inactive");
+          alert("Your account has been deactivated. Please contact the Super Admin for assistance.");
+          await signOut(auth);
+          loginButton.disabled = false;
+          loginButton.textContent = "Login";
+          return;
+        }
+
         // 🔒 Status check for Admin accounts (case-insensitive)
         if (normalizedPosition === "admin") {
           console.log("👤 Checking Admin status...");
@@ -646,13 +748,6 @@
           if (normalizedStatus === "pending") {
             console.warn("⚠️ Admin account is pending approval");
             alert("Your account is pending approval. Please wait for the Super Admin to approve your account.");
-            await signOut(auth);
-            loginButton.disabled = false;
-            loginButton.textContent = "Login";
-            return;
-          } else if (normalizedStatus === "inactive") {
-            console.warn("⚠️ Admin account is inactive");
-            alert("Your account has been deactivated. Please contact the Super Admin for assistance.");
             await signOut(auth);
             loginButton.disabled = false;
             loginButton.textContent = "Login";
@@ -697,10 +792,10 @@
         
         if (normalizedPosition === "super admin") {
           console.log("➡️ Redirecting to Super Admin dashboard");
-          window.location.replace("dashboard.html"); // use replace
+          window.location.replace("dashboard.html");
         } else if (normalizedPosition === "admin") {
           console.log("➡️ Redirecting to Admin dashboard");
-          window.location.replace("ad_dash.html"); // use replace
+          window.location.replace("ad_dash.html");
         }
 
       } catch (error) {

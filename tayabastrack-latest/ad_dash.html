@@ -455,221 +455,13 @@
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJkfi59FibsnD-dxAdyYUohj36N_bOtfE&callback=initMiniMap"></script>
 
-    <!-- Notification System -->
-    <script>
-    let notificationsList = [];
-    let seenNotificationIds = new Set();
-    let trackedUserStatuses = {};
-    let trackedReportIds = new Set();
-    let currentFilter = "all";
-    let globalDb = null;
-
-    function normalizeStatus(status) { 
-        return (status || "").toLowerCase().trim(); 
-    }
-
-    function isBarangayPosition(position) {
-        if (!position) return false;
-        const pos = position.toLowerCase();
-        return pos.includes("barangay") || pos.includes("brgy") || pos.includes("brgy.");
-    }
-
-    // Add notification function
-    function addNotification(type, message, detail) {
-        const cleanMsg = (message || "").trim();
-        const cleanDetail = (detail || "").trim();
-        const timestamp = new Date();
-        const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
-        
-        if (seenNotificationIds.has(id)) return;
-        seenNotificationIds.add(id);
-        
-        const notification = {
-            id,
-            type,
-            message: cleanMsg,
-            detail: cleanDetail,
-            timestamp: timestamp,
-            read: false
-        };
-        
-        notificationsList.unshift(notification);
-        updateNotificationUI();
-    }
-
-    function updateNotificationUI() {
-        let filtered = [...notificationsList];
-        
-        if (currentFilter === "report") {
-            filtered = filtered.filter((n) => n.type === "report");
-        } else if (currentFilter === "user") {
-            filtered = filtered.filter((n) => n.type === "user");
-        } else if (currentFilter === "24h") {
-            const ago = Date.now() - 24 * 60 * 60 * 1000;
-            filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
-        }
-        
-        filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-        
-        const unreadCount = notificationsList.filter(n => !n.read).length;
-        const notificationBadge = document.getElementById("notificationBadge");
-        if (unreadCount > 0) {
-            notificationBadge.textContent = unreadCount;
-            notificationBadge.classList.add("show");
-        } else {
-            notificationBadge.textContent = "";
-            notificationBadge.classList.remove("show");
-        }
-        
-        const notificationList = document.getElementById("notificationList");
-        if (filtered.length === 0) {
-            notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
-        } else {
-            notificationList.innerHTML = filtered.map((n) => `
-                <div class="notification-item ${n.read ? '' : 'unread'}">
-                    <div class="notification-icon ${n.type}">
-                        ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
-                    </div>
-                    <div class="notification-content">
-                        <p><strong>${n.message}</strong></p>
-                        <p>${n.detail}</p>
-                        <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                    </div>
-                </div>
-            `).join("");
-        }
-    }
-
-    // Initialize notification listeners
-    const notificationBell = document.getElementById("notificationBell");
-    const notificationMenu = document.getElementById("notificationMenu");
-    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
-    const markAllReadBtn = document.getElementById("markAllReadBtn");
-
-    notificationBell.addEventListener("click", (e) => {
-        e.stopPropagation();
-        notificationMenu.classList.toggle("show");
-        document.getElementById("dropdownMenu").classList.remove("show");
-    });
-
-    clearNotificationsBtn.addEventListener("click", () => {
-        notificationsList = [];
-        seenNotificationIds.clear();
-        updateNotificationUI();
-    });
-
-    markAllReadBtn.addEventListener("click", () => {
-        notificationsList.forEach(n => n.read = true);
-        updateNotificationUI();
-    });
-
-    document.querySelectorAll(".filter-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-            document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
-            e.target.classList.add("active");
-            currentFilter = e.target.dataset.filter;
-            updateNotificationUI();
-        });
-    });
-
-    async function setupRealtimeNotifications(db) {
-        globalDb = db;
-        
-        const { collection, getDocs, onSnapshot } = await import(
-            "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
-        );
-        
-        // Track existing users
-        const userSnap = await getDocs(collection(db, "users"));
-        userSnap.forEach((docSnap) => {
-            const userId = docSnap.id;
-            const data = docSnap.data();
-            const status = normalizeStatus(data.status);
-            trackedUserStatuses[userId] = status;
-        });
-        
-        // Listen for user changes
-        onSnapshot(collection(db, "users"), (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                const userId = change.doc.id;
-                const data = change.doc.data();
-                const currentStatus = normalizeStatus(data.status);
-                const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-                const position = data.position || "User";
-                
-                if (change.type === "added") {
-                    trackedUserStatuses[userId] = currentStatus;
-                    if (currentStatus === "active") {
-                        addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
-                    }
-                }
-                
-                if (change.type === "modified") {
-                    const oldStatus = trackedUserStatuses[userId];
-                    if (oldStatus !== "active" && currentStatus === "active") {
-                        addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
-                    }
-                    trackedUserStatuses[userId] = currentStatus;
-                }
-            });
-        });
-        
-        // Track existing reports
-        const reportSnap = await getDocs(collection(db, "reports"));
-        reportSnap.forEach((docSnap) => {
-            trackedReportIds.add(docSnap.id);
-        });
-        
-// Listen for new reports
-onSnapshot(collection(db, "reports"), (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-        const id = change.doc.id;
-        const data = change.doc.data();
-
-        if (change.type === "added" && !trackedReportIds.has(id)) {
-            trackedReportIds.add(id);
-
-            const barangay = data.barangay || data.location || "Unknown location";
-            const type = data.reportType || data.type || data.projectName || "Report";
-
-            addNotification(
-                "report",
-                "New report submitted",
-                `${type} in ${barangay}`,   // ✔ fixed template string
-                id                          // optional unique ID if needed
-            );
-        }
-    });
-});
-
-updateNotificationUI();
-console.log("✅ Notifications active");
-
-    }
-const dropdownMenu = document.getElementById('dropdownMenu');
-const profileToggle = document.getElementById('profileToggle');
-
-profileToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    dropdownMenu.classList.toggle("show");
-    notificationMenu.classList.remove("show");
-});
-
-window.addEventListener('click', (e) => {
-    if (!e.target.closest('.profile-dropdown')) {
-        dropdownMenu.classList.remove("show");
-    }
-    if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
-        notificationMenu.classList.remove("show");
-    }
-});
-</script>
-
-<!-- Firebase + Chart -->
-<script type="module">
+ <script type="module">
+    // ==========================================
+    // FIREBASE INITIALIZATION
+    // ==========================================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, collection, getDocs, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, collection, getDocs, getDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -685,18 +477,483 @@ window.addEventListener('click', (e) => {
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
+setPersistence(auth, browserSessionPersistence)
+  .then(() => {
+    console.log("Auth persistence set to SESSION");
+  })
+  .catch((error) => {
+    console.error("Error setting persistence:", error);
+  });
+
+let isInternalNavigation = false;
+let isLoggingOut = false;
+let autoLogoutInitialized = false;
+
+function setupAutoLogout(auth) {
+  if (autoLogoutInitialized) {
+    console.log("⚠️ Auto-logout already initialized");
+    return;
+  }
+  autoLogoutInitialized = true;
+
+  // ✅ Track ALL link clicks (including profile links)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href) {
+      try {
+        const linkUrl = new URL(link.href, window.location.href);
+        const currentOrigin = window.location.origin;
+        
+        // Check if it's an internal link
+        if (linkUrl.origin === currentOrigin) {
+          isInternalNavigation = true;
+          console.log("🔗 Internal navigation detected:", link.href);
+          
+          // ✅ LONGER timeout - 3 seconds to ensure navigation completes
+          setTimeout(() => {
+            isInternalNavigation = false;
+          }, 3000);
+        }
+      } catch (err) {
+        // If URL parsing fails, treat as internal navigation to be safe
+        isInternalNavigation = true;
+        setTimeout(() => {
+          isInternalNavigation = false;
+        }, 3000);
+      }
+    }
+  }, true); // ✅ Use capture phase to catch all clicks
+
+  // ✅ IMPROVED: Only logout on actual page close, not navigation
+  window.addEventListener('beforeunload', (e) => {
+    // Don't logout if it's internal navigation
+    if (isInternalNavigation) {
+      console.log("✅ Internal navigation - NOT logging out");
+      return;
+    }
+    
+    // Only logout on actual tab/browser close
+    if (!isLoggingOut) {
+      console.log("🚪 Tab/browser closing - logging out");
+      isLoggingOut = true;
+      
+      // Use synchronous approach for reliable logout on page close
+      try {
+        signOut(auth);
+        sessionStorage.clear();
+      } catch (error) {
+        console.error("❌ Error during auto logout:", error);
+      }
+    }
+  });
+
+  // ✅ Handle browser back/forward button
+  window.addEventListener('popstate', async (e) => {
+    if (!isInternalNavigation && !isLoggingOut) {
+      console.log("⬅️ Browser back button detected - logging out");
+      isLoggingOut = true;
+      try {
+        await signOut(auth);
+        sessionStorage.clear();
+        window.location.replace("login.html");
+      } catch (error) {
+        console.error("❌ Error during back navigation logout:", error);
+      }
+    }
+  });
+
+  console.log("✅ Auto-logout functionality initialized");
+}
+
+
     window.db = db;
+
+    // ==========================================
+    // NOTIFICATION SYSTEM - IMPROVED VERSION
+    // ==========================================
+
+    async function setupRealtimeNotifications() {
+        if (!localStorage.getItem('notifications')) {
+            localStorage.setItem('notifications', '[]');
+        }
+
+        let allNotifications = [];
+
+        // LISTEN TO REPORTS
+        const reportsRef = collection(db, "reports");
+        const reportsQuery = query(reportsRef, orderBy("createdAt", "desc"), limit(50));
+
+        onSnapshot(reportsQuery, (snapshot) => {
+            const reportNotifications = [];
+            
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                
+                let timestamp;
+                if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+                    timestamp = data.createdAt.toDate();
+                } else if (data.timestamp && typeof data.timestamp === 'string') {
+                    timestamp = new Date(data.timestamp.replace(' ', 'T'));
+                } else if (data.createdAt) {
+                    timestamp = new Date(data.createdAt);
+                } else {
+                    timestamp = new Date();
+                }
+                
+                const category = data.category || 'Report';
+                const issue = data.issue || '';
+                const barangay = data.barangay || data.userBarangay || 'Unknown Location';
+                const status = data.status || 'Pending';
+                const firstName = data.firstName || 'User';
+                
+                let title = `New ${category} Report`;
+                let message = `${firstName} reported ${issue} in Brgy. ${barangay}`;
+                
+                if (status.toLowerCase() === 'repaired' || status.toLowerCase() === 'completed') {
+                    title = `✓ ${category} Completed`;
+                    message = `${issue} in Brgy. ${barangay} has been ${status.toLowerCase()}`;
+                } else if (status.toLowerCase() === 'ongoing') {
+                    title = `⚙ ${category} In Progress`;
+                    message = `${issue} in Brgy. ${barangay} is now ${status.toLowerCase()}`;
+                }
+                
+                reportNotifications.push({
+                    id: 'report_' + doc.id,
+                    type: 'report',
+                    title: title,
+                    message: message,
+                    timestamp: timestamp.toISOString(),
+                    read: false,
+                    status: status,
+                    category: category,
+                    barangay: barangay,
+                    data: data
+                });
+            });
+
+            allNotifications = [...reportNotifications, ...allNotifications.filter(n => n.type === 'user')];
+            allNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            allNotifications = allNotifications.map(notification => {
+                const existing = existingNotifications.find(n => n.id === notification.id);
+                if (existing) {
+                    notification.read = existing.read;
+                }
+                return notification;
+            });
+            
+            localStorage.setItem('notifications', JSON.stringify(allNotifications));
+            updateNotificationUI();
+        });
+
+        // LISTEN TO USERS
+        const usersRef = collection(db, "users");
+        const usersQuery = query(usersRef, orderBy("createdAt", "desc"), limit(50));
+
+        onSnapshot(usersQuery, (snapshot) => {
+            const userNotifications = [];
+            
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                
+                let timestamp;
+                if (data.createdAt && typeof data.createdAt === 'number') {
+                    timestamp = new Date(data.createdAt);
+                } else if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+                    timestamp = data.createdAt.toDate();
+                } else {
+                    timestamp = new Date();
+                }
+                
+                const fullName = data.fullName || `${data.firstName || ''} ${data.surname || ''}`.trim() || 'New User';
+                const position = data.position || 'User';
+                const barangay = data.barangay || 'Unknown Barangay';
+                const status = data.status || 'active';
+                
+                let title = `✓ New User Active`;
+                let message = `${fullName} (${position}) from Brgy. ${barangay}`;
+                
+                if (status === 'inactive') {
+                    title = `User Deactivated`;
+                    message = `${fullName} account is now inactive`;
+                }
+                
+                userNotifications.push({
+                    id: 'user_' + doc.id,
+                    type: 'user',
+                    title: title,
+                    message: message,
+                    timestamp: timestamp.toISOString(),
+                    read: false,
+                    status: status,
+                    position: position,
+                    barangay: barangay,
+                    data: data
+                });
+            });
+
+            allNotifications = [...allNotifications.filter(n => n.type === 'report'), ...userNotifications];
+            allNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            allNotifications = allNotifications.map(notification => {
+                const existing = existingNotifications.find(n => n.id === notification.id);
+                if (existing) {
+                    notification.read = existing.read;
+                }
+                return notification;
+            });
+            
+            localStorage.setItem('notifications', JSON.stringify(allNotifications));
+            updateNotificationUI();
+        });
+
+        console.log("✅ Notifications active");
+    }
+
+    function updateNotificationUI() {
+        const notificationsStr = localStorage.getItem('notifications') || '[]';
+        let notifications = [];
+        
+        try {
+            notifications = JSON.parse(notificationsStr);
+        } catch (e) {
+            console.error('Error parsing notifications:', e);
+            notifications = [];
+        }
+        
+        const activeFilterBtn = document.querySelector('.filter-btn.active');
+        const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+        let filteredNotifications = filterNotifications(notifications, activeFilter);
+        
+        const unreadCount = notifications.filter(n => n && n.read === false).length;
+        const badge = document.getElementById('notificationBadge');
+        
+        if (badge) {
+            badge.textContent = unreadCount;
+            if (unreadCount > 0) {
+                badge.classList.add('show');
+            } else {
+                badge.classList.remove('show');
+            }
+        }
+        
+        const notificationList = document.getElementById('notificationList');
+        
+        if (!notificationList) {
+            console.error('Notification list element not found');
+            return;
+        }
+        
+        if (filteredNotifications.length === 0) {
+            notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
+            return;
+        }
+        
+        notificationList.innerHTML = filteredNotifications.map(notification => {
+            if (!notification) return '';
+            
+            const timeAgo = getTimeAgo(notification.timestamp);
+            const unreadClass = notification.read ? '' : 'unread';
+            const title = notification.title || 'Notification';
+            const message = notification.message || 'No details';
+            const id = notification.id || '';
+            
+            let iconClass = 'report';
+            let iconName = 'fa-exclamation-triangle';
+            
+            if (notification.type === 'user') {
+                iconClass = 'user';
+                iconName = notification.status === 'inactive' ? 'fa-user-slash' : 'fa-user-plus';
+            } else if (notification.type === 'report') {
+                const status = (notification.status || '').toLowerCase();
+                if (status === 'repaired' || status === 'completed') {
+                    iconName = 'fa-check-circle';
+                } else if (status === 'ongoing') {
+                    iconName = 'fa-tools';
+                }
+            }
+            
+            return `
+                <div class="notification-item ${unreadClass}" data-id="${id}">
+                    <div class="notification-icon ${iconClass}">
+                        <i class="fa ${iconName}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <p><strong>${title}</strong></p>
+                        <p>${message}</p>
+                        <div class="time">${timeAgo}</div>
+                    </div>
+                </div>
+            `;
+        }).filter(html => html !== '').join('');
+        
+        document.querySelectorAll('.notification-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.dataset.id;
+                if (id) markAsRead(id);
+            });
+        });
+    }
+
+    function filterNotifications(notifications, filter) {
+        const now = new Date();
+        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        
+        switch(filter) {
+            case 'report':
+                return notifications.filter(n => n.type === 'report');
+            case 'user':
+                return notifications.filter(n => n.type === 'user');
+            case '24h':
+                return notifications.filter(n => new Date(n.timestamp) > oneDayAgo);
+            default:
+                return notifications;
+        }
+    }
+
+    function markAsRead(notificationId) {
+        const notificationsStr = localStorage.getItem('notifications') || '[]';
+        let notifications = JSON.parse(notificationsStr);
+        
+        const notification = notifications.find(n => n.id === notificationId);
+        if (notification) {
+            notification.read = true;
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            updateNotificationUI();
+        }
+    }
+
+    function markAllAsRead() {
+        const notificationsStr = localStorage.getItem('notifications') || '[]';
+        let notifications = JSON.parse(notificationsStr);
+        
+        notifications.forEach(n => n.read = true);
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotificationUI();
+    }
+
+    function clearAllNotifications() {
+        if (confirm('Are you sure you want to clear all notifications?')) {
+            localStorage.setItem('notifications', '[]');
+            updateNotificationUI();
+        }
+    }
+
+    function getTimeAgo(date) {
+        if (!date) return 'Recently';
+        
+        const dateObj = typeof date === 'string' ? new Date(date) : date;
+        if (isNaN(dateObj.getTime())) return 'Recently';
+        
+        const seconds = Math.floor((new Date() - dateObj) / 1000);
+        if (seconds < 0) return 'Just now';
+        
+        const intervals = {
+            year: 31536000,
+            month: 2592000,
+            week: 604800,
+            day: 86400,
+            hour: 3600,
+            minute: 60
+        };
+        
+        for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+            const interval = Math.floor(seconds / secondsInUnit);
+            if (interval >= 1) {
+                return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
+            }
+        }
+        
+        return 'Just now';
+    }
+
+    function initNotificationListeners() {
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationMenu = document.getElementById('notificationMenu');
+        const profileToggle = document.getElementById('profileToggle');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        if (notificationBell) {
+            notificationBell.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notificationMenu.classList.toggle('show');
+                if (dropdownMenu) dropdownMenu.classList.remove('show');
+            });
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateNotificationUI();
+            });
+        });
+
+        const markAllBtn = document.getElementById('markAllReadBtn');
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                markAllAsRead();
+            });
+        }
+
+        const clearBtn = document.getElementById('clearNotificationsBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                clearAllNotifications();
+            });
+        }
+
+        if (profileToggle) {
+            profileToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (dropdownMenu) dropdownMenu.classList.toggle('show');
+                if (notificationMenu) notificationMenu.classList.remove('show');
+            });
+        }
+
+        document.addEventListener('click', () => {
+            if (notificationMenu) notificationMenu.classList.remove('show');
+            if (dropdownMenu) dropdownMenu.classList.remove('show');
+        });
+
+        if (notificationMenu) {
+            notificationMenu.addEventListener('click', (e) => e.stopPropagation());
+        }
+        if (dropdownMenu) {
+            dropdownMenu.addEventListener('click', (e) => e.stopPropagation());
+        }
+    }
+
+    // ==========================================
+    // AUTHENTICATION & SESSION MANAGEMENT
+    // ==========================================
+    
+    function normalizeStatus(status) { 
+        return (status || "").toLowerCase().trim(); 
+    }
+
+    function normalizePosition(position) {
+        if (!position) return "";
+        return position.toString().toLowerCase().trim();
+    }
+    
+    // Set session-only persistence
+    setPersistence(auth, browserSessionPersistence)
+        .then(() => {
+            console.log("✅ Admin Dashboard: Auth persistence set to SESSION (logout on tab close)");
+        })
+        .catch((error) => {
+            console.error("❌ Error setting persistence:", error);
+        });
 
     const totalReportsEl = document.getElementById("totalReports");
     const pendingEl = document.getElementById("pendingReports");
     const ongoingEl = document.getElementById("ongoingReports");
     const completedEl = document.getElementById("completedReports");
-
-    // ✅ Helper function to normalize position
-    function normalizePosition(position) {
-        if (!position) return "";
-        return position.toString().toLowerCase().trim();
-    }
 
     async function getImageUrl(imagePath) {
         try {
@@ -710,11 +967,11 @@ window.addEventListener('click', (e) => {
         }
     }
 
-    // ✅ ENHANCED AUTH CHECK with instant redirect
+    // Enhanced auth check with inactive/deleted protection
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
             console.log("❌ No user logged in, redirecting to login");
-            window.location.replace("login.html");
+            window.location.replace("index.html");
             return;
         }
 
@@ -724,60 +981,115 @@ window.addEventListener('click', (e) => {
         if (!userDocSnapshot.exists()) {
             console.log("❌ User document not found, redirecting to login");
             await signOut(auth);
-            window.location.replace("login.html");
+            window.location.replace("index.html");
             return;
         }
 
         const userData = userDocSnapshot.data();
         const normalizedPosition = normalizePosition(userData.position);
+        const normalizedStatus = normalizeStatus(userData.status);
         
         console.log("🔍 Admin Dashboard Auth Check:");
         console.log("   User Position:", userData.position);
         console.log("   Normalized Position:", normalizedPosition);
+        console.log("   User Status:", userData.status);
+        console.log("   Normalized Status:", normalizedStatus);
+
+        // Check if account is inactive or deleted
+        if (normalizedStatus === "inactive" || normalizedStatus === "deleted") {
+            console.warn("⚠️ Account is inactive or deleted, logging out...");
+            await signOut(auth);
+            alert("Your account has been deactivated or deleted. You have been logged out.");
+            window.location.replace("index.html");
+            return;
+        }
+
+        // Check if account is pending
+        if (normalizedStatus === "pending") {
+            console.warn("⚠️ Account is pending approval, logging out...");
+            await signOut(auth);
+            alert("Your account is pending approval. Please wait for the Super Admin to approve your account.");
+            window.location.replace("index.html");
+            return;
+        }
 
         if (normalizedPosition !== "admin") {
             console.log("❌ Unauthorized access - User is not an Admin");
             await signOut(auth);
-            window.location.replace("login.html");
+            window.location.replace("index.html");
             return;
         }
 
         console.log("✅ Admin access granted");
-        document.body.classList.add('auth-checked'); // ✅ Show page now
+        document.body.classList.add('auth-checked');
         
-        // ✅ Setup realtime listener for user data updates
+        // Setup realtime listener for user data updates
         onSnapshot(userDocRef, async (userDoc) => {
             if (!userDoc.exists()) {
+                console.warn("⚠️ User document deleted, logging out...");
                 await signOut(auth);
-                window.location.replace("login.html");
+                alert("Your account has been deleted.");
+                window.location.replace("index.html");
                 return;
             }
 
             const data = userDoc.data();
             const currentPosition = normalizePosition(data.position);
+            const currentStatus = normalizeStatus(data.status);
             
-            // ✅ Recheck if user is still Admin
-            if (currentPosition !== "admin") {
+            // Check status in real-time
+            if (currentStatus === "inactive" || currentStatus === "deleted") {
+                console.warn("⚠️ Account status changed to inactive/deleted, logging out...");
                 await signOut(auth);
-                window.location.replace("login.html");
+                alert("Your account has been deactivated or deleted. You have been logged out.");
+                window.location.replace("index.html");
                 return;
             }
 
-            document.getElementById("navUsername").textContent = data.name || data.firstName || "Admin";
-            const photoURL = data.photoURL || "image.png";
-            document.getElementById("navAvatar").src = photoURL;
+            // Check if status changed to pending
+            if (currentStatus === "pending") {
+                console.warn("⚠️ Account status changed to pending, logging out...");
+                await signOut(auth);
+                alert("Your account has been set to pending approval.");
+                window.location.replace("index.html");
+                return;
+            }
+            
+            // Recheck if user is still Admin
+            if (currentPosition !== "admin") {
+                console.warn("⚠️ User role changed, logging out...");
+                await signOut(auth);
+                alert("Your role has been changed. Please login again.");
+                window.location.replace("index.html");
+                return;
+            }
+
+            const navUsername = document.getElementById("navUsername");
+            const navAvatar = document.getElementById("navAvatar");
+            if (navUsername) navUsername.textContent = data.name || data.firstName || "Admin";
+            if (navAvatar) navAvatar.src = data.photoURL || "image.png";
         });
 
+        // Initialize everything after auth check passes
+        initNotificationListeners();
         await loadDashboardData();
-        await setupRealtimeNotifications(db);
+        await setupRealtimeNotifications();
     });
 
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-        if (confirm("Are you sure you want to logout?")) {
-            await signOut(auth);
-            window.location.replace("login.html");
-        }
-    });
+    // Logout handler
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+            if (confirm("Are you sure you want to logout?")) {
+                await signOut(auth);
+                window.location.replace("index.html");
+            }
+        });
+    }
+
+    // ==========================================
+    // DASHBOARD DATA & CHARTS
+    // ==========================================
 
     async function loadDashboardData() {
         const snapshot = await getDocs(collection(db, "reports"));
@@ -809,10 +1121,11 @@ window.addEventListener('click', (e) => {
             }
         });
 
-        totalReportsEl.textContent = total;
-        pendingEl.textContent = pending;
-        ongoingEl.textContent = ongoing;
-        completedEl.textContent = completed;
+        if (totalReportsEl) totalReportsEl.textContent = total;
+        if (pendingEl) pendingEl.textContent = pending;
+        if (ongoingEl) ongoingEl.textContent = ongoing;
+        if (completedEl) completedEl.textContent = completed;
+        
         updateChart(completed, ongoing, pending);
         updateBarangayChart(barangayData);
         if (window.miniMap) addReportMarkers();
@@ -821,9 +1134,11 @@ window.addEventListener('click', (e) => {
 
     let chart;
     function updateChart(completed, ongoing, pending) {
-        const ctx = document.getElementById("dashboardChart").getContext("2d");
+        const ctx = document.getElementById("dashboardChart");
+        if (!ctx) return;
+        
         if (chart) chart.destroy();
-        chart = new Chart(ctx, {
+        chart = new Chart(ctx.getContext("2d"), {
             type: "bar",
             data: {
                 labels: ["Completed", "Ongoing", "Pending"],
@@ -841,80 +1156,94 @@ window.addEventListener('click', (e) => {
         });
     }
 
-    let barangayChart;
-    function updateBarangayChart(barangayData) {
-        const ctx = document.getElementById("barangayChart").getContext("2d");
-        if (barangayChart) barangayChart.destroy();
+   let barangayChart;
+function updateBarangayChart(barangayData) {
+    const ctx = document.getElementById("barangayChart");
+    if (!ctx) return;
+    
+    if (barangayChart) barangayChart.destroy();
 
-        const sortedBarangays = Object.entries(barangayData)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10);
+    const sortedBarangays = Object.entries(barangayData)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
 
-        const labels = sortedBarangays.map(item => item[0]);
-        const data = sortedBarangays.map(item => item[1]);
+    const labels = sortedBarangays.map(item => item[0]);
+    const data = sortedBarangays.map(item => item[1]);
 
-        barangayChart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: "Number of Reports",
-                    data: data,
-                    borderColor: "#004aad",
-                    backgroundColor: "rgba(0, 74, 173, 0.1)",
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: "#004aad",
-                    pointBorderColor: "#fff",
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
+    barangayChart = new Chart(ctx.getContext("2d"), {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                borderColor: "#004aad",
+                backgroundColor: "rgba(0, 74, 173, 0.1)",
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: "#004aad",
+                pointBorderColor: "#fff",
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointHitRadius: 10  // ✅ ADDED: Larger hit detection area
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'nearest',  // ✅ ADDED: Find nearest point
+                intersect: false  // ✅ ADDED: Don't require direct intersection
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        enabled: true,
-                        backgroundColor: 'rgba(0, 74, 173, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        borderColor: '#004aad',
-                        borderWidth: 1
-                    }
+            plugins: {
+                legend: {
+                    display: false
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(0, 74, 173, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#004aad',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Reports: ' + context.parsed.y;
                         },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 45
+                        title: function(context) {
+                            return context[0].label;
                         }
                     }
                 }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
             }
-        });
-    }
-
+        }
+    });
+}
     async function loadReportImages() {
         const gallery = document.getElementById("reportImages");
+        if (!gallery) return;
+        
         gallery.innerHTML = "";
         const snapshot = await getDocs(collection(db, "reports"));
         let count = 0;
@@ -937,7 +1266,6 @@ window.addEventListener('click', (e) => {
             }
         }
     }
-    
 </script>
 </body>
 </html>

@@ -384,6 +384,85 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
+ let isInternalNavigation = false;
+let isLoggingOut = false;
+let autoLogoutInitialized = false;
+
+function setupAutoLogout(auth) {
+  if (autoLogoutInitialized) {
+    console.log("⚠️ Auto-logout already initialized");
+    return;
+  }
+  autoLogoutInitialized = true;
+
+  // ✅ Track ALL link clicks (including profile links)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href) {
+      try {
+        const linkUrl = new URL(link.href, window.location.href);
+        const currentOrigin = window.location.origin;
+        
+        // Check if it's an internal link
+        if (linkUrl.origin === currentOrigin) {
+          isInternalNavigation = true;
+          console.log("🔗 Internal navigation detected:", link.href);
+          
+          // ✅ LONGER timeout - 3 seconds to ensure navigation completes
+          setTimeout(() => {
+            isInternalNavigation = false;
+          }, 3000);
+        }
+      } catch (err) {
+        // If URL parsing fails, treat as internal navigation to be safe
+        isInternalNavigation = true;
+        setTimeout(() => {
+          isInternalNavigation = false;
+        }, 3000);
+      }
+    }
+  }, true); // ✅ Use capture phase to catch all clicks
+
+  // ✅ IMPROVED: Only logout on actual page close, not navigation
+  window.addEventListener('beforeunload', (e) => {
+    // Don't logout if it's internal navigation
+    if (isInternalNavigation) {
+      console.log("✅ Internal navigation - NOT logging out");
+      return;
+    }
+    
+    // Only logout on actual tab/browser close
+    if (!isLoggingOut) {
+      console.log("🚪 Tab/browser closing - logging out");
+      isLoggingOut = true;
+      
+      // Use synchronous approach for reliable logout on page close
+      try {
+        signOut(auth);
+        sessionStorage.clear();
+      } catch (error) {
+        console.error("❌ Error during auto logout:", error);
+      }
+    }
+  });
+
+  // ✅ Handle browser back/forward button
+  window.addEventListener('popstate', async (e) => {
+    if (!isInternalNavigation && !isLoggingOut) {
+      console.log("⬅️ Browser back button detected - logging out");
+      isLoggingOut = true;
+      try {
+        await signOut(auth);
+        sessionStorage.clear();
+        window.location.replace("login.html");
+      } catch (error) {
+        console.error("❌ Error during back navigation logout:", error);
+      }
+    }
+  });
+
+  console.log("✅ Auto-logout functionality initialized");
+}
     const pendingBody = document.getElementById("pendingBody");
     const searchPending = document.getElementById("searchPending");
     const categoryFilter = document.getElementById("categoryFilter");
@@ -392,94 +471,94 @@
     const activeFilters = document.getElementById("activeFilters");
     const pendingPagination = document.getElementById("pendingPagination");
     const viewModal = document.getElementById("viewModal");
-const viewModalGrid = document.getElementById("viewModalGrid");
-const closeViewModal = document.getElementById("closeViewModal");
-const closeViewBtn = document.getElementById("closeViewBtn");
-const dropdownMenu = document.getElementById("dropdownMenu");
-const profileToggle = document.getElementById("profileToggle");
-const navUsername = document.getElementById("navUsername");
-const navbarAvatar = document.getElementById("navbarAvatar");
-const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
-const navLogoutBtn = document.getElementById("navLogoutBtn");
-const notificationBell = document.getElementById("notificationBell");
-const notificationBadge = document.getElementById("notificationBadge");
-const notificationMenu = document.getElementById("notificationMenu");
-const notificationList = document.getElementById("notificationList");
-const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
-const markAllReadBtn = document.getElementById("markAllReadBtn");
-let reportsUnsub = null;
-let notificationsList = [];
-let trackedIds = new Set();
-let currentFilter = "all";
-let allPendingReports = [];
-let filteredPendingReports = [];
-let currentPendingPage = 1;
-const itemsPerPage = 5;
-// ===== PREDEFINED CATEGORIES AND ISSUES =====
-const CATEGORIES = [
-"Daan (Road)",
-"Tulay (Bridge)",
-"Ilaw (Street Light)",
-"Kanal (Drainage)",
-"Basketbol Court (Basketball Court)",
-"Covered Court",
-"Barangay Hall",
-"Health Center",
-"Day Care Center",
-"Multi-Purpose Hall",
-"Waiting Shed",
-"Public Toilet",
-"Water System",
-"Others"
-];
-const ISSUES = [
-  "Sira (Broken)",
-  "Butas (Has Holes)",
-  "Gumuho (Collapsed)",
-  "Hindi Gumagana (Not Working)",
-  "Kailangan ng Pagkukumpuni (Needs Repair)",
-  "Kailangan ng Pagpapalitan (Needs Replacement)",
-  "Kailangan Ayusin (Needs Fixing)",
-  "Walang (None/Missing)",
-  "Others"
-];
+    const viewModalGrid = document.getElementById("viewModalGrid");
+    const closeViewModal = document.getElementById("closeViewModal");
+    const closeViewBtn = document.getElementById("closeViewBtn");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const profileToggle = document.getElementById("profileToggle");
+    const navUsername = document.getElementById("navUsername");
+    const navbarAvatar = document.getElementById("navbarAvatar");
+    const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
+    const navLogoutBtn = document.getElementById("navLogoutBtn");
+    const notificationBell = document.getElementById("notificationBell");
+    const notificationBadge = document.getElementById("notificationBadge");
+    const notificationMenu = document.getElementById("notificationMenu");
+    const notificationList = document.getElementById("notificationList");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+    const markAllReadBtn = document.getElementById("markAllReadBtn");
+    let reportsUnsub = null;
+    let notificationsList = [];
+    let trackedIds = new Set();
+    let currentFilter = "all";
+    let allPendingReports = [];
+    let filteredPendingReports = [];
+    let currentPendingPage = 1;
+    const itemsPerPage = 5;
+    // ===== PREDEFINED CATEGORIES AND ISSUES =====
+    const CATEGORIES = [
+    "Daan (Road)",
+    "Tulay (Bridge)",
+    "Ilaw (Street Light)",
+    "Kanal (Drainage)",
+    "Basketbol Court (Basketball Court)",
+    "Covered Court",
+    "Barangay Hall",
+    "Health Center",
+    "Day Care Center",
+    "Multi-Purpose Hall",
+    "Waiting Shed",
+    "Public Toilet",
+    "Water System",
+    "Others"
+    ];
+    const ISSUES = [
+      "Sira (Broken)",
+      "Butas (Has Holes)",
+      "Gumuho (Collapsed)",
+      "Hindi Gumagana (Not Working)",
+      "Kailangan ng Pagkukumpuni (Needs Repair)",
+      "Kailangan ng Pagpapalitan (Needs Replacement)",
+      "Kailangan Ayusin (Needs Fixing)",
+      "Walang (None/Missing)",
+      "Others"
+    ];
 
-function normalizeStatus(status) {
-  return (status || "").toLowerCase().trim();
-}
-
-function saveNotificationsToLocalStorage() {
-  try {
-    localStorage.setItem('notifications', JSON.stringify(notificationsList));
-    localStorage.setItem('trackedIds', JSON.stringify([...trackedIds]));
-  } catch (error) {
-    console.error("Error saving notifications:", error);
-  }
-}
-
-function loadNotificationsFromLocalStorage() {
-  try {
-    const savedNotifications = localStorage.getItem('notifications');
-    const savedTrackedIds = localStorage.getItem('trackedIds');
-    if (savedNotifications) {
-      notificationsList = JSON.parse(savedNotifications).map(n => ({
-        ...n,
-        timestamp: new Date(n.timestamp)
-      }));
+    function normalizeStatus(status) {
+      return (status || "").toLowerCase().trim();
     }
-    if (savedTrackedIds) {
-      trackedIds = new Set(JSON.parse(savedTrackedIds));
-    }
-  } catch (error) {
-    console.error("Error loading notifications:", error);
-  }
-}
 
-notificationBell.addEventListener("click", (e) => {
-  e.stopPropagation();
-  notificationMenu.classList.toggle("show");
-  dropdownMenu.classList.remove("show");
-});
+    function saveNotificationsToLocalStorage() {
+      try {
+        localStorage.setItem('notifications', JSON.stringify(notificationsList));
+        localStorage.setItem('trackedIds', JSON.stringify([...trackedIds]));
+      } catch (error) {
+        console.error("Error saving notifications:", error);
+      }
+    }
+
+    function loadNotificationsFromLocalStorage() {
+      try {
+        const savedNotifications = localStorage.getItem('notifications');
+        const savedTrackedIds = localStorage.getItem('trackedIds');
+        if (savedNotifications) {
+          notificationsList = JSON.parse(savedNotifications).map(n => ({
+            ...n,
+            timestamp: new Date(n.timestamp)
+          }));
+        }
+        if (savedTrackedIds) {
+          trackedIds = new Set(JSON.parse(savedTrackedIds));
+        }
+      } catch (error) {
+        console.error("Error loading notifications:", error);
+      }
+    }
+
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notificationMenu.classList.toggle("show");
+      dropdownMenu.classList.remove("show");
+    });
 
 clearNotificationsBtn.addEventListener("click", () => {
   notificationsList = [];
@@ -1004,6 +1083,10 @@ onAuthStateChanged(auth, async(user)=>{
     window.location.href="login.html";
     return;
   }
+
+    setupAutoLogout(auth);
+
+
   try {
     const userDocRef = doc(db,"users",user.uid);
     onSnapshot(userDocRef, async (docSnap) => {

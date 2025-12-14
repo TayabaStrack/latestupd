@@ -332,11 +332,11 @@
     </section>
   </main>
   
-  <script type="module">
+<script type="module">
   // ===== FIREBASE IMPORTS =====
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, query, orderBy, onSnapshot, getDoc, doc, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, query, orderBy, limit, onSnapshot, getDoc, doc, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
   // ===== FIREBASE CONFIGURATION =====
@@ -353,6 +353,86 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   const storage = getStorage(app);
+   let isInternalNavigation = false;
+let isLoggingOut = false;
+let autoLogoutInitialized = false;
+
+function setupAutoLogout(auth) {
+  if (autoLogoutInitialized) {
+    console.log("⚠️ Auto-logout already initialized");
+    return;
+  }
+  autoLogoutInitialized = true;
+
+  // ✅ Track ALL link clicks (including profile links)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href) {
+      try {
+        const linkUrl = new URL(link.href, window.location.href);
+        const currentOrigin = window.location.origin;
+        
+        // Check if it's an internal link
+        if (linkUrl.origin === currentOrigin) {
+          isInternalNavigation = true;
+          console.log("🔗 Internal navigation detected:", link.href);
+          
+          // ✅ LONGER timeout - 3 seconds to ensure navigation completes
+          setTimeout(() => {
+            isInternalNavigation = false;
+          }, 3000);
+        }
+      } catch (err) {
+        // If URL parsing fails, treat as internal navigation to be safe
+        isInternalNavigation = true;
+        setTimeout(() => {
+          isInternalNavigation = false;
+        }, 3000);
+      }
+    }
+  }, true); // ✅ Use capture phase to catch all clicks
+
+  // ✅ IMPROVED: Only logout on actual page close, not navigation
+  window.addEventListener('beforeunload', (e) => {
+    // Don't logout if it's internal navigation
+    if (isInternalNavigation) {
+      console.log("✅ Internal navigation - NOT logging out");
+      return;
+    }
+    
+    // Only logout on actual tab/browser close
+    if (!isLoggingOut) {
+      console.log("🚪 Tab/browser closing - logging out");
+      isLoggingOut = true;
+      
+      // Use synchronous approach for reliable logout on page close
+      try {
+        signOut(auth);
+        sessionStorage.clear();
+      } catch (error) {
+        console.error("❌ Error during auto logout:", error);
+      }
+    }
+  });
+
+  // ✅ Handle browser back/forward button
+  window.addEventListener('popstate', async (e) => {
+    if (!isInternalNavigation && !isLoggingOut) {
+      console.log("⬅️ Browser back button detected - logging out");
+      isLoggingOut = true;
+      try {
+        await signOut(auth);
+        sessionStorage.clear();
+        window.location.replace("login.html");
+      } catch (error) {
+        console.error("❌ Error during back navigation logout:", error);
+      }
+    }
+  });
+
+  console.log("✅ Auto-logout functionality initialized");
+}
+
 
   // ===== DOM ELEMENTS =====
   const declinedBody = document.getElementById("declinedBody");
@@ -376,13 +456,7 @@
 
   // ===== GLOBAL VARIABLES =====
   let reportsUnsub = null;
-  let allReportsData = [];
-  let notificationsList = [];
-  let seenNotificationIds = new Set();
-  let trackedUserStatuses = {};
-  let trackedReportIds = new Set();
   let currentFilter = "all";
-  let globalDb = null;
   
   // PAGINATION VARIABLES
   let allDeclinedReports = [];
@@ -454,12 +528,11 @@
         ...additionalData
       };
 
-      // Add to Firestore
       await addDoc(collection(db, "auditLogs"), logData);
-      console.log("Audit log created:", logData);
+      console.log("✅ Audit log created:", logData);
 
     } catch (error) {
-      console.error("Error logging audit event:", error);
+      console.error("❌ Error logging audit event:", error);
     }
   }
 
@@ -574,152 +647,354 @@
   });
 
   // ===== NOTIFICATION SYSTEM FUNCTIONS =====
-  function normalizeStatus(status) {
-    return (status || "").toLowerCase().trim();
+  async function setupRealtimeNotifications(db) {
+    // Initialize notifications array if it doesn't exist
+    if (!localStorage.getItem('notifications')) {
+      localStorage.setItem('notifications', '[]');
+    }
+
+    let allNotifications = [];
+
+    // ===== LISTEN TO REPORTS =====
+    const reportsRef = collection(db, "reports");
+    const reportsQuery = query(reportsRef, orderBy("createdAt", "desc"), limit(50));
+
+    onSnapshot(reportsQuery, (snapshot) => {
+      const reportNotifications = [];
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        
+        // Handle timestamp
+        let timestamp;
+        if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+          timestamp = data.createdAt.toDate();
+        } else if (data.timestamp && typeof data.timestamp === 'string') {
+          timestamp = new Date(data.timestamp.replace(' ', 'T'));
+        } else if (data.createdAt) {
+          timestamp = new Date(data.createdAt);
+        } else {
+          timestamp = new Date();
+        }
+        
+        const category = data.category || 'Report';
+        const issue = data.issue || '';
+        const barangay = data.barangay || data.userBarangay || 'Unknown Location';
+        const status = data.status || 'Pending';
+        const firstName = data.firstName || 'User';
+        
+        let title = `New ${category} Report`;
+        let message = `${firstName} reported ${issue} in Brgy. ${barangay}`;
+        
+        if (status.toLowerCase() === 'repaired' || status.toLowerCase() === 'completed') {
+          title = `✓ ${category} Completed`;
+          message = `${issue} in Brgy. ${barangay} has been ${status.toLowerCase()}`;
+        } else if (status.toLowerCase() === 'ongoing') {
+          title = `⚙ ${category} In Progress`;
+          message = `${issue} in Brgy. ${barangay} is now ${status.toLowerCase()}`;
+        }
+        
+        reportNotifications.push({
+          id: 'report_' + doc.id,
+          type: 'report',
+          title: title,
+          message: message,
+          timestamp: timestamp.toISOString(),
+          read: false,
+          status: status,
+          category: category,
+          barangay: barangay,
+          data: data
+        });
+      });
+
+      // Merge with user notifications
+      allNotifications = [...reportNotifications, ...allNotifications.filter(n => n.type === 'user')];
+      
+      // Sort by timestamp (newest first)
+      allNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      // Preserve read status from localStorage
+      const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+      allNotifications = allNotifications.map(notification => {
+        const existing = existingNotifications.find(n => n.id === notification.id);
+        if (existing) {
+          notification.read = existing.read;
+        }
+        return notification;
+      });
+      
+      localStorage.setItem('notifications', JSON.stringify(allNotifications));
+      updateNotificationUI();
+    }, (error) => {
+      console.error("Error listening to report notifications:", error);
+    });
+
+    // ===== LISTEN TO USERS =====
+    const usersRef = collection(db, "users");
+    const usersQuery = query(usersRef, orderBy("createdAt", "desc"), limit(50));
+
+    onSnapshot(usersQuery, (snapshot) => {
+      const userNotifications = [];
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        
+        // Handle timestamp - createdAt is a number (Unix timestamp in milliseconds)
+        let timestamp;
+        if (data.createdAt && typeof data.createdAt === 'number') {
+          timestamp = new Date(data.createdAt);
+        } else if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+          timestamp = data.createdAt.toDate();
+        } else {
+          timestamp = new Date();
+        }
+        
+        const fullName = data.fullName || `${data.firstName || ''} ${data.surname || ''}`.trim() || 'New User';
+        const position = data.position || 'User';
+        const barangay = data.barangay || 'Unknown Barangay';
+        const status = data.status || 'active';
+        
+        let title = `New User Registered`;
+        let message = `${fullName} (${position}) from Brgy. ${barangay}`;
+        
+        // Customize based on status
+        if (status === 'active') {
+          title = `✓ New User Active`;
+        } else if (status === 'inactive') {
+          title = `User Deactivated`;
+          message = `${fullName} account is now inactive`;
+        }
+        
+        userNotifications.push({
+          id: 'user_' + doc.id,
+          type: 'user',
+          title: title,
+          message: message,
+          timestamp: timestamp.toISOString(),
+          read: false,
+          status: status,
+          position: position,
+          barangay: barangay,
+          data: data
+        });
+      });
+
+      // Merge with report notifications
+      allNotifications = [...allNotifications.filter(n => n.type === 'report'), ...userNotifications];
+      
+      // Sort by timestamp (newest first)
+      allNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      // Preserve read status from localStorage
+      const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+      allNotifications = allNotifications.map(notification => {
+        const existing = existingNotifications.find(n => n.id === notification.id);
+        if (existing) {
+          notification.read = existing.read;
+        }
+        return notification;
+      });
+      
+      localStorage.setItem('notifications', JSON.stringify(allNotifications));
+      updateNotificationUI();
+    }, (error) => {
+      console.error("Error listening to user notifications:", error);
+    });
   }
 
-  function isBarangayPosition(position) {
-    if (!position) return false;
-    const pos = position.toLowerCase();
-    return pos.includes("barangay") || pos.includes("brgy") || pos.includes("brgy.");
-  }
-
-  function addNotification(type, message, detail) {
-    const cleanMsg = (message || "").trim();
-    const cleanDetail = (detail || "").trim();
-    const timestamp = new Date();
-    const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
-
-    if (seenNotificationIds.has(id)) return;
-    seenNotificationIds.add(id);
-
-    const notification = {
-      id,
-      type,
-      message: cleanMsg,
-      detail: cleanDetail,
-      timestamp: timestamp,
-      read: false
-    };
-
-    notificationsList.unshift(notification);
-    updateNotificationUI();
-  }
-
+  // Updated updateNotificationUI with proper icons for both types
   function updateNotificationUI() {
-    let filtered = [...notificationsList];
-    if (currentFilter === "report") {
-      filtered = filtered.filter((n) => n.type === "report");
-    } else if (currentFilter === "user") {
-      filtered = filtered.filter((n) => n.type === "user");
-    } else if (currentFilter === "24h") {
-      const ago = Date.now() - 24 * 60 * 60 * 1000;
-      filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+    const notificationsStr = localStorage.getItem('notifications') || '[]';
+    let notifications = [];
+    
+    try {
+      notifications = JSON.parse(notificationsStr);
+    } catch (e) {
+      console.error('Error parsing notifications:', e);
+      notifications = [];
     }
-
-    filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-    const unreadCount = notificationsList.filter(n => !n.read).length;
-    if (unreadCount > 0) {
-      notificationBadge.textContent = unreadCount;
-      notificationBadge.classList.add("show");
-    } else {
-      notificationBadge.textContent = "";
-      notificationBadge.classList.remove("show");
+    
+    // Apply active filter
+    const activeFilterBtn = document.querySelector('.filter-btn.active');
+    const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+    let filteredNotifications = filterNotifications(notifications, activeFilter);
+    
+    // Update badge count (unread only)
+    const unreadCount = notifications.filter(n => n && n.read === false).length;
+    const badge = document.getElementById('notificationBadge');
+    
+    if (badge) {
+      badge.textContent = unreadCount;
+      if (unreadCount > 0) {
+        badge.classList.add('show');
+      } else {
+        badge.classList.remove('show');
+      }
     }
-
-    if (filtered.length === 0) {
+    
+    // Update notification list
+    const notificationList = document.getElementById('notificationList');
+    
+    if (!notificationList) {
+      console.error('Notification list element not found');
+      return;
+    }
+    
+    if (filteredNotifications.length === 0) {
       notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
-    } else {
-      notificationList.innerHTML = filtered.map((n) => `
-        <div class="notification-item ${n.read ? '' : 'unread'}">
-          <div class="notification-icon ${n.type}">
-            ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
+      return;
+    }
+    
+    notificationList.innerHTML = filteredNotifications.map(notification => {
+      if (!notification) return '';
+      
+      const timeAgo = getTimeAgo(notification.timestamp);
+      const unreadClass = notification.read ? '' : 'unread';
+      const title = notification.title || 'Notification';
+      const message = notification.message || 'No details';
+      const id = notification.id || '';
+      
+      // Determine icon and class based on type
+      let iconClass = 'report';
+      let iconName = 'fa-exclamation-triangle';
+      
+      if (notification.type === 'user') {
+        iconClass = 'user';
+        iconName = 'fa-user-plus';
+        
+        // Different icon based on user status
+        if (notification.status === 'inactive') {
+          iconName = 'fa-user-slash';
+        }
+      } else if (notification.type === 'report') {
+        const status = (notification.status || '').toLowerCase();
+        if (status === 'repaired' || status === 'completed') {
+          iconName = 'fa-check-circle';
+        } else if (status === 'ongoing') {
+          iconName = 'fa-tools';
+        } else {
+          iconName = 'fa-exclamation-triangle';
+        }
+      }
+      
+      return `
+        <div class="notification-item ${unreadClass}" data-id="${id}">
+          <div class="notification-icon ${iconClass}">
+            <i class="fa ${iconName}"></i>
           </div>
           <div class="notification-content">
-            <p><strong>${n.message}</strong></p>
-            <p>${n.detail}</p>
-            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            <p><strong>${title}</strong></p>
+            <p>${message}</p>
+            <div class="time">${timeAgo}</div>
           </div>
         </div>
-      `).join("");
+      `;
+    }).filter(html => html !== '').join('');
+    
+    // Add click listeners to mark as read
+    document.querySelectorAll('.notification-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const id = item.dataset.id;
+        if (id) markAsRead(id);
+      });
+    });
+  }
+
+  // Filter notifications
+  function filterNotifications(notifications, filter) {
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    
+    switch(filter) {
+      case 'report':
+        return notifications.filter(n => n.type === 'report');
+      case 'user':
+        return notifications.filter(n => n.type === 'user');
+      case '24h':
+        return notifications.filter(n => new Date(n.timestamp) > oneDayAgo);
+      default:
+        return notifications;
     }
   }
 
-  async function setupRealtimeNotifications(db) {
-    globalDb = db;
-    const userSnap = await getDocs(collection(db, "users"));
-    userSnap.forEach((docSnap) => {
-      const userId = docSnap.id;
-      const data = docSnap.data();
-      const status = normalizeStatus(data.status);
-      trackedUserStatuses[userId] = status;
-    });
+  // Mark single notification as read
+  function markAsRead(notificationId) {
+    const notificationsStr = localStorage.getItem('notifications') || '[]';
+    let notifications = JSON.parse(notificationsStr);
+    
+    const notification = notifications.find(n => n.id === notificationId);
+    if (notification) {
+      notification.read = true;
+      localStorage.setItem('notifications', JSON.stringify(notifications));
+      updateNotificationUI();
+    }
+  }
 
-    onSnapshot(collection(db, "users"), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const userId = change.doc.id;
-        const data = change.doc.data();
-        const currentStatus = normalizeStatus(data.status);
-        const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-        const position = data.position || "User";
-        
-        if (change.type === "added") {
-          trackedUserStatuses[userId] = currentStatus;
-          if (currentStatus === "active" && isBarangayPosition(position)) {
-            addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
-          }
-        }
-        
-        if (change.type === "modified") {
-          const oldStatus = trackedUserStatuses[userId];
-          if (oldStatus !== "active" && currentStatus === "active" && isBarangayPosition(position)) {
-            addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
-          }
-          trackedUserStatuses[userId] = currentStatus;
-        }
-      });
-    });
-
-    const reportSnap = await getDocs(collection(db, "reports"));
-    reportSnap.forEach((docSnap) => {
-      trackedReportIds.add(docSnap.id);
-    });
-
-    onSnapshot(collection(db, "reports"), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const id = change.doc.id;
-        const data = change.doc.data();
-        
-        if (change.type === "added" && !trackedReportIds.has(id)) {
-          trackedReportIds.add(id);
-          const barangay = data.barangay || data.location || "Unknown location";
-          const type = data.reportType || data.type || data.projectName || "Report";
-          addNotification("report", "New report submitted", `${type} in ${barangay}`);
-        }
-      });
-    });
-
+  // Mark all as read
+  function markAllAsRead() {
+    const notificationsStr = localStorage.getItem('notifications') || '[]';
+    let notifications = JSON.parse(notificationsStr);
+    
+    notifications.forEach(n => n.read = true);
+    localStorage.setItem('notifications', JSON.stringify(notifications));
     updateNotificationUI();
+  }
+
+  // Clear all notifications
+  function clearAllNotifications() {
+    if (confirm('Are you sure you want to clear all notifications?')) {
+      localStorage.setItem('notifications', '[]');
+      updateNotificationUI();
+    }
+  }
+
+  // Get time ago string
+  function getTimeAgo(timestamp) {
+    const date = new Date(timestamp);
+    const seconds = Math.floor((new Date() - date) / 1000);
+    
+    const intervals = {
+      year: 31536000,
+      month: 2592000,
+      week: 604800,
+      day: 86400,
+      hour: 3600,
+      minute: 60
+    };
+    
+    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+      const interval = Math.floor(seconds / secondsInUnit);
+      if (interval >= 1) {
+        return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
+      }
+    }
+    
+    return 'Just now';
   }
 
   // ===== NOTIFICATION EVENT LISTENERS =====
-  notificationBell.addEventListener("click", (e) => {
-    e.stopPropagation();
-    notificationMenu.classList.toggle("show");
-    dropdownMenu.classList.remove("show");
-  });
+  if (notificationBell) {
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notificationMenu.classList.toggle("show");
+      if (dropdownMenu) dropdownMenu.classList.remove("show");
+    });
+  }
 
-  clearNotificationsBtn.addEventListener("click", () => {
-    notificationsList = [];
-    seenNotificationIds.clear();
-    updateNotificationUI();
-  });
+  if (clearNotificationsBtn) {
+    clearNotificationsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      clearAllNotifications();
+    });
+  }
 
-  markAllReadBtn.addEventListener("click", () => {
-    notificationsList.forEach(n => n.read = true);
-    updateNotificationUI();
-  });
+  if (markAllReadBtn) {
+    markAllReadBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      markAllAsRead();
+    });
+  }
 
   document.querySelectorAll(".filter-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
@@ -730,21 +1005,33 @@
     });
   });
 
-  // ===== PROFILE DROPDOWN EVENT LISTENERS =====
-  profileToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    dropdownMenu.classList.toggle("show");
-    notificationMenu.classList.remove("show");
+  // ===== PROFILE DROPDOWN HANDLERS =====
+  if (profileToggle) {
+    profileToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle("show");
+      if (notificationMenu) notificationMenu.classList.remove("show");
+    });
+  }
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', () => {
+    if (notificationMenu) notificationMenu.classList.remove('show');
+    if (dropdownMenu) dropdownMenu.classList.remove('show');
   });
 
-  window.addEventListener('click', (e) => {
-    if (!e.target.closest('.profile-dropdown')) {
-      dropdownMenu.classList.remove("show");
-    }
-    if (!e.target.closest('.notification-menu') && e.target !== notificationBell) {
-      notificationMenu.classList.remove("show");
-    }
-  });
+  // Prevent closing when clicking inside menus
+  if (notificationMenu) {
+    notificationMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  if (dropdownMenu) {
+    dropdownMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
 
   // ===== UTILITY FUNCTIONS =====
   function formatTimestamp(timestamp) {
@@ -865,22 +1152,6 @@
 
     currentDeclinedPage = 1;
     renderDeclinedTable();
-    
-    // 🔥 LOG FILTER USAGE (Optional - only if filters are applied)
-    if (hasActiveFilters) {
-      logAuditEvent(
-        "Filtered Declined Reports",
-        "filter",
-        "Reports",
-        `Applied filters: ${selectedCategory ? `Category: ${selectedCategory}` : ''} ${selectedIssue ? `Issue: ${selectedIssue}` : ''}`.trim(),
-        {
-          filterType: "declined_reports",
-          category: selectedCategory,
-          issue: selectedIssue,
-          resultsCount: filteredDeclinedReports.length
-        }
-      );
-    }
   }
 
   searchDeclined.addEventListener("keyup", applyFilters);
@@ -1132,6 +1403,8 @@ if(!user) {
 window.location.href="login.html";
 return;
 }
+    setupAutoLogout(auth);
+
 try {
 const userDocRef = doc(db,"users",user.uid);
   onSnapshot(userDocRef, async(docSnap)=>{

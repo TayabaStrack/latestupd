@@ -339,7 +339,7 @@
 
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getAuth, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { 
     getFirestore, doc, getDoc, collection, getDocs, onSnapshot 
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -359,6 +359,94 @@
   const db = getFirestore(app);
   const storage = getStorage(app);
 
+
+setPersistence(auth, browserSessionPersistence)
+  .then(() => {
+    console.log("Auth persistence set to SESSION");
+  })
+  .catch((error) => {
+    console.error("Error setting persistence:", error);
+  });
+
+let isInternalNavigation = false;
+let isLoggingOut = false;
+let autoLogoutInitialized = false;
+
+function setupAutoLogout(auth) {
+  if (autoLogoutInitialized) {
+    console.log("⚠️ Auto-logout already initialized");
+    return;
+  }
+  autoLogoutInitialized = true;
+
+  // ✅ Track ALL link clicks (including profile links)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href) {
+      try {
+        const linkUrl = new URL(link.href, window.location.href);
+        const currentOrigin = window.location.origin;
+        
+        // Check if it's an internal link
+        if (linkUrl.origin === currentOrigin) {
+          isInternalNavigation = true;
+          console.log("🔗 Internal navigation detected:", link.href);
+          
+          // ✅ LONGER timeout - 3 seconds to ensure navigation completes
+          setTimeout(() => {
+            isInternalNavigation = false;
+          }, 3000);
+        }
+      } catch (err) {
+        // If URL parsing fails, treat as internal navigation to be safe
+        isInternalNavigation = true;
+        setTimeout(() => {
+          isInternalNavigation = false;
+        }, 3000);
+      }
+    }
+  }, true); // ✅ Use capture phase to catch all clicks
+
+  // ✅ IMPROVED: Only logout on actual page close, not navigation
+  window.addEventListener('beforeunload', (e) => {
+    // Don't logout if it's internal navigation
+    if (isInternalNavigation) {
+      console.log("✅ Internal navigation - NOT logging out");
+      return;
+    }
+    
+    // Only logout on actual tab/browser close
+    if (!isLoggingOut) {
+      console.log("🚪 Tab/browser closing - logging out");
+      isLoggingOut = true;
+      
+      // Use synchronous approach for reliable logout on page close
+      try {
+        signOut(auth);
+        sessionStorage.clear();
+      } catch (error) {
+        console.error("❌ Error during auto logout:", error);
+      }
+    }
+  });
+
+  // ✅ Handle browser back/forward button
+  window.addEventListener('popstate', async (e) => {
+    if (!isInternalNavigation && !isLoggingOut) {
+      console.log("⬅️ Browser back button detected - logging out");
+      isLoggingOut = true;
+      try {
+        await signOut(auth);
+        sessionStorage.clear();
+        window.location.replace("login.html");
+      } catch (error) {
+        console.error("❌ Error during back navigation logout:", error);
+      }
+    }
+  });
+
+  console.log("✅ Auto-logout functionality initialized");
+}
   const navbarName = document.getElementById("navbarName");
   const navbarAvatar = document.getElementById("navbarAvatar");
   const logoutBtn = document.getElementById("logoutBtn");
@@ -387,23 +475,26 @@
     return position.toString().toLowerCase().trim();
   }
 
+  // ✅ Helper function to normalize status
   function normalizeStatus(status) {
-    return (status || "").toLowerCase().trim();
+    if (!status) return "";
+    return status.toString().toLowerCase().trim();
   }
 
-  function saveNotificationsToLocalStorage() {
+  // 🔒 CHANGED: Use sessionStorage instead of localStorage for notifications
+  function saveNotificationsToSessionStorage() {
     try {
-      localStorage.setItem('notifications', JSON.stringify(notificationsList));
-      localStorage.setItem('trackedIds', JSON.stringify([...trackedIds]));
+      sessionStorage.setItem('notifications', JSON.stringify(notificationsList));
+      sessionStorage.setItem('trackedIds', JSON.stringify([...trackedIds]));
     } catch (error) {
       console.error("Error saving notifications:", error);
     }
   }
 
-  function loadNotificationsFromLocalStorage() {
+  function loadNotificationsFromSessionStorage() {
     try {
-      const savedNotifications = localStorage.getItem('notifications');
-      const savedTrackedIds = localStorage.getItem('trackedIds');
+      const savedNotifications = sessionStorage.getItem('notifications');
+      const savedTrackedIds = sessionStorage.getItem('trackedIds');
       
       if (savedNotifications) {
         notificationsList = JSON.parse(savedNotifications).map(n => ({
@@ -429,13 +520,13 @@
   clearNotificationsBtn.addEventListener("click", () => {
     notificationsList = [];
     trackedIds.clear();
-    saveNotificationsToLocalStorage();
+    saveNotificationsToSessionStorage();
     updateNotificationUI();
   });
 
   markAllReadBtn.addEventListener("click", () => {
     notificationsList.forEach(n => n.read = true);
-    saveNotificationsToLocalStorage();
+    saveNotificationsToSessionStorage();
     updateNotificationUI();
   });
 
@@ -480,7 +571,7 @@
       read: false
     });
     
-    saveNotificationsToLocalStorage();
+    saveNotificationsToSessionStorage();
     updateNotificationUI();
   }
 
@@ -529,7 +620,7 @@
   }
 
   async function setupRealtimeNotifications() {
-    loadNotificationsFromLocalStorage();
+    loadNotificationsFromSessionStorage();
 
     onSnapshot(collection(db, "users"), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
@@ -577,60 +668,83 @@
     }
   }
 
-  // ✅ ENHANCED AUTH CHECK - Redirects to login if not logged in OR not a Super Admin
+  // ✅ ENHANCED AUTH CHECK with inactive/deleted protection
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       console.log("❌ No user logged in, redirecting to login");
-      return (window.location.href = "login.html");
+      window.location.replace("index.html");
+      return;
     }
 
     const userDocRef = doc(db, "users", user.uid);
-    
-    // ✅ Get user document first to check role before setting up snapshot
     const userDocSnapshot = await getDoc(userDocRef);
     
     if (!userDocSnapshot.exists()) {
       console.log("❌ User document not found, redirecting to login");
-      alert("User data not found! Redirecting...");
       await signOut(auth);
-      return (window.location.href = "login.html");
+      window.location.replace("index.html");
+      return;
     }
 
     const userData = userDocSnapshot.data();
     const normalizedPosition = normalizePosition(userData.position);
+    const normalizedStatus = normalizeStatus(userData.status);
     
     console.log("🔍 Super Admin Dashboard Auth Check:");
     console.log("   User Position:", userData.position);
     console.log("   Normalized Position:", normalizedPosition);
+    console.log("   User Status:", userData.status);
+    console.log("   Normalized Status:", normalizedStatus);
+
+    // 🔒 CHECK IF ACCOUNT IS INACTIVE OR DELETED (Super Admins shouldn't normally have this, but just in case)
+    if (normalizedStatus === "inactive" || normalizedStatus === "deleted") {
+      console.warn("⚠️ Super Admin account is inactive or deleted, logging out...");
+      await signOut(auth);
+      alert("Your account has been deactivated or deleted. You have been logged out.");
+      window.location.replace("index.html");
+      return;
+    }
 
     // ✅ Check if user is Super Admin (case-insensitive)
     if (normalizedPosition !== "super admin") {
       console.log("❌ Unauthorized access - User is not a Super Admin");
-      alert("Unauthorized access! This dashboard is for Super Admins only.");
       await signOut(auth);
-      return (window.location.href = "login.html");
+      alert("Unauthorized access! This dashboard is for Super Admins only.");
+      window.location.replace("index.html");
+      return;
     }
 
     console.log("✅ Super Admin access granted");
 
     // ✅ Setup realtime listener for user data updates
-    onSnapshot(userDocRef, (docSnap) => {
+    onSnapshot(userDocRef, async (docSnap) => {
       if (!docSnap.exists()) {
-        console.error("User document not found!");
-        alert("User data not found! Redirecting...");
-        signOut(auth);
-        window.location.href = "login.html";
+        console.warn("⚠️ User document deleted, logging out...");
+        await signOut(auth);
+        alert("Your account has been deleted.");
+        window.location.replace("index.html");
         return;
       }
 
       const data = docSnap.data();
       const currentPosition = normalizePosition(data.position);
+      const currentStatus = normalizeStatus(data.status);
+      
+      // 🔒 CHECK STATUS IN REAL-TIME
+      if (currentStatus === "inactive" || currentStatus === "deleted") {
+        console.warn("⚠️ Super Admin account status changed to inactive/deleted, logging out...");
+        await signOut(auth);
+        alert("Your account has been deactivated or deleted. You have been logged out.");
+        window.location.replace("index.html");
+        return;
+      }
       
       // ✅ Recheck if user is still Super Admin
       if (currentPosition !== "super admin") {
-        alert("Your role has been changed. Redirecting...");
-        signOut(auth);
-        window.location.href = "login.html";
+        console.warn("⚠️ User role changed, logging out...");
+        await signOut(auth);
+        alert("Your role has been changed. Please login again.");
+        window.location.replace("index.html");
         return;
       }
       
@@ -646,7 +760,9 @@
       navbarName.textContent = fullName;
 
       const photoURL = data.photoURL || data.profilePic || "image.png";
-      updateAllProfilePhotos(photoURL);
+      if (navbarAvatar) {
+        navbarAvatar.src = photoURL;
+      }
 
       console.log("User profile updated in real-time");
     }, (error) => {
@@ -657,10 +773,23 @@
     await setupRealtimeNotifications();
   });
 
-  logoutBtn.addEventListener("click", async () => {
-    await signOut(auth);
-    window.location.href = "login.html";
-  });
+    // Add the performLogout function first
+    async function performLogout() {
+      try {
+        await signOut(auth);
+        sessionStorage.clear();
+        window.location.href = "login.html";
+      } catch (error) {
+        console.error("❌ Error during logout:", error);
+      }
+    }
+
+    // Then update your button handler to use it
+    logoutBtn.addEventListener("click", async () => {
+      if (confirm("Are you sure you want to logout?")) {
+        await performLogout(); // ← Just call this instead of signOut directly
+      }
+    });
 
   async function loadDashboardData() {
     const snapshot = await getDocs(collection(db, "reports"));

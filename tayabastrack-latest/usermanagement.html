@@ -137,38 +137,15 @@
     .password-section { background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
     .password-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
     .password-header label { font-weight: 600; color: #004aad; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-    .password-input-group { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
-    .password-input-wrapper { flex: 1; position: relative; }
-    .password-input-wrapper input { width: 100%; padding: 0.65rem 40px 0.65rem 0.65rem; font-family: 'Courier New', monospace; letter-spacing: 1px; font-size: 0.9rem; border: 1px solid #ddd; background: #f9f9f9; border-radius: 6px; }
-    .toggle-password { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #666; cursor: pointer; font-size: 1rem; transition: color 0.2s; background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
-    .toggle-password:hover { color: #004aad; }
-    .generate-btn { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: #fff; border: none; padding: 0.65rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.3s; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3); }
-    .generate-btn:hover { background: linear-gradient(135deg, #218838 0%, #1aa179 100%); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(40, 167, 69, 0.5); }
-    
-    .password-options { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 0.8rem; }
-    .options-title { font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
-    .length-control { margin-bottom: 0.8rem; }
-    .length-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
-    .length-header span:first-child { font-size: 0.85rem; color: #555; }
-    .length-value { font-weight: 700; color: #004aad; font-size: 0.95rem; background: #e3f2fd; padding: 2px 8px; border-radius: 4px; }
-    .length-slider { width: 100%; height: 6px; border-radius: 3px; background: linear-gradient(to right, #004aad 0%, #0066cc 100%); outline: none; -webkit-appearance: none; opacity: 0.7; transition: opacity 0.2s; }
-    .length-slider:hover { opacity: 1; }
-    .length-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #004aad; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: all 0.2s; }
-    .length-slider::-webkit-slider-thumb:hover { background: #003d8f; transform: scale(1.15); }
-    .length-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #004aad; cursor: pointer; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: all 0.2s; }
-    .length-slider::-moz-range-thumb:hover { background: #003d8f; transform: scale(1.15); }
-    
-    .checkbox-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
-    .checkbox-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem; background: #f9f9f9; border-radius: 4px; transition: background 0.2s; }
-    .checkbox-item:hover { background: #e8f4fd; }
-    .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #004aad; }
-    .checkbox-item label { font-size: 0.85rem; color: #555; cursor: pointer; user-select: none; }
-    
-    .strength-indicator { margin-top: 0.8rem; }
-    .strength-label { font-size: 0.85rem; color: #555; margin-bottom: 0.4rem; font-weight: 500; }
-    .strength-bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; position: relative; }
-    .strength-fill { height: 100%; transition: width 0.3s ease, background 0.3s ease; border-radius: 4px; }
-    .strength-text { font-size: 0.85rem; margin-top: 0.4rem; font-weight: 600; text-align: center; }
+    .password-input-wrapper { position: relative; margin-bottom: 0.5rem; }
+    .password-input-wrapper input { width: 100%; padding: 0.65rem 100px 0.65rem 0.65rem; font-family: 'Courier New', monospace; letter-spacing: 1px; font-size: 0.9rem; border: 1px solid #ddd; background: #fff; border-radius: 6px; }
+    .password-input-wrapper input:focus { outline: none; border-color: #004aad; box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.1); }
+    .password-actions { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; gap: 0.3rem; align-items: center; }
+    .toggle-password, .suggest-password { color: #666; cursor: pointer; font-size: 0.9rem; transition: color 0.2s; background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
+    .toggle-password:hover, .suggest-password:hover { color: #004aad; }
+    .suggest-btn { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: #fff; border: none; padding: 0.5rem 0.9rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.3s; display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3); }
+    .suggest-btn:hover { background: linear-gradient(135deg, #218838 0%, #1aa179 100%); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(40, 167, 69, 0.5); }
+    .password-hint { font-size: 0.75rem; color: #666; margin-top: 0.3rem; font-style: italic; }
     
     .modal-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.8rem; padding-top: 1rem; border-top: 2px solid #e0e0e0; }
     .modal-actions button { border: none; padding: 0.65rem 1.8rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: all 0.3s; }
@@ -238,8 +215,6 @@
       .actions { width: 100%; }
       .actions input { flex: 1; }
       .view-toggle-btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
-      .checkbox-grid { grid-template-columns: 1fr; }
-      .password-input-group { flex-direction: column; }
     }
   </style>
 </head>
@@ -373,142 +348,140 @@
             </div>
           </div>
         </div>
-
         <h3><i class="fa fa-check-circle"></i> Active Admins</h3>
-        <div class="table-wrapper">
-          <div class="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>First Name</th>
-                  <th>Last Name</th>
-                  <th>Email</th>
-                  <th>Barangay</th>
-                  <th>Position</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="activeAdmins"></tbody>
-            </table>
-          </div>
-          <div class="pagination-wrapper">
-            <div class="pagination-container" id="paginationActive">
-              <div class="pagination-info" id="infoActive"></div>
-              <div class="pagination-controls" id="controlsActive"></div>
-              <select class="page-size-select" onchange="setPageSize('active', this.value)">
-                <option value="5">5 per page</option>
-                <option value="10" selected>10 per page</option>
-                <option value="25">25 per page</option>
-                <option value="50">50 per page</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <h3><i class="fa fa-times-circle"></i> Inactive Admins</h3>
-        <div class="table-wrapper">
-          <div class="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>First Name</th>
-                  <th>Last Name</th>
-                  <th>Email</th>
-                  <th>Barangay</th>
-                  <th>Position</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="inactiveAdmins"></tbody>
-            </table>
-          </div>
-          <div class="pagination-wrapper">
-            <div class="pagination-container" id="paginationInactive">
-              <div class="pagination-info" id="infoInactive"></div>
-              <div class="pagination-controls" id="controlsInactive"></div>
-              <select class="page-size-select" onchange="setPageSize('inactive', this.value)">
-                <option value="5">5 per page</option>
-                <option value="10" selected>10 per page</option>
-                <option value="25">25 per page</option>
-                <option value="50">50 per page</option>
-              </select>
-            </div>
-          </div>
+    <div class="table-wrapper">
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <th>Barangay</th>
+              <th>Position</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="activeAdmins"></tbody>
+        </table>
+      </div>
+      <div class="pagination-wrapper">
+        <div class="pagination-container" id="paginationActive">
+          <div class="pagination-info" id="infoActive"></div>
+          <div class="pagination-controls" id="controlsActive"></div>
+          <select class="page-size-select" onchange="setPageSize('active', this.value)">
+            <option value="5">5 per page</option>
+            <option value="10" selected>10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="50">50 per page</option>
+          </select>
         </div>
       </div>
+    </div>
 
-      <div id="officialsView" class="view-section">
-        <h3><i class="fa fa-check-circle"></i> Active Barangay Officials</h3>
-        <div class="table-wrapper">
-          <div class="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>First Name</th>
-                  <th>Last Name</th>
-                  <th>Email</th>
-                  <th>Barangay</th>
-                  <th>Position</th>
-                  <th>Contact</th>
-                  <th>Status</th>
-                  <th>Access</th>
-                </tr>
-              </thead>
-              <tbody id="activeOfficials"></tbody>
-            </table>
-          </div>
-          <div class="pagination-wrapper">
-            <div class="pagination-container" id="paginationActiveOfficials">
-              <div class="pagination-info" id="infoActiveOfficials"></div>
-              <div class="pagination-controls" id="controlsActiveOfficials"></div>
-              <select class="page-size-select" onchange="setPageSize('activeOfficials', this.value)">
-                <option value="5">5 per page</option>
-                <option value="10" selected>10 per page</option>
-                <option value="25">25 per page</option>
-                <option value="50">50 per page</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <h3><i class="fa fa-times-circle"></i> Inactive Barangay Officials</h3>
-        <div class="table-wrapper">
-          <div class="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>First Name</th>
-                  <th>Last Name</th>
-                  <th>Email</th>
-                  <th>Barangay</th>
-                  <th>Position</th>
-                  <th>Contact</th>
-                  <th>Status</th>
-                  <th>Access</th>
-                </tr>
-              </thead>
-              <tbody id="inactiveOfficials"></tbody>
-            </table>
-          </div>
-          <div class="pagination-wrapper">
-            <div class="pagination-container" id="paginationInactiveOfficials">
-              <div class="pagination-info" id="infoInactiveOfficials"></div>
-              <div class="pagination-controls" id="controlsInactiveOfficials"></div>
-              <select class="page-size-select" onchange="setPageSize('inactiveOfficials', this.value)">
-                <option value="5">5 per page</option>
-                <option value="10" selected>10 per page</option>
-                <option value="25">25 per page</option>
-                <option value="50">50 per page</option>
-              </select>
-            </div>
-          </div>
+    <h3><i class="fa fa-times-circle"></i> Inactive Admins</h3>
+    <div class="table-wrapper">
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <th>Barangay</th>
+              <th>Position</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inactiveAdmins"></tbody>
+        </table>
+      </div>
+      <div class="pagination-wrapper">
+        <div class="pagination-container" id="paginationInactive">
+          <div class="pagination-info" id="infoInactive"></div>
+          <div class="pagination-controls" id="controlsInactive"></div>
+          <select class="page-size-select" onchange="setPageSize('inactive', this.value)">
+            <option value="5">5 per page</option>
+            <option value="10" selected>10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="50">50 per page</option>
+          </select>
         </div>
       </div>
     </div>
   </div>
 
+  <div id="officialsView" class="view-section">
+    <h3><i class="fa fa-check-circle"></i> Active Barangay Officials</h3>
+    <div class="table-wrapper">
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <th>Barangay</th>
+              <th>Position</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Access</th>
+            </tr>
+          </thead>
+          <tbody id="activeOfficials"></tbody>
+        </table>
+      </div>
+      <div class="pagination-wrapper">
+        <div class="pagination-container" id="paginationActiveOfficials">
+          <div class="pagination-info" id="infoActiveOfficials"></div>
+          <div class="pagination-controls" id="controlsActiveOfficials"></div>
+          <select class="page-size-select" onchange="setPageSize('activeOfficials', this.value)">
+            <option value="5">5 per page</option>
+            <option value="10" selected>10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="50">50 per page</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <h3><i class="fa fa-times-circle"></i> Inactive Barangay Officials</h3>
+    <div class="table-wrapper">
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <th>Barangay</th>
+              <th>Position</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Access</th>
+            </tr>
+          </thead>
+          <tbody id="inactiveOfficials"></tbody>
+        </table>
+      </div>
+      <div class="pagination-wrapper">
+        <div class="pagination-container" id="paginationInactiveOfficials">
+          <div class="pagination-info" id="infoInactiveOfficials"></div>
+          <div class="pagination-controls" id="controlsInactiveOfficials"></div>
+          <select class="page-size-select" onchange="setPageSize('inactiveOfficials', this.value)">
+            <option value="5">5 per page</option>
+            <option value="10" selected>10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="50">50 per page</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
   <div class="modal" id="userModal">
     <div class="modal-content">
       <h2 id="modalTitle"><i class="fa fa-user-plus"></i> Add User</h2>
@@ -620,74 +593,39 @@
             <option>Other</option>
           </select>
         </div>
-        <div class="password-section" id="passwordSection">
+        <div class="password-section" id="passwordSection" style="display: none;">
           <div class="password-header">
-            <label><i class="fa fa-lock"></i> Password Generator</label>
+            <label><i class="fa fa-lock"></i> Password</label>
           </div>
-          <div class="password-input-group">
-            <div class="password-input-wrapper">
-              <input type="password" id="password" placeholder="Generated password" required readonly>
-              <button type="button" class="toggle-password" id="togglePasswordIcon" onclick="togglePasswordVisibility()">
+          <div class="password-input-wrapper">
+            <input type="password" id="password" placeholder="Enter password" required>
+            <div class="password-actions">
+              <button type="button" class="toggle-password" id="togglePasswordIcon" onclick="togglePasswordVisibility()" title="Show/Hide password">
                 <i class="fa fa-eye"></i>
               </button>
-            </div>
-            <button type="button" class="generate-btn" onclick="generatePassword()">
-              <i class="fa fa-sync-alt"></i> Generate
-            </button>
-          </div>
-          
-          <div class="password-options">
-            <div class="options-title">
-              <i class="fa fa-cog"></i> Password Options
-            </div>
-            <div class="length-control">
-              <div class="length-header">
-                <span>Length:</span>
-                <span class="length-value" id="lengthValue">16</span>
-              </div>
-              <input type="range" class="length-slider" id="passwordLength" min="8" max="32" value="16" oninput="updateLengthValue()">
-            </div>
-            <div class="checkbox-grid">
-              <div class="checkbox-item">
-                <input type="checkbox" id="includeUppercase" checked>
-                <label for="includeUppercase">Uppercase (A-Z)</label>
-              </div>
-              <div class="checkbox-item">
-                <input type="checkbox" id="includeLowercase" checked>
-                <label for="includeLowercase">Lowercase (a-z)</label>
-              </div>
-              <div class="checkbox-item">
-                <input type="checkbox" id="includeNumbers" checked>
-                <label for="includeNumbers">Numbers (0-9)</label>
-              </div>
-              <div class="checkbox-item">
-                <input type="checkbox" id="includeSymbols" checked>
-                <label for="includeSymbols">Symbols (!@#$%)</label>
-              </div>
+              <button type="button" class="suggest-password" onclick="showSuggestPassword()" title="Suggest strong password">
+                <i class="fa fa-key"></i>
+              </button>
             </div>
           </div>
-          
-          <div class="strength-indicator">
-            <div class="strength-label">Password Strength:</div>
-            <div class="strength-bar">
-              <div class="strength-fill" id="strengthFill"></div>
-            </div>
-            <div class="strength-text" id="strengthText">Not Generated</div>
+          <button type="button" class="suggest-btn" onclick="generateSuggestedPassword()">
+            <i class="fa fa-magic"></i> Suggest Strong Password
+          </button>
+          <div class="password-hint">
+            <i class="fa fa-info-circle"></i> Password should be at least 8 characters with uppercase, lowercase, numbers, and symbols.
           </div>
         </div>
-        
         <div class="modal-actions">
-          <button type="button" class="cancel-btn" onclick="closeModal()">
-            <i class="fa fa-times"></i> Cancel
-          </button>
-          <button type="submit" class="save-btn" id="submitBtn">
-            <i class="fa fa-save"></i> Save User
-          </button>
-        </div>
-      </form>
+      <button type="button" class="cancel-btn" onclick="closeModal()">
+        <i class="fa fa-times"></i> Cancel
+      </button>
+      <button type="submit" class="save-btn" id="submitBtn">
+        <i class="fa fa-save"></i> Save User
+      </button>
     </div>
-  </div>
-
+  </form>
+</div>
+</div>
   <div class="modal" id="editModal">
     <div class="modal-content">
       <h2><i class="fa fa-user-edit"></i> Edit User</h2>
@@ -800,7 +738,6 @@
       </form>
     </div>
   </div>
-
   <script>
     function toggleSubmenu(event) {
       event.preventDefault();
@@ -890,11 +827,6 @@
       }
     });
 
-    function updateLengthValue() {
-      const length = document.getElementById('passwordLength').value;
-      document.getElementById('lengthValue').textContent = length;
-    }
-
     function togglePasswordVisibility() {
       const passwordInput = document.getElementById('password');
       const icon = document.getElementById('togglePasswordIcon').querySelector('i');
@@ -910,71 +842,39 @@
       }
     }
 
-    function generatePassword() {
-      const length = parseInt(document.getElementById('passwordLength').value);
-      const includeUppercase = document.getElementById('includeUppercase').checked;
-      const includeLowercase = document.getElementById('includeLowercase').checked;
-      const includeNumbers = document.getElementById('includeNumbers').checked;
-      const includeSymbols = document.getElementById('includeSymbols').checked;
-
-      if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
-        alert('Please select at least one character type!');
-        return;
-      }
-
-      let charset = '';
-      if (includeUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      if (includeLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
-      if (includeNumbers) charset += '0123456789';
-      if (includeSymbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-
+    function generateSuggestedPassword() {
+      const length = 16;
+      const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=';
+      
       let password = '';
       const randomValues = new Uint32Array(length);
       window.crypto.getRandomValues(randomValues);
       
-      for (let i = 0; i < length; i++) {
+      password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[randomValues[0] % 26];
+      password += 'abcdefghijklmnopqrstuvwxyz'[randomValues[1] % 26];
+      password += '0123456789'[randomValues[2] % 10];
+      password += '!@#$%^&*()_+-='[randomValues[3] % 14];
+      
+      for (let i = 4; i < length; i++) {
         password += charset[randomValues[i] % charset.length];
       }
-
+      
+      password = password.split('').sort(() => 0.5 - Math.random()).join('');
+      
       document.getElementById('password').value = password;
-      calculatePasswordStrength(password, 'strengthFill', 'strengthText');
+      document.getElementById('password').type = 'text';
+      document.getElementById('togglePasswordIcon').querySelector('i').classList.remove('fa-eye');
+      document.getElementById('togglePasswordIcon').querySelector('i').classList.add('fa-eye-slash');
     }
 
-    function calculatePasswordStrength(password, fillId, textId) {
-      let strength = 0;
-      const strengthFill = document.getElementById(fillId);
-      const strengthText = document.getElementById(textId);
-
-      if (password.length >= 8) strength += 20;
-      if (password.length >= 12) strength += 20;
-      if (password.length >= 16) strength += 10;
-      if (/[a-z]/.test(password)) strength += 10;
-      if (/[A-Z]/.test(password)) strength += 10;
-      if (/[0-9]/.test(password)) strength += 15;
-      if (/[^a-zA-Z0-9]/.test(password)) strength += 15;
-
-      strengthFill.style.width = strength + '%';
-
-      if (strength < 40) {
-        strengthFill.style.background = '#dc3545';
-        strengthText.textContent = 'Weak';
-        strengthText.style.color = '#dc3545';
-      } else if (strength < 70) {
-        strengthFill.style.background = '#ffc107';
-        strengthText.textContent = 'Medium';
-        strengthText.style.color = '#ffc107';
-      } else {
-        strengthFill.style.background = '#28a745';
-        strengthText.textContent = 'Strong';
-        strengthText.style.color = '#28a745';
-      }
+    function showSuggestPassword() {
+      generateSuggestedPassword();
     }
 
     function updatePositionOptions() {
       const position = document.getElementById('position').value;
       const passwordSection = document.getElementById('passwordSection');
-      const isAdminPosition = position === 'Super Admin' || position === 'Admin';
-      if (isAdminPosition) {
+      if (position) {
         passwordSection.style.display = 'block';
       } else {
         passwordSection.style.display = 'none';
@@ -986,17 +886,17 @@
       document.getElementById("submitBtn").innerHTML = '<i class="fa fa-save"></i> Save User';
       document.getElementById("userModal").style.display = "flex";
       document.getElementById("position").value = "";
+      document.getElementById("password").value = "";
       updatePositionOptions();
-      generatePassword();
     };
     
     window.closeModal = () => {
       document.getElementById("userModal").style.display = "none";
       document.getElementById("addUserForm").reset();
-      document.getElementById('strengthFill').style.width = '0%';
-      document.getElementById('strengthText').textContent = 'Not Generated';
-      document.getElementById('strengthText').style.color = '#666';
-      document.getElementById('passwordSection').style.display = 'block';
+      document.getElementById('passwordSection').style.display = 'none';
+      document.getElementById('password').type = 'password';
+      document.getElementById('togglePasswordIcon').querySelector('i').classList.remove('fa-eye-slash');
+      document.getElementById('togglePasswordIcon').querySelector('i').classList.add('fa-eye');
     };
     
     window.openEditModal = (userId, userData) => {
@@ -1016,11 +916,10 @@
     };
 
   </script>
-
   <script type="module">
     import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { 
-      getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut
+      getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence
     } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
     import { 
       getFirestore, collection, doc, setDoc, updateDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, getDoc, addDoc
@@ -1034,11 +933,97 @@
       messagingSenderId: "674055915366",
       appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
     };
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    setPersistence(auth, browserSessionPersistence)
+      .then(() => {
+        console.log("Auth persistence set to SESSION");
+      })
+      .catch((error) => {
+        console.error("Error setting persistence:", error);
+      });
+
+let isInternalNavigation = false;
+let isLoggingOut = false;
+let autoLogoutInitialized = false;
+
+function setupAutoLogout(auth) {
+  if (autoLogoutInitialized) {
+    console.log("⚠️ Auto-logout already initialized");
+    return;
+  }
+  autoLogoutInitialized = true;
+
+  // ✅ Track ALL link clicks (including profile links)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href) {
+      try {
+        const linkUrl = new URL(link.href, window.location.href);
+        const currentOrigin = window.location.origin;
+        
+        // Check if it's an internal link
+        if (linkUrl.origin === currentOrigin) {
+          isInternalNavigation = true;
+          console.log("🔗 Internal navigation detected:", link.href);
+          
+          // ✅ LONGER timeout - 3 seconds to ensure navigation completes
+          setTimeout(() => {
+            isInternalNavigation = false;
+          }, 3000);
+        }
+      } catch (err) {
+        // If URL parsing fails, treat as internal navigation to be safe
+        isInternalNavigation = true;
+        setTimeout(() => {
+          isInternalNavigation = false;
+        }, 3000);
+      }
+    }
+  }, true); // ✅ Use capture phase to catch all clicks
+
+  // ✅ IMPROVED: Only logout on actual page close, not navigation
+  window.addEventListener('beforeunload', (e) => {
+    // Don't logout if it's internal navigation
+    if (isInternalNavigation) {
+      console.log("✅ Internal navigation - NOT logging out");
+      return;
+    }
+    
+    // Only logout on actual tab/browser close
+    if (!isLoggingOut) {
+      console.log("🚪 Tab/browser closing - logging out");
+      isLoggingOut = true;
+      
+      // Use synchronous approach for reliable logout on page close
+      try {
+        signOut(auth);
+        sessionStorage.clear();
+      } catch (error) {
+        console.error("❌ Error during auto logout:", error);
+      }
+    }
+  });
+
+  // ✅ Handle browser back/forward button
+  window.addEventListener('popstate', async (e) => {
+    if (!isInternalNavigation && !isLoggingOut) {
+      console.log("⬅️ Browser back button detected - logging out");
+      isLoggingOut = true;
+      try {
+        await signOut(auth);
+        sessionStorage.clear();
+        window.location.replace("login.html");
+      } catch (error) {
+        console.error("❌ Error during back navigation logout:", error);
+      }
+    }
+  });
+
+  console.log("✅ Auto-logout functionality initialized");
+}
     let superAdminData = null;
 
     const paginationState = {
@@ -1408,131 +1393,175 @@
       console.log("Notifications system active");
     }
 
-    document.getElementById("addUserForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const firstName = document.getElementById("firstName").value.trim();
-      const lastName = document.getElementById("lastName").value.trim();
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const barangay = document.getElementById("barangay").value.trim();
-      const position = document.getElementById("position").value;
-      const password = document.getElementById("password").value;
+document.getElementById("addUserForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const barangay = document.getElementById("barangay").value.trim();
+  const position = document.getElementById("position").value;
+  const password = document.getElementById("password").value;
 
-      const isAdminPosition = position === "Super Admin" || position === "Admin";
-      const hashedPassword = isAdminPosition ? CryptoJS.SHA256(password).toString() : null;
+  const isAdminPosition = position === "Super Admin" || position === "Admin";
 
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        alert("You must be logged in to add users");
-        return;
+  if (!password) {
+    alert("Password is required for all users");
+    return;
+  }
+
+  const hashedPassword = CryptoJS.SHA256(password).toString();
+
+  const currentUser = auth.currentUser;
+  if (!currentUser) {
+    alert("You must be logged in to add users");
+    return;
+  }
+
+  try {
+    let newUid;
+    let userRef;
+
+    // Only create Firebase Auth account for Barangay Officials
+    if (!isAdminPosition) {
+      const secondaryApp = initializeApp(firebaseConfig, "Secondary-" + Date.now());
+      const secondaryAuth = getAuth(secondaryApp);
+
+      console.log("Creating Firebase Auth account for Official...");
+      const userCredential = await createUserWithEmailAndPassword(
+        secondaryAuth, 
+        email, 
+        password
+      );
+
+      newUid = userCredential.user.uid;
+      console.log("Auth account created with UID:", newUid);
+
+      await signOut(secondaryAuth);
+      await deleteApp(secondaryApp);
+      console.log("Secondary app cleaned up");
+    } else {
+      newUid = doc(collection(db, "users")).id;
+      console.log("Admin pending approval, temporary ID:", newUid);
+    }
+
+    userRef = doc(db, "users", newUid);
+
+    // ✅ FIXED: Use "surname" and lowercase "active"/"pending"
+    const userData = {
+      firstName,
+      surname: lastName,        // ✅ Changed from "lastName" to "surname"
+      name,
+      email,
+      barangay,
+      position,
+      password,
+      hashedPassword,
+      createdAt: serverTimestamp()
+    };
+
+    if (isAdminPosition) {
+      userData.status = "pending";      // ✅ Changed from "Pending" to "pending"
+      userData.role = "Admin";
+    } else {
+      userData.status = "active";       // ✅ Changed from "Active" to "active"
+      userData.role = "Official";
+      userData.phoneNumber = "";        // ✅ Add phoneNumber field
+    }
+
+    await setDoc(userRef, userData);
+
+    await logAuditEvent(
+      "User Added",
+      "add",
+      "Users",
+      `Added new user: ${name}`,
+      {
+        targetUserEmail: email,
+        targetUserPosition: position,
+        targetUserId: newUid,
+        barangay: barangay
       }
+    );
 
-      try {
-        const userRef = doc(collection(db, "users"));
-        const userData = {
-          firstName,
-          lastName,
-          name,
-          email,
-          barangay,
-          position,
-          createdAt: serverTimestamp()
-        };
+    closeModal();
+    document.getElementById("addUserForm").reset();
 
-        if (isAdminPosition) {
-          userData.password = password;
-          userData.hashedPassword = hashedPassword;
-          userData.status = "Pending";
-          userData.role = "Admin";
-        } else {
-          userData.status = "Active";
-          userData.role = "Official";
-        }
+    if (isAdminPosition) {
+      alert(`Admin user added successfully (Pending approval)!\n\nUID: ${newUid}\n\nFirebase Auth account will be created upon approval.\nEmail: ${email}\nPassword: ${password}`);
+    } else {
+      alert(`Barangay Official added successfully!\n\nFirebase Auth account created.\nUID: ${newUid}\n\nThey can login with:\nEmail: ${email}\nPassword: ${password}`);
+    }
+  } catch (err) {
+    console.error("Error adding user:", err);
+    
+    if (err.code === 'auth/email-already-in-use') {
+      alert("Error: This email is already registered. Please use a different email address.");
+    } else if (err.code === 'auth/weak-password') {
+      alert("Error: The password is too weak. Please use a stronger password (at least 6 characters).");
+    } else if (err.code === 'auth/invalid-email') {
+      alert("Error: Invalid email format.");
+    } else {
+      alert("Error: " + err.message);
+    }
+  }
+});
 
-        await setDoc(userRef, userData);
+ document.getElementById("editUserForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const userId = document.getElementById("editUserId").value;
+  const firstName = document.getElementById("editFirstName").value.trim();
+  const lastName = document.getElementById("editLastName").value.trim();
+  const name = document.getElementById("editName").value.trim();
+  const email = document.getElementById("editEmail").value.trim();
+  const barangay = document.getElementById("editBarangay").value.trim();
+  const position = document.getElementById("editPosition").value;
 
-        await logAuditEvent(
-          "User Added",
-          "add",
-          "Users",
-          `Added new user: ${name}`,
-          {
-            targetUserEmail: email,
-            targetUserPosition: position,
-            targetUserId: userRef.id,
-            barangay: barangay
-          }
-        );
+  try {
+    const userRef = doc(db, "users", userId);
+    const oldDoc = await getDoc(userRef);
+    const oldData = oldDoc.data();
 
-        closeModal();
-        document.getElementById("addUserForm").reset();
-        
-        if (isAdminPosition) {
-          alert("Admin user added successfully (Pending approval)!");
-        } else {
-          alert("Barangay Official added successfully!");
-        }
-      } catch (err) {
-        console.error("Error adding user:", err);
-        alert("Error: " + err.message);
-      }
+    // ✅ FIXED: Use "surname" instead of "lastName"
+    await updateDoc(userRef, {
+      firstName,
+      surname: lastName,  // ✅ Changed from "lastName" to "surname"
+      name,
+      email,
+      barangay,
+      position,
+      updatedAt: serverTimestamp()
     });
 
-    document.getElementById("editUserForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const userId = document.getElementById("editUserId").value;
-      const firstName = document.getElementById("editFirstName").value.trim();
-      const lastName = document.getElementById("editLastName").value.trim();
-      const name = document.getElementById("editName").value.trim();
-      const email = document.getElementById("editEmail").value.trim();
-      const barangay = document.getElementById("editBarangay").value.trim();
-      const position = document.getElementById("editPosition").value;
+    const changes = [];
+    if (oldData.firstName !== firstName) changes.push(`First Name: "${oldData.firstName}" → "${firstName}"`);
+    if (oldData.surname !== lastName) changes.push(`Last Name: "${oldData.surname}" → "${lastName}"`);  // ✅ Changed
+    if (oldData.name !== name) changes.push(`Name: "${oldData.name}" → "${name}"`);
+    if (oldData.email !== email) changes.push(`Email: "${oldData.email}" → "${email}"`);
+    if (oldData.barangay !== barangay) changes.push(`Barangay: "${oldData.barangay}" → "${barangay}"`);
+    if (oldData.position !== position) changes.push(`Position: "${oldData.position}" → "${position}"`);
 
-      try {
-        const userRef = doc(db, "users", userId);
-        const oldDoc = await getDoc(userRef);
-        const oldData = oldDoc.data();
-
-        await updateDoc(userRef, {
-          firstName,
-          lastName,
-          name,
-          email,
-          barangay,
-          position,
-          updatedAt: serverTimestamp()
-        });
-
-        const changes = [];
-        if (oldData.firstName !== firstName) changes.push(`First Name: "${oldData.firstName}" → "${firstName}"`);
-        if (oldData.lastName !== lastName) changes.push(`Last Name: "${oldData.lastName}" → "${lastName}"`);
-        if (oldData.name !== name) changes.push(`Name: "${oldData.name}" → "${name}"`);
-        if (oldData.email !== email) changes.push(`Email: "${oldData.email}" → "${email}"`);
-        if (oldData.barangay !== barangay) changes.push(`Barangay: "${oldData.barangay}" → "${barangay}"`);
-        if (oldData.position !== position) changes.push(`Position: "${oldData.position}" → "${position}"`);
-
-        await logAuditEvent(
-          "User Updated",
-          "edit",
-          "Users",
-          `Updated user: ${name}`,
-          {
-            targetUserId: userId,
-            targetUserEmail: email,
-            changes: changes.join(", "),
-            beforeValue: JSON.stringify(oldData),
-            afterValue: JSON.stringify({ firstName, lastName, name, email, barangay, position })
-          }
-        );
-
-        closeEditModal();
-        alert("User updated successfully!");
-      } catch (err) {
-        console.error("Error updating user:", err);
-        alert("Error: " + err.message);
+    await logAuditEvent(
+      "User Updated",
+      "edit",
+      "Users",
+      `Updated user: ${name}`,
+      {
+        targetUserId: userId,
+        targetUserEmail: email,
+        changes: changes.join(", "),
+        beforeValue: JSON.stringify(oldData),
+        afterValue: JSON.stringify({ firstName, surname: lastName, name, email, barangay, position })
       }
-    });
+    );
 
+    closeEditModal();
+    alert("User updated successfully!");
+  } catch (err) {
+    console.error("Error updating user:", err);
+    alert("Error: " + err.message);
+  }
+});
     const q = query(collection(db, "users"));
     onSnapshot(q, (snap) => {
       paginationState.pending.data = [];
@@ -1585,18 +1614,18 @@
           }
         }
 
-        if (isBrgyOfficial) {
-          const contactDisplay = u.phoneNumber || u.contact || "—";
-          const rowHtml = `
-            <td>${u.firstName || ""}</td>
-            <td>${u.lastName || u.surname || ""}</td>
-            <td>${u.email || ""}</td>
-            <td>${u.barangay || ""}</td>
-            <td>${u.position || ""}</td>
-            <td>${contactDisplay}</td>
-            <td>${statusBadge}</td>
-            <td><span class="view-only-cell"><i class="fa fa-eye"></i> View Only</span></td>
-          `;
+if (isBrgyOfficial) {
+  const contactDisplay = u.phoneNumber || u.contact || "—";
+  const rowHtml = `
+    <td>${u.firstName || ""}</td>
+    <td>${u.surname || u.lastName || ""}</td>  
+    <td>${u.email || ""}</td>
+    <td>${u.barangay || ""}</td>
+    <td>${u.position || ""}</td>
+    <td>${contactDisplay}</td>
+    <td>${statusBadge}</td>
+    <td><span class="view-only-cell"><i class="fa fa-eye"></i> View Only</span></td>
+  `;
 
           if (status === "active") {
             activeOfficialsData.push({ html: rowHtml, barangay: u.barangay || "" });
@@ -1618,127 +1647,153 @@
       });
     });
 
-    window.approveUser = async (oldDocId) => {
-      if (!confirm("Approve this user and create their login credentials?")) return;
-      
-      try {
-        console.log("🔄 Starting approval process for document ID:", oldDocId);
-        
-        const oldDocRef = doc(db, "users", oldDocId);
-        const oldDocSnap = await getDoc(oldDocRef);
-        
-        if (!oldDocSnap.exists()) {
-          alert("User not found.");
-          return;
-        }
-        
-        const userData = oldDocSnap.data();
-        console.log("User data retrieved:", userData);
-
-        const secondaryApp = initializeApp(firebaseConfig, "Secondary-" + Date.now());
-        const secondaryAuth = getAuth(secondaryApp);
-
-        console.log("Creating Firebase Auth account...");
-        const userCredential = await createUserWithEmailAndPassword(
-          secondaryAuth, 
-          userData.email, 
-          userData.password
-        );
+window.approveUser = async (pendingDocId) => {
+  if (!confirm("Approve this user? Their Firebase Auth account will be created and status will be changed to Active.")) return;
+  
+  try {
+    console.log("🔄 Approving user with document ID:", pendingDocId);
     
-        const newUid = userCredential.user.uid;
-        console.log("Auth account created with UID:", newUid);
+    const userRef = doc(db, "users", pendingDocId);
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      alert("User not found.");
+      return;
+    }
+    
+    const userData = userDoc.data();
+    console.log("User data retrieved:", userData);
 
-        const newDocRef = doc(db, "users", newUid);
-        console.log("Creating new Firestore document with ID:", newUid);
-        
-        await setDoc(newDocRef, {
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          name: userData.name,
-          email: userData.email,
-          barangay: userData.barangay,
-          position: userData.position,
-          password: userData.password,
-          hashedPassword: userData.hashedPassword,
-          status: "Active",
-          role: userData.role || (userData.position === "Barangay Official" ? "Official" : "Admin"),
-          createdAt: userData.createdAt || serverTimestamp(),
+    const secondaryApp = initializeApp(firebaseConfig, "Secondary-" + Date.now());
+    const secondaryAuth = getAuth(secondaryApp);
+
+    console.log("Creating Firebase Auth account for approved admin...");
+    const userCredential = await createUserWithEmailAndPassword(
+      secondaryAuth, 
+      userData.email, 
+      userData.password
+    );
+
+    const authUid = userCredential.user.uid;
+    console.log("Auth account created with UID:", authUid);
+
+    await signOut(secondaryAuth);
+    await deleteApp(secondaryApp);
+
+    if (authUid !== pendingDocId) {
+      console.log("Migrating user document from temp ID to Auth UID...");
+      const newUserRef = doc(db, "users", authUid);
+      await setDoc(newUserRef, {
+        ...userData,
+        status: "active",              // ✅ Changed from "Active" to "active"
+        approvedAt: serverTimestamp()
+      });
+      await deleteDoc(userRef);
+      console.log("User document migrated successfully");
+    } else {
+      await updateDoc(userRef, {
+        status: "active",              // ✅ Changed from "Active" to "active"
+        approvedAt: serverTimestamp()
+      });
+    }
+    
+    console.log("User approved successfully");
+
+    await logAuditEvent(
+      "User Approved",
+      "approve",
+      "Users",
+      `Approved user: ${userData.name}`,
+      {
+        beforeValue: "pending",        // ✅ Changed from "Pending" to "pending"
+        afterValue: "active",          // ✅ Changed from "Active" to "active"
+        targetUserId: authUid,
+        targetUserEmail: userData.email,
+        targetUserPosition: userData.position
+      }
+    );
+
+    alert(`✅ ${userData.name} has been approved successfully!\n\nFirebase Auth account created.\nThey can now login with:\nEmail: ${userData.email}\nPassword: (the password you set)`);
+    
+  } catch (err) {
+    console.error("Error approving user:", err);
+    if (err.code === 'auth/email-already-in-use') {
+      alert("Error: This email already has a Firebase Auth account. Updating status only...");
+      try {
+        await updateDoc(userRef, {
+          status: "active",            // ✅ Changed from "Active" to "active"
           approvedAt: serverTimestamp()
         });
-        
-        console.log("New document created successfully");
-
-        console.log("Deleting old pending document:", oldDocId);
-        await deleteDoc(oldDocRef);
-        console.log("Old document deleted");
-
-        await signOut(secondaryAuth);
-        await deleteApp(secondaryApp);
-        console.log("Secondary app cleaned up");
-
-        await logAuditEvent(
-          "User Approved",
-          "approve",
-          "Users",
-          `Approved user: ${userData.name}`,
-          {
-            beforeValue: "Pending",
-            afterValue: "Active",
-            targetUserId: newUid,
-            targetUserEmail: userData.email,
-            targetUserPosition: userData.position
-          }
-        );
-
-        alert(`✅ ${userData.name} has been approved successfully!\n\nThey can now login with:\nEmail: ${userData.email}\nPassword: (the one you set)`);
-        
-      } catch (err) {
-        console.error("Error approving user:", err);
-        console.error("Error code:", err.code);
-        console.error("Error message:", err.message);
-        
-        if (err.code === 'auth/email-already-in-use') {
-          alert("Error: This email is already registered in Firebase Authentication. The user may have already been approved or registered separately.");
-        } else if (err.code === 'auth/weak-password') {
-          alert("Error: The password is too weak. Please use a stronger password.");
-        } else if (err.code === 'auth/invalid-email') {
-          alert("Error: Invalid email format.");
-        } else {
-          alert("Error approving user: " + err.message);
-        }
+        alert("Status updated to Active!");
+      } catch (updateErr) {
+        console.error("Error updating status:", updateErr);
       }
-    };
+    } else {
+      alert("Error approving user: " + err.message);
+    }
+  }
+};
+window.deactivateUser = async (id) => {
+  if (confirm("Deactivate this user? They will not be able to login.")) {
+    try {
+      const userRef = doc(db, "users", id);
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.data();
+      const userName = userData.name || `${userData.firstName} ${userData.surname || userData.lastName}`;
 
-    window.deactivateUser = async (id) => {
-      if (confirm("Deactivate this user? They will not be able to login.")) {
-        try {
-          const userRef = doc(db, "users", id);
-          const userDoc = await getDoc(userRef);
-          const userData = userDoc.data();
-          const userName = userData.name || `${userData.firstName} ${userData.lastName}`;
+      await updateDoc(userRef, { status: "inactive" });  // ✅ Changed from "Inactive" to "inactive"
 
-          await updateDoc(userRef, { status: "Inactive" });
-
-          await logAuditEvent(
-            "User Deactivated",
-            "status",
-            "Users",
-            `Deactivated user: ${userName}`,
-            {
-              beforeValue: "Active",
-              afterValue: "Inactive",
-              targetUserId: id,
-              targetUserEmail: userData.email
-            }
-          );
-
-          alert("User deactivated successfully!");
-        } catch (err) {
-          console.error("Error deactivating user:", err);
-          alert("Error: " + err.message);
+      await logAuditEvent(
+        "User Deactivated",
+        "status",
+        "Users",
+        `Deactivated user: ${userName}`,
+        {
+          beforeValue: "active",      // ✅ lowercase
+          afterValue: "inactive",     // ✅ lowercase
+          targetUserId: id,
+          targetUserEmail: userData.email
         }
-      }
-    };
+      );
+
+      alert("User deactivated successfully!");
+    } catch (err) {
+      console.error("Error deactivating user:", err);
+      alert("Error: " + err.message);
+    }
+  }
+};
+
+window.activateUser = async (id) => {
+  if (confirm("Activate this user? They will be able to login again.")) {
+    try {
+      const userRef = doc(db, "users", id);
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.data();
+      const userName = userData.name || `${userData.firstName} ${userData.surname || userData.lastName}`;
+
+      await updateDoc(userRef, { status: "active" });  // ✅ Changed from "Active" to "active"
+
+      await logAuditEvent(
+        "User Activated",
+        "status",
+        "Users",
+        `Activated user: ${userName}`,
+        {
+          beforeValue: "inactive",    // ✅ lowercase
+          afterValue: "active",       // ✅ lowercase
+          targetUserId: id,
+          targetUserEmail: userData.email
+        }
+      );
+
+      alert("User activated successfully!");
+    } catch (err) {
+      console.error("Error activating user:", err);
+      alert("Error: " + err.message);
+    }
+  }
+};
 
     window.activateUser = async (id) => {
       if (confirm("Activate this user? They will be able to login again.")) {
@@ -1816,26 +1871,44 @@
       });
     };
 
-    const handleLogout = async (e) => {
-      e.preventDefault();
-      if (confirm("Are you sure you want to logout?")) {
-        await logAuditEvent(
-          "Logged Out",
-          "logout",
-          "Authentication",
-          "User logged out from the system"
-        );
-
+// 🔒 SHARED LOGOUT FUNCTION
+    async function performLogout(isManualLogout = true) {
+      try {
+        if (isManualLogout) {
+          await logAuditEvent(
+            "Logged Out",
+            "logout",
+            "Authentication",
+            "User logged out from the system"
+          );
+        }
+        
         await signOut(auth);
+        sessionStorage.clear();
+        console.log("✅ User logged out successfully");
         window.location.href = "login.html";
+      } catch (error) {
+        console.error("❌ Error during logout:", error);
+        if (isManualLogout) {
+          alert("Error logging out. Please try again.");
+        }
       }
-    };
+    }
 
-    document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
-    document.getElementById("dropdownLogoutBtn").addEventListener("click", handleLogout);
+    // 🔒 MANUAL LOGOUT HANDLERS
+    const handleLogout = async (e) => {
+    e.preventDefault();
+    if (confirm("Are you sure you want to logout?")) {
+      await performLogout(true);
+    }
+  };
+
+  document.getElementById("sidebarLogoutBtn").addEventListener("click", handleLogout);
+  document.getElementById("dropdownLogoutBtn").addEventListener("click", handleLogout);
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
+        setupAutoLogout(auth);
         const userDocRef = doc(db, "users", user.uid);
         onSnapshot(userDocRef, (docSnap) => {
           if (!docSnap.exists()) {
@@ -1847,32 +1920,32 @@
           if (data.firstName && data.lastName) {
             fullName = `${data.firstName} ${data.lastName}`;
           } else if (data.name) {
-            fullName = data.name;
+          fullName = data.name;
           } else if (data.firstName) {
-            fullName = data.firstName;
-          }    
-          document.getElementById("navUsername").textContent = fullName;    
+          fullName = data.firstName;
+          }
+          document.getElementById("navUsername").textContent = fullName;
           const photoURL = data.photoURL || data.profilePic || "image.png";
-          updateAllProfilePhotos(photoURL);    
+          updateAllProfilePhotos(photoURL);
           superAdminData = {
-            uid: user.uid,
-            email: user.email,
-            position: data.position
-          };    
-          if (data.position !== "Super Admin") {
+          uid: user.uid,
+          email: user.email,
+          position: data.position
+          };
+            if (data.position !== "Super Admin") {
             alert("Access denied. Only Super Admins can manage users.");
             window.location.href = "dashboard.html";
             return;
-          }    
+          }
           console.log("Super Admin authenticated and authorized");
-        }, (error) => {
+          }, (error) => {
           console.error("Error in user snapshot:", error);
-        });  
-        await setupRealtimeNotifications();
-      } else {
-        window.location.href = "login.html";
-      }
-    });
+          });
+          await setupRealtimeNotifications();
+          } else {
+          window.location.href = "login.html";
+          }
+          });
   </script>
 </body>
 </html>

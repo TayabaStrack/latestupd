@@ -421,735 +421,1053 @@
   </div>
 </div>
   </div>
-<script>
-    function toggleMobileMenu(){document.querySelector('.sidebar').classList.toggle('mobile-open')}
+ <script type="module">
+    // ==========================================
+    // FIREBASE INITIALIZATION
+    // ==========================================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, serverTimestamp, updateDoc, getDoc, collection, addDoc, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",
+        authDomain: "tayabastrack-23b95.firebaseapp.com",
+        projectId: "tayabastrack-23b95",
+        storageBucket: "tayabastrack-23b95.appspot.com",
+        messagingSenderId: "674055915366",
+        appId: "1:674055915366:web:aa560336c1f8b504eeaaa7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage();
+ let isInternalNavigation = false;
+let isLoggingOut = false;
+let autoLogoutInitialized = false;
+
+function setupAutoLogout(auth) {
+  if (autoLogoutInitialized) {
+    console.log("⚠️ Auto-logout already initialized");
+    return;
+  }
+  autoLogoutInitialized = true;
+
+  // ✅ Track ALL link clicks (including profile links)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href) {
+      try {
+        const linkUrl = new URL(link.href, window.location.href);
+        const currentOrigin = window.location.origin;
+        
+        // Check if it's an internal link
+        if (linkUrl.origin === currentOrigin) {
+          isInternalNavigation = true;
+          console.log("🔗 Internal navigation detected:", link.href);
+          
+          // ✅ LONGER timeout - 3 seconds to ensure navigation completes
+          setTimeout(() => {
+            isInternalNavigation = false;
+          }, 3000);
+        }
+      } catch (err) {
+        // If URL parsing fails, treat as internal navigation to be safe
+        isInternalNavigation = true;
+        setTimeout(() => {
+          isInternalNavigation = false;
+        }, 3000);
+      }
+    }
+  }, true); // ✅ Use capture phase to catch all clicks
+
+  // ✅ IMPROVED: Only logout on actual page close, not navigation
+  window.addEventListener('beforeunload', (e) => {
+    // Don't logout if it's internal navigation
+    if (isInternalNavigation) {
+      console.log("✅ Internal navigation - NOT logging out");
+      return;
+    }
     
-    // Submenu toggle function
+    // Only logout on actual tab/browser close
+    if (!isLoggingOut) {
+      console.log("🚪 Tab/browser closing - logging out");
+      isLoggingOut = true;
+      
+      // Use synchronous approach for reliable logout on page close
+      try {
+        signOut(auth);
+        sessionStorage.clear();
+      } catch (error) {
+        console.error("❌ Error during auto logout:", error);
+      }
+    }
+  });
+
+  // ✅ Handle browser back/forward button
+  window.addEventListener('popstate', async (e) => {
+    if (!isInternalNavigation && !isLoggingOut) {
+      console.log("⬅️ Browser back button detected - logging out");
+      isLoggingOut = true;
+      try {
+        await signOut(auth);
+        sessionStorage.clear();
+        window.location.replace("login.html");
+      } catch (error) {
+        console.error("❌ Error during back navigation logout:", error);
+      }
+    }
+  });
+
+  console.log("✅ Auto-logout functionality initialized");
+}
+
+    window.db = db;
+
+    // ==========================================
+    // GLOBAL VARIABLES
+    // ==========================================
+    let currentUser = null;
+    let ongoingReports = [];
+    let currentDate = new Date();
+    let selectedMonth = currentDate.getMonth();
+    let selectedYear = currentDate.getFullYear();
+
+    // ==========================================
+    // UTILITY FUNCTIONS
+    // ==========================================
+    function toggleMobileMenu() {
+        document.querySelector('.sidebar').classList.toggle('mobile-open');
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
     function toggleSubmenu(event) {
-      event.preventDefault();
-      const submenu = event.currentTarget.nextElementSibling;
-      const chevron = event.currentTarget.querySelector('.fa-chevron-down');
+        event.preventDefault();
+        const submenu = event.currentTarget.nextElementSibling;
+        const chevron = event.currentTarget.querySelector('.fa-chevron-down');
 
-      if (submenu) {
-        submenu.classList.toggle('open');
-      }
-      if (chevron) {
-        chevron.style.transform = submenu.classList.contains('open') 
-          ? 'rotate(180deg)' 
-          : 'rotate(0deg)';
-      }
+        if (submenu) {
+            submenu.classList.toggle('open');
+        }
+        if (chevron) {
+            chevron.style.transform = submenu.classList.contains('open') 
+                ? 'rotate(180deg)' 
+                : 'rotate(0deg)';
+        }
     }
+    window.toggleSubmenu = toggleSubmenu;
 
-    document.addEventListener('click',function(e){const sidebar=document.querySelector('.sidebar');const menuBtn=document.querySelector('.mobile-menu-btn');if(window.innerWidth<=980&&!sidebar.contains(e.target)&&!menuBtn.contains(e.target)){sidebar.classList.remove('mobile-open')}});
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+        const sidebar = document.querySelector('.sidebar');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        if (window.innerWidth <= 980 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+            sidebar.classList.remove('mobile-open');
+        }
+    });
 
-    let currentUser=null;
-    let ongoingReports=[];
-    let currentDate=new Date();
-    let selectedMonth=currentDate.getMonth();
-    let selectedYear=currentDate.getFullYear();
+    // ==========================================
+    // AUDIT LOGGING SYSTEM
+    // ==========================================
+    window.logAuditEvent = async function(action, actionType, module, description, additionalData = {}) {
+        try {
+            const user = auth.currentUser;
+            if (!user) {
+                console.warn("No authenticated user for audit log");
+                return;
+            }
 
-    let notificationsList = [];
-    let seenNotificationIds = new Set();
-    let trackedUserStatuses = {};
-    let trackedReportIds = new Set();
-    let currentFilter = "all";
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (!userDoc.exists()) {
+                console.warn("User document not found for audit log");
+                return;
+            }
+            
+            const userData = userDoc.data();
 
-    function normalizeStatus(status) {
-      return (status || "").toLowerCase().trim();
-    }
+            const logData = {
+                timestamp: serverTimestamp(),
+                userId: user.uid,
+                userName: userData.name || `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unknown User",
+                userRole: userData.position || userData.role || "User",
+                action: action,
+                actionType: (actionType || 'edit').toLowerCase(),
+                module: module || 'System',
+                description: description || 'No description provided',
+                beforeValue: additionalData.beforeValue || null,
+                afterValue: additionalData.afterValue || null,
+                ...additionalData
+            };
 
-    function isBarangayPosition(position) {
-      if (!position) return false;
-      const pos = position.toLowerCase().trim();
-      return pos.includes("barangay captain") || pos.includes("brgy captain") || pos.includes("brgy. captain") || pos.includes("barangay official") || pos.includes("brgy official") || pos.includes("brgy. official");
-    }
+            await addDoc(collection(db, "auditLogs"), logData);
+            console.log("✅ Audit log created:", logData);
 
-    function addNotification(type, message, detail) {
-      const cleanMsg = (message || "").trim();
-      const cleanDetail = (detail || "").trim();
-      const timestamp = new Date();
-      const id = `${type}-${cleanMsg}-${cleanDetail}-${timestamp.getTime()}`;
-      
-      if (seenNotificationIds.has(id)) return;
-      seenNotificationIds.add(id);
-      
-      notificationsList.unshift({
-        id,
-        type,
-        message: cleanMsg,
-        detail: cleanDetail,
-        timestamp: timestamp,
-        read: false
-      });
-      updateNotificationUI();
+        } catch (error) {
+            console.error("❌ Error logging audit event:", error);
+        }
+    };
+
+    // ==========================================
+    // NOTIFICATION SYSTEM - IMPROVED VERSION
+    // ==========================================
+    async function setupRealtimeNotifications() {
+        if (!localStorage.getItem('notifications')) {
+            localStorage.setItem('notifications', '[]');
+        }
+
+        let allNotifications = [];
+
+        // LISTEN TO REPORTS
+        const reportsRef = collection(db, "reports");
+        const reportsQuery = query(reportsRef, orderBy("createdAt", "desc"), limit(50));
+
+        onSnapshot(reportsQuery, (snapshot) => {
+            const reportNotifications = [];
+            
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                
+                let timestamp;
+                if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+                    timestamp = data.createdAt.toDate();
+                } else if (data.timestamp && typeof data.timestamp === 'string') {
+                    timestamp = new Date(data.timestamp.replace(' ', 'T'));
+                } else if (data.createdAt) {
+                    timestamp = new Date(data.createdAt);
+                } else {
+                    timestamp = new Date();
+                }
+                
+                const category = data.category || 'Report';
+                const issue = data.issue || '';
+                const barangay = data.barangay || data.userBarangay || 'Unknown Location';
+                const status = data.status || 'Pending';
+                const firstName = data.firstName || 'User';
+                
+                let title = `New ${category} Report`;
+                let message = `${firstName} reported ${issue} in Brgy. ${barangay}`;
+                
+                if (status.toLowerCase() === 'repaired' || status.toLowerCase() === 'completed') {
+                    title = `✓ ${category} Completed`;
+                    message = `${issue} in Brgy. ${barangay} has been ${status.toLowerCase()}`;
+                } else if (status.toLowerCase() === 'ongoing') {
+                    title = `⚙ ${category} In Progress`;
+                    message = `${issue} in Brgy. ${barangay} is now ${status.toLowerCase()}`;
+                }
+                
+                reportNotifications.push({
+                    id: 'report_' + docSnap.id,
+                    type: 'report',
+                    title: title,
+                    message: message,
+                    timestamp: timestamp.toISOString(),
+                    read: false,
+                    status: status,
+                    category: category,
+                    barangay: barangay,
+                    data: data
+                });
+            });
+
+            allNotifications = [...reportNotifications, ...allNotifications.filter(n => n.type === 'user')];
+            allNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            allNotifications = allNotifications.map(notification => {
+                const existing = existingNotifications.find(n => n.id === notification.id);
+                if (existing) {
+                    notification.read = existing.read;
+                }
+                return notification;
+            });
+            
+            localStorage.setItem('notifications', JSON.stringify(allNotifications));
+            updateNotificationUI();
+        });
+
+        // LISTEN TO USERS
+        const usersRef = collection(db, "users");
+        const usersQuery = query(usersRef, orderBy("createdAt", "desc"), limit(50));
+
+        onSnapshot(usersQuery, (snapshot) => {
+            const userNotifications = [];
+            
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                
+                let timestamp;
+                if (data.createdAt && typeof data.createdAt === 'number') {
+                    timestamp = new Date(data.createdAt);
+                } else if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+                    timestamp = data.createdAt.toDate();
+                } else {
+                    timestamp = new Date();
+                }
+                
+                const fullName = data.fullName || `${data.firstName || ''} ${data.surname || ''}`.trim() || 'New User';
+                const position = data.position || 'User';
+                const barangay = data.barangay || 'Unknown Barangay';
+                const status = data.status || 'active';
+                
+                let title = `✓ New User Active`;
+                let message = `${fullName} (${position}) from Brgy. ${barangay}`;
+                
+                if (status === 'inactive') {
+                    title = `User Deactivated`;
+                    message = `${fullName} account is now inactive`;
+                }
+                
+                userNotifications.push({
+                    id: 'user_' + docSnap.id,
+                    type: 'user',
+                    title: title,
+                    message: message,
+                    timestamp: timestamp.toISOString(),
+                    read: false,
+                    status: status,
+                    position: position,
+                    barangay: barangay,
+                    data: data
+                });
+            });
+
+            allNotifications = [...allNotifications.filter(n => n.type === 'report'), ...userNotifications];
+            allNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            allNotifications = allNotifications.map(notification => {
+                const existing = existingNotifications.find(n => n.id === notification.id);
+                if (existing) {
+                    notification.read = existing.read;
+                }
+                return notification;
+            });
+            
+            localStorage.setItem('notifications', JSON.stringify(allNotifications));
+            updateNotificationUI();
+        });
+
+        console.log("✅ Notifications active");
     }
 
     function updateNotificationUI() {
-      let filtered = [...notificationsList];
-      
-      if (currentFilter === "report") {
-        filtered = filtered.filter((n) => n.type === "report");
-      } else if (currentFilter === "user") {
-        filtered = filtered.filter((n) => n.type === "user");
-      } else if (currentFilter === "24h") {
-        const ago = Date.now() - 24 * 60 * 60 * 1000;
-        filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
-      }
-
-      filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-      const unreadCount = notificationsList.filter(n => !n.read).length;
-      const notificationBadge = document.getElementById("notificationBadge");
-      if (unreadCount > 0) {
-        notificationBadge.textContent = unreadCount;
-        notificationBadge.classList.add("show");
-      } else {
-        notificationBadge.textContent = "";
-        notificationBadge.classList.remove("show");
-      }
-
-      const notificationList = document.getElementById("notificationList");
-      if (filtered.length === 0) {
-        notificationList.innerHTML = `<div class="notification-empty">No notifications</div>`;
-      } else {
-        notificationList.innerHTML = filtered
-          .map(
-            (n) => `
-          <div class="notification-item ${n.read ? '' : 'unread'}">
-            <div class="notification-icon ${n.type}">
-              ${n.type === "user" ? `<i class="fa fa-user"></i>` : `<i class="fa fa-flag"></i>`}
-            </div>
-            <div class="notification-content">
-              <p><strong>${n.message}</strong></p>
-              <p>${n.detail}</p>
-              <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-            </div>
-          </div>`
-          )
-          .join("");
-      }
-    }
-
-    const notificationBell = document.getElementById("notificationBell");
-    const notificationMenu = document.getElementById("notificationMenu");
-    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
-    const markAllReadBtn = document.getElementById("markAllReadBtn");
-
-    notificationBell.addEventListener("click", (e) => {
-      e.stopPropagation();
-      notificationMenu.classList.toggle("show");
-      document.getElementById("dropdownMenu").classList.remove("show");
-    });
-
-    clearNotificationsBtn.addEventListener("click", () => {
-      notificationsList = [];
-      seenNotificationIds.clear();
-      updateNotificationUI();
-    });
-
-    markAllReadBtn.addEventListener("click", () => {
-      notificationsList.forEach(n => n.read = true);
-      updateNotificationUI();
-    });
-
-    document.querySelectorAll(".filter-btn").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
-        e.target.classList.add("active");
-        currentFilter = e.target.dataset.filter;
-        updateNotificationUI();
-      });
-    });
-
-    async function setupRealtimeNotifications(db) {
-      const { collection, getDocs, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      
-      const userSnap = await getDocs(collection(db, "users"));
-      userSnap.forEach((docSnap) => {
-        const userId = docSnap.id;
-        const data = docSnap.data();
-        const status = normalizeStatus(data.status);
-        trackedUserStatuses[userId] = status;
-        if (status === "active") {
-          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-          const position = data.position || "User";
-          addNotification("user", `User approved: ${fullName}`, `Position: ${position}`);
-        }
-      });
-
-      onSnapshot(collection(db, "users"), (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          const userId = change.doc.id;
-          const data = change.doc.data();
-          const currentStatus = normalizeStatus(data.status);
-          const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-          const position = data.position || "User";
-
-          if (change.type === "added") {
-            trackedUserStatuses[userId] = currentStatus;
-            if (currentStatus === "active") {
-              addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
-            }
-          }
-
-          if (change.type === "modified") {
-            const oldStatus = trackedUserStatuses[userId];
-            if (oldStatus !== "active" && currentStatus === "active") {
-              addNotification("user", `New user approved: ${fullName}`, `Position: ${position}`);
-            }
-            trackedUserStatuses[userId] = currentStatus;
-          }
-        });
-      });
-
-      const reportSnap = await getDocs(collection(db, "reports"));
-      reportSnap.forEach((docSnap) => {
-        const id = docSnap.id;
-        trackedReportIds.add(id);
-        const data = docSnap.data();
-        const barangay = data.barangay || data.location || "Unknown location";
-        const type = data.reportType || data.type || data.projectName || "Report";
-        addNotification("report", "Report submitted", `${type} in ${barangay}`);
-      });
-
-      onSnapshot(collection(db, "reports"), (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          const id = change.doc.id;
-          const data = change.doc.data();
-          if (change.type === "added" && !trackedReportIds.has(id)) {
-            trackedReportIds.add(id);
-            const barangay = data.barangay || data.location || "Unknown location";
-            const type = data.reportType || data.type || data.projectName || "Report";
-            addNotification("report", "New report submitted", `${type} in ${barangay}`);
-          }
-        });
-      });
-
-      updateNotificationUI();
-      console.log("✅ Notifications active — existing + new");
-    }
-
-    function previousMonth(){selectedMonth--;if(selectedMonth<0){selectedMonth=11;selectedYear--}renderCalendar()}
-    function nextMonth(){selectedMonth++;if(selectedMonth>11){selectedMonth=0;selectedYear++}renderCalendar()}
-
-    function renderCalendar(){
-      const firstDay=new Date(selectedYear,selectedMonth,1);
-      const lastDay=new Date(selectedYear,selectedMonth+1,0);
-      const prevLastDay=new Date(selectedYear,selectedMonth,0);
-      const firstDayIndex=firstDay.getDay();
-      const lastDayIndex=lastDay.getDay();
-      const nextDays=7-lastDayIndex-1;
-      const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-      document.getElementById('currentMonthYear').textContent=`${months[selectedMonth]} ${selectedYear}`;
-      
-      let days='';
-      
-      for(let x=firstDayIndex;x>0;x--){
-        days+=`<div class="calendar-day other-month"><div class="calendar-day-number">${prevLastDay.getDate()-x+1}</div></div>`;
-      }
-      
-      for(let i=1;i<=lastDay.getDate();i++){
-        const isToday=i===currentDate.getDate()&&selectedMonth===currentDate.getMonth()&&selectedYear===currentDate.getFullYear();
-        const currentDateStr=`${selectedYear}-${String(selectedMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+        const notificationsStr = localStorage.getItem('notifications') || '[]';
+        let notifications = [];
         
-        const eventsForDay=ongoingReports.filter(report=>{
-          const start=formatDateForComparison(report.startDate);
-          const end=formatDateForComparison(report.endDate);
-          return currentDateStr>=start&&currentDateStr<=end;
-        });
-        
-        let eventHTML='';
-        if(eventsForDay.length>0){
-          eventHTML='<div class="event-indicators">';
-          if(eventsForDay.length===1){
-            const report=eventsForDay[0];
-            const start=formatDateForComparison(report.startDate);
-            const end=formatDateForComparison(report.endDate);
-            let dotClass='event-dot';
-            if(currentDateStr===start){
-              dotClass+=' start';
-            }else if(currentDateStr===end){
-              dotClass+=' end';
-            }else{
-              dotClass+=' ongoing';
-            }
-            eventHTML+=`<div class="${dotClass}" onclick="showDayEvents(event,'${currentDateStr}')" title="${report.projectName}"></div>`;
-          }else{
-            eventHTML+=`<div class="event-count-badge" onclick="showDayEvents(event,'${currentDateStr}')" title="View ${eventsForDay.length} inspections">${eventsForDay.length}</div>`;
-          }
-          eventHTML+='</div>';
+        try {
+            notifications = JSON.parse(notificationsStr);
+        } catch (e) {
+            console.error('Error parsing notifications:', e);
+            notifications = [];
         }
         
-        days+=`<div class="calendar-day ${isToday?'today':''}" onclick="showDayEvents(event,'${currentDateStr}')"><div class="calendar-day-number">${i}</div>${eventHTML}</div>`;
-      }
-      
-      for(let j=1;j<=nextDays;j++){
-        days+=`<div class="calendar-day other-month"><div class="calendar-day-number">${j}</div></div>`;
-      }
-      
-      document.getElementById('calendarDays').innerHTML=days;
-    }
-
-    function formatDateForComparison(date){
-      if(!date)return'';
-      const d=date instanceof Date?date:(date.toDate?date.toDate():new Date(date));
-      return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
-
-    window.showDayEvents=function(event,dateStr){
-      event.stopPropagation();
-      
-      const eventsForDay=ongoingReports.filter(report=>{
-        const start=formatDateForComparison(report.startDate);
-        const end=formatDateForComparison(report.endDate);
-        return dateStr>=start&&dateStr<=end;
-      });
-      
-      if(eventsForDay.length===0){
-        return;
-      }
-      
-      const dateObj=new Date(dateStr);
-      const formattedDate=dateObj.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-      
-      document.getElementById('dayEventsTitle').textContent=`Inspections on ${formattedDate}`;
-      
-      const dayEventsBody=document.getElementById('dayEventsBody');
-      dayEventsBody.innerHTML=eventsForDay.map(report=>{
-        const start=formatDateForComparison(report.startDate);
-        const end=formatDateForComparison(report.endDate);
+        const activeFilterBtn = document.querySelector('.filter-btn.active');
+        const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+        let filteredNotifications = filterNotifications(notifications, activeFilter);
         
-        let statusBadge='';
-        let statusClass='';
-        if(dateStr===start){
-          statusBadge='<span class="status-badge start">Start Date</span>';
-          statusClass='start';
-        }else if(dateStr===end){
-          statusBadge='<span class="status-badge end">End Date</span>';
-          statusClass='end';
-        }else{
-          statusBadge='<span class="status-badge ongoing">Ongoing</span>';
-          statusClass='ongoing';
+        const unreadCount = notifications.filter(n => n && n.read === false).length;
+        const badge = document.getElementById('notificationBadge');
+        
+        if (badge) {
+            badge.textContent = unreadCount;
+            if (unreadCount > 0) {
+                badge.classList.add('show');
+            } else {
+                badge.classList.remove('show');
+            }
         }
         
-        const imageHTML=report.imageUrl?`<img src="${report.imageUrl}" class="event-card-image" alt="${report.projectName}"/>`:'';
+        const notificationList = document.getElementById('notificationList');
         
-        return`
-          <div class="event-card">
-            <div class="event-card-header">
-              <h3 class="event-card-title">${report.projectName}</h3>
-              <div class="event-card-status">${statusBadge}</div>
-            </div>
-            
-            <div class="event-card-details">
-              <div class="event-detail">
-                <span class="event-detail-label"><i class="fa fa-map-marker-alt"></i> Barangay</span>
-                <span class="event-detail-value">${report.barangay}</span>
-              </div>
-              
-              <div class="event-detail">
-                <span class="event-detail-label"><i class="fa fa-dollar-sign"></i> Budget</span>
-                <span class="event-detail-value">${report.allocatedBudget}</span>
-              </div>
-              
-              <div class="event-detail">
-                <span class="event-detail-label"><i class="fa fa-hard-hat"></i> Contractor</span>
-                <span class="event-detail-value">${report.contractor}</span>
-              </div>
-              
-              <div class="event-detail">
-                <span class="event-detail-label"><i class="fa fa-truck"></i> Supplier</span>
-                <span class="event-detail-value">${report.supplier}</span>
-              </div>
-            </div>
-            
-            ${imageHTML}
-            
-            <div class="event-card-dates">
-              <span><i class="fa fa-calendar-day"></i> Start: ${new Date(report.startDate).toLocaleDateString()}</span>
-              <span><i class="fa fa-calendar-check"></i> End: ${new Date(report.endDate).toLocaleDateString()}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      document.getElementById('dayEventsModal').classList.add('show');
-    };
-
-    window.closeDayEventsModal=function(){
-      document.getElementById('dayEventsModal').classList.remove('show');
-    };
-
-    async function loadOngoingReports(db){
-      try{
-        const{collection,query,where,onSnapshot}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-        const{getStorage,ref,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
-        const storage=getStorage();
-        const reportsRef=collection(db,'reports');
-        const q=query(reportsRef,where('status','==','Ongoing'));
+        if (!notificationList) return;
         
-        onSnapshot(q,async(snapshot)=>{
-          ongoingReports=[];
-          let eventCount=0;
-          
-          for(const doc of snapshot.docs){
-            const data=doc.data();
-            if(data.startDate&&data.endDate){
-              const startDate=data.startDate.toDate?data.startDate.toDate():new Date(data.startDate);
-              const endDate=data.endDate.toDate?data.endDate.toDate():new Date(data.endDate);
-              
-              let imageUrl='';
-              if(data.incidentImage||data.imageUrl||data.image){
-                const imagePath=data.incidentImage||data.imageUrl||data.image;
-                if(imagePath.startsWith('http')){
-                  imageUrl=imagePath;
-                }else{
-                  try{
-                    imageUrl=await getDownloadURL(ref(storage,imagePath));
-                  }catch(err){
-                    console.error("Error loading image:",err);
-                  }
+        if (filteredNotifications.length === 0) {
+            notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
+            return;
+        }
+        
+        notificationList.innerHTML = filteredNotifications.map(notification => {
+            if (!notification) return '';
+            
+            const timeAgo = getTimeAgo(notification.timestamp);
+            const unreadClass = notification.read ? '' : 'unread';
+            const title = notification.title || 'Notification';
+            const message = notification.message || 'No details';
+            const id = notification.id || '';
+            
+            let iconClass = 'report';
+            let iconName = 'fa-exclamation-triangle';
+            
+            if (notification.type === 'user') {
+                iconClass = 'user';
+                iconName = notification.status === 'inactive' ? 'fa-user-slash' : 'fa-user-plus';
+            } else if (notification.type === 'report') {
+                const status = (notification.status || '').toLowerCase();
+                if (status === 'repaired' || status === 'completed') {
+                    iconName = 'fa-check-circle';
+                } else if (status === 'ongoing') {
+                    iconName = 'fa-tools';
                 }
-              }
-              
-              ongoingReports.push({
-                id:doc.id,
-                startDate:startDate,
-                endDate:endDate,
-                projectName:data.projectName||'Unnamed Project',
-                barangay:data.barangay||'N/A',
-                contractor:data.contractor||'N/A',
-                supplier:data.supplier||'N/A',
-                allocatedBudget:data.allocatedBudget||'N/A',
-                imageUrl:imageUrl
-              });
-              eventCount++;
             }
-          }
-          
-          renderCalendar();
-          
-          const syncStatus=document.getElementById('syncStatus');
-          syncStatus.innerHTML=`<i class="fa fa-check-circle" style="color:#1cc88a"></i> Auto-synced ${eventCount} ongoing inspection${eventCount!==1?'s':''} - Last updated: ${new Date().toLocaleTimeString()}`;
+            
+            return `
+                <div class="notification-item ${unreadClass}" data-id="${id}">
+                    <div class="notification-icon ${iconClass}">
+                        <i class="fa ${iconName}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <p><strong>${title}</strong></p>
+                        <p>${message}</p>
+                        <div class="time">${timeAgo}</div>
+                    </div>
+                </div>
+            `;
+        }).filter(html => html !== '').join('');
+        
+        document.querySelectorAll('.notification-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.dataset.id;
+                if (id) markAsRead(id);
+            });
         });
-      }catch(err){
-        console.error("Error loading ongoing reports:",err);
-        document.getElementById('syncStatus').innerHTML=`<i class="fa fa-exclamation-circle" style="color:#d9534f"></i> Error syncing calendar`;
-      }
     }
 
-    const dropdownMenu=document.getElementById('dropdownMenu');
-    const profileToggle=document.getElementById('profileToggle');
-    profileToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      dropdownMenu.classList.toggle("show");
-      notificationMenu.classList.remove("show");
-    });
+    function filterNotifications(notifications, filter) {
+        const now = new Date();
+        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        
+        switch(filter) {
+            case 'report':
+                return notifications.filter(n => n.type === 'report');
+            case 'user':
+                return notifications.filter(n => n.type === 'user');
+            case '24h':
+                return notifications.filter(n => new Date(n.timestamp) > oneDayAgo);
+            default:
+                return notifications;
+        }
+    }
 
-    window.addEventListener('click',(e)=>{
-      if(!e.target.closest('.profile-dropdown')){
-        dropdownMenu.classList.remove("show");
-      }
-      if(!e.target.closest('.notification-menu')&&e.target!==notificationBell){
-        notificationMenu.classList.remove("show");
-      }
-      if(e.target.id==='dayEventsModal'){
-        closeDayEventsModal();
-      }
-    });
+    function markAsRead(notificationId) {
+        const notificationsStr = localStorage.getItem('notifications') || '[]';
+        let notifications = JSON.parse(notificationsStr);
+        
+        const notification = notifications.find(n => n.id === notificationId);
+        if (notification) {
+            notification.read = true;
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            updateNotificationUI();
+        }
+    }
 
-    const editModal=document.getElementById("editModal");
-    
-    window.openEditModal=function(){
-      // 🔥 LOG EDIT MODAL OPEN
-      if (window.logAuditEvent) {
-        window.logAuditEvent(
-          "Opened Profile Edit Modal",
-          "view",
-          "System",
-          "Opened profile edit modal to update personal information"
-        );
-      }
-      editModal.style.display="flex";
+    function markAllAsRead() {
+        const notificationsStr = localStorage.getItem('notifications') || '[]';
+        let notifications = JSON.parse(notificationsStr);
+        
+        notifications.forEach(n => n.read = true);
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotificationUI();
+    }
+
+    function clearAllNotifications() {
+        if (confirm('Are you sure you want to clear all notifications?')) {
+            localStorage.setItem('notifications', '[]');
+            updateNotificationUI();
+        }
+    }
+
+    function getTimeAgo(date) {
+        if (!date) return 'Recently';
+        
+        const dateObj = typeof date === 'string' ? new Date(date) : date;
+        if (isNaN(dateObj.getTime())) return 'Recently';
+        
+        const seconds = Math.floor((new Date() - dateObj) / 1000);
+        if (seconds < 0) return 'Just now';
+        
+        const intervals = {
+            year: 31536000,
+            month: 2592000,
+            week: 604800,
+            day: 86400,
+            hour: 3600,
+            minute: 60
+        };
+        
+        for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+            const interval = Math.floor(seconds / secondsInUnit);
+            if (interval >= 1) {
+                return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
+            }
+        }
+        
+        return 'Just now';
+    }
+
+    function initNotificationListeners() {
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationMenu = document.getElementById('notificationMenu');
+        const profileToggle = document.getElementById('profileToggle');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        if (notificationBell && notificationMenu) {
+            notificationBell.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notificationMenu.classList.toggle('show');
+                if (dropdownMenu) dropdownMenu.classList.remove('show');
+            });
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateNotificationUI();
+            });
+        });
+
+        const markAllBtn = document.getElementById('markAllReadBtn');
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                markAllAsRead();
+            });
+        }
+
+        const clearBtn = document.getElementById('clearNotificationsBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                clearAllNotifications();
+            });
+        }
+
+        if (profileToggle && dropdownMenu) {
+            profileToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('show');
+                if (notificationMenu) notificationMenu.classList.remove('show');
+            });
+        }
+
+        window.addEventListener('click', (e) => {
+            if (dropdownMenu && !e.target.closest('.profile-dropdown')) {
+                dropdownMenu.classList.remove('show');
+            }
+            if (notificationMenu && !e.target.closest('.notification-menu') && e.target !== notificationBell) {
+                notificationMenu.classList.remove('show');
+            }
+        });
+    }
+
+    // ==========================================
+    // CALENDAR SYSTEM
+    // ==========================================
+    function previousMonth() {
+        selectedMonth--;
+        if (selectedMonth < 0) {
+            selectedMonth = 11;
+            selectedYear--;
+        }
+        renderCalendar();
+    }
+    window.previousMonth = previousMonth;
+
+    function nextMonth() {
+        selectedMonth++;
+        if (selectedMonth > 11) {
+            selectedMonth = 0;
+            selectedYear++;
+        }
+        renderCalendar();
+    }
+    window.nextMonth = nextMonth;
+
+    function formatDateForComparison(date) {
+        if (!date) return '';
+        const d = date instanceof Date ? date : (date.toDate ? date.toDate() : new Date(date));
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function renderCalendar() {
+        const firstDay = new Date(selectedYear, selectedMonth, 1);
+        const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
+        const prevLastDay = new Date(selectedYear, selectedMonth, 0);
+        const firstDayIndex = firstDay.getDay();
+        const lastDayIndex = lastDay.getDay();
+        const nextDays = 7 - lastDayIndex - 1;
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        const monthYearEl = document.getElementById('currentMonthYear');
+        if (monthYearEl) {
+            monthYearEl.textContent = `${months[selectedMonth]} ${selectedYear}`;
+        }
+        
+        let days = '';
+        
+        for (let x = firstDayIndex; x > 0; x--) {
+            days += `<div class="calendar-day other-month"><div class="calendar-day-number">${prevLastDay.getDate() - x + 1}</div></div>`;
+        }
+        
+        for (let i = 1; i <= lastDay.getDate(); i++) {
+            const isToday = i === currentDate.getDate() && selectedMonth === currentDate.getMonth() && selectedYear === currentDate.getFullYear();
+            const currentDateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            
+            const eventsForDay = ongoingReports.filter(report => {
+                const start = formatDateForComparison(report.startDate);
+                const end = formatDateForComparison(report.endDate);
+                return currentDateStr >= start && currentDateStr <= end;
+            });
+            
+            let eventHTML = '';
+            if (eventsForDay.length > 0) {
+                eventHTML = '<div class="event-indicators">';
+                if (eventsForDay.length === 1) {
+                    const report = eventsForDay[0];
+                    const start = formatDateForComparison(report.startDate);
+                    const end = formatDateForComparison(report.endDate);
+                    let dotClass = 'event-dot';
+                    if (currentDateStr === start) {
+                        dotClass += ' start';
+                    } else if (currentDateStr === end) {
+                        dotClass += ' end';
+                    } else {
+                        dotClass += ' ongoing';
+                    }
+                    eventHTML += `<div class="${dotClass}" onclick="showDayEvents(event,'${currentDateStr}')" title="${report.projectName}"></div>`;
+                } else {
+                    eventHTML += `<div class="event-count-badge" onclick="showDayEvents(event,'${currentDateStr}')" title="View ${eventsForDay.length} inspections">${eventsForDay.length}</div>`;
+                }
+                eventHTML += '</div>';
+            }
+            
+            days += `<div class="calendar-day ${isToday ? 'today' : ''}" onclick="showDayEvents(event,'${currentDateStr}')"><div class="calendar-day-number">${i}</div>${eventHTML}</div>`;
+        }
+        
+        for (let j = 1; j <= nextDays; j++) {
+            days += `<div class="calendar-day other-month"><div class="calendar-day-number">${j}</div></div>`;
+        }
+        
+        const calendarDaysEl = document.getElementById('calendarDays');
+        if (calendarDaysEl) {
+            calendarDaysEl.innerHTML = days;
+        }
+    }
+
+    window.showDayEvents = function(event, dateStr) {
+        event.stopPropagation();
+        
+        const eventsForDay = ongoingReports.filter(report => {
+            const start = formatDateForComparison(report.startDate);
+            const end = formatDateForComparison(report.endDate);
+            return dateStr >= start && dateStr <= end;
+        });
+        
+        if (eventsForDay.length === 0) return;
+        
+        const dateObj = new Date(dateStr);
+        const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        const titleEl = document.getElementById('dayEventsTitle');
+        if (titleEl) {
+            titleEl.textContent = `Inspections on ${formattedDate}`;
+        }
+        
+        const dayEventsBody = document.getElementById('dayEventsBody');
+        if (dayEventsBody) {
+            dayEventsBody.innerHTML = eventsForDay.map(report => {
+                const start = formatDateForComparison(report.startDate);
+                const end = formatDateForComparison(report.endDate);
+                
+                let statusBadge = '';
+                if (dateStr === start) {
+                    statusBadge = '<span class="status-badge start">Start Date</span>';
+                } else if (dateStr === end) {
+                    statusBadge = '<span class="status-badge end">End Date</span>';
+                } else {
+                    statusBadge = '<span class="status-badge ongoing">Ongoing</span>';
+                }
+                
+                const imageHTML = report.imageUrl ? `<img src="${report.imageUrl}" class="event-card-image" alt="${report.projectName}"/>` : '';
+                
+                return `
+                    <div class="event-card">
+                        <div class="event-card-header">
+                            <h3 class="event-card-title">${report.projectName}</h3>
+                            <div class="event-card-status">${statusBadge}</div>
+                        </div>
+                        
+                        <div class="event-card-details">
+                            <div class="event-detail">
+                                <span class="event-detail-label"><i class="fa fa-map-marker-alt"></i> Barangay</span>
+                                <span class="event-detail-value">${report.barangay}</span>
+                            </div>
+                            
+                            <div class="event-detail">
+                                <span class="event-detail-label"><i class="fa fa-dollar-sign"></i> Budget</span>
+                                <span class="event-detail-value">${report.allocatedBudget}</span>
+                            </div>
+                            
+                            <div class="event-detail">
+                                <span class="event-detail-label"><i class="fa fa-hard-hat"></i> Contractor</span>
+                                <span class="event-detail-value">${report.contractor}</span>
+                            </div>
+                            
+                            <div class="event-detail">
+                                <span class="event-detail-label"><i class="fa fa-truck"></i> Supplier</span>
+                                <span class="event-detail-value">${report.supplier}</span>
+                            </div>
+                        </div>
+                        
+                        ${imageHTML}
+                        
+                        <div class="event-card-dates">
+                            <span><i class="fa fa-calendar-day"></i> Start: ${new Date(report.startDate).toLocaleDateString()}</span>
+                            <span><i class="fa fa-calendar-check"></i> End: ${new Date(report.endDate).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        const modal = document.getElementById('dayEventsModal');
+        if (modal) {
+            modal.classList.add('show');
+        }
     };
-    
-    window.closeEditModal=function(){editModal.style.display="none"};
 
-    // ✅ SAVE PROFILE WITHOUT PHOTO UPLOAD
-    window.saveEdit=async function(){
-      if(!currentUser){
-        alert("No user logged in");
-        return;
-      }
-      
-      const{updateDoc,doc,getDoc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      
-      const uid=currentUser.uid;
-      const userRef=doc(window.db,"users",uid);
-      const saveBtn=document.getElementById("saveBtn");
-      
-      const updated={
-        name:document.getElementById("editName").value.trim(),
-        ID:document.getElementById("editID").value.trim(),
-        email:document.getElementById("editEmail").value.trim(),
-        phone:document.getElementById("editPhone").value.trim(),
-        address:document.getElementById("editAddress").value.trim(),
-        gender:document.getElementById("editGender").value.trim()
-      };
-      
-      if(!updated.name){
-        alert("Name is required");
-        return;
-      }
-      
-      try{
-        // Get old data for audit log
-        const oldDoc = await getDoc(userRef);
-        const oldData = oldDoc.data();
+    window.closeDayEventsModal = function() {
+        const modal = document.getElementById('dayEventsModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    };
+
+    async function loadOngoingReports() {
+        try {
+            const reportsRef = collection(db, 'reports');
+            const q = query(reportsRef, where('status', '==', 'Ongoing'));
+            
+            onSnapshot(q, async (snapshot) => {
+                ongoingReports = [];
+                let eventCount = 0;
+                
+                for (const docSnap of snapshot.docs) {
+                    const data = docSnap.data();
+                    if (data.startDate && data.endDate) {
+                        const startDate = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
+                        const endDate = data.endDate.toDate ? data.endDate.toDate() : new Date(data.endDate);
+                        
+                        let imageUrl = '';
+                        if (data.incidentImage || data.imageUrl || data.image) {
+                            const imagePath = data.incidentImage || data.imageUrl || data.image;
+                            if (imagePath.startsWith('http')) {
+                                imageUrl = imagePath;
+                            } else {
+                                try {
+                                    imageUrl = await getDownloadURL(ref(storage, imagePath));
+                                } catch (err) {
+                                    console.error("Error loading image:", err);
+                                }
+                            }
+                        }
+                        
+                        ongoingReports.push({
+                            id: docSnap.id,
+                            startDate: startDate,
+                            endDate: endDate,
+                            projectName: data.projectName || 'Unnamed Project',
+                            barangay: data.barangay || 'N/A',
+                            contractor: data.contractor || 'N/A',
+                            supplier: data.supplier || 'N/A',
+                            allocatedBudget: data.allocatedBudget || 'N/A',
+                            imageUrl: imageUrl
+                        });
+                        eventCount++;
+                    }
+                }
+                
+                renderCalendar();
+                
+                const syncStatus = document.getElementById('syncStatus');
+                if (syncStatus) {
+                    syncStatus.innerHTML = `<i class="fa fa-check-circle" style="color:#1cc88a"></i> Auto-synced ${eventCount} ongoing inspection${eventCount !== 1 ? 's' : ''} - Last updated: ${new Date().toLocaleTimeString()}`;
+                }
+            });
+        } catch (err) {
+            console.error("Error loading ongoing reports:", err);
+            const syncStatus = document.getElementById('syncStatus');
+            if (syncStatus) {
+                syncStatus.innerHTML = `<i class="fa fa-exclamation-circle" style="color:#d9534f"></i> Error syncing calendar`;
+            }
+        }
+    }
+
+    // ==========================================
+    // PROFILE EDIT MODAL
+    // ==========================================
+    window.openEditModal = function() {
+        if (window.logAuditEvent) {
+            window.logAuditEvent(
+                "Opened Profile Edit Modal",
+                "view",
+                "System",
+                "Opened profile edit modal to update personal information"
+            );
+        }
+        const editModal = document.getElementById("editModal");
+        if (editModal) {
+            editModal.style.display = "flex";
+        }
+    };
+
+    window.closeEditModal = function() {
+        const editModal = document.getElementById("editModal");
+        if (editModal) {
+            editModal.style.display = "none";
+        }
+    };
+
+    window.saveEdit = async function() {
+        if (!currentUser) {
+            alert("No user logged in");
+            return;
+        }
         
-        saveBtn.disabled=true;
-        saveBtn.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving...';
+        const uid = currentUser.uid;
+        const userRef = doc(db, "users", uid);
+        const saveBtn = document.getElementById("saveBtn");
         
-        await updateDoc(userRef,updated);
+        const updated = {
+            name: document.getElementById("editName").value.trim(),
+            ID: document.getElementById("editID").value.trim(),
+            email: document.getElementById("editEmail").value.trim(),
+            phone: document.getElementById("editPhone").value.trim(),
+            address: document.getElementById("editAddress").value.trim(),
+            gender: document.getElementById("editGender").value.trim()
+        };
         
-        // ✅ LOG PROFILE UPDATE
-        const changes = [];
-        if (oldData.name !== updated.name) changes.push(`Name: "${oldData.name}" → "${updated.name}"`);
-        if (oldData.ID !== updated.ID) changes.push(`ID: "${oldData.ID}" → "${updated.ID}"`);
-        if (oldData.email !== updated.email) changes.push(`Email: "${oldData.email}" → "${updated.email}"`);
-        if (oldData.phone !== updated.phone) changes.push(`Phone: "${oldData.phone}" → "${updated.phone}"`);
-        if (oldData.address !== updated.address) changes.push(`Address: "${oldData.address}" → "${updated.address}"`);
-        if (oldData.gender !== updated.gender) changes.push(`Gender: "${oldData.gender}" → "${updated.gender}"`);
+        if (!updated.name) {
+            alert("Name is required");
+            return;
+        }
+        
+        try {
+            const oldDoc = await getDoc(userRef);
+            const oldData = oldDoc.data();
+            
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+            }
+            
+            await updateDoc(userRef, updated);
+            
+            const changes = [];
+            if (oldData.name !== updated.name) changes.push(`Name: "${oldData.name}" → "${updated.name}"`);
+            if (oldData.ID !== updated.ID) changes.push(`ID: "${oldData.ID}" → "${updated.ID}"`);
+            if (oldData.email !== updated.email) changes.push(`Email: "${oldData.email}" → "${updated.email}"`);
+            if (oldData.phone !== updated.phone) changes.push(`Phone: "${oldData.phone}" → "${update.phone}");             if (oldData.address !== updated.address) changes.push(Address: "oldData.address"→"{oldData.address}" → "
+oldData.address"→"{updated.address}"
+);             if (oldData.gender !== updated.gender) changes.push(Gender: "oldData.gender"→"{oldData.gender}" → "
+oldData.gender"→"{updated.gender}"`);
 
         if (window.logAuditEvent && changes.length > 0) {
-          await window.logAuditEvent(
-            "Profile Updated",
-            "edit",
-            "System",
-            `Updated own profile: ${changes.join(", ")}`,
-            {
-              changes: changes.join(", "),
-              beforeValue: JSON.stringify(oldData),
-              afterValue: JSON.stringify(updated)
-            }
-          );
+            await window.logAuditEvent(
+                "Profile Updated",
+                "edit",
+                "System",
+                `Updated own profile: ${changes.join(", ")}`,
+                {
+                    changes: changes.join(", "),
+                    beforeValue: JSON.stringify(oldData),
+                    afterValue: JSON.stringify(updated)
+                }
+            );
         }
         
         alert("Profile updated successfully!");
         closeEditModal();
-      }catch(err){
-        console.error("Error details:",err);
-        alert("Error updating profile: "+err.message);
-      }finally{
-        saveBtn.disabled=false;
-        saveBtn.innerHTML='<i class="fa fa-save"></i> Save Changes';
-      }
-    };
-
-    window.addEventListener("click",(e)=>{
-      if(e.target===editModal)closeEditModal();
-    });
-</script>
-
-<script type="module">
-    import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import{getFirestore,doc,onSnapshot,serverTimestamp,updateDoc,getDoc,collection,addDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig={apiKey:"AIzaSyB06vfES5thZQi3Yd11vkooHVH-d5d4Y3o",authDomain:"tayabastrack-23b95.firebaseapp.com",projectId:"tayabastrack-23b95",storageBucket:"tayabastrack-23b95.appspot.com",messagingSenderId:"674055915366",appId:"1:674055915366:web:aa560336c1f8b504eeaaa7"};
-
-    const app=initializeApp(firebaseConfig);
-    const auth=getAuth(app);
-    const db=getFirestore(app);
-    window.db=db;
-
-    // ✅ AUDIT LOGGING FUNCTION
-    window.logAuditEvent = async function(action, actionType, module, description, additionalData = {}) {
-      try {
-        const user = auth.currentUser;
-        if (!user) {
-          console.warn("No authenticated user for audit log");
-          return;
+    } catch (err) {
+        console.error("Error details:", err);
+        alert("Error updating profile: " + err.message);
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
         }
+    }
+};
 
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (!userDoc.exists()) {
-          console.warn("User document not found for audit log");
-          return;
-        }
-        
-        const userData = userDoc.data();
+// Close modal when clicking outside
+window.addEventListener("click", (e) => {
+    const editModal = document.getElementById("editModal");
+    const dayEventsModal = document.getElementById('dayEventsModal');
+    
+    if (e.target === editModal) {
+        closeEditModal();
+    }
+    if (e.target === dayEventsModal) {
+        closeDayEventsModal();
+    }
+});
 
-        const logData = {
-          timestamp: serverTimestamp(),
-          userId: user.uid,
-          userName: userData.name || `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "Unknown User",
-          userRole: userData.position || userData.role || "User",
-          action: action,
-          actionType: (actionType || 'edit').toLowerCase(),
-          module: module || 'System',
-          description: description || 'No description provided',
-          beforeValue: additionalData.beforeValue || null,
-          afterValue: additionalData.afterValue || null,
-          ...additionalData
-        };
-
-        await addDoc(collection(db, "auditLogs"), logData);
-        console.log("✅ Audit log created:", logData);
-
-      } catch (error) {
-        console.error("❌ Error logging audit event:", error);
-      }
-    };
-
-    // ✅ LOGOUT WITH AUDIT LOGGING
-    async function handleLogout() {
-      try {
-        // ✅ LOG LOGOUT
+// ==========================================
+// LOGOUT HANDLER
+// ==========================================
+async function handleLogout() {
+    try {
         if (window.logAuditEvent) {
-          await window.logAuditEvent(
-            "Logged Out",
-            "logout",
-            "Authentication",
-            "Admin logged out from the system"
-          );
+            await window.logAuditEvent(
+                "Logged Out",
+                "logout",
+                "Authentication",
+                "Admin logged out from the system"
+            );
         }
         
         await signOut(auth);
         window.location.href = "login.html";
-      } catch(err) {
+    } catch (err) {
         alert("Error logging out: " + err.message);
-      }
     }
+}
 
-    document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", handleLogout);
+}
 
-    onAuthStateChanged(auth, async(user)=>{
-      if(!user) {
+// ==========================================
+// AUTHENTICATION & USER DATA
+// ==========================================
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
         console.warn("No user logged in.");
-        window.location.href="login.html";
+        window.location.href = "login.html";
         return;
-      }
-      
-      console.log("User authenticated:",user.uid);
-      currentUser=user;
-      window.currentUser=user;
-      
-      try{
-        const userRef=doc(db,'users',user.uid);
-        await updateDoc(userRef,{lastLogin:serverTimestamp()});
+    }
+              setupAutoLogout(auth);
+
+    console.log("User authenticated:", user.uid);
+    currentUser = user;
+    window.currentUser = user;
+    
+    try {
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, { lastLogin: serverTimestamp() });
         console.log("Last login updated");
         
-        // 🔥 LOG PAGE VIEW (only once per session)
         if (!window.dashboardPageLogged) {
-          window.dashboardPageLogged = true;
-          if (window.logAuditEvent) {
-            await window.logAuditEvent(
-              "Viewed Dashboard",
-              "view",
-              "System",
-              "Accessed admin dashboard page"
-            );
-          }
+            window.dashboardPageLogged = true;
+            if (window.logAuditEvent) {
+                await window.logAuditEvent(
+                    "Viewed Profile",
+                    "view",
+                    "System",
+                    "Accessed admin profile page"
+                );
+            }
         }
-      }catch(err){
-        console.error("Error updating last login:",err);
-      }
-      
-      const ref=doc(db,'users',user.uid);
-      onSnapshot(ref,docSnap=>{
-        if(!docSnap.exists()){
-          console.error("User document not found!");
-          return;
-        }
-        
-        const data=docSnap.data();
-        console.log("User data loaded:",data);
-        
-        let fullName="User";
-        if(data.firstName&&data.lastName){
-          fullName=`${data.firstName} ${data.lastName}`;
-        }else if(data.name){
-          fullName=data.name;
-        }else if(data.firstName){
-          fullName=data.firstName;
+    } catch (err) {
+        console.error("Error updating last login:", err);
+    }
+    
+    const userDocRef = doc(db, 'users', user.uid);
+    onSnapshot(userDocRef, docSnap => {
+        if (!docSnap.exists()) {
+            console.error("User document not found!");
+            return;
         }
         
-        const elements={
-          displayName:fullName,
-          displayRole:data.position||data.role||"Admin",
-          accountType:data.position||data.role||"Admin"
+        const data = docSnap.data();
+        console.log("User data loaded:", data);
+        
+        let fullName = "User";
+        if (data.firstName && data.lastName) {
+            fullName = `${data.firstName} ${data.lastName}`;
+        } else if (data.name) {
+            fullName = data.name;
+        } else if (data.firstName) {
+            fullName = data.firstName;
+        }
+        
+        const elements = {
+            displayName: fullName,
+            displayRole: data.position || data.role || "Admin",
+            accountType: data.position || data.role || "Admin"
         };
         
-        Object.keys(elements).forEach(id=>{
-          const el=document.getElementById(id);
-          if(el)el.textContent=elements[id];
+        Object.keys(elements).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = elements[id];
         });
         
-        // ✅ UPDATE PROFILE PHOTOS (display only)
-        const photoURL=data.photoURL||"image.png";
+        const photoURL = data.photoURL || "image.png";
         const photoElements = ["profilePic"];
         photoElements.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.src = photoURL;
-            el.onerror = function() {
-              this.src = "image.png";
-            };
-          }
+            const el = document.getElementById(id);
+            if (el) {
+                el.src = photoURL;
+                el.onerror = function() {
+                    this.src = "image.png";
+                };
+            }
         });
         
-        const fields={
-          cardName:fullName,
-          cardID:data.ID||data.id||"",
-          cardEmail:data.email||user.email,
-          cardPhone:data.phone||"",
-          cardAddress:data.address||data.barangay||"",
-          cardGender:data.gender||"",
-          editName:fullName,
-          editID:data.ID||data.id||"",
-          editEmail:data.email||user.email,
-          editPhone:data.phone||"",
-          editAddress:data.address||data.barangay||"",
-          editGender:data.gender||""
+        const fields = {
+            cardName: fullName,
+            cardID: data.ID || data.id || "",
+            cardEmail: data.email || user.email,
+            cardPhone: data.phone || "",
+            cardAddress: data.address || data.barangay || "",
+            cardGender: data.gender || "",
+            editName: fullName,
+            editID: data.ID || data.id || "",
+            editEmail: data.email || user.email,
+            editPhone: data.phone || "",
+            editAddress: data.address || data.barangay || "",
+            editGender: data.gender || ""
         };
         
-        Object.keys(fields).forEach(id=>{
-          const el=document.getElementById(id);
-          if(el)el.value=fields[id];
+        Object.keys(fields).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = fields[id];
         });
         
-        if(data.createdAt){
-          const date=data.createdAt.toDate?data.createdAt.toDate():new Date(data.createdAt);
-          const el=document.getElementById("registeredAt");
-          if(el)el.textContent=date.toLocaleDateString();
+        if (data.createdAt) {
+            const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+            const el = document.getElementById("registeredAt");
+            if (el) el.textContent = date.toLocaleDateString();
         }
         
-        if(data.lastLogin){
-          const date=data.lastLogin.toDate?data.lastLogin.toDate():new Date(data.lastLogin);
-          const el=document.getElementById("lastLogin");
-          if(el)el.textContent=date.toLocaleString();
+        if (data.lastLogin) {
+            const date = data.lastLogin.toDate ? data.lastLogin.toDate() : new Date(data.lastLogin);
+            const el = document.getElementById("lastLogin");
+            if (el) el.textContent = date.toLocaleString();
         }
         
         console.log("UI updated successfully");
-      },error=>{
-        console.error("Error in user snapshot:",error);
-      });
-      
-      try{
-        await setupRealtimeNotifications(db);
-        console.log("Notifications setup complete");
-      }catch(err){
-        console.error("Error setting up notifications:",err);
-      }
-      
-      try{
-        await loadOngoingReports(db);
-        console.log("Calendar loaded");
-      }catch(err){
-        console.error("Error loading calendar:",err);
-      }
+    }, error => {
+        console.error("Error in user snapshot:", error);
     });
+    
+    try {
+        initNotificationListeners();
+        await setupRealtimeNotifications();
+        console.log("Notifications setup complete");
+    } catch (err) {
+        console.error("Error setting up notifications:", err);
+    }
+    
+    try {
+        await loadOngoingReports();
+        console.log("Calendar loaded");
+    } catch (err) {
+        console.error("Error loading calendar:", err);
+    }
+});
 </script>
 </body>
 </html>

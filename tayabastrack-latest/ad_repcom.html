@@ -154,7 +154,122 @@
     .category-badge, .issue-badge{display:inline-block;padding:0.3rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:600;white-space:nowrap}
     .category-badge{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
     .issue-badge{background:#fff3e0;color:#e65100;border:1px solid #ffb74d}
-    
+        /* ACTION MENU DROPDOWN - FIXED VERSION */
+.action-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.action-menu-btn {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #495057;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 36px;
+}
+
+.action-menu-btn:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+  color: #212529;
+}
+
+.action-menu-btn:active {
+  transform: scale(0.95);
+  background: #dee2e6;
+}
+
+.action-dropdown {
+  position: fixed; /* allows escaping table overflow */
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  z-index: 9999;
+  display: none;
+}
+
+.action-dropdown.show {
+  display: block;
+}
+
+.action-option {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 14px;
+  color: #495057;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.action-option:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.action-option:last-child {
+  border-bottom: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.action-option i {
+  width: 16px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.action-option span {
+  flex: 1;
+  font-weight: 500;
+}
+
+/* Option states */
+.action-option.approve:hover {
+  background: #d1f4e0;
+  color: #28a745;
+}
+
+.action-option.approve i {
+  color: #28a745;
+}
+
+.action-option.decline:hover {
+  background: #ffe5e5;
+  color: #dc3545;
+}
+
+.action-option.decline i {
+  color: #dc3545;
+}
+
+.action-option.edit:hover {
+  background: #e7f3ff;
+  color: #007bff;
+}
+
+.action-option.edit i {
+  color: #007bff;
+}
+
+/* TABLE OVERFLOW FIX */
+.table-container,
+table,
+tbody,
+tr,
+td {
+  overflow: visible !important;
+}
     .action a{color:#004aad;text-decoration:none;font-weight:700;cursor:pointer;margin-right:8px}
     .action a.decline{color:#d9534f}
     td button{padding:0.3rem 0.6rem;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;margin-right:4px}
@@ -341,6 +456,7 @@
               <th>Completion Date</th>
               <th>Penalties</th>
               <th>Reporter Position</th>
+              <th>Remarks</th>
               <th>Status</th>
               <th>Action</th>
             </tr>
@@ -395,6 +511,10 @@
           <label>Progress Report (View Only)</label>
           <textarea id="viewProgressReport" disabled style="min-height:120px"></textarea>
         </div>
+        <div class="form-group">
+          <label for="editCompletedRemarks">Super Admin Remarks</label>
+          <textarea id="editCompletedRemarks" rows="3"></textarea>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -407,7 +527,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, query, orderBy, onSnapshot, getDoc, doc, updateDoc, setDoc, getDocs, where, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, query, orderBy, limit, onSnapshot, getDoc, doc, updateDoc, setDoc, getDocs, where, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
   const firebaseConfig = {
@@ -423,6 +543,86 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   const storage = getStorage(app);
+ let isInternalNavigation = false;
+let isLoggingOut = false;
+let autoLogoutInitialized = false;
+
+function setupAutoLogout(auth) {
+  if (autoLogoutInitialized) {
+    console.log("⚠️ Auto-logout already initialized");
+    return;
+  }
+  autoLogoutInitialized = true;
+
+  // ✅ Track ALL link clicks (including profile links)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href) {
+      try {
+        const linkUrl = new URL(link.href, window.location.href);
+        const currentOrigin = window.location.origin;
+        
+        // Check if it's an internal link
+        if (linkUrl.origin === currentOrigin) {
+          isInternalNavigation = true;
+          console.log("🔗 Internal navigation detected:", link.href);
+          
+          // ✅ LONGER timeout - 3 seconds to ensure navigation completes
+          setTimeout(() => {
+            isInternalNavigation = false;
+          }, 3000);
+        }
+      } catch (err) {
+        // If URL parsing fails, treat as internal navigation to be safe
+        isInternalNavigation = true;
+        setTimeout(() => {
+          isInternalNavigation = false;
+        }, 3000);
+      }
+    }
+  }, true); // ✅ Use capture phase to catch all clicks
+
+  // ✅ IMPROVED: Only logout on actual page close, not navigation
+  window.addEventListener('beforeunload', (e) => {
+    // Don't logout if it's internal navigation
+    if (isInternalNavigation) {
+      console.log("✅ Internal navigation - NOT logging out");
+      return;
+    }
+    
+    // Only logout on actual tab/browser close
+    if (!isLoggingOut) {
+      console.log("🚪 Tab/browser closing - logging out");
+      isLoggingOut = true;
+      
+      // Use synchronous approach for reliable logout on page close
+      try {
+        signOut(auth);
+        sessionStorage.clear();
+      } catch (error) {
+        console.error("❌ Error during auto logout:", error);
+      }
+    }
+  });
+
+  // ✅ Handle browser back/forward button
+  window.addEventListener('popstate', async (e) => {
+    if (!isInternalNavigation && !isLoggingOut) {
+      console.log("⬅️ Browser back button detected - logging out");
+      isLoggingOut = true;
+      try {
+        await signOut(auth);
+        sessionStorage.clear();
+        window.location.replace("login.html");
+      } catch (error) {
+        console.error("❌ Error during back navigation logout:", error);
+      }
+    }
+  });
+
+  console.log("✅ Auto-logout functionality initialized");
+}
+
 
   // ===== AUDIT LOGGING FUNCTION =====
   async function logAuditEvent(action, actionType, module, description, additionalData = {}) {
@@ -485,7 +685,6 @@
 
   let currentDocId = null;
   let reportsUnsub = null;
-  let currentFilter = 'all';
   let allReportsData = [];
 
   // PAGINATION VARIABLES
@@ -494,11 +693,16 @@
   let currentCompletedPage = 1;
   const itemsPerPage = 10;
 
-  // Notification System Variables
-  let notificationsList = [];
-  let seenNotificationIds = new Set();
-  let trackedUserStatuses = {};
-  let trackedReportIds = new Set();
+  // ===== INPUT VALIDATION FUNCTIONS =====
+  function validateAlphanumeric(input) {
+    // Remove any characters that are not letters or numbers
+    input.value = input.value.replace(/[^a-zA-Z0-9\s]/g, '');
+  }
+
+  function validateNumericOnly(input) {
+    // Remove any characters that are not numbers
+    input.value = input.value.replace(/[^0-9]/g, '');
+  }
 
   // ===== PREDEFINED CATEGORIES AND ISSUES =====
   const CATEGORIES = [
@@ -530,166 +734,426 @@
     "Others"
   ];
 
-  // ===== NOTIFICATION SYSTEM FUNCTIONS =====
-  function normalizeStatus(status) {
-    return (status || "").toLowerCase().trim();
-  }
-
-  function saveNotificationsToLocalStorage() {
-    try {
-      localStorage.setItem('notifications', JSON.stringify(notificationsList));
-      localStorage.setItem('trackedIds', JSON.stringify([...seenNotificationIds]));
-    } catch (error) {
-      console.error("Error saving notifications:", error);
-    }
-  }
-
-  function loadNotificationsFromLocalStorage() {
-    try {
-      const savedNotifications = localStorage.getItem('notifications');
-      const savedTrackedIds = localStorage.getItem('trackedIds');
+  // ===== ACTION MENU FUNCTIONS =====
+  function createActionMenu(docId, reportData) {
+    const container = document.createElement("div");
+    container.className = "action-menu-container";
+    
+    const btn = document.createElement("button");
+    btn.className = "action-menu-btn";
+    btn.innerHTML = '<i class="fa fa-ellipsis-v"></i>';
+    btn.onclick = (e) => {
+      e.stopPropagation();
       
-      if (savedNotifications) {
-        notificationsList = JSON.parse(savedNotifications).map(n => ({
-          ...n,
-          timestamp: new Date(n.timestamp)
-        }));
+      // Close all other dropdowns
+      document.querySelectorAll('.action-dropdown').forEach(d => {
+        if (d !== dropdown) d.classList.remove('show');
+      });
+      
+      // Get button position
+      const rect = btn.getBoundingClientRect();
+      
+      // Position dropdown using fixed positioning
+      dropdown.style.left = (rect.right - 160) + 'px'; // 160px is dropdown width
+      dropdown.style.top = (rect.bottom + 5) + 'px';
+      
+      // Check if dropdown goes off bottom of screen
+      const dropdownHeight = 120; // Approximate height (1 option for completed)
+      if (rect.bottom + dropdownHeight > window.innerHeight) {
+        // Show above instead
+        dropdown.style.top = (rect.top - dropdownHeight - 5) + 'px';
       }
       
-      if (savedTrackedIds) {
-        seenNotificationIds = new Set(JSON.parse(savedTrackedIds));
-      }
-    } catch (error) {
-      console.error("Error loading notifications:", error);
-    }
+      dropdown.classList.toggle('show');
+    };
+    
+    const dropdown = document.createElement("div");
+    dropdown.className = "action-dropdown";
+    
+    // Edit option
+    const editOption = document.createElement("div");
+    editOption.className = "action-option edit";
+    editOption.innerHTML = '<i class="fa fa-edit"></i> <span>View/Edit</span>';
+    editOption.onclick = async (e) => {
+      e.stopPropagation();
+      dropdown.classList.remove('show');
+      await openEditCompletedModal({
+        preventDefault: () => {},
+        currentTarget: { dataset: { id: docId } }
+      });
+    };
+    
+    dropdown.appendChild(editOption);
+    
+    // Append dropdown to body instead of container
+    document.body.appendChild(dropdown);
+    container.appendChild(btn);
+    
+    return container;
   }
 
-  function addNotification(type, message, detail, uniqueId) {
-    if (seenNotificationIds.has(uniqueId)) return;
-    seenNotificationIds.add(uniqueId);
+  // Close action menus when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.action-menu-container')) {
+      document.querySelectorAll('.action-dropdown').forEach(d => {
+        d.classList.remove('show');
+      });
+    }
+  });
 
-    const timestamp = new Date();
-    const id = `${type}-${uniqueId}-${timestamp.getTime()}`;
+  // ===== NOTIFICATION SYSTEM FUNCTIONS (ENHANCED) =====
+  async function setupRealtimeNotifications(db) {
+    // Initialize notifications array if it doesn't exist
+    if (!localStorage.getItem('notifications')) {
+      localStorage.setItem('notifications', '[]');
+    }
 
-    notificationsList.unshift({
-      id,
-      type,
-      message: message.trim(),
-      detail: detail.trim(),
-      timestamp: timestamp,
-      read: false
+    let allNotifications = [];
+
+    // ===== LISTEN TO REPORTS =====
+    const reportsRef = collection(db, "reports");
+    const reportsQuery = query(reportsRef, orderBy("createdAt", "desc"), limit(50));
+
+    onSnapshot(reportsQuery, (snapshot) => {
+      const reportNotifications = [];
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        
+        // Handle timestamp
+        let timestamp;
+        if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+          timestamp = data.createdAt.toDate();
+        } else if (data.timestamp && typeof data.timestamp === 'string') {
+          timestamp = new Date(data.timestamp.replace(' ', 'T'));
+        } else if (data.createdAt) {
+          timestamp = new Date(data.createdAt);
+        } else {
+          timestamp = new Date();
+        }
+        
+        const category = data.category || 'Report';
+        const issue = data.issue || '';
+        const barangay = data.barangay || data.userBarangay || 'Unknown Location';
+        const status = data.status || 'Pending';
+        const firstName = data.firstName || 'User';
+        
+        let title = `New ${category} Report`;
+        let message = `${firstName} reported ${issue} in Brgy. ${barangay}`;
+        
+        if (status.toLowerCase() === 'repaired' || status.toLowerCase() === 'completed') {
+          title = `✓ ${category} Completed`;
+          message = `${issue} in Brgy. ${barangay} has been ${status.toLowerCase()}`;
+        } else if (status.toLowerCase() === 'ongoing') {
+          title = `⚙ ${category} In Progress`;
+          message = `${issue} in Brgy. ${barangay} is now ${status.toLowerCase()}`;
+        }
+        
+        reportNotifications.push({
+          id: 'report_' + doc.id,
+          type: 'report',
+          title: title,
+          message: message,
+          timestamp: timestamp.toISOString(),
+          read: false,
+          status: status,
+          category: category,
+          barangay: barangay,
+          data: data
+        });
+      });
+
+      // Merge with user notifications
+      allNotifications = [...reportNotifications, ...allNotifications.filter(n => n.type === 'user')];
+      
+      // Sort by timestamp (newest first)
+      allNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      // Preserve read status from localStorage
+      const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+      allNotifications = allNotifications.map(notification => {
+        const existing = existingNotifications.find(n => n.id === notification.id);
+        if (existing) {
+          notification.read = existing.read;
+        }
+        return notification;
+      });
+      
+      localStorage.setItem('notifications', JSON.stringify(allNotifications));
+      updateNotificationUI();
+    }, (error) => {
+      console.error("Error listening to report notifications:", error);
     });
 
-    saveNotificationsToLocalStorage();
-    updateNotificationUI();
+    // ===== LISTEN TO USERS =====
+    const usersRef = collection(db, "users");
+    const usersQuery = query(usersRef, orderBy("createdAt", "desc"), limit(50));
+
+    onSnapshot(usersQuery, (snapshot) => {
+      const userNotifications = [];
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        
+        // Handle timestamp - createdAt is a number (Unix timestamp in milliseconds)
+        let timestamp;
+        if (data.createdAt && typeof data.createdAt === 'number') {
+          timestamp = new Date(data.createdAt);
+        } else if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+          timestamp = data.createdAt.toDate();
+        } else {
+          timestamp = new Date();
+        }
+        
+        const fullName = data.fullName || `${data.firstName || ''} ${data.surname || ''}`.trim() || 'New User';
+        const position = data.position || 'User';
+        const barangay = data.barangay || 'Unknown Barangay';
+        const status = data.status || 'active';
+        
+        let title = `New User Registered`;
+        let message = `${fullName} (${position}) from Brgy. ${barangay}`;
+        
+        // Customize based on status
+        if (status === 'active') {
+          title = `✓ New User Active`;
+        } else if (status === 'inactive') {
+          title = `User Deactivated`;
+          message = `${fullName} account is now inactive`;
+        }
+        
+        userNotifications.push({
+          id: 'user_' + doc.id,
+          type: 'user',
+          title: title,
+          message: message,
+          timestamp: timestamp.toISOString(),
+          read: false,
+          status: status,
+          position: position,
+          barangay: barangay,
+          data: data
+        });
+      });
+
+      // Merge with report notifications
+      allNotifications = [...allNotifications.filter(n => n.type === 'report'), ...userNotifications];
+      
+      // Sort by timestamp (newest first)
+      allNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      // Preserve read status from localStorage
+      const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+      allNotifications = allNotifications.map(notification => {
+        const existing = existingNotifications.find(n => n.id === notification.id);
+        if (existing) {
+          notification.read = existing.read;
+        }
+        return notification;
+      });
+      
+      localStorage.setItem('notifications', JSON.stringify(allNotifications));
+      updateNotificationUI();
+    }, (error) => {
+      console.error("Error listening to user notifications:", error);
+    });
   }
 
+  // Updated updateNotificationUI with proper icons for both types
   function updateNotificationUI() {
-    let filtered = [...notificationsList];
-    if (currentFilter === "report") {
-      filtered = filtered.filter((n) => n.type === "report");
-    } else if (currentFilter === "user") {
-      filtered = filtered.filter((n) => n.type === "user");
-    } else if (currentFilter === "24h") {
-      const ago = Date.now() - 24 * 60 * 60 * 1000;
-      filtered = filtered.filter((n) => n.timestamp.getTime() > ago);
+    const notificationsStr = localStorage.getItem('notifications') || '[]';
+    let notifications = [];
+    
+    try {
+      notifications = JSON.parse(notificationsStr);
+    } catch (e) {
+      console.error('Error parsing notifications:', e);
+      notifications = [];
     }
-
-    filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-    const unreadCount = notificationsList.filter(n => !n.read).length;
-
-    if (unreadCount > 0) {
-      notificationBadge.textContent = unreadCount;
-      notificationBadge.classList.add("show");
-    } else {
-      notificationBadge.textContent = "";
-      notificationBadge.classList.remove("show");
+    
+    // Apply active filter
+    const activeFilterBtn = document.querySelector('.filter-btn.active');
+    const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+    let filteredNotifications = filterNotifications(notifications, activeFilter);
+    
+    // Update badge count (unread only)
+    const unreadCount = notifications.filter(n => n && n.read === false).length;
+    const badge = document.getElementById('notificationBadge');
+    
+    if (badge) {
+      badge.textContent = unreadCount;
+      if (unreadCount > 0) {
+        badge.classList.add('show');
+      } else {
+        badge.classList.remove('show');
+      }
     }
-
-    if (filtered.length === 0) {
+    
+    // Update notification list
+    const notificationList = document.getElementById('notificationList');
+    
+    if (!notificationList) {
+      console.error('Notification list element not found');
+      return;
+    }
+    
+    if (filteredNotifications.length === 0) {
       notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
-    } else {
-      notificationList.innerHTML = filtered.map((n) => `
-        <div class="notification-item ${n.read ? '' : 'unread'}">
-          <div class="notification-icon ${n.type}">
-            ${n.type === "user" ? '<i class="fa fa-user"></i>' : '<i class="fa fa-flag"></i>'}
+      return;
+    }
+    
+    notificationList.innerHTML = filteredNotifications.map(notification => {
+      if (!notification) return '';
+      
+      const timeAgo = getTimeAgo(notification.timestamp);
+      const unreadClass = notification.read ? '' : 'unread';
+      const title = notification.title || 'Notification';
+      const message = notification.message || 'No details';
+      const id = notification.id || '';
+      
+      // Determine icon and class based on type
+      let iconClass = 'report';
+      let iconName = 'fa-exclamation-triangle';
+      
+      if (notification.type === 'user') {
+        iconClass = 'user';
+        iconName = 'fa-user-plus';
+        
+        // Different icon based on user status
+        if (notification.status === 'inactive') {
+          iconName = 'fa-user-slash';
+        }
+      } else if (notification.type === 'report') {
+        const status = (notification.status || '').toLowerCase();
+        if (status === 'repaired' || status === 'completed') {
+          iconName = 'fa-check-circle';
+        } else if (status === 'ongoing') {
+          iconName = 'fa-tools';
+        } else {
+          iconName = 'fa-exclamation-triangle';
+        }
+      }
+      
+      return `
+        <div class="notification-item ${unreadClass}" data-id="${id}">
+          <div class="notification-icon ${iconClass}">
+            <i class="fa ${iconName}"></i>
           </div>
           <div class="notification-content">
-            <p><strong>${n.message}</strong></p>
-            <p>${n.detail}</p>
-            <span class="time">${n.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            <p><strong>${title}</strong></p>
+            <p>${message}</p>
+            <div class="time">${timeAgo}</div>
           </div>
         </div>
-      `).join("");
+      `;
+    }).filter(html => html !== '').join('');
+    
+    // Add click listeners to mark as read
+    document.querySelectorAll('.notification-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const id = item.dataset.id;
+        if (id) markAsRead(id);
+      });
+    });
+  }
+
+  // Filter notifications
+  function filterNotifications(notifications, filter) {
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    
+    switch(filter) {
+      case 'report':
+        return notifications.filter(n => n.type === 'report');
+      case 'user':
+        return notifications.filter(n => n.type === 'user');
+      case '24h':
+        return notifications.filter(n => new Date(n.timestamp) > oneDayAgo);
+      default:
+        return notifications;
     }
   }
 
-  async function setupRealtimeNotifications(db) {
-    loadNotificationsFromLocalStorage();
+  // Mark single notification as read
+  function markAsRead(notificationId) {
+    const notificationsStr = localStorage.getItem('notifications') || '[]';
+    let notifications = JSON.parse(notificationsStr);
     
-    onSnapshot(collection(db, "users"), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const userId = change.doc.id;
-        const data = change.doc.data();
-        const currentStatus = normalizeStatus(data.status);
-        const fullName = data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unknown User";
-        const position = data.position || "User";
-        
-        if (change.type === "modified") {
-          if (currentStatus === "active") {
-            const uniqueId = `user-${userId}-active`;
-            addNotification("user", `User approved: ${fullName}`, `Position: ${position}`, uniqueId);
-          }
-        }
-      });
-    });
+    const notification = notifications.find(n => n.id === notificationId);
+    if (notification) {
+      notification.read = true;
+      localStorage.setItem('notifications', JSON.stringify(notifications));
+      updateNotificationUI();
+    }
+  }
 
-    onSnapshot(collection(db, "reports"), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const reportId = change.doc.id;
-        const data = change.doc.data();
-        
-        if (change.type === "added") {
-          const barangay = data.barangay || data.location || "Unknown location";
-          const type = data.reportType || data.type || data.projectName || "Report";
-          const uniqueId = `report-${reportId}`;
-          addNotification("report", "New report submitted", `${type} in ${barangay}`, uniqueId);
-        }
-      });
-    });
-
+  // Mark all as read
+  function markAllAsRead() {
+    const notificationsStr = localStorage.getItem('notifications') || '[]';
+    let notifications = JSON.parse(notificationsStr);
+    
+    notifications.forEach(n => n.read = true);
+    localStorage.setItem('notifications', JSON.stringify(notifications));
     updateNotificationUI();
-    console.log("Notifications system active");
+  }
+
+  // Clear all notifications
+  function clearAllNotifications() {
+    if (confirm('Are you sure you want to clear all notifications?')) {
+      localStorage.setItem('notifications', '[]');
+      updateNotificationUI();
+    }
+  }
+
+  // Get time ago string
+  function getTimeAgo(timestamp) {
+    const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+    const seconds = Math.floor((new Date() - date) / 1000);
+    
+    const intervals = {
+      year: 31536000,
+      month: 2592000,
+      week: 604800,
+      day: 86400,
+      hour: 3600,
+      minute: 60
+    };
+    
+    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+      const interval = Math.floor(seconds / secondsInUnit);
+      if (interval >= 1) {
+        return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
+      }
+    }
+    
+    return 'Just now';
   }
 
   // ===== NOTIFICATION EVENT LISTENERS =====
-  notificationBell.addEventListener("click", (e) => {
+  notificationBell.addEventListener('click', (e) => {
     e.stopPropagation();
-    notificationMenu.classList.toggle("show");
-    dropdownMenu.classList.remove("show");
+    notificationMenu.classList.toggle('show');
+    dropdownMenu.classList.remove('show');
   });
 
-  document.getElementById("clearNotificationsBtn").addEventListener("click", () => {
-    notificationsList = [];
-    seenNotificationIds.clear();
-    saveNotificationsToLocalStorage();
-    updateNotificationUI();
-  });
-
-  document.getElementById("markAllReadBtn").addEventListener("click", () => {
-    notificationsList.forEach(n => n.read = true);
-    saveNotificationsToLocalStorage();
-    updateNotificationUI();
-  });
-
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
-      e.target.classList.add("active");
-      currentFilter = e.target.dataset.filter;
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       updateNotificationUI();
     });
+  });
+
+  // Mark all as read button
+  document.getElementById("markAllReadBtn").addEventListener('click', (e) => {
+    e.stopPropagation();
+    markAllAsRead();
+  });
+
+  // Clear notifications button
+  document.getElementById("clearNotificationsBtn").addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearAllNotifications();
   });
 
   // ===== MOBILE MENU & SUBMENU FUNCTIONS =====
@@ -803,6 +1267,14 @@
   });
 
   // ===== UTILITY FUNCTIONS =====
+  function sanitizeInput(str) {
+    if (str === undefined || str === null) return "";
+    return String(str)
+      .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+      .replace(/[<>]/g, "")
+      .trim();
+  }
+
   function formatDateForInput(timestamp) {
     if (!timestamp) return "";
     let date;
@@ -813,441 +1285,421 @@
     else return "";
 
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');const day = String(date.getDate()).padStart(2, '0');
 
-    return `${year}-${month}-${day}`;
+return `${year}-${month}-${day}`;
+}
+function formatDateForDisplay(timestamp) {
+if (!timestamp) return "";
+let date;
+if (timestamp.toDate) date = timestamp.toDate();
+else if (typeof timestamp === 'string') date = new Date(timestamp);
+else if (timestamp instanceof Date) date = timestamp;
+else return "";
+return date.toLocaleDateString('en-US', {
+year: 'numeric',
+month: 'short',
+day: 'numeric'
+});
+}
+function timeAgo(timestamp) {
+if (!timestamp) return "";
+let date;
+if (timestamp.toDate) date = timestamp.toDate();
+else if (typeof timestamp === 'string') date = new Date(timestamp);
+else if (timestamp instanceof Date) date = timestamp;
+else return "";
+const seconds = Math.floor((new Date() - date) / 1000);
+let interval = seconds / 31536000;
+if (interval > 1) return Math.floor(interval) + " years ago";
+interval = seconds / 2592000;
+if (interval > 1) return Math.floor(interval) + " months ago";
+interval = seconds / 86400;
+if (interval > 1) return Math.floor(interval) + " days ago";
+interval = seconds / 3600;
+if (interval > 1) return Math.floor(interval) + " hours ago";
+interval = seconds / 60;
+if (interval > 1) return Math.floor(interval) + " minutes ago";
+return Math.floor(seconds) + " seconds ago";
+}
+// ===== IMAGE VIEWING FUNCTION =====
+async function getImageUrl(imagePath) {
+try {
+if (!imagePath) return null;
+  // If it's already a full URL, return it
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
   }
-
-  function formatDateForDisplay(timestamp) {
-    if (!timestamp) return "";
-    let date;
-    if (timestamp.toDate) date = timestamp.toDate();
-    else if (typeof timestamp === 'string') date = new Date(timestamp);
-    else if (timestamp instanceof Date) date = timestamp;
-    else return "";
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
-
-  function timeAgo(timestamp) {
-    if (!timestamp) return "";
-    let date;
-    if (timestamp.toDate) date = timestamp.toDate();
-    else if (typeof timestamp === 'string') date = new Date(timestamp);
-    else if (timestamp instanceof Date) date = timestamp;
-    else return "";
-    const seconds = Math.floor((new Date() - date) / 1000);
-    let interval = seconds / 31536000;
-    if (interval > 1) return Math.floor(interval) + " years ago";
-    interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + " months ago";
-    interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + " days ago";
-    interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + " hours ago";
-    interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + " minutes ago";
-    return Math.floor(seconds) + " seconds ago";
-  }
-
-  // ===== IMAGE VIEWING FUNCTION =====
-  async function getImageUrl(imagePath) {
+  
+  // Otherwise, get it from Firebase Storage
+  const imageRef = ref(storage, imagePath);
+  return await getDownloadURL(imageRef);
+} catch (error) {
+  console.error("Error getting image URL:", error);
+  return null;
+}
+}
+function createImageViewer(imagePath, reportData = {}) {
+const imgSpan = document.createElement("span");
+if (imagePath) {
+  const link = document.createElement("a");
+  link.href = "#";
+  link.textContent = "View";
+  link.style.color = "#004aad";
+  link.style.textDecoration = "none";
+  link.style.fontWeight = "500";
+  
+  link.onclick = async (e) => {
+    e.preventDefault();
+    
     try {
-      if (!imagePath) return null;
-      
-      // If it's already a full URL, return it
-      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-        return imagePath;
+      const imgUrl = await getImageUrl(imagePath);
+      if (!imgUrl) {
+        alert("Could not load image");
+        return;
       }
       
-      // Otherwise, get it from Firebase Storage
-      const imageRef = ref(storage, imagePath);
-      return await getDownloadURL(imageRef);
-    } catch (error) {
-      console.error("Error getting image URL:", error);
-      return null;
-    }
-  }
-
-  function createImageViewer(imagePath, reportData = {}) {
-    const imgSpan = document.createElement("span");
-    
-    if (imagePath) {
-      const link = document.createElement("a");
-      link.href = "#";
-      link.textContent = "View";
-      link.style.color = "#004aad";
-      link.style.textDecoration = "none";
-      link.style.fontWeight = "500";
+      // 🔥 LOG IMAGE VIEW
+      if (reportData.reportId) {
+        await logAuditEvent(
+          "Viewed Report Image",
+          "view",
+          "Reports",
+          `Viewed image for completed report: ${reportData.projectName || reportData.reportId}`,
+          {
+            reportId: reportData.reportId,
+            barangay: reportData.barangay,
+            projectName: reportData.projectName
+          }
+        );
+      }
       
-      link.onclick = async (e) => {
-        e.preventDefault();
-        
-        try {
-          const imgUrl = await getImageUrl(imagePath);
-          if (!imgUrl) {
-            alert("Could not load image");
-            return;
-          }
-          
-          // 🔥 LOG IMAGE VIEW
-          if (reportData.reportId) {
-            await logAuditEvent(
-              "Viewed Report Image",
-              "view",
-              "Reports",
-              `Viewed image for completed report: ${reportData.projectName || reportData.reportId}`,
-              {
-                reportId: reportData.reportId,
-                barangay: reportData.barangay,
-                projectName: reportData.projectName
-              }
-            );
-          }
-          
-          // Create overlay
-          const overlay = document.createElement("div");
-          overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            animation: fadeIn 0.2s ease;
-          `;
-          
-          // Create image container
-          const imgContainer = document.createElement("div");
-          imgContainer.style.cssText = `
-            position: relative;
-            max-width: 90vw;
-            max-height: 90vh;
-          `;
-          
-          // Create image
-          const img = document.createElement("img");
-          img.src = imgUrl;
-          img.alt = "Report Image";
-        img.style.cssText="width:min(800px, 90vw);height:min(600px, 80vh);object-fit:contain;border-radius:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.3);";
-          
-          // Create close button
-          const closeBtn = document.createElement("button");
-          closeBtn.innerHTML = "×";
-          closeBtn.style.cssText = `
-            position: absolute;
-            top: -15px;
-            right: -15px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #fff;
-            border: none;
-            font-size: 28px;
-            line-height: 1;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s;
-            z-index: 10000;
-          `;
-          
-          closeBtn.onmouseover = () => {
-            closeBtn.style.background = "#f44336";
-            closeBtn.style.color = "#fff";
-          };
-          closeBtn.onmouseout = () => {
-            closeBtn.style.background = "#fff";
-            closeBtn.style.color = "#000";
-          };
-          
-          // Assembly
-          imgContainer.appendChild(img);
-          imgContainer.appendChild(closeBtn);
-          overlay.appendChild(imgContainer);
-          
-          // Close handlers
-          const closeOverlay = () => {
-            overlay.remove();
-            document.removeEventListener("keydown", escHandler);
-          };
-          
-          overlay.onclick = (e) => {
-            if (e.target === overlay) closeOverlay();
-          };
-          
-          closeBtn.onclick = (e) => {
-            e.stopPropagation();
-            closeOverlay();
-          };
-          
-          // ESC key to close
-          const escHandler = (e) => {
-            if (e.key === "Escape") {
-              closeOverlay();
-            }
-          };
-          document.addEventListener("keydown", escHandler);
-          
-          // Prevent image drag
-          img.ondragstart = () => false;
-          
-          document.body.appendChild(overlay);
-          
-        } catch (error) {
-          console.error("Error viewing image:", error);
-          alert("Error loading image. Please try again.");
+      // Create overlay
+      const overlay = document.createElement("div");
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        animation: fadeIn 0.2s ease;
+      `;
+      
+      // Create image container
+      const imgContainer = document.createElement("div");
+      imgContainer.style.cssText = `
+        position: relative;
+        max-width: 90vw;
+        max-height: 90vh;
+      `;
+      
+      // Create image
+      const img = document.createElement("img");
+      img.src = imgUrl;
+      img.alt = "Report Image";
+      img.style.cssText="width:min(800px, 90vw);height:min(600px, 80vh);object-fit:contain;border-radius:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.3);";
+      
+      // Create close button
+      const closeBtn = document.createElement("button");
+      closeBtn.innerHTML = "×";
+      closeBtn.style.cssText = `
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #fff;
+        border: none;
+        font-size: 28px;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s;
+        z-index: 10000;
+      `;
+      
+      closeBtn.onmouseover = () => {
+        closeBtn.style.background = "#f44336";
+        closeBtn.style.color = "#fff";
+      };
+      closeBtn.onmouseout = () => {
+        closeBtn.style.background = "#fff";
+        closeBtn.style.color = "#000";
+      };
+      
+      // Assembly
+      imgContainer.appendChild(img);
+      imgContainer.appendChild(closeBtn);
+      overlay.appendChild(imgContainer);
+      
+      // Close handlers
+      const closeOverlay = () => {
+        overlay.remove();
+        document.removeEventListener("keydown", escHandler);
+      };
+      
+      overlay.onclick = (e) => {
+        if (e.target === overlay) closeOverlay();
+      };
+      
+      closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeOverlay();
+      };
+      
+      // ESC key to close
+      const escHandler = (e) => {
+        if (e.key === "Escape") {
+          closeOverlay();
         }
       };
+      document.addEventListener("keydown", escHandler);
       
-      imgSpan.appendChild(link);
-    } else {
-      imgSpan.textContent = "No";
-      imgSpan.style.color = "#999";
+      // Prevent image drag
+      img.ondragstart = () => false;
+      
+      document.body.appendChild(overlay);
+      
+    } catch (error) {
+      console.error("Error viewing image:", error);
+      alert("Error loading image. Please try again.");
     }
-    
-    return imgSpan;
-  }
-
-  // ===== PAGINATION FUNCTIONS =====
-  function renderPagination(paginationContainer, currentPage, totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    if (totalPages <= 1) {
-      paginationContainer.innerHTML = '';
-      return;
-    }
-    let html = '';
-
-    html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="window.changePage(${currentPage - 1})">
-      <i class="fa fa-chevron-left"></i> Previous
-    </button>`;
-
-    const startItem = (currentPage - 1) * itemsPerPage + 1;
-    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
-    html += `<span class="pagination-info">Showing ${startItem}-${endItem} of ${totalItems}</span>`;
-
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-    if (endPage - startPage < maxVisiblePages - 1) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    if (startPage > 1) {
-      html += `<button onclick="window.changePage(1)">1</button>`;
-      if (startPage > 2) {
-        html += `<span class="pagination-info">...</span>`;
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      html += `<button class="${i === currentPage ? 'active' : ''}" onclick="window.changePage(${i})">${i}</button>`;
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        html += `<span class="pagination-info">...</span>`;
-      }
-      html += `<button onclick="window.changePage(${totalPages})">${totalPages}</button>`;
-    }
-
-    html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="window.changePage(${currentPage + 1})">
-      Next <i class="fa fa-chevron-right"></i>
-    </button>`;
-
-    paginationContainer.innerHTML = html;
-  }
-
-  window.changePage = function(newPage) {
-    currentCompletedPage = newPage;
-    renderCompletedTable();
   };
+  
+  imgSpan.appendChild(link);
+} else {
+  imgSpan.textContent = "No";
+  imgSpan.style.color = "#999";
+}
 
-  //===== FILTER FUNCTIONS =====
-  function populateFilterDropdowns() {
-    categoryFilter.innerHTML = '<option value="">All Categories</option>';
-    CATEGORIES.forEach(cat => {
-      const option = document.createElement('option');
-      option.value = cat;
-      option.textContent = cat;
-      categoryFilter.appendChild(option);
-    });
-    
-    issueFilter.innerHTML = '<option value="">All Issues</option>';
-    ISSUES.forEach(iss => {
-      const option = document.createElement('option');
-      option.value = iss;
-      option.textContent = iss;
-      issueFilter.appendChild(option);
-    });
-  }
+return imgSpan;
+}
+// ===== PAGINATION FUNCTIONS =====
+function renderPagination(paginationContainer, currentPage, totalItems) {
+const totalPages = Math.ceil(totalItems / itemsPerPage);
+if (totalPages <= 1) {
+paginationContainer.innerHTML = '';
+return;
+}
+let html = '';
+html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="window.changePage(${currentPage - 1})">
+  <i class="fa fa-chevron-left"></i> Previous
+</button>`;
 
-  function applyFilters() {
-    const searchTerm = searchCompleted.value.toLowerCase();
-    const selectedCategory = categoryFilter.value;
-    const selectedIssue = issueFilter.value;
-    let hasActiveFilters = selectedCategory || selectedIssue;
-    clearFiltersBtn.style.display = hasActiveFilters ? 'block' : 'none';
+const startItem = (currentPage - 1) * itemsPerPage + 1;
+const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+html += `<span class="pagination-info">Showing ${startItem}-${endItem} of ${totalItems}</span>`;
 
-    activeFilters.innerHTML = '';
-    if (selectedCategory) {
-      const tag = document.createElement('span');
-      tag.className = 'filter-tag';
-      tag.innerHTML = `Category: ${selectedCategory} <i class="fa fa-times"></i>`;
-      tag.querySelector('i').addEventListener('click', () => {
-        categoryFilter.value = '';
-        applyFilters();
-      });
-      activeFilters.appendChild(tag);
-    }
-    if (selectedIssue) {
-      const tag = document.createElement('span');
-      tag.className = 'filter-tag';
-      tag.innerHTML = `Issue: ${selectedIssue} <i class="fa fa-times"></i>`;
-      tag.querySelector('i').addEventListener('click', () => {
-        issueFilter.value = '';
-        applyFilters();
-      });
-      activeFilters.appendChild(tag);
-    }
+const maxVisiblePages = 5;
+let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-    filteredCompletedReports = allCompletedReports.filter(item => {
-      const data = item.data;
-      const searchText = `${data.projectName || ''} ${data.barangay || ''} ${data.description || ''}`.toLowerCase();
-      
-      const matchesSearch = !searchTerm || searchText.includes(searchTerm);
-      const matchesCategory = !selectedCategory || data.category === selectedCategory;
-      const matchesIssue = !selectedIssue || data.issue === selectedIssue;
-      
-      return matchesSearch && matchesCategory && matchesIssue;
-    });
+if (endPage - startPage < maxVisiblePages - 1) {
+  startPage = Math.max(1, endPage - maxVisiblePages + 1);
+}
 
-    currentCompletedPage = 1;
-    renderCompletedTable();
-  }
-
-  searchCompleted.addEventListener("keyup", applyFilters);
-  categoryFilter.addEventListener("change", applyFilters);
-  issueFilter.addEventListener("change", applyFilters);
-  clearFiltersBtn.addEventListener("click", () => {
-    categoryFilter.value = '';
-    issueFilter.value = '';
-    searchCompleted.value = '';
-    applyFilters();
-  });
-
-  // ===== PROJECT COST RETRIEVAL =====
-  async function getProjectCost(reportId) {
-    try {
-      const snap = await getDoc(doc(db, "reports", reportId));
-      if (!snap.exists()) return 0;
-      const data = snap.data();
-      
-      let cost = 0;
-      if (data.allocatedBudget) {
-        cost = parseFloat(data.allocatedBudget.replace(/[₱,]/g, ''));
-      } else if (data.proposedBudget) {
-        cost = parseFloat(data.proposedBudget.replace(/[₱,]/g, ''));
-      }
-      
-      return cost || 0;
-    } catch (err) {
-      console.error("Error getting project cost:", err);
-      return 0;
-    }
-  }
-
-  // ===== LIQUIDATED DAMAGES CALCULATION =====
-async function computeLiquidatedDamages(
-  reportId, 
-  completionDate, 
-  targetDate, 
-  additionalExtension = 0, 
-  undeliveredPercent = 0
-) {
-  try {
-    const projectCost = await getProjectCost(reportId);
-
-    if (!projectCost || projectCost === 0) {
-      return {
-        amount: 0,
-        days: 0,
-        details: "No project cost available"
-      };
-    }
-
-    const completedDate = completionDate instanceof Date ? completionDate : new Date(completionDate);
-    const deadlineDate = targetDate instanceof Date ? targetDate : new Date(targetDate);
-
-    if (isNaN(completedDate.getTime()) || isNaN(deadlineDate.getTime())) {
-      return {
-        amount: 0,
-        days: 0,
-        details: "Invalid dates provided"
-      };
-    }
-
-    // Apply extension
-    const adjustedDeadline = new Date(deadlineDate);
-    adjustedDeadline.setDate(adjustedDeadline.getDate() + parseInt(additionalExtension || 0));
-
-    // Compute delay
-    const timeDiff = completedDate - adjustedDeadline;
-    const daysOfDelay = Math.max(0, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
-
-    if (daysOfDelay === 0) {
-      return { 
-        amount: 0, 
-        days: 0, 
-        details: "Completed on time - No penalties" 
-      };
-    }
-
-    const undeliveredPercentValue = parseFloat(undeliveredPercent) || 0;
-    const undeliveredCost = projectCost * (undeliveredPercentValue / 100);
-
-    // No penalties if 0% undelivered
-    if (undeliveredCost === 0) {
-      return {
-        amount: 0,
-        days: daysOfDelay,
-        details: `${daysOfDelay} day(s) delay but 0% undelivered - No penalties`
-      };
-    }
-
-    // LD formula
-    const ldAmount = undeliveredCost * 0.001 * daysOfDelay;
-
-    return {
-      amount: ldAmount,
-      days: daysOfDelay,
-      undeliveredCost: undeliveredCost,
-      projectCost: projectCost,
-      details: `${daysOfDelay} day(s) × ₱${undeliveredCost.toLocaleString(
-        'en-PH',
-        { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-      )} (${undeliveredPercentValue}% undelivered) × 0.1%`
-    };
-
-  } catch (err) {
-    console.error("Error computing LD:", err);
-    return { 
-      amount: 0, 
-      days: 0, 
-      details: "Calculation error: " + err.message 
-    };
+if (startPage > 1) {
+  html += `<button onclick="window.changePage(1)">1</button>`;
+  if (startPage > 2) {
+    html += `<span class="pagination-info">...</span>`;
   }
 }
 
+for (let i = startPage; i <= endPage; i++) {
+  html += `<button class="${i === currentPage ? 'active' : ''}" onclick="window.changePage(${i})">${i}</button>`;
+}
+
+if (endPage < totalPages) {
+  if (endPage < totalPages - 1) {
+    html += `<span class="pagination-info">...</span>`;
+  }
+  html += `<button onclick="window.changePage(${totalPages})">${totalPages}</button>`;
+}
+
+html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="window.changePage(${currentPage + 1})">
+  Next <i class="fa fa-chevron-right"></i>
+</button>`;
+
+paginationContainer.innerHTML = html;
+}
+window.changePage = function(newPage) {
+currentCompletedPage = newPage;
+renderCompletedTable();
+};
+//===== FILTER FUNCTIONS =====
+function populateFilterDropdowns() {
+categoryFilter.innerHTML = '<option value="">All Categories</option>';
+CATEGORIES.forEach(cat => {
+const option = document.createElement('option');
+option.value = cat;
+option.textContent = cat;
+categoryFilter.appendChild(option);
+});
+issueFilter.innerHTML = '<option value="">All Issues</option>';
+ISSUES.forEach(iss => {
+  const option = document.createElement('option');
+  option.value = iss;
+  option.textContent = iss;
+  issueFilter.appendChild(option);
+});
+}
+function applyFilters() {
+const searchTerm = searchCompleted.value.toLowerCase();
+const selectedCategory = categoryFilter.value;
+const selectedIssue = issueFilter.value;
+let hasActiveFilters = selectedCategory || selectedIssue;
+clearFiltersBtn.style.display = hasActiveFilters ? 'block' : 'none';
+activeFilters.innerHTML = '';
+if (selectedCategory) {
+  const tag = document.createElement('span');
+  tag.className = 'filter-tag';
+  tag.innerHTML = `Category: ${selectedCategory} <i class="fa fa-times"></i>`;
+  tag.querySelector('i').addEventListener('click', () => {
+    categoryFilter.value = '';
+    applyFilters();
+  });
+  activeFilters.appendChild(tag);
+}
+if (selectedIssue) {
+  const tag = document.createElement('span');
+  tag.className = 'filter-tag';
+  tag.innerHTML = `Issue: ${selectedIssue} <i class="fa fa-times"></i>`;
+  tag.querySelector('i').addEventListener('click', () => {
+    issueFilter.value = '';
+    applyFilters();
+  });
+  activeFilters.appendChild(tag);
+}
+
+filteredCompletedReports = allCompletedReports.filter(item => {
+  const data = item.data;
+  const searchText = `${data.projectName || ''} ${data.barangay || ''} ${data.description || ''}`.toLowerCase();
+  
+  const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+  const matchesCategory = !selectedCategory || data.category === selectedCategory;
+  const matchesIssue = !selectedIssue || data.issue === selectedIssue;
+  
+  return matchesSearch && matchesCategory && matchesIssue;
+});
+
+currentCompletedPage = 1;
+renderCompletedTable();
+}
+searchCompleted.addEventListener("keyup", applyFilters);
+categoryFilter.addEventListener("change", applyFilters);
+issueFilter.addEventListener("change", applyFilters);
+clearFiltersBtn.addEventListener("click", () => {
+categoryFilter.value = '';
+issueFilter.value = '';
+searchCompleted.value = '';
+applyFilters();
+});
+// ===== PROJECT COST RETRIEVAL =====
+async function getProjectCost(reportId) {
+try {
+const snap = await getDoc(doc(db, "reports", reportId));
+if (!snap.exists()) return 0;
+const data = snap.data();
+  let cost = 0;
+  if (data.allocatedBudget) {
+    cost = parseFloat(data.allocatedBudget.replace(/[₱,]/g, ''));
+  } else if (data.proposedBudget) {
+    cost = parseFloat(data.proposedBudget.replace(/[₱,]/g, ''));
+  }
+  
+  return cost || 0;
+} catch (err) {
+  console.error("Error getting project cost:", err);
+  return 0;
+}
+}
+// ===== LIQUIDATED DAMAGES CALCULATION =====
+async function computeLiquidatedDamages(
+reportId,
+completionDate,
+targetDate,
+additionalExtension = 0,
+undeliveredPercent = 0
+) {
+try {
+const projectCost = await getProjectCost(reportId);
+  if (!projectCost || projectCost === 0) {
+    return {
+      amount: 0,
+      days: 0,
+      details: "No project cost available"
+    };
+  }
+
+  const completedDate = completionDate instanceof Date ? completionDate : new Date(completionDate);
+  const deadlineDate = targetDate instanceof Date ? targetDate : new Date(targetDate);
+
+  if (isNaN(completedDate.getTime()) || isNaN(deadlineDate.getTime())) {
+    return {
+      amount: 0,
+      days: 0,
+      details: "Invalid dates provided"
+    };
+  }
+
+  // Apply extension
+  const adjustedDeadline = new Date(deadlineDate);
+  adjustedDeadline.setDate(adjustedDeadline.getDate() + parseInt(additionalExtension || 0));
+
+  // Compute delay
+  const timeDiff = completedDate - adjustedDeadline;
+  const daysOfDelay = Math.max(0, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
+
+  if (daysOfDelay === 0) {
+    return { 
+      amount: 0, 
+      days: 0, 
+      details: "Completed on time - No penalties" 
+    };
+  }
+
+  const undeliveredPercentValue = parseFloat(undeliveredPercent) || 0;
+  const undeliveredCost = projectCost * (undeliveredPercentValue / 100);
+
+  // No penalties if 0% undelivered
+  if (undeliveredCost === 0) {
+    return {
+      amount: 0,
+      days: daysOfDelay,
+      details: `${daysOfDelay} day(s) delay but 0% undelivered - No penalties`
+    };
+  }
+
+  // LD formula
+  const ldAmount = undeliveredCost * 0.001 * daysOfDelay;
+
+  return {
+    amount: ldAmount,
+    days: daysOfDelay,
+    undeliveredCost: undeliveredCost,
+    projectCost: projectCost,
+    details: `${daysOfDelay} day(s) × ₱${undeliveredCost.toLocaleString(
+      'en-PH',
+      { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+    )} (${undeliveredPercentValue}% undelivered) × 0.1%`
+  };
+
+} catch (err) {
+  console.error("Error computing LD:", err);
+  return { 
+    amount: 0, 
+    days: 0, 
+    details: "Calculation error: " + err.message 
+  };
+}
+}
 // ===== AUTO-UPDATE LD DISPLAY =====
 async function updateLiquidatedDamages() {
 if (!currentDocId) return;
@@ -1255,7 +1707,6 @@ const completionDate = document.getElementById("editCompletionDate").value;
 const targetDate = document.getElementById("editTargetDate").value;
 const additionalExtension = document.getElementById("editAdditionalExtension").value || 0;
 const undeliveredPercent = document.getElementById("editUndeliveredPercent").value || 0;
-
 if (!completionDate || !targetDate) {
   document.getElementById("editPenalties").value = "Please enter both completion and target dates";
   return;
@@ -1286,36 +1737,166 @@ async function openEditCompletedModal(e) {
 e.preventDefault();
 const id = e.currentTarget.dataset.id;
 currentDocId = id;
-const snap = await getDoc(doc(db, "reports", id));
-if (!snap.exists()) {
-alert("Report not found");
-return;
+try {
+  const snap = await getDoc(doc(db, "reports", id));
+  if (!snap.exists()) {
+    alert("Report not found");
+    return;
+  }
+  const data = snap.data();
+
+  // Get current user's position
+  const currentUser = auth.currentUser;
+  const currentUserDoc = await getDoc(doc(db, "users", currentUser.uid));
+  const currentUserData = currentUserDoc.data();
+  const currentUserPosition = currentUserData.position;
+
+  document.getElementById("editCompletedProjectName").value = data.projectName || "";
+  document.getElementById("editCompletionDate").value = formatDateForInput(data.completionDate);
+  document.getElementById("editTargetDate").value = formatDateForInput(data.endDate || data.targetDate);
+  document.getElementById("editAdditionalExtension").value = data.additionalExtension || 0;
+  document.getElementById("editUndeliveredPercent").value = data.undeliveredPercent || 0;
+  document.getElementById("viewProgressReport").value = data.progressReport || "No progress report available";
+
+  if (data.startDate && data.completionDate) {
+    const start = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
+    const completed = data.completionDate.toDate ? data.completionDate.toDate() : new Date(data.completionDate);
+    const duration = Math.ceil((completed - start) / (1000 * 60 * 60 * 24));
+    document.getElementById("editActualDuration").value = `${duration} days`;
+  } else {
+    document.getElementById("editActualDuration").value = "N/A";
+  }
+
+  // ✅ HANDLE REMARKS BASED ON USER POSITION
+  const remarksInput = document.getElementById("editCompletedRemarks");
+  const remarksContainer = remarksInput.parentElement;
+  const remarksLabel = remarksContainer.querySelector('label');
+  
+  // Update the label
+  if (remarksLabel) {
+    remarksLabel.textContent = "Super Admin Remarks";
+  }
+  
+  if (currentUserPosition === "Admin") {
+    // ✅ FOR ADMIN: HIDE INPUT, ONLY SHOW HISTORY
+    remarksInput.style.display = "none";
+    
+    let remarksHistory = remarksContainer.querySelector('.remarks-history');
+    
+    if (data.remarks && Array.isArray(data.remarks) && data.remarks.length > 0) {
+      if (!remarksHistory) {
+        remarksHistory = document.createElement('div');
+        remarksHistory.className = 'remarks-history';
+        remarksHistory.style.cssText = 'margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;max-height:200px;overflow-y:auto;font-size:0.85rem;';
+        remarksContainer.appendChild(remarksHistory);
+      }
+      
+      remarksHistory.innerHTML = '<strong style="color:#333;margin-bottom:8px;display:block;">Remarks History:</strong>' + 
+        data.remarks.map((remark, index) => {
+          const remarkDate = new Date(remark.timestamp);
+          const formattedDate = remarkDate.toLocaleString('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+          return `<div style="padding:8px 0;${index < data.remarks.length - 1 ? 'border-bottom:1px solid #dee2e6;' : ''}">
+            <strong style="color:#2c5282;">${remark.author}</strong> 
+            <span style="color:#718096;font-size:0.8rem;">(${formattedDate})</span><br>
+            <span style="color:#4a5568;margin-top:4px;display:block;">${remark.text}</span>
+          </div>`;
+        }).reverse().join('');
+    } else {
+      if (!remarksHistory) {
+        remarksHistory = document.createElement('div');
+        remarksHistory.className = 'remarks-history';
+        remarksHistory.style.cssText = 'margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;font-size:0.85rem;color:#999;text-align:center;';
+        remarksContainer.appendChild(remarksHistory);
+      }
+      remarksHistory.innerHTML = '<em>No remarks available</em>';
+    }
+  } else {
+    // ✅ FOR SUPER ADMIN: SHOW INPUT AND HISTORY
+    remarksInput.style.display = "block";
+    remarksInput.value = "";
+    remarksInput.disabled = false;
+    remarksInput.style.backgroundColor = "";
+    remarksInput.style.cursor = "";
+    remarksInput.title = "";
+    remarksInput.placeholder = "Enter new remark...";
+    
+    // Add alphanumeric validation
+    remarksInput.addEventListener("input", function() {
+      validateAlphanumeric(this);
+    });
+    
+    let remarksHistory = remarksContainer.querySelector('.remarks-history');
+    
+    if (data.remarks && Array.isArray(data.remarks) && data.remarks.length > 0) {
+      if (!remarksHistory) {
+        remarksHistory = document.createElement('div');
+        remarksHistory.className = 'remarks-history';
+        remarksHistory.style.cssText = 'margin-top:8px;padding:10px;background:#f8f9fa;border-radius:4px;max-height:200px;overflow-y:auto;font-size:0.85rem;';
+        remarksContainer.appendChild(remarksHistory);
+      }
+      
+      remarksHistory.innerHTML = '<strong style="color:#333;margin-bottom:8px;display:block;">Remarks History:</strong>' + 
+        data.remarks.map((remark, index) => {
+          const remarkDate = new Date(remark.timestamp);
+          const formattedDate = remarkDate.toLocaleString('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+          return `<div style="padding:8px 0;${index < data.remarks.length - 1 ? 'border-bottom:1px solid #dee2e6;' : ''}">
+            <strong style="color:#2c5282;">${remark.author}</strong> 
+            <span style="color:#718096;font-size:0.8rem;">(${formattedDate})</span><br>
+            <span style="color:#4a5568;margin-top:4px;display:block;">${remark.text}</span>
+          </div>`;
+        }).reverse().join('');
+    } else {
+      if (remarksHistory) {
+        remarksHistory.remove();
+      }
+    }
+  }
+
+  await updateLiquidatedDamages();
+
+  editCompletedModal.style.display = "flex";
+  
+  // 🔥 LOG MODAL OPEN
+  await logAuditEvent(
+    "Viewed Completed Report",
+    "view",
+    "Reports",
+    `Opened edit modal for completed report: ${data.projectName || "Unknown"}`,
+    {
+      reportId: id,
+      projectName: data.projectName,
+      barangay: data.barangay
+    }
+  );
+  
+} catch (err) {
+  console.error("Error opening modal:", err);
+  alert("Error opening report: " + err.message);
 }
-const data = snap.data();
-
-document.getElementById("editCompletedProjectName").value = data.projectName || "";
-document.getElementById("editCompletionDate").value = formatDateForInput(data.completionDate);
-document.getElementById("editTargetDate").value = formatDateForInput(data.endDate || data.targetDate);
-document.getElementById("editAdditionalExtension").value = data.additionalExtension || 0;
-document.getElementById("editUndeliveredPercent").value = data.undeliveredPercent || 0;
-document.getElementById("viewProgressReport").value = data.progressReport || "No progress report available";
-
-if (data.startDate && data.completionDate) {
-  const start = data.startDate.toDate ? data.startDate.toDate() : new Date(data.startDate);
-  const completed = data.completionDate.toDate ? data.completionDate.toDate() : new Date(data.completionDate);
-  const duration = Math.ceil((completed - start) / (1000 * 60 * 60 * 24));
-  document.getElementById("editActualDuration").value = `${duration} days`;
-} else {
-  document.getElementById("editActualDuration").value = "N/A";
-}
-
-await updateLiquidatedDamages();
-
-editCompletedModal.style.display = "flex";
 }
 function closeModal() {
 editCompletedModal.style.display = "none";
 currentDocId = null;
+// Clean up remarks history if it exists
+const remarksContainer = document.getElementById("editCompletedRemarks").parentElement;
+const remarksHistory = remarksContainer.querySelector('.remarks-history');
+if (remarksHistory) {
+  remarksHistory.remove();
+}
 }
 // ===== SAVE CHANGES WITH AUDIT LOGGING =====
 async function saveChanges() {
@@ -1325,6 +1906,7 @@ const targetDate = document.getElementById("editTargetDate").value;
 const additionalExtension = document.getElementById("editAdditionalExtension").value || 0;
 const undeliveredPercent = document.getElementById("editUndeliveredPercent").value || 0;
 const penalties = document.getElementById("editPenalties").value;
+const newRemark = sanitizeInput(document.getElementById("editCompletedRemarks").value.trim());
 
 if (!completionDate) {
   alert("Please select a completion date.");
@@ -1335,9 +1917,20 @@ if (!targetDate) {
   return;
 }
 
-let actualDuration = 0;
-const snap = await getDoc(doc(db, "reports", currentDocId));
-if (snap.exists()) {
+try {
+  // Get current user's position
+  const currentUser = auth.currentUser;
+  const currentUserDoc = await getDoc(doc(db, "users", currentUser.uid));
+  const currentUserData = currentUserDoc.data();
+  const currentUserPosition = currentUserData.position;
+
+  let actualDuration = 0;
+  const snap = await getDoc(doc(db, "reports", currentDocId));
+  if (!snap.exists()) {
+    alert("Report not found");
+    return;
+  }
+  
   const data = snap.data();
   
   // Get old data for audit log
@@ -1355,81 +1948,99 @@ if (snap.exists()) {
     actualDuration = Math.ceil((completed - start) / (1000 * 60 * 60 * 24));
   }
 
-  try {
-    const reportRef = doc(db, "reports", currentDocId);
-    await updateDoc(reportRef, {
-      completionDate: new Date(completionDate),
-      targetDate: new Date(targetDate),
-      additionalExtension: parseInt(additionalExtension),
-      undeliveredPercent: parseFloat(undeliveredPercent),
-      actualDuration: actualDuration,
-      penalties: penalties,
-      updatedAt: new Date()
-    });
-
-    // ✅ LOG COMPLETED REPORT UPDATE
-    const changes = [];
-    if (oldData.completionDate !== formatDateForDisplay(new Date(completionDate))) {
-      changes.push(`Completion Date: "${oldData.completionDate}" → "${formatDateForDisplay(new Date(completionDate))}"`);
-    }
-    if (oldData.targetDate !== formatDateForDisplay(new Date(targetDate))) {
-      changes.push(`Target Date: "${oldData.targetDate}" → "${formatDateForDisplay(new Date(targetDate))}"`);
-    }
-    if (oldData.additionalExtension !== parseInt(additionalExtension)) {
-      changes.push(`Extension: ${oldData.additionalExtension} days → ${additionalExtension} days`);
-    }
-    if (oldData.undeliveredPercent !== parseFloat(undeliveredPercent)) {
-      changes.push(`Undelivered: ${oldData.undeliveredPercent}% → ${undeliveredPercent}%`);
-    }
-    if (oldData.penalties !== penalties) {
-      changes.push("Penalties recalculated");
-    }
-
-    await logAuditEvent(
-      "Completed Report Updated",
-      "edit",
-      "Reports",
-      `Updated completion details for: ${data.projectName || "Unknown"} - ${changes.join(", ")}`,
-      {
-        reportId: currentDocId,
-        projectName: data.projectName,
-        barangay: data.barangay,
-        changes: changes.join(", "),
-        beforeValue: JSON.stringify(oldData),
-        afterValue: JSON.stringify({
-          completionDate: formatDateForDisplay(new Date(completionDate)),
-          targetDate: formatDateForDisplay(new Date(targetDate)),
-          additionalExtension: parseInt(additionalExtension),
-          undeliveredPercent: parseFloat(undeliveredPercent),
-          penalties: penalties
-        })
-      }
-    );
-
-    alert("Completion details and liquidated damages saved successfully!");
-    closeModal();
-  } catch (err) {
-    console.error("Save error:", err);
-    alert("Save failed: " + err.message);
+  const reportRef = doc(db, "reports", currentDocId);
+  const updateData = {
+    completionDate: new Date(completionDate),
+    targetDate: new Date(targetDate),
+    additionalExtension: parseInt(additionalExtension),
+    undeliveredPercent: parseFloat(undeliveredPercent),
+    actualDuration: actualDuration,
+    penalties: penalties,
+    updatedAt: new Date()
+  };
+  
+  // ✅ ONLY SUPER ADMIN CAN ADD NEW REMARKS
+  if (currentUserPosition === "Super Admin" && newRemark) {
+    const existingRemarks = data.remarks || [];
+    const newRemarkObject = {
+      author: currentUserData.name || `${currentUserData.firstName || ''} ${currentUserData.surname || ''}`.trim(),
+      authorId: currentUser.uid,
+      text: newRemark,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Add new remark to the array
+    updateData.remarks = [...existingRemarks, newRemarkObject];
   }
+
+  await updateDoc(reportRef, updateData);
+
+  // ✅ LOG COMPLETED REPORT UPDATE
+  const changes = [];
+  if (oldData.completionDate !== formatDateForDisplay(new Date(completionDate))) {
+    changes.push(`Completion Date: "${oldData.completionDate}" → "${formatDateForDisplay(new Date(completionDate))}"`);
+  }
+  if (oldData.targetDate !== formatDateForDisplay(new Date(targetDate))) {
+    changes.push(`Target Date: "${oldData.targetDate}" → "${formatDateForDisplay(new Date(targetDate))}"`);
+  }
+  if (oldData.additionalExtension !== parseInt(additionalExtension)) {
+    changes.push(`Extension: ${oldData.additionalExtension} days → ${additionalExtension} days`);
+  }
+  if (oldData.undeliveredPercent !== parseFloat(undeliveredPercent)) {
+    changes.push(`Undelivered: ${oldData.undeliveredPercent}% → ${undeliveredPercent}%`);
+  }
+  if (oldData.penalties !== penalties) {
+    changes.push("Penalties recalculated");
+  }
+  if (currentUserPosition === "Super Admin" && newRemark) {
+    changes.push("New remark added");
+  }
+
+  await logAuditEvent(
+    "Completed Report Updated",
+    "edit",
+    "Reports",
+    `Updated completion details for: ${data.projectName || "Unknown"} - ${changes.join(", ")}`,
+    {
+      reportId: currentDocId,
+      projectName: data.projectName,
+      barangay: data.barangay,
+      changes: changes.join(", "),
+      newRemark: currentUserPosition === "Super Admin" && newRemark ? newRemark : null,
+      beforeValue: JSON.stringify(oldData),
+      afterValue: JSON.stringify({
+        completionDate: formatDateForDisplay(new Date(completionDate)),
+        targetDate: formatDateForDisplay(new Date(targetDate)),
+        additionalExtension: parseInt(additionalExtension),
+        undeliveredPercent: parseFloat(undeliveredPercent),
+        penalties: penalties
+      })
+    }
+  );
+
+  alert("Completion details and liquidated damages saved successfully!");
+  closeModal();
+  
+} catch (err) {
+  console.error("Save error:", err);
+  alert("Save failed: " + err.message);
 }
 }
-// ===== BUILD TABLE ROW WITH IMAGE VIEWER =====
+// ===== BUILD TABLE ROW WITH ACTION MENU AND REMARKS =====
 async function buildTableRow(docSnap) {
 const r = docSnap.data();
 const tr = document.createElement("tr");
 tr.dataset.category = r.category || '';
 tr.dataset.issue = r.issue || '';
 const addCell = (content) => {
-  const td = document.createElement("td");
-  if (typeof content === "string") {
-    td.textContent = content;
-  } else {
-    td.appendChild(content);
-  }
-  tr.appendChild(td);
+const td = document.createElement("td");
+if (typeof content === "string") {
+td.textContent = content;
+} else {
+td.appendChild(content);
+}
+tr.appendChild(td);
 };
-
 addCell(r.projectName || "N/A");
 
 const categoryBadge = document.createElement("span");
@@ -1452,7 +2063,7 @@ addCell(descCell);
 
 addCell(r.width && r.height ? `${r.width}×${r.height}` : "N/A");
 
-// ===== REPLACED IMAGE CELL WITH IMAGE VIEWER =====
+// ===== IMAGE VIEWER =====
 const imagePath = r.incidentImage || r.imageUrl || r.image;
 const imgSpan = createImageViewer(imagePath, {
   reportId: docSnap.id,
@@ -1490,7 +2101,7 @@ addCell(formatDateForDisplay(r.completionDate) || "Not set");
 const penaltiesText = r.penalties || "Not calculated";
 addCell(penaltiesText);
 
-// ===== FIXED REPORTER POSITION =====
+// ===== REPORTER POSITION =====
 let reporterPositionText = "N/A";
 if (r.reporterPosition && typeof r.reporterPosition === 'string') {
   reporterPositionText = r.reporterPosition;
@@ -1508,19 +2119,32 @@ if (r.reporterPosition && typeof r.reporterPosition === 'string') {
 }
 addCell(reporterPositionText);
 
+// ===== REMARKS COLUMN - Show latest remark from array =====
+const remarksSpan = document.createElement("span");
+remarksSpan.className = "truncate";
+
+if (r.remarks && Array.isArray(r.remarks) && r.remarks.length > 0) {
+  const latestRemark = r.remarks[r.remarks.length - 1];
+  remarksSpan.textContent = latestRemark.text || "No remarks";
+  remarksSpan.title = `${latestRemark.author} (${new Date(latestRemark.timestamp).toLocaleString()}): ${latestRemark.text}`;
+} else {
+  remarksSpan.textContent = "No remarks";
+  remarksSpan.title = "No remarks";
+}
+
+remarksSpan.style.maxWidth = "150px";
+addCell(remarksSpan);
+
 const statusSpan = document.createElement("span");
 statusSpan.className = `status ${(r.status || "").toLowerCase()}`;
 statusSpan.textContent = r.status || "N/A";
 addCell(statusSpan);
 
+// ===== ACTION MENU =====
+const actionMenu = createActionMenu(docSnap.id, r);
 const actionCell = document.createElement("td");
 actionCell.className = "action";
-const editBtn = document.createElement("button");
-editBtn.className = "btn-edit";
-editBtn.textContent = "View/Edit";
-editBtn.dataset.id = docSnap.id;
-editBtn.onclick = openEditCompletedModal;
-actionCell.appendChild(editBtn);
+actionCell.appendChild(actionMenu);
 tr.appendChild(actionCell);
 
 return tr;
@@ -1534,7 +2158,7 @@ const pageItems = filteredCompletedReports.slice(startIndex, endIndex);
 if (pageItems.length === 0 && filteredCompletedReports.length === 0) {
   const emptyRow = document.createElement("tr");
   const emptyCell = document.createElement("td");
-  emptyCell.colSpan = 18;
+  emptyCell.colSpan = 19;
   emptyCell.style.textAlign = "center";
   emptyCell.style.padding = "2rem";
   emptyCell.style.color = "#999";
@@ -1572,13 +2196,13 @@ await logAuditEvent(
 "Authentication",
 "Admin logged out from the system"
 );
-      await signOut(auth);
-      window.location.href = "login.html";
-    } catch (err) {
-      console.error("Logout error:", err);
-      alert("Error logging out: " + err.message);
-    }
-  }
+await signOut(auth);
+window.location.href = "login.html";
+} catch (err) {
+console.error("Logout error:", err);
+alert("Error logging out: " + err.message);
+}
+}
 });
 }
 // Profile dropdown toggle
@@ -1602,6 +2226,8 @@ onAuthStateChanged(auth, async (user) => {
 if (!user) {
 window.location.href = "login.html";
 return;
+    setupAutoLogout(auth);
+
 }
 try {
   const userDocRef = doc(db, "users", user.uid);
@@ -1615,7 +2241,7 @@ try {
 
   const userData = userSnap.data();
 
-  if (userData.position !== "Admin") {
+  if (userData.position !== "Admin" && userData.position !== "Super Admin") {
     alert("Unauthorized access! Only Admins can access this page.");
     window.location.href = "login.html";
     return;
